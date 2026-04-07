@@ -1,26 +1,457 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@custom-variant dark (&:is(.dark *));
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  20%       { transform: rotate(-15deg); }
+  40%       { transform: rotate(15deg); }
+  60%       { transform: rotate(-10deg); }
+  80%       { transform: rotate(10deg); }
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+@theme {
+  --color-primary: #3B82F6;
+  --animate-wiggle: wiggle 0.5s ease-in-out;
+  --color-accent-purple: #8B5CF6;
+  
+  --color-background-light: #f8fafc;
+  --color-background-dark: #0a0a0a;
+
+  /* Font */
+  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-display: "Google Sans Text", "Arial", sans-serif;
+
+  /* Focus Mode Defaults */
+  --focus-zoom: 1;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  body {
+    @apply bg-background-light dark:bg-background-dark text-slate-900 dark:text-white antialiased transition-colors duration-300 font-sans;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold tracking-tight;
+  }
+
+  button:not(:disabled) {
+    cursor: pointer;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ─── Focus Mode ─────────────────────────────────────────── */
+
+/* Hide chrome */
+html.focus-mode header,
+html.focus-mode footer,
+html.focus-mode [data-focus-hide] {
+  display: none !important;
+}
+
+/* Expand content area: remove grid, center main */
+html.focus-mode [data-focus-grid] {
+  display: block !important;
+}
+
+html.focus-mode [data-focus-main] {
+  max-width: 850px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  zoom: var(--focus-zoom, 1);
+  transition: zoom 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Layout container: tighten padding */
+html.focus-mode [data-focus-container] {
+  padding-left: 1.5rem !important;
+  padding-right: 1.5rem !important;
+  max-width: none !important;
+  width: 100% !important;
+}
+@media (max-width: 768px) {
+  html.focus-mode [data-focus-main],
+  html.focus-mode [data-focus-container] {
+    max-width: 100vw !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
+/* Targeted Zoom: Scalable Prose Card */
+html.focus-mode [data-focus-prose] {
+  max-width: 850px !important;
+  width: 100% !important;
+}
+
+/* Headings scroll margin */
+[data-focus-prose] h1,
+[data-focus-prose] h2,
+[data-focus-prose] h3,
+[data-focus-prose] h4 {
+  scroll-margin-top: 100px;
+}
+
+/* Focus TOC — left panel */
+.focus-toc-trigger {
+  position: fixed;
+  top: 50%;
+  left: 0.5rem;
+  transform: translateY(-50%);
+  z-index: 41;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+/* Personal Note Markers */
+.note-marker {
+  position: absolute;
+  left: -2.5rem;
+  top: 0.25rem;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.23, 1, 0.32, 1);
+  z-index: 10;
+  opacity: 0;
+}
+
+[data-focus-prose] p:hover .note-marker,
+.note-marker.active {
+  opacity: 0.8;
+}
+
+.note-marker:hover {
+  opacity: 1 !important;
+  background: #3b82f6;
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+@media (max-width: 1024px) {
+  .note-marker {
+    left: -1.75rem;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+/* KS Highlight: Golden Amber Selection */
+.ks-highlight {
+  background-color: rgba(251, 191, 36, 0.25);
+  border-bottom: 2px solid rgba(251, 191, 36, 0.4);
+  border-radius: 2px;
+  padding: 0;
+  margin: 0;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+  position: relative;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+
+.ks-highlight-delete {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0;
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(0.5);
+  pointer-events: auto;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.ks-highlight:hover .ks-highlight-delete {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.ks-highlight-delete:hover {
+  background: rgba(239, 68, 68, 0.8) !important;
+  color: white !important;
+  transform: scale(1.2) !important;
+}
+
+.dark .ks-highlight {
+  background-color: rgba(251, 191, 36, 0.2);
+  border-bottom-color: rgba(251, 191, 36, 0.3);
+}
+
+.ks-highlight:hover {
+  background-color: rgba(251, 191, 36, 0.35);
+}
+
+.focus-toc-line {
+  display: block;
+  height: 2px;
+  border-radius: 9999px;
+  background: rgba(71,85,105,0.5);
+  transition: background 0.15s;
+}
+
+.focus-toc-trigger:hover .focus-toc-line {
+  background: #3B82F6;
+}
+
+html.dark .focus-toc-line {
+  background: rgba(148,163,184,0.4);
+}
+
+@media (max-width: 768px) {
+  .focus-toc-trigger { display: none; }
+  .focus-toc-panel   { display: none; }
+}
+
+.focus-toc-panel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  width: 260px;
+  height: 100vh;
+  background: rgba(248, 250, 252, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-right: 1px solid rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+html.dark .focus-toc-panel {
+  background: rgba(15, 23, 42, 0.92);
+  border-right-color: rgba(255, 255, 255, 0.06);
+}
+
+.focus-toc-panel-open {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.focus-toc-panel-closed {
+  opacity: 0;
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+
+/* Progress bar — top */
+.focus-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+  z-index: 9999;
+  transition: width 0.2s ease;
+  border-radius: 0 2px 2px 0;
+}
+
+/* Bottom bar */
+.focus-bar {
+  position: fixed;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9999px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255,255,255,0.04);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+  white-space: nowrap;
+  max-width: calc(100vw - 3rem);
+}
+
+/* Hide redundant focus elements on mobile (MobileNavHub handles it) */
+@media (max-width: 1023px) {
+  .focus-bar, 
+  .focus-progress-bar {
+    display: none !important;
+  }
+}
+
+.focus-bar-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.focus-bar-hidden {
+  opacity: 0;
+  transform: translateX(-50%) translateY(0.75rem);
+  pointer-events: none;
+}
+
+.focus-bar-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.625rem;
+  border-radius: 9999px;
+  color: rgba(255,255,255,0.7);
+  font-size: 0.75rem;
+  font-weight: 700;
+  transition: background 0.15s, color 0.15s;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.focus-bar-btn:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+}
+
+.focus-bar-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.focus-bar-exit {
+  color: rgba(255,255,255,0.6);
+}
+
+.focus-bar-exit:hover {
+  background: rgba(59, 130, 246, 0.2);
+  color: #93c5fd;
+}
+
+.focus-bar-btn-active {
+  background: rgba(59, 130, 246, 0.2) !important;
+  color: #93c5fd !important;
+}
+
+.focus-bar-divider {
+  width: 1px;
+  height: 1.25rem;
+  background: rgba(255,255,255,0.1);
+  margin: 0 0.25rem;
+  flex-shrink: 0;
+}
+
+.focus-bar-progress-track {
+  width: 80px;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 9999px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.focus-bar-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+  border-radius: 9999px;
+  transition: width 0.3s ease;
+}
+
+.focus-bar-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 80px;
+  height: 4px;
+  border-radius: 9999px;
+  background: rgba(255,255,255,0.15);
+  outline: none;
+  cursor: pointer;
+}
+
+.focus-bar-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #3B82F6;
+  border: 2px solid rgba(255,255,255,0.3);
+  cursor: pointer;
+  transition: background 0.15s, transform 0.15s;
+}
+
+/* Code Themes */
+:root {
+  --code-bg: #1e1e1e;
+  --code-text: #d4d4d4;
+  --code-accent: #3b82f6;
+}
+
+[data-code-theme="classic"] {
+  --code-bg: #1e1e1e;
+  --code-text: #d4d4d4;
+  --code-accent: #3b82f6;
+}
+[data-code-theme="dracula"] {
+  --code-bg: #282a36;
+  --code-text: #f8f8f2;
+  --code-accent: #ff79c6;
+}
+[data-code-theme="monokai"] {
+  --code-bg: #2d2a2e;
+  --code-text: #fcfcfa;
+  --code-accent: #ffd866;
+}
+[data-code-theme="synthwave"] {
+  --code-bg: #262335;
+  --code-text: #ffffff;
+  --code-accent: #ff7edb;
+}
+[data-code-theme="nord"] {
+  --code-bg: #2e3440;
+  --code-text: #d8dee9;
+  --code-accent: #88c0d0;
+}
+
+/* Apply themes to pre blocks */
+pre {
+  background-color: var(--code-bg) !important;
+  color: var(--code-text) !important;
+  transition: background-color 0.4s ease, color 0.4s ease;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+pre code {
+  color: inherit !important;
+}
+
+/* Inline Annotations (Tooltip Triggers) */
+.ks-highlight-note {
+  @apply bg-amber-500/10 dark:bg-amber-500/5 text-inherit underline decoration-primary/50 decoration-dotted underline-offset-4 cursor-pointer transition-all duration-300;
+}
+
+.ks-highlight-note:hover {
+  @apply bg-amber-500/20 dark:bg-amber-500/15 decoration-primary;
 }

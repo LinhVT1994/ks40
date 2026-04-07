@@ -1,0 +1,213 @@
+'use server';
+
+import { auth } from '@/auth';
+import { db } from '@/lib/db';
+import { CommentStatus } from '@prisma/client';
+import { eventBus, EVENTS } from '@/lib/events/bus';
+import { createNotificationAction } from '@/features/notifications/actions/notification';
+
+export type CommentWithAuthor = {
+  id: string;
+  content: string;
+  createdAt: Date;
+  parentId: string | null;
+  author: { id: string; name: string; image: string | null };
+  replies: CommentWithAuthor[];
+  replyCount: number;
+  repliesLoaded: boolean;
+  likeCount: number;
+  dislikeCount: number;
+  isLiked: boolean;
+  isDisliked: boolean;
+};
+
+export async function getCommentsAction(articleId: string): Promise<CommentWithAuthor[]> {
+  const session = await auth();
+  const userId  = session?.user?.id;
+
+  const comments = await db.comment.findMany({
+    where:   { articleId, status: CommentStatus.VISIBLE, parentId: null },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      author:  { select: { id: true, name: true, image: true } },
+      likes:   userId ? { where: { userId }, select: { type: true } } : false,
+      _count:  { select: { replies: { where: { status: CommentStatus.VISIBLE } } } },
+    },
+  });
+
+  const mapComment = (c: any): CommentWithAuthor => ({
+    id:            c.id,
+    content:       c.content,
+    createdAt:     c.createdAt,
+    parentId:      c.parentId,
+    author:        c.author,
+    replies:       [],
+    replyCount:    c._count?.replies ?? 0,
+    repliesLoaded: false,
+    likeCount:     0,
+    dislikeCount:  0,
+    isLiked:       Array.isArray(c.likes) && c.likes.some((l: any) => l.type === 'LIKE'),
+    isDisliked:    Array.isArray(c.likes) && c.likes.some((l: any) => l.type === 'DISLIKE'),
+  });
+
+  return comments.map(mapComment);
+}
+
+export async function getRepliesAction(commentId: string): Promise<CommentWithAuthor[]> {
+  const session = await auth();
+  const userId  = session?.user?.id;
+
+  const replies = await db.comment.findMany({
+    where:   { parentId: commentId, status: CommentStatus.VISIBLE },
+    orderBy: { createdAt: 'asc' },
+    include: {
+      author: { select: { id: true, name: true, image: true } },
+      likes:  userId ? { where: { userId }, select: { type: true } } : false,
+    },
+  });
+
+  return replies.map((r: any) => ({
+    id:            r.id,
+    content:       r.content,
+    createdAt:     r.createdAt,
+    parentId:      r.parentId,
+    author:        r.author,
+    replies:       [],
+    replyCount:    0,
+    repliesLoaded: true,
+    likeCount:     0,
+    dislikeCount:  0,
+    isLiked:       Array.isArray(r.likes) && r.likes.some((l: any) => l.type === 'LIKE'),
+    isDisliked:    Array.isArray(r.likes) && r.likes.some((l: any) => l.type === 'DISLIKE'),
+  }));
+}
+
+export async function createCommentAction(
+  articleId: string,
+  content: string,
+  parentId?: string,
+): Promise<{ success: boolean; error?: string; comment?: CommentWithAuthor }> {
+  const session = await auth();
+  const userId  = session?.user?.id;
+  if (!userId) return { success: false, error: 'Bạn cần đăng nhập để bình luận.' };
+
+  const trimmed = content.trim();
+  if (!trimmed)              return { success: false, error: 'Bình luận không được để trống.' };
+  if (trimmed.length > 1000) return { success: false, error: 'Bình luận tối đa 1000 ký tự.' };
+
+  const comment = await db.comment.create({
+    data: { content: trimmed, articleId, authorId: userId, parentId: parentId ?? null },
+    include: { author: { select: { id: true, name: true, image: true } } },
+  });
+
+  // Lấy thông tin bài viết để gửi notification
+  const article = await db.article.findUnique({
+    where: { id: articleId },
+    select: { title: true, slug: true, authorId: true },
+  });
+
+  if (article) {
+    const commenterName = (session.user as { name?: string }).name ?? 'Ai đó';
+
+    // Emit event để ghi Activity Log
+    eventBus.emit(EVENTS.COMMENT_POSTED, {
+      commentId:    comment.id,
+      articleTitle: article.title,
+      articleSlug:  article.slug,
+      authorName:   commenterName,
+      actorId:      userId,
+    });
+
+    // Notify tác giả bài viết (nếu không phải chính mình comment)
+    if (article.authorId !== userId) {
+      await createNotificationAction(
+        article.authorId,
+        'COMMENT_REPLY',
+        `${commenterName} đã bình luận bài viết của bạn`,
+        {
+          message: `"${trimmed.slice(0, 80)}${trimmed.length > 80 ? '...' : ''}"`,
+          link:    `/article/${article.slug}`,
+        },
+      );
+    }
+
+    // Notify người bị reply (nếu là comment con và khác commenter)
+    if (parentId) {
+      const parentComment = await db.comment.findUnique({
+        where: { id: parentId },
+        select: { authorId: true },
+      });
+      if (parentComment && parentComment.authorId !== userId && parentComment.authorId !== article.authorId) {
+        await createNotificationAction(
+          parentComment.authorId,
+          'COMMENT_REPLY',
+          `${commenterName} đã trả lời bình luận của bạn`,
+          {
+            message: `"${trimmed.slice(0, 80)}${trimmed.length > 80 ? '...' : ''}"`,
+            link:    `/article/${article.slug}`,
+          },
+        );
+      }
+    }
+  }
+
+  return {
+    success: true,
+    comment: { ...comment, replies: [], replyCount: 0, repliesLoaded: true, likeCount: 0, dislikeCount: 0, isLiked: false, isDisliked: false } as unknown as CommentWithAuthor,
+  };
+}
+
+export async function toggleCommentLikeAction(
+  commentId: string,
+  type: 'LIKE' | 'DISLIKE',
+): Promise<{ success: boolean; likeCount: number; dislikeCount: number; isLiked: boolean; isDisliked: boolean }> {
+  const session = await auth();
+  const userId  = session?.user?.id;
+  if (!userId) return { success: false, likeCount: 0, dislikeCount: 0, isLiked: false, isDisliked: false };
+
+  const existing = await db.commentLike.findUnique({ where: { commentId_userId: { commentId, userId } } });
+
+  if (existing) {
+    if (existing.type === type) {
+      // Toggle off
+      await db.commentLike.delete({ where: { commentId_userId: { commentId, userId } } });
+    } else {
+      // Switch type
+      await db.commentLike.update({ where: { commentId_userId: { commentId, userId } }, data: { type } });
+    }
+  } else {
+    await db.commentLike.create({ data: { commentId, userId, type } });
+  }
+
+  const [likeCount, dislikeCount] = await Promise.all([
+    db.commentLike.count({ where: { commentId, type: 'LIKE' } }),
+    db.commentLike.count({ where: { commentId, type: 'DISLIKE' } }),
+  ]);
+
+  const updated = await db.commentLike.findUnique({ where: { commentId_userId: { commentId, userId } } });
+  return {
+    success:     true,
+    likeCount,
+    dislikeCount,
+    isLiked:     updated?.type === 'LIKE',
+    isDisliked:  updated?.type === 'DISLIKE',
+  };
+}
+
+export async function deleteCommentAction(commentId: string): Promise<{ success: boolean }> {
+  const session = await auth();
+  const userId  = session?.user?.id;
+  if (!userId) return { success: false };
+
+  const comment = await db.comment.findUnique({ where: { id: commentId } });
+  if (!comment) return { success: false };
+
+  const role    = (session?.user as { role?: string })?.role;
+  const isOwner = comment.authorId === userId;
+  const isAdmin = role === 'ADMIN';
+
+  if (!isOwner && !isAdmin) return { success: false };
+
+  await db.comment.delete({ where: { id: commentId } });
+  return { success: true };
+}

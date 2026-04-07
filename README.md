@@ -1,36 +1,130 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# KS40
 
-## Getting Started
+Nền tảng đọc và chia sẻ bài viết kỹ thuật, xây dựng bằng Next.js 15 App Router.
 
-First, run the development server:
+## Tech Stack
+
+- **Framework:** Next.js 16 (App Router, Server Actions)
+- **Auth:** NextAuth v5 (Credentials + Google OAuth)
+- **Database:** PostgreSQL + Prisma ORM
+- **Styling:** Tailwind CSS v4
+- **Runtime:** Node.js 20+
+
+---
+
+## Yêu cầu
+
+- Node.js >= 20
+- npm >= 10
+- Docker (để chạy PostgreSQL)
+
+---
+
+## Cài đặt & Build
+
+### 1. Clone và cài dependencies
+
+```bash
+git clone <repo-url>
+cd KS40
+npm install
+```
+
+### 2. Cấu hình biến môi trường
+
+```bash
+cp .env.example .env
+```
+
+Chỉnh sửa `.env` với các giá trị phù hợp:
+
+```env
+# Database
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=password
+POSTGRES_DB=ks40
+DATABASE_URL="postgresql://postgres:password@localhost:5466/ks40?schema=public"
+
+# NextAuth
+NEXTAUTH_URL="http://localhost:3000"
+AUTH_SECRET="your-secret-here"
+
+# Google OAuth (tùy chọn)
+AUTH_GOOGLE_ID="..."
+AUTH_GOOGLE_SECRET="..."
+
+# Resend (email, tùy chọn)
+RESEND_API_KEY="..."
+```
+
+### 3. Khởi động database
+
+```bash
+docker compose up -d
+```
+
+PostgreSQL sẽ chạy tại `localhost:5466`.
+
+### 4. Khởi tạo database
+
+```bash
+# Đẩy schema Prisma lên DB và generate client
+npx prisma db push
+```
+
+### 5. Chạy môi trường development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Mở [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Build production
 
-## Learn More
+```bash
+npm run build
+npm run start
+```
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Các lệnh hữu ích
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Lệnh | Mô tả |
+|---|---|
+| `npm run dev` | Chạy dev server (hot reload) |
+| `npm run build` | Build production |
+| `npm run start` | Chạy production server |
+| `npm run lint` | Kiểm tra lỗi ESLint |
+| `npm run test` | Chạy unit tests (Vitest) |
+| `npm run test:watch` | Chạy tests ở chế độ watch |
+| `npx prisma studio` | Mở Prisma Studio để xem DB |
+| `npx prisma db push` | Sync schema Prisma → DB |
+| `npx prisma generate` | Generate Prisma Client |
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Cấu trúc thư mục
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── app/                  # Next.js App Router (pages, layouts, API routes)
+│   ├── (auth)/           # Trang đăng nhập, đăng ký
+│   ├── (member)/         # Trang dành cho người dùng
+│   ├── (admin)/          # Trang quản trị
+│   └── api/              # API routes
+├── features/             # Tính năng theo domain
+│   ├── articles/
+│   ├── auth/
+│   ├── member/
+│   ├── admin/
+│   └── notifications/
+├── components/           # UI components dùng chung
+├── lib/                  # Tiện ích (db, auth, email...)
+└── middleware.ts         # Auth middleware
+docs/                     # Tài liệu kỹ thuật và kế hoạch
+prisma/                   # Schema và migrations
+```

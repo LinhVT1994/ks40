@@ -1,0 +1,433 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                String            @id @default(cuid())
+  name              String
+  email             String            @unique
+  password          String?
+  role              Role              @default(MEMBER)
+  status            UserStatus        @default(ACTIVE)
+  image             String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  bio               String?
+  accounts          Account[]
+  activities        Activity[]
+  articles          Article[]
+  books             Book[]
+  bookReadHistories BookReadHistory[]
+  bookmarks         Bookmark[]
+  comments          Comment[]
+  commentLikes      CommentLike[]
+  following         Follow[]          @relation("Follower")
+  followers         Follow[]          @relation("Following")
+  likes             Like[]
+  notifications     Notification[]
+  readHistories     ReadHistory[]
+  sharedPackages    SharedPackage[]
+  onboarding        UserOnboarding?
+  notes             Note[]
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String?
+  content   String
+  color     String   @default("yellow")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Follow {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+  follower    User     @relation("Follower", fields: [followerId], references: [id])
+  following   User     @relation("Following", fields: [followingId], references: [id])
+
+  @@id([followerId, followingId])
+}
+
+model UserOnboarding {
+  id                   String            @id @default(cuid())
+  userId               String            @unique
+  occupation           Occupation?
+  interestedCategories ArticleCategory[]
+  completedAt          DateTime?
+  skippedAt            DateTime?
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  codeTheme            String?           @default("dracula")
+  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@index([email])
+}
+
+model Series {
+  id          String          @id @default(cuid())
+  title       String
+  slug        String          @unique
+  description String?
+  thumbnail   String?
+  audience    ArticleAudience @default(PUBLIC)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  articles    Article[]
+
+  @@index([slug])
+}
+
+model Article {
+  id                String          @id @default(cuid())
+  title             String
+  slug              String          @unique
+  summary           String?
+  content           String
+  cover             String?
+  thumbnail         String?
+  category          ArticleCategory
+  badges            ArticleBadge[]
+  audience          ArticleAudience @default(MEMBERS)
+  status            ArticleStatus   @default(DRAFT)
+  publishedAt       DateTime?
+  viewCount         Int             @default(0)
+  readTime          Int             @default(5)
+  authorId          String
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  coverPosition     String?         @default("50% 50%")
+  thumbnailPosition String?         @default("50% 50%")
+  objectives        String?
+  overview          String?
+  seriesId          String?
+  seriesOrder       Int?
+  nextArticleId     String?
+  author            User            @relation(fields: [authorId], references: [id])
+  nextArticle       Article?        @relation("ArticleNext", fields: [nextArticleId], references: [id])
+  prevForArticles   Article[]       @relation("ArticleNext")
+  series            Series?         @relation(fields: [seriesId], references: [id])
+  tags              ArticleTag[]
+  bookmarks         Bookmark[]
+  comments          Comment[]
+  likes             Like[]
+  readHistories     ReadHistory[]
+  resources         Resource[]
+
+  @@index([status, publishedAt])
+  @@index([authorId])
+  @@index([category])
+  @@index([seriesId, seriesOrder])
+}
+
+model Tag {
+  id       String       @id @default(cuid())
+  name     String       @unique
+  slug     String       @unique
+  articles ArticleTag[]
+}
+
+model ArticleTag {
+  articleId String
+  tagId     String
+  article   Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([articleId, tagId])
+}
+
+model Comment {
+  id        String        @id @default(cuid())
+  content   String
+  status    CommentStatus @default(VISIBLE)
+  articleId String
+  authorId  String
+  parentId  String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+  article   Article       @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  author    User          @relation(fields: [authorId], references: [id])
+  parent    Comment?      @relation("CommentReplies", fields: [parentId], references: [id])
+  replies   Comment[]     @relation("CommentReplies")
+  likes     CommentLike[]
+
+  @@index([articleId])
+  @@index([authorId])
+}
+
+model CommentLike {
+  commentId String
+  userId    String
+  createdAt DateTime            @default(now())
+  type      CommentReactionType @default(LIKE)
+  comment   Comment             @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User                @relation(fields: [userId], references: [id])
+
+  @@id([commentId, userId])
+}
+
+model Like {
+  userId    String
+  articleId String
+  createdAt DateTime @default(now())
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, articleId])
+}
+
+model Bookmark {
+  userId    String
+  articleId String
+  createdAt DateTime @default(now())
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, articleId])
+}
+
+model ReadHistory {
+  userId    String
+  articleId String
+  progress  Float    @default(0)
+  readAt    DateTime @default(now())
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, articleId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  type      NotificationType
+  title     String
+  message   String?
+  link      String?
+  read      Boolean          @default(false)
+  userId    String
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}
+
+model Activity {
+  id        String       @id @default(cuid())
+  type      ActivityType
+  message   String
+  link      String?
+  metadata  Json?
+  actorId   String?
+  createdAt DateTime     @default(now())
+  actor     User?        @relation(fields: [actorId], references: [id])
+
+  @@index([createdAt])
+  @@index([type])
+  @@index([actorId])
+}
+
+model SharedPackage {
+  id            String          @id @default(cuid())
+  slug          String          @unique
+  title         String
+  description   String?
+  downloadCount Int             @default(0)
+  expiresAt     DateTime?
+  createdAt     DateTime        @default(now())
+  uploadedById  String
+  audience      ArticleAudience @default(PUBLIC)
+  files         SharedFile[]
+  uploadedBy    User            @relation(fields: [uploadedById], references: [id])
+
+  @@index([slug])
+}
+
+model SharedFile {
+  id        String        @id @default(cuid())
+  packageId String
+  name      String
+  url       String
+  size      Int
+  mimeType  String
+  package   SharedPackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+
+  @@index([packageId])
+}
+
+model Resource {
+  id        String   @id @default(cuid())
+  articleId String
+  name      String
+  url       String
+  size      Int
+  mimeType  String
+  createdAt DateTime @default(now())
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@index([articleId])
+}
+
+model SiteConfig {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+}
+
+model Book {
+  id          String          @id @default(cuid())
+  title       String
+  slug        String          @unique
+  description String?
+  cover       String?
+  audience    ArticleAudience @default(PUBLIC)
+  published   Boolean         @default(false)
+  authorId    String
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  author      User            @relation(fields: [authorId], references: [id])
+  chapters    Chapter[]
+
+  @@index([slug])
+  @@index([authorId])
+}
+
+model Chapter {
+  id            String            @id @default(cuid())
+  bookId        String
+  title         String
+  slug          String
+  content       String
+  order         Int
+  isFree        Boolean           @default(false)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  readTime      Int               @default(5)
+  readHistories BookReadHistory[]
+  book          Book              @relation(fields: [bookId], references: [id], onDelete: Cascade)
+
+  @@unique([bookId, slug])
+  @@unique([bookId, order])
+  @@index([bookId])
+}
+
+model BookReadHistory {
+  userId    String
+  chapterId String
+  bookId    String
+  readAt    DateTime @default(now())
+  chapter   Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, chapterId])
+  @@index([userId, bookId])
+}
+
+enum Role {
+  ADMIN
+  PREMIUM
+  MEMBER
+}
+
+enum UserStatus {
+  ACTIVE
+  LOCKED
+}
+
+enum ArticleCategory {
+  SYSTEM_DESIGN
+  AI_ML
+  DEVOPS
+  BLOCKCHAIN
+  FRONTEND
+  BACKEND
+  OTHER
+}
+
+enum ArticleBadge {
+  HOT
+  NEW
+  TRENDING
+  FEATURED
+}
+
+enum ArticleAudience {
+  PUBLIC
+  MEMBERS
+  PREMIUM
+  PRIVATE
+}
+
+enum ArticleStatus {
+  DRAFT
+  PUBLISHED
+  SCHEDULED
+}
+
+enum CommentReactionType {
+  LIKE
+  DISLIKE
+}
+
+enum CommentStatus {
+  VISIBLE
+  HIDDEN
+  SPAM
+}
+
+enum NotificationType {
+  SYSTEM
+  NEW_ARTICLE
+  COMMENT_REPLY
+  LIKE
+}
+
+enum ActivityType {
+  USER_REGISTERED
+  ARTICLE_PUBLISHED
+  COMMENT_POSTED
+  USER_UPGRADED
+  SYSTEM_ALERT
+}
+
+enum Occupation {
+  STUDENT
+  DEVELOPER
+  DEVOPS_ENGINEER
+  DATA_SCIENTIST
+  OTHER
+}
