@@ -46,6 +46,9 @@ export const metadata: Metadata = {
     shortcut: '/favicon.ico',
     apple:    '/icon-512.png',
   },
+  other: {
+    "google-adsense-account": "ca-pub-9196783506195067",
+  },
 };
 
 export const viewport: Viewport = {
