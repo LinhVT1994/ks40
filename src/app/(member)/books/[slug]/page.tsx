@@ -76,7 +76,7 @@ export default async function BookLandingPage({
                <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-white/10 blur-[100px] rounded-full translate-x-1/3 -translate-y-1/3 group-hover:bg-white/20 transition-colors" />
                <div className="absolute bottom-0 left-0 w-80 h-80 bg-black/10 blur-[80px] rounded-full -translate-x-1/2 translate-y-1/2" />
 
-               <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl md:rounded-[2.5rem] bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white shrink-0 shadow-2xl relative z-10 group-hover:scale-110 group-hover:rotate-12 transition-all duration-700">
+               <div className="w-20 h-20 md:w-24 md:h-24 rounded-2xl md:rounded-[2.5rem] bg-white/10 backdrop-blur-xl max-md:backdrop-blur-lg border border-white/20 flex items-center justify-center text-white shrink-0 shadow-2xl relative z-10 group-hover:scale-110 group-hover:rotate-12 transition-all duration-700">
                   <Star className="w-10 h-10 md:w-12 md:h-12 fill-current" />
                </div>
                <div className="flex-1 text-center md:text-left relative z-10 space-y-3 md:space-y-4">
@@ -94,7 +94,7 @@ export default async function BookLandingPage({
           {/* Sidebar */}
           <div className="lg:col-span-4 lg:sticky lg:top-32 space-y-10">
             {/* Author Card */}
-            <div className="p-10 bg-white dark:bg-white/[0.02] border border-zinc-300/60 dark:border-white/5 rounded-[3rem] shadow-sm flex flex-col items-center text-center group hover:border-primary/20 transition-all duration-700 backdrop-blur-xl">
+            <div className="p-10 bg-white dark:bg-white/[0.02] border border-zinc-300/60 dark:border-white/5 rounded-[3rem] shadow-sm flex flex-col items-center text-center group hover:border-primary/20 transition-all duration-700 backdrop-blur-xl max-md:backdrop-blur-lg">
                <div className="relative mb-8">
                  <div className="w-28 h-28 rounded-full p-1.5 bg-gradient-to-tr from-primary via-blue-500 to-indigo-600 group-hover:rotate-12 transition-transform duration-700 ring-4 ring-primary/5">
                     <div className="w-full h-full rounded-full border-4 border-white dark:border-slate-950 overflow-hidden shadow-2xl">

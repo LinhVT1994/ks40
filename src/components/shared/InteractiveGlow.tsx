@@ -13,8 +13,14 @@ export default function InteractiveGlow() {
   const springY = useSpring(mouseY, springConfig);
 
   const [isVisible, setIsVisible] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    // Check if device supports hover (not a touch device)
+    const isTouch = window.matchMedia('(hover: none)').matches;
+    setIsMobile(isTouch);
+    if (isTouch) return;
+
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
@@ -34,6 +40,8 @@ export default function InteractiveGlow() {
       document.removeEventListener('mouseenter', handleMouseEnter);
     };
   }, [mouseX, mouseY, isVisible]);
+
+  if (isMobile) return null;
 
   return (
     <div className="fixed inset-0 pointer-events-none z-[1] overflow-hidden">

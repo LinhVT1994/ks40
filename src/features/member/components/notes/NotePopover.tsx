@@ -30,7 +30,7 @@ export default function NotePopover({ rect, content, onClose, onEdit }: NotePopo
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: showAbove ? -10 : 10 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="fixed z-[101] w-[320px] rounded-[1.25rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] border border-white/40 dark:border-white/10 backdrop-blur-3xl bg-white/60 dark:bg-slate-900/60 overflow-hidden group"
+        className="fixed z-[101] w-[320px] rounded-[1.25rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] border border-white/40 dark:border-white/10 backdrop-blur-3xl max-md:backdrop-blur-lg bg-white/60 dark:bg-slate-900/60 overflow-hidden group"
         style={{
           left: Math.max(16, Math.min(window.innerWidth - 336, rect.left + rect.width / 2)),
           top: showAbove ? rect.top - 16 : rect.bottom + 12,

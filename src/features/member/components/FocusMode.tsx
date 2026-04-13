@@ -406,7 +406,7 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
 
           {showLibrary && (
             <div 
-              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-5 w-52 bg-zinc-800/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl p-2.5 overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-bottom-3 duration-200"
+              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-5 w-52 bg-zinc-800/95 backdrop-blur-3xl max-md:backdrop-blur-lg border border-white/10 rounded-2xl shadow-2xl p-2.5 overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-bottom-3 duration-200"
               onMouseLeave={() => setShowLibrary(false)}
             >
               <div className="px-2 py-1.5 mb-2 border-b border-white/5 flex items-center justify-between">

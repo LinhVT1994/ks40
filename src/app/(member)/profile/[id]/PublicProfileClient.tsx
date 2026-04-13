@@ -92,7 +92,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
       <div className="relative">
         <div className="absolute -inset-4 bg-gradient-to-br from-primary/5 via-accent-purple/5 to-transparent rounded-[2rem] blur-2xl pointer-events-none" />
 
-        <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-8 p-8 bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl border border-zinc-200 dark:border-white/5 rounded-3xl shadow-sm">
+        <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-8 p-8 bg-white/60 dark:bg-white/[0.03] backdrop-blur-xl max-md:backdrop-blur-lg border border-zinc-200 dark:border-white/5 rounded-3xl shadow-sm">
           {/* Avatar */}
           <div className="relative shrink-0">
             <div className="absolute -inset-2 bg-gradient-to-tr from-primary/20 to-accent-purple/20 rounded-full blur-xl opacity-60" />
@@ -216,7 +216,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
                 key={a.id}
                 href={`/article/${a.slug}`}
                 style={{ animationDelay: `${i * 100}ms` }}
-                className="group relative bg-white/40 dark:bg-white/[0.02] backdrop-blur-md border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
+                className="group relative bg-white/40 dark:bg-white/[0.02] backdrop-blur-md max-md:backdrop-blur-sm border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
               >
                 <div className="aspect-[16/10] overflow-hidden relative">
                   <img
@@ -226,7 +226,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
                   />
                   <div className="absolute top-3 left-3">
                     <span
-                      className="backdrop-blur-md bg-white/80 dark:bg-slate-900/80 text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wide shadow-sm border border-white/20 dark:border-white/5"
+                      className="backdrop-blur-md max-md:backdrop-blur-sm bg-white/80 dark:bg-slate-900/80 text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wide shadow-sm border border-white/20 dark:border-white/5"
                       style={{ color: a.topic.color ?? '#3B82F6' }}
                     >
                       {a.topic.label}

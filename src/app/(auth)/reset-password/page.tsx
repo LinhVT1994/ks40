@@ -3,7 +3,7 @@ import ResetPasswordForm from '@/features/auth/components/ResetPasswordForm';
 
 export default function ResetPasswordPage() {
   return (
-    <div className="w-full max-w-md bg-white/50 dark:bg-black/30 backdrop-blur-md border border-zinc-300 dark:border-slate-800 rounded-2xl p-8 shadow-2xl relative z-10 glass-panel">
+    <div className="w-full max-w-md bg-white/50 dark:bg-black/30 backdrop-blur-md max-md:backdrop-blur-sm border border-zinc-300 dark:border-slate-800 rounded-2xl p-8 shadow-2xl relative z-10 glass-panel">
       <div className="mb-8 text-center">
         <div className="flex justify-center mb-6">
           <BrandLogo size={48} />

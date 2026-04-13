@@ -27,7 +27,7 @@ function AddModal({ isOpen, onClose, onConfirm, title, isPending }: { isOpen: bo
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div onClick={onClose} className="absolute inset-0 bg-zinc-800/40 backdrop-blur-sm transition-opacity" />
+      <div onClick={onClose} className="absolute inset-0 bg-zinc-800/40 backdrop-blur-sm max-md:backdrop-blur-none transition-opacity" />
       <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-zinc-300/60 dark:border-white/10 shadow-2xl rounded-2xl p-8 animate-in fade-in zoom-in duration-200">
         <h2 className="text-xl font-bold mb-6 text-zinc-800 dark:text-white">{title}</h2>
         <div className="space-y-4">
@@ -64,7 +64,7 @@ function AddTagModal({ isOpen, onClose, onConfirm, isPending }: { isOpen: boolea
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div onClick={onClose} className="absolute inset-0 bg-zinc-800/40 backdrop-blur-sm transition-opacity" />
+      <div onClick={onClose} className="absolute inset-0 bg-zinc-800/40 backdrop-blur-sm max-md:backdrop-blur-none transition-opacity" />
       <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border border-zinc-300/60 dark:border-white/10 shadow-2xl rounded-2xl p-8 animate-in fade-in zoom-in duration-200">
         <h2 className="text-xl font-bold mb-6 text-zinc-800 dark:text-white">Thêm tag mới</h2>
         <div className="space-y-6">

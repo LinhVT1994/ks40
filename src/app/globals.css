@@ -543,7 +543,16 @@ pre code {
   background: rgba(255, 255, 255, 0.95) !important;
   backdrop-filter: blur(24px) saturate(200%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
-  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+}
+
+@media (max-width: 768px) {
+  [data-sonner-toast] {
+    backdrop-filter: blur(8px) saturate(150%) !important;
+    -webkit-backdrop-filter: blur(8px) saturate(150%) !important;
+  }
+}
+
+[data-sonner-toast] {
   border-radius: 20px !important;
   padding: 14px 18px !important;
   box-shadow: 

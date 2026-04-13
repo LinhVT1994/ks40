@@ -6,7 +6,7 @@ import Link from "next/link";
 
 export default function LoginPage() {
   return (
-    <div className="w-full max-w-md bg-white/70 dark:bg-black/40 backdrop-blur-xl border border-zinc-200 dark:border-white/10 rounded-[2rem] p-8 lg:p-10 shadow-2xl relative z-10 glass-panel ring-1 ring-zinc-200/50 dark:ring-white/5">
+    <div className="w-full max-w-md bg-white/70 dark:bg-black/40 backdrop-blur-xl max-md:backdrop-blur-lg border border-zinc-200 dark:border-white/10 rounded-[2rem] p-8 lg:p-10 shadow-2xl relative z-10 glass-panel ring-1 ring-zinc-200/50 dark:ring-white/5">
       <div className="text-center mb-8">
         <div className="flex justify-center mb-6">
           <BrandLogo size={48} />

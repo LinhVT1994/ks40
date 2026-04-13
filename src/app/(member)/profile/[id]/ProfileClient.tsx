@@ -133,7 +133,7 @@ function ArticleList({ articles: initialArticles, totalArticles, totalPages: ini
             key={a.id}
             href={`/article/${a.slug}`}
             style={{ animationDelay: `${i * 100}ms` }}
-            className="group relative cursor-pointer bg-white/40 dark:bg-white/[0.02] backdrop-blur-md border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
+            className="group relative cursor-pointer bg-white/40 dark:bg-white/[0.02] backdrop-blur-md max-md:backdrop-blur-sm border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
           >
             <div className="aspect-[16/10] overflow-hidden relative">
               <img
@@ -142,7 +142,7 @@ function ArticleList({ articles: initialArticles, totalArticles, totalPages: ini
                 alt={a.title}
               />
               <div className="absolute top-3 left-3">
-                <span className="backdrop-blur-md bg-white/80 dark:bg-slate-900/80 text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wide shadow-sm border border-white/20 dark:border-white/5"
+                <span className="backdrop-blur-md max-md:backdrop-blur-sm bg-white/80 dark:bg-slate-900/80 text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wide shadow-sm border border-white/20 dark:border-white/5"
                   style={{ color: a.topic.color ?? '#3B82F6' }}>
                   {a.topic.label}
                 </span>
@@ -222,7 +222,7 @@ function BookmarkList({ bookmarks }: { bookmarks: Bookmark[] }) {
           key={b.id} 
           href={`/article/${b.slug}`} 
           style={{ animationDelay: `${i * 100}ms` }}
-          className="group relative cursor-pointer bg-white/40 dark:bg-white/[0.02] backdrop-blur-md border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
+          className="group relative cursor-pointer bg-white/40 dark:bg-white/[0.02] backdrop-blur-md max-md:backdrop-blur-sm border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
         >
           <div className="aspect-[16/10] overflow-hidden relative">
             <img 
@@ -281,7 +281,7 @@ function HistoryList({ history }: { history: HistoryItem[] }) {
           <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 relative">
             <img src={article.thumbnail || '/placeholder.jpg'} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" alt="" />
             {progress >= 0.95 && (
-               <div className="absolute inset-0 bg-primary/20 backdrop-blur-[2px] flex items-center justify-center">
+               <div className="absolute inset-0 bg-primary/20 backdrop-blur-[2px] max-md:backdrop-blur-none flex items-center justify-center">
                   <Heart className="w-6 h-6 text-white animate-pulse" />
                </div>
             )}
@@ -382,7 +382,7 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
             key={d.id} 
             href={d.status === 'PENDING' ? '#' : `/write/${d.id}`}
             style={{ animationDelay: `${index * 80}ms` }}
-            className={`group relative cursor-pointer bg-white/60 dark:bg-white/[0.02] backdrop-blur-xl border border-zinc-200 dark:border-white/5 rounded-[2rem] p-4 flex flex-col md:flex-row gap-6 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 fill-mode-both ${d.status === 'PENDING' ? 'pointer-events-none opacity-80' : ''}`}
+            className={`group relative cursor-pointer bg-white/60 dark:bg-white/[0.02] backdrop-blur-xl max-md:backdrop-blur-lg border border-zinc-200 dark:border-white/5 rounded-[2rem] p-4 flex flex-col md:flex-row gap-6 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 fill-mode-both ${d.status === 'PENDING' ? 'pointer-events-none opacity-80' : ''}`}
           >
             {/* Thumbnail / Gradient Fallback */}
             <div className="w-full md:w-[240px] aspect-[16/10] md:aspect-square lg:aspect-[16/10] rounded-2xl overflow-hidden relative shrink-0">
@@ -401,7 +401,7 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
                   </span>
                </div>
                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-zinc-900/60 to-transparent flex items-end p-4">
-                  <span className="text-[9px] font-black text-white px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-md border border-white/20 uppercase tracking-widest">
+                  <span className="text-[9px] font-black text-white px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-md max-md:backdrop-blur-sm border border-white/20 uppercase tracking-widest">
                     {d.topic.label}
                   </span>
                </div>

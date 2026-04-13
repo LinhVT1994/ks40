@@ -90,7 +90,7 @@ export default function SharesClient({ initialPackages }: { initialPackages: Sha
       {/* ── Table ── */}
       <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-lg shadow-sm flex flex-col min-w-[700px]">
           {/* Header */}
-          <div className="grid grid-cols-12 px-6 py-3 border-b border-zinc-200 dark:border-white/5 text-[11px] font-bold uppercase tracking-widest text-zinc-500 bg-zinc-50/90 dark:bg-slate-900/90 backdrop-blur-md rounded-t-lg items-center sticky top-[65px] md:top-[73px] z-20">
+          <div className="grid grid-cols-12 px-6 py-3 border-b border-zinc-200 dark:border-white/5 text-[11px] font-bold uppercase tracking-widest text-zinc-500 bg-zinc-50/90 dark:bg-slate-900/90 backdrop-blur-md max-md:backdrop-blur-sm rounded-t-lg items-center sticky top-[65px] md:top-[73px] z-20">
             <div className="col-span-5">Tiêu đề</div>
             <div className="col-span-2 text-center">Files</div>
             <div className="col-span-2 text-center">Quyền</div>
