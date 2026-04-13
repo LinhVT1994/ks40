@@ -7,7 +7,7 @@ import { useSession } from 'next-auth/react';
 import { Heart, MessageCircle, Bookmark, Share2, Sparkles, Target, Lock as LockIcon } from 'lucide-react';
 import { toggleLikeAction } from '@/features/articles/actions/like';
 import { toggleBookmarkAction } from '@/features/articles/actions/bookmark';
-import { upsertReadHistoryAction } from '@/features/articles/actions/read-history';
+import { upsertReadHistoryAction, markArticleOpenedAction } from '@/features/articles/actions/read-history';
 import { incrementViewAction } from '@/features/articles/actions/article';
 import ReactMarkdown from 'react-markdown';
 
@@ -62,9 +62,14 @@ export default function ArticleContent({
 
   useEffect(() => {
     if (isPreview) return;
-    // Ghi nhận đã mở bài, sync lastSaved
-    lastSavedRef.current = 0.02;
-    upsertReadHistoryAction(articleId, 0.02);
+    // Ghi nhận đã mở bài — KHÔNG đụng progress nếu đã có, đồng thời sync ref với DB
+    let cancelled = false;
+    markArticleOpenedAction(articleId).then(({ progress }) => {
+      if (cancelled) return;
+      lastSavedRef.current = Math.max(lastSavedRef.current, progress);
+      progressRef.current  = Math.max(progressRef.current, progress);
+      setReadProgress(prev => Math.max(prev, progress));
+    });
 
     // Chỉ ghi khi tiến thêm ≥5% so với lần lưu trước (không bao giờ lùi)
     const save = (p: number, force = false) => {
@@ -82,7 +87,7 @@ export default function ArticleContent({
       progressRef.current = Math.max(progressRef.current, p); // không lùi
       setReadProgress(prev => Math.max(prev, p));
       clearTimeout(saveTimer.current);
-      saveTimer.current = setTimeout(() => save(p), 3000);
+      saveTimer.current = setTimeout(() => save(progressRef.current), 3000);
     };
 
     // Khi user switch tab / minimize → save ngay, không đợi debounce
@@ -97,6 +102,7 @@ export default function ArticleContent({
     document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
+      cancelled = true;
       window.removeEventListener('scroll', onScroll);
       document.removeEventListener('visibilitychange', onVisibilityChange);
       clearTimeout(saveTimer.current);
