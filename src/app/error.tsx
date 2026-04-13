@@ -101,42 +101,42 @@ export default function Error({
               { left: '50%', delay: '0.6s', dur: '2s'   },
               { left: '68%', delay: '1.1s', dur: '1.6s' },
             ].map((s, i) => (
-              <div key={i} className="absolute -top-4 w-5 h-5 rounded-full bg-slate-300 dark:bg-slate-600"
+              <div key={i} className="absolute -top-4 w-5 h-5 rounded-full bg-zinc-300 dark:bg-slate-600"
                 style={{ left: s.left, animation: `smoke ${s.dur} ${s.delay} ease-out infinite`, transformOrigin: 'center bottom' }} />
             ))}
 
             <svg width="160" height="140" viewBox="0 0 160 140" fill="none" xmlns="http://www.w3.org/2000/svg">
 
               {/* Server rack body */}
-              <rect x="20" y="30" width="120" height="88" rx="8" className="fill-slate-200 dark:fill-slate-700" />
-              <rect x="20" y="30" width="120" height="88" rx="8" className="stroke-slate-300 dark:stroke-slate-600" strokeWidth="1.5" />
+              <rect x="20" y="30" width="120" height="88" rx="8" className="fill-zinc-200 dark:fill-slate-700" />
+              <rect x="20" y="30" width="120" height="88" rx="8" className="stroke-zinc-300 dark:stroke-slate-600" strokeWidth="1.5" />
 
               {/* Server unit 1 */}
               <rect x="28" y="38" width="104" height="22" rx="4" className="fill-white dark:fill-slate-600" />
-              <rect x="28" y="38" width="104" height="22" rx="4" className="stroke-slate-200 dark:stroke-slate-500" strokeWidth="1" />
+              <rect x="28" y="38" width="104" height="22" rx="4" className="stroke-zinc-200 dark:stroke-slate-500" strokeWidth="1" />
               {/* LEDs row 1 */}
               <circle cx="116" cy="46" r="3" style={{ animation: 'led-blink 0.5s 0s steps(1) infinite' }} />
               <circle cx="125" cy="46" r="3" style={{ animation: 'led-blink 0.5s 0.15s steps(1) infinite' }} />
-              <circle cx="116" cy="54" r="3" className="fill-slate-300 dark:fill-slate-500" />
+              <circle cx="116" cy="54" r="3" className="fill-zinc-300 dark:fill-slate-500" />
               <circle cx="125" cy="54" r="3" style={{ animation: 'led-blink 0.5s 0.3s steps(1) infinite' }} />
               {/* Drive slots */}
-              <rect x="36" y="43" width="60" height="4" rx="2" className="fill-slate-100 dark:fill-slate-700" />
-              <rect x="36" y="51" width="48" height="4" rx="2" className="fill-slate-100 dark:fill-slate-700" />
+              <rect x="36" y="43" width="60" height="4" rx="2" className="fill-zinc-100 dark:fill-slate-700" />
+              <rect x="36" y="51" width="48" height="4" rx="2" className="fill-zinc-100 dark:fill-slate-700" />
 
               {/* Server unit 2 — face */}
               <rect x="28" y="66" width="104" height="30" rx="4" className="fill-white dark:fill-slate-600" />
-              <rect x="28" y="66" width="104" height="30" rx="4" className="stroke-slate-200 dark:stroke-slate-500" strokeWidth="1" />
+              <rect x="28" y="66" width="104" height="30" rx="4" className="stroke-zinc-200 dark:stroke-slate-500" strokeWidth="1" />
               {/* Panic eyes */}
               <g style={{ animation: 'eye-panic 2s 0.5s ease-in-out infinite', transformOrigin: '65px 81px' }}>
-                <circle cx="58" cy="81" r="5" className="fill-slate-800 dark:fill-white" />
+                <circle cx="58" cy="81" r="5" className="fill-zinc-800 dark:fill-white" />
                 <circle cx="60" cy="79" r="1.5" className="fill-white dark:fill-slate-900" />
               </g>
               <g style={{ animation: 'eye-panic 2s 0.7s ease-in-out infinite', transformOrigin: '80px 81px' }}>
-                <circle cx="80" cy="81" r="5" className="fill-slate-800 dark:fill-white" />
+                <circle cx="80" cy="81" r="5" className="fill-zinc-800 dark:fill-white" />
                 <circle cx="82" cy="79" r="1.5" className="fill-white dark:fill-slate-900" />
               </g>
               {/* Shocked mouth */}
-              <ellipse cx="69" cy="90" rx="5" ry="3.5" className="fill-slate-800 dark:fill-white" />
+              <ellipse cx="69" cy="90" rx="5" ry="3.5" className="fill-zinc-800 dark:fill-white" />
               {/* Sweat drop */}
               <path d="M96 72 Q98 68 100 72 Q100 76 98 76 Q96 76 96 72Z" className="fill-blue-400 dark:fill-blue-300" opacity="0.8" />
               {/* LEDs row 2 */}
@@ -145,8 +145,8 @@ export default function Error({
 
               {/* Server unit 3 */}
               <rect x="28" y="102" width="104" height="10" rx="4" className="fill-white dark:fill-slate-600" />
-              <rect x="28" y="102" width="104" height="10" rx="4" className="stroke-slate-200 dark:stroke-slate-500" strokeWidth="1" />
-              <rect x="36" y="105" width="70" height="3" rx="1.5" className="fill-slate-200 dark:fill-slate-500" />
+              <rect x="28" y="102" width="104" height="10" rx="4" className="stroke-zinc-200 dark:stroke-slate-500" strokeWidth="1" />
+              <rect x="36" y="105" width="70" height="3" rx="1.5" className="fill-zinc-200 dark:fill-slate-500" />
               <circle cx="120" cy="107" r="2.5" style={{ animation: 'led-blink 0.3s 0.2s steps(1) infinite' }} />
 
               {/* Flames on top */}
@@ -188,14 +188,14 @@ export default function Error({
         </div>
 
         <div className="mt-4 space-y-2">
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white">
+          <h1 className="text-xl font-bold text-zinc-800 dark:text-white">
             Đã có lỗi xảy ra
           </h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+          <p className="text-zinc-500 dark:text-slate-400 text-sm leading-relaxed">
             Có gì đó không ổn ở phía chúng tôi. Vui lòng thử lại sau.
           </p>
           {error.digest && (
-            <p className="text-[11px] text-slate-400 dark:text-slate-600 font-mono bg-slate-100 dark:bg-white/5 px-3 py-1.5 rounded-lg inline-block">
+            <p className="text-[11px] text-zinc-500 dark:text-slate-600 font-mono bg-zinc-100 dark:bg-white/5 px-3 py-1.5 rounded-lg inline-block">
               {error.digest}
             </p>
           )}
@@ -210,7 +210,7 @@ export default function Error({
           </button>
           <a
             href="/"
-            className="px-6 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-600 dark:text-slate-300 hover:border-rose-500/50 hover:text-rose-500 transition-colors"
+            className="px-6 py-2.5 rounded-xl border border-zinc-300 dark:border-white/10 text-sm font-bold text-zinc-600 dark:text-slate-300 hover:border-rose-500/50 hover:text-rose-500 transition-colors"
           >
             Về trang chủ
           </a>

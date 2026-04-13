@@ -10,7 +10,7 @@ const AUDIENCE_CONFIG: Record<string, { label: string; icon: React.ElementType; 
   PUBLIC:  { label: 'Public',   icon: Globe,  className: 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400' },
   MEMBERS: { label: 'Members',  icon: Users,  className: 'bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400' },
   PREMIUM: { label: 'Premium',  icon: Star,   className: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' },
-  PRIVATE: { label: 'Private',  icon: Lock,   className: 'bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400' },
+  PRIVATE: { label: 'Private',  icon: Lock,   className: 'bg-zinc-100 text-zinc-500 dark:bg-white/5 dark:text-slate-400' },
 };
 
 function toSlug(title: string) {
@@ -56,13 +56,13 @@ function SeriesModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-white/10">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-white/5">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-lg border border-zinc-300 dark:border-white/10">
+        <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-200 dark:border-white/5">
+          <h2 className="text-lg font-bold text-zinc-800 dark:text-white">
             {mode === 'create' ? 'Tạo series mới' : 'Chỉnh sửa series'}
           </h2>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
-            <X className="w-4 h-4 text-slate-500" />
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors">
+            <X className="w-4 h-4 text-zinc-500" />
           </button>
         </div>
 
@@ -71,33 +71,33 @@ function SeriesModal({
             <p className="text-sm text-rose-500 bg-rose-50 dark:bg-rose-500/10 px-4 py-2.5 rounded-xl">{error}</p>
           )}
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Tiêu đề</label>
+            <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Tiêu đề</label>
             <input
-              className="mt-1.5 w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary text-slate-900 dark:text-white"
+              className="mt-1.5 w-full bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary text-zinc-800 dark:text-white"
               value={form.title}
               onChange={e => { set('title', e.target.value); set('slug', toSlug(e.target.value)); }}
               placeholder="Ví dụ: System Design từ A–Z"
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Slug</label>
+            <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Slug</label>
             <input
-              className="mt-1.5 w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm font-mono outline-none focus:border-primary text-slate-900 dark:text-white"
+              className="mt-1.5 w-full bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm font-mono outline-none focus:border-primary text-zinc-800 dark:text-white"
               value={form.slug}
               onChange={e => set('slug', e.target.value)}
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Mô tả (tuỳ chọn)</label>
+            <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Mô tả (tuỳ chọn)</label>
             <textarea
-              className="mt-1.5 w-full bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary text-slate-900 dark:text-white resize-none"
+              className="mt-1.5 w-full bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:border-primary text-zinc-800 dark:text-white resize-none"
               rows={3}
               value={form.description}
               onChange={e => set('description', e.target.value)}
             />
           </div>
           <div>
-            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Audience</label>
+            <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider mb-2 block">Audience</label>
             <div className="flex gap-2 flex-wrap">
               {Object.entries(AUDIENCE_CONFIG).map(([k, cfg]) => (
                 <button
@@ -106,7 +106,7 @@ function SeriesModal({
                   className={`px-3 py-1.5 rounded-xl text-xs font-bold border-2 transition-all ${
                     form.audience === k
                       ? 'border-primary bg-primary/5 text-primary'
-                      : 'border-slate-200 dark:border-white/10 text-slate-500 hover:border-primary/30'
+                      : 'border-zinc-300 dark:border-white/10 text-zinc-500 hover:border-primary/30'
                   }`}
                 >
                   {cfg.label}
@@ -116,8 +116,8 @@ function SeriesModal({
           </div>
         </div>
 
-        <div className="px-6 py-4 border-t border-slate-100 dark:border-white/5 flex justify-end gap-3">
-          <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm font-bold text-slate-500 hover:text-slate-700 dark:hover:text-white border border-slate-200 dark:border-white/10 transition-colors">
+        <div className="px-6 py-4 border-t border-zinc-200 dark:border-white/5 flex justify-end gap-3">
+          <button onClick={onClose} className="px-5 py-2 rounded-xl text-sm font-bold text-zinc-500 hover:text-zinc-700 dark:hover:text-white border border-zinc-300 dark:border-white/10 transition-colors">
             Huỷ
           </button>
           <button
@@ -219,41 +219,41 @@ export default function SeriesClient({ series: initial }: { series: SeriesSummar
         </button>
 
         {series.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-slate-400 gap-3">
+          <div className="flex flex-col items-center justify-center py-20 text-zinc-500 gap-3">
             <BookOpen className="w-10 h-10 opacity-30" />
             <p className="text-sm font-medium">Chưa có series nào</p>
           </div>
         ) : (
-          <div className="rounded-2xl border border-slate-200 dark:border-white/5 overflow-hidden">
+          <div className="rounded-2xl border border-zinc-300 dark:border-white/5 overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/5">
-                  <th className="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Tiêu đề</th>
-                  <th className="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider hidden md:table-cell">Slug</th>
-                  <th className="text-center px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Bài viết</th>
-                  <th className="text-left px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Audience</th>
+                <tr className="bg-zinc-50 dark:bg-white/5 border-b border-zinc-300 dark:border-white/5">
+                  <th className="text-left px-5 py-3 text-xs font-bold text-zinc-500 uppercase tracking-wider">Tiêu đề</th>
+                  <th className="text-left px-5 py-3 text-xs font-bold text-zinc-500 uppercase tracking-wider hidden md:table-cell">Slug</th>
+                  <th className="text-center px-5 py-3 text-xs font-bold text-zinc-500 uppercase tracking-wider">Bài viết</th>
+                  <th className="text-left px-5 py-3 text-xs font-bold text-zinc-500 uppercase tracking-wider">Audience</th>
                   <th className="px-5 py-3" />
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-white/5">
+              <tbody className="divide-y divide-zinc-200 dark:divide-white/5">
                 {series.map(s => {
                   const aud = AUDIENCE_CONFIG[s.audience];
                   const AudIcon = aud?.icon ?? Globe;
                   return (
-                    <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition-colors">
+                    <tr key={s.id} className="hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           <div className="p-2 rounded-xl bg-primary/10 text-primary shrink-0">
                             <BookOpen className="w-4 h-4" />
                           </div>
-                          <span className="font-semibold text-slate-800 dark:text-white truncate max-w-[200px]">{s.title}</span>
+                          <span className="font-semibold text-zinc-800 dark:text-white truncate max-w-[200px]">{s.title}</span>
                         </div>
                       </td>
                       <td className="px-5 py-4 hidden md:table-cell">
-                        <span className="font-mono text-xs text-slate-400">{s.slug}</span>
+                        <span className="font-mono text-xs text-zinc-500">{s.slug}</span>
                       </td>
                       <td className="px-5 py-4 text-center">
-                        <span className="text-sm font-bold text-slate-600 dark:text-slate-300">{s._count.articles}</span>
+                        <span className="text-sm font-bold text-zinc-600 dark:text-slate-300">{s._count.articles}</span>
                       </td>
                       <td className="px-5 py-4">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold ${aud?.className}`}>
@@ -265,14 +265,14 @@ export default function SeriesClient({ series: initial }: { series: SeriesSummar
                         <div className="flex items-center gap-2 justify-end">
                           <button
                             onClick={() => { setEditItem(s); setError(null); }}
-                            className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-white/10 text-slate-400 hover:text-primary transition-colors"
+                            className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/10 text-zinc-500 hover:text-primary transition-colors"
                           >
                             <Edit2 className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(s.id)}
                             disabled={deletingId === s.id}
-                            className="p-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-500/10 text-slate-400 hover:text-rose-500 transition-colors disabled:opacity-50"
+                            className="p-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-500/10 text-zinc-500 hover:text-rose-500 transition-colors disabled:opacity-50"
                           >
                             {deletingId === s.id
                               ? <Loader2 className="w-4 h-4 animate-spin" />

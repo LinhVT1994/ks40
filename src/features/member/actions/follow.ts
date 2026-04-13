@@ -10,7 +10,7 @@ export async function getAuthorInfoAction(authorId: string) {
   const [author, followerCount, articleCount, isFollowing] = await Promise.all([
     db.user.findUnique({
       where:  { id: authorId },
-      select: { id: true, name: true, image: true, bio: true },
+      select: { id: true, name: true, image: true, bio: true, websiteUrl: true, facebookUrl: true, instagramUrl: true, twitterUrl: true, linkedinUrl: true, githubUrl: true, youtubeUrl: true },
     }),
     db.follow.count({ where: { followingId: authorId } }),
     db.article.count({ where: { authorId, status: 'PUBLISHED' } }),

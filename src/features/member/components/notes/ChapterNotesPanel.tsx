@@ -58,7 +58,7 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
     switch (color) {
       case 'blue': return 'border-blue-500/50 text-blue-400';
       case 'emerald': return 'border-emerald-500/50 text-emerald-400';
-      case 'slate': return 'border-slate-500/50 text-slate-400';
+      case 'slate': return 'border-zinc-500/50 text-zinc-500';
       default: return 'border-amber-500/50 text-amber-400';
     }
   };
@@ -68,14 +68,14 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
       switch (color) {
         case 'blue': return 'bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300';
         case 'emerald': return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300';
-        case 'slate': return 'bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-slate-300';
+        case 'slate': return 'bg-zinc-100 text-zinc-700 dark:bg-white/10 dark:text-slate-300';
         default: return 'bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-300';
       }
     } else {
       switch (color) {
         case 'blue': return 'bg-blue-50/50 text-blue-500/80 dark:bg-blue-500/10 dark:text-blue-400/60 border border-blue-200/50 dark:border-blue-500/20';
         case 'emerald': return 'bg-emerald-50/50 text-emerald-500/80 dark:bg-emerald-500/10 dark:text-emerald-400/60 border border-emerald-200/50 dark:border-emerald-500/20';
-        case 'slate': return 'bg-slate-50/50 text-slate-500/80 dark:bg-white/5 dark:text-slate-400/60 border border-slate-200/50 dark:border-white/10';
+        case 'slate': return 'bg-zinc-50/50 text-zinc-500/80 dark:bg-white/5 dark:text-slate-400/60 border border-zinc-200 dark:border-white/10';
         default: return 'bg-amber-50/50 text-amber-500/80 dark:bg-amber-500/10 dark:text-amber-400/60 border border-amber-200/50 dark:border-amber-500/20';
       }
     }
@@ -111,7 +111,7 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-slate-900/40 dark:bg-black/40 backdrop-blur-sm z-[110]"
+            className="fixed inset-0 bg-zinc-800/40 dark:bg-black/40 backdrop-blur-sm z-[110]"
           />
 
           {/* Panel */}
@@ -120,33 +120,33 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-[400px] bg-slate-50 dark:bg-slate-900 border-l border-slate-200 dark:border-white/10 z-[120] shadow-2xl flex flex-col"
+            className="fixed top-0 right-0 h-full w-[400px] bg-zinc-50 dark:bg-slate-900 border-l border-zinc-300 dark:border-white/10 z-[120] shadow-2xl flex flex-col"
           >
             {/* Header */}
-            <div className="p-6 border-b border-slate-200 dark:border-white/10 flex items-center justify-between bg-white dark:bg-slate-900/50">
+            <div className="p-6 border-b border-zinc-300 dark:border-white/10 flex items-center justify-between bg-white dark:bg-slate-900/50">
               <div>
-                <h2 className="text-xl font-black text-slate-800 dark:text-white">Ghi chú & Highlight</h2>
-                <p className="text-xs font-bold text-slate-400 mt-1 truncate w-64 uppercase tracking-widest">{chapterTitle}</p>
+                <h2 className="text-xl font-black text-zinc-800 dark:text-white">Ghi chú & Highlight</h2>
+                <p className="text-xs font-bold text-zinc-500 mt-1 truncate w-64 uppercase tracking-widest">{chapterTitle}</p>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 bg-slate-100 hover:bg-slate-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-xl text-slate-500 dark:text-slate-400 dark:hover:text-white transition-all hover:scale-105 active:scale-95"
+                className="p-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-xl text-zinc-500 dark:text-slate-400 dark:hover:text-white transition-all hover:scale-105 active:scale-95"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Search Bar, Add Button, & Type Filters */}
-            <div className="border-b border-slate-200 dark:border-white/10 bg-white/50 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-10 shrink-0 px-5 pt-4 pb-3 flex flex-col gap-3">
+            <div className="border-b border-zinc-300 dark:border-white/10 bg-white/50 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-10 shrink-0 px-5 pt-4 pb-3 flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <div className="relative group flex-1">
-                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-colors" />
+                  <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
                   <input
                     type="text"
                     placeholder="Tìm ghi chú hoặc nội dung trích dẫn..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full bg-slate-100 dark:bg-black/20 border border-transparent focus:border-primary/50 dark:focus:border-primary/50 text-[13px] text-slate-800 dark:text-slate-200 rounded-xl pl-10 pr-10 py-2.5 outline-none transition-all placeholder:text-slate-400"
+                    className="w-full bg-zinc-100 dark:bg-black/20 border border-transparent focus:border-primary/50 dark:focus:border-primary/50 text-[13px] text-zinc-800 dark:text-slate-200 rounded-xl pl-10 pr-10 py-2.5 outline-none transition-all placeholder:text-zinc-500"
                   />
                   <AnimatePresence>
                     {searchQuery && (
@@ -155,7 +155,7 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
                         onClick={() => setSearchQuery('')} 
-                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-white dark:bg-white/10 rounded-md shadow-sm"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-600 dark:hover:text-slate-200 bg-white dark:bg-white/10 rounded-md shadow-sm"
                       >
                         <X className="w-3.5 h-3.5" />
                       </motion.button>
@@ -170,7 +170,7 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
               </div>
 
               {/* Modern Minimalist Animated Tabs */}
-              <div className="flex items-center gap-6 border-b border-slate-200/50 dark:border-white/10 w-full overflow-x-auto custom-scrollbar pt-3 px-1 -mx-1">
+              <div className="flex items-center gap-6 border-b border-zinc-200 dark:border-white/10 w-full overflow-x-auto custom-scrollbar pt-3 px-1 -mx-1">
                 {(['Tất cả', 'Ghi chú chung', 'Ghi chú', 'Highlight'] as FilterType[]).map(type => {
                   const isActive = filterType === type;
                   return (
@@ -180,7 +180,7 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
                       className={`relative pb-3 text-[10px] font-black uppercase tracking-[0.2em] transition-colors whitespace-nowrap ${
                         isActive 
                           ? 'text-primary' 
-                          : 'text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
+                          : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-slate-200'
                       }`}
                     >
                       {type}
@@ -198,11 +198,11 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
             </div>
 
             {/* Notes List */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-slate-50/50 dark:bg-transparent custom-scrollbar">
+            <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-zinc-50/50 dark:bg-transparent custom-scrollbar">
               {filteredNotes.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-slate-500 text-center">
+                <div className="h-full flex flex-col items-center justify-center text-zinc-500 text-center">
                   <div className="w-10 h-10 bg-white dark:bg-white/5 shadow-sm rounded-xl flex items-center justify-center mb-3">
-                    <Search className="w-5 h-5 text-slate-400" />
+                    <Search className="w-5 h-5 text-zinc-500" />
                   </div>
                   <p className="text-[13px] font-medium">Không tìm thấy kết quả nào khớp với "{searchQuery}"</p>
                 </div>
@@ -211,7 +211,7 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
                   
                   const getCardBgClass = (color: string, isGeneral?: boolean, hasContent?: boolean) => {
                     if (isGeneral) return 'bg-white dark:bg-white/5 border border-primary/30 shadow-primary/5 dark:border-primary/40 hover:border-primary/50';
-                    if (hasContent) return 'bg-white dark:bg-white/5 border border-slate-200/60 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20';
+                    if (hasContent) return 'bg-white dark:bg-white/5 border border-zinc-300/60 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20';
                     
                     switch (color) {
                       case 'blue': return 'bg-blue-50/50 hover:bg-blue-50 dark:bg-blue-500/5 dark:hover:bg-blue-500/10 border border-blue-200/60 dark:border-blue-500/10 hover:border-blue-300 dark:hover:border-blue-500/20';
@@ -238,10 +238,10 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
                               <span className={`text-[8.5px] px-1.5 py-0.5 rounded uppercase tracking-widest font-black bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-300`}>
                                 Ghi chú chương
                               </span>
-                              <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">{note.time}</span>
+                              <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">{note.time}</span>
                             </div>
                           </div>
-                          <p className="text-[13px] font-medium text-slate-800 dark:text-slate-200 leading-snug">
+                          <p className="text-[13px] font-medium text-zinc-800 dark:text-slate-200 leading-snug">
                             {note.content}
                           </p>
                         </>
@@ -251,20 +251,20 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
                           {/* Compact Highlight Context */}
                           <div className="flex items-center gap-2 opacity-60">
                             <div className={`w-1 h-3 rounded-full ${getColorClass(note.color).split(' ')[0].replace('border-', 'bg-')}`} />
-                            <p className={`text-[11px] font-serif italic truncate flex-1 leading-none pt-0.5 ${!note.content ? 'text-slate-800 dark:text-slate-200 font-medium not-italic' : ''}`}>
+                            <p className={`text-[11px] font-serif italic truncate flex-1 leading-none pt-0.5 ${!note.content ? 'text-zinc-800 dark:text-slate-200 font-medium not-italic' : ''}`}>
                               "{note.highlightText}"
                             </p>
                             <div className="flex items-center gap-1.5 shrink-0">
                               <span className={`text-[8.5px] px-1.5 py-0.5 rounded uppercase tracking-widest font-black ${getBadgeClass(note.color, !!note.content)}`}>
                                 {note.content ? 'Ghi chú' : 'Highlight'}
                               </span>
-                              <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400">{note.time}</span>
+                              <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">{note.time}</span>
                             </div>
                           </div>
 
                           {/* Compact Note Content (Only if exists) */}
                           {note.content && (
-                            <p className="text-[13px] font-medium text-slate-800 dark:text-slate-200 leading-snug pt-1">
+                            <p className="text-[13px] font-medium text-zinc-800 dark:text-slate-200 leading-snug pt-1">
                               {note.content}
                             </p>
                           )}
@@ -282,10 +282,10 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
                         )}
                         
                         <div className="flex items-center gap-0.5">
-                          <button className="p-1 hover:bg-slate-800/5 dark:hover:bg-white/10 rounded-md text-slate-400 hover:text-primary transition-colors" title={note.content ? "Chỉnh sửa" : "Thêm ghi chú"}>
+                          <button className="p-1 hover:bg-zinc-800/5 dark:hover:bg-white/10 rounded-md text-zinc-500 hover:text-primary transition-colors" title={note.content ? "Chỉnh sửa" : "Thêm ghi chú"}>
                             <FileEdit className="w-3 h-3" />
                           </button>
-                          <button className="p-1 hover:bg-red-500/10 dark:hover:bg-red-500/20 rounded-md text-slate-400 hover:text-red-500 transition-colors" title="Xóa">
+                          <button className="p-1 hover:bg-red-500/10 dark:hover:bg-red-500/20 rounded-md text-zinc-500 hover:text-red-500 transition-colors" title="Xóa">
                             <Trash2 className="w-3 h-3" />
                           </button>
                         </div>
@@ -297,8 +297,8 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
             </div>
             
             {/* Footer */}
-            <div className="p-6 border-t border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900 flex justify-center">
-               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">KS4.0 Personal Notes</span>
+            <div className="p-6 border-t border-zinc-300 dark:border-white/10 bg-white dark:bg-slate-900 flex justify-center">
+               <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">KS4.0 Personal Notes</span>
             </div>
           </motion.div>
         </>

@@ -29,16 +29,16 @@ export default function SeriesBanner({ ctx }: { ctx: SeriesContext }) {
           </div>
           <div className="min-w-0">
             <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-0.5">Series</p>
-            <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{series.title}</p>
+            <p className="text-sm font-bold text-zinc-800 dark:text-white truncate">{series.title}</p>
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <span className="text-xs font-bold text-slate-500 dark:text-slate-400 tabular-nums">
+          <span className="text-xs font-bold text-zinc-500 dark:text-slate-400 tabular-nums">
             {currentIndex + 1} / {total}
           </span>
           <button
             onClick={() => setExpanded(v => !v)}
-            className="p-1.5 rounded-lg hover:bg-primary/10 text-slate-500 dark:text-slate-400 transition-colors"
+            className="p-1.5 rounded-lg hover:bg-primary/10 text-zinc-500 dark:text-slate-400 transition-colors"
             aria-label="Toggle series list"
           >
             {expanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -68,7 +68,7 @@ export default function SeriesBanner({ ctx }: { ctx: SeriesContext }) {
                 className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-colors ${
                   isCurrent
                     ? 'bg-primary/10 text-primary font-bold cursor-default pointer-events-none'
-                    : 'text-slate-600 dark:text-slate-300 hover:bg-primary/5 font-medium'
+                    : 'text-zinc-600 dark:text-slate-300 hover:bg-primary/5 font-medium'
                 }`}
               >
                 <span className="shrink-0 w-5 h-5 rounded-full border border-current/30 flex items-center justify-center text-[10px] font-black">
@@ -87,7 +87,7 @@ export default function SeriesBanner({ ctx }: { ctx: SeriesContext }) {
           {prev ? (
             <Link
               href={`/article/${prev.slug}`}
-              className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-primary transition-colors min-w-0"
+              className="flex items-center gap-2 text-xs font-bold text-zinc-500 dark:text-slate-400 hover:text-primary transition-colors min-w-0"
             >
               <ChevronLeft className="w-3.5 h-3.5 shrink-0" />
               <span className="truncate max-w-[140px]">{prev.title}</span>
@@ -96,7 +96,7 @@ export default function SeriesBanner({ ctx }: { ctx: SeriesContext }) {
           {next ? (
             <Link
               href={`/article/${next.slug}`}
-              className="flex items-center gap-2 text-xs font-bold text-slate-500 dark:text-slate-400 hover:text-primary transition-colors min-w-0 text-right"
+              className="flex items-center gap-2 text-xs font-bold text-zinc-500 dark:text-slate-400 hover:text-primary transition-colors min-w-0 text-right"
             >
               <span className="truncate max-w-[140px]">{next.title}</span>
               <ChevronRight className="w-3.5 h-3.5 shrink-0" />

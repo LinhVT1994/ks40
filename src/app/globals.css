@@ -2,7 +2,7 @@
 @plugin "@tailwindcss/typography";
 @custom-variant dark (&:is(.dark *));
 
-@keyframes wiggle {
+@keyframes wigle {
   0%, 100% { transform: rotate(0deg); }
   20%       { transform: rotate(-15deg); }
   40%       { transform: rotate(15deg); }
@@ -10,14 +10,61 @@
   80%       { transform: rotate(10deg); }
 }
 
+@keyframes shimmer-sweep {
+  0%   { transform: translateX(-100%) skewX(-20deg); opacity: 0; }
+  20%  { opacity: 0.5; }
+  100% { transform: translateX(200%) skewX(-20deg); opacity: 0; }
+}
+
+@keyframes wave-animation {
+    0% { transform: rotate( 0.0deg) }
+   10% { transform: rotate(14.0deg) }
+   20% { transform: rotate(-8.0deg) }
+   30% { transform: rotate(14.0deg) }
+   40% { transform: rotate(-4.0deg) }
+   50% { transform: rotate(10.0deg) }
+   60% { transform: rotate( 0.0deg) }
+  100% { transform: rotate( 0.0deg) }
+}
+
+@keyframes text-shimmer {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes welcome-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-wave {
+  animation: wave-animation 2.5s infinite;
+  transform-origin: 70% 70%;
+  display: inline-block;
+}
+
+.animate-welcome-fade-up {
+  animation: welcome-fade-up 1s ease-out forwards;
+}
+
+.animate-text-shimmer {
+  background-size: 200% auto;
+  animation: text-shimmer 4s linear infinite;
+}
+
 @theme {
-  --color-primary: #3B82F6;
+  /* Default Light Mode Palette - Premium Minimalist (Zinc/Neutral) */
+  --color-primary: #27272A; /* Zinc 800 - dark solid color for high contrast & elegance */
   --animate-wiggle: wiggle 0.5s ease-in-out;
-  --color-accent-purple: #8B5CF6;
+  --color-accent-purple: #6D28D9; /* Violet 700 - Deeper purple for better readability */
   
-  --color-background-light: #f8fafc;
+  --color-background-light: #FAFAFA; /* Zinc 50 - Cleaner, less blueish than Slate 50 */
   --color-background-dark: #0a0a0a;
 
+  --background-rgb: 250, 250, 250;
+  --foreground-rgb: 39, 39, 42; /* Zinc 800 */
+  
   /* Font */
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   --font-display: "Google Sans Text", "Arial", sans-serif;
@@ -28,11 +75,19 @@
 
 @layer base {
   body {
-    @apply bg-background-light dark:bg-background-dark text-slate-900 dark:text-white antialiased transition-colors duration-300 font-sans;
+    @apply bg-background-light dark:bg-background-dark text-zinc-800 dark:text-white antialiased transition-colors duration-300 font-sans;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-display font-bold tracking-tight;
+  }
+
+  .dark {
+    /* Preserve Original Dark Mode Colors */
+    --color-primary: #3B82F6; /* Original Blue 500 */
+    --color-accent-purple: #8B5CF6; /* Original Violet 500 */
+    --background-rgb: 10, 10, 10;
+    --foreground-rgb: 255, 255, 255;
   }
 
   button:not(:disabled) {
@@ -42,11 +97,28 @@
 
 /* ─── Focus Mode ─────────────────────────────────────────── */
 
-/* Hide chrome */
-html.focus-mode header,
-html.focus-mode footer,
-html.focus-mode [data-focus-hide] {
+/* Hide chrome but keep logo/eyes visible in a subtle way */
+/* Hide all elements marked to hide in Focus Mode globally */
+html.focus-mode [data-focus-hide],
+html.focus-mode footer {
   display: none !important;
+}
+
+html.focus-mode header {
+  background: transparent !important;
+  border: none !important;
+  backdrop-filter: none !important;
+  pointer-events: none;
+}
+
+html.focus-mode header a[href="/"] {
+  pointer-events: auto;
+  opacity: 0.4;
+  transition: opacity 0.3s ease;
+}
+
+html.focus-mode header a[href="/"]:hover {
+  opacity: 1;
 }
 
 /* Expand content area: remove grid, center main */
@@ -402,10 +474,16 @@ html.dark .focus-toc-panel {
   transition: background 0.15s, transform 0.15s;
 }
 
-/* Code Themes */
+/* Code Themes - Light Mode Default */
 :root {
-  --code-bg: #1e1e1e;
-  --code-text: #d4d4d4;
+  --code-bg: #f9f9fb; /* Zinc 50-ish */
+  --code-text: #18181b; /* Zinc 950 */
+  --code-accent: #27272a;
+}
+
+.dark {
+  --code-bg: #0f172a; /* Slate 900 */
+  --code-text: #f8fafc; /* Slate 50 */
   --code-accent: #3b82f6;
 }
 
@@ -440,7 +518,11 @@ pre {
   background-color: var(--code-bg) !important;
   color: var(--code-text) !important;
   transition: background-color 0.4s ease, color 0.4s ease;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.dark pre {
+  border-color: rgba(255, 255, 255, 0.05);
 }
 
 pre code {
@@ -454,4 +536,103 @@ pre code {
 
 .ks-highlight-note:hover {
   @apply bg-amber-500/20 dark:bg-amber-500/15 decoration-primary;
+}
+
+/* ─── Premium Modern Toast (Luminous Floating Style) ───────────────── */
+[data-sonner-toast] {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(24px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(200%) !important;
+  border: 1px solid rgba(0, 0, 0, 0.12) !important;
+  border-radius: 20px !important;
+  padding: 14px 18px !important;
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.08),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8) !important;
+  transform: translateY(0) scale(1) !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+  color: #020617 !important; /* Slate-950 for max contrast */
+  font-family: var(--font-sans) !important;
+}
+
+[data-sonner-toast]:hover {
+  transform: translateY(-2px) scale(1.02) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Success Toast */
+[data-sonner-toast][data-type='success'] {
+  border-color: rgba(16, 185, 129, 0.3) !important;
+}
+[data-sonner-toast][data-type='success'] [data-icon] {
+  color: #059669 !important; /* Stronger Emerald */
+}
+[data-sonner-toast][data-type='success']::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
+  height: 12px;
+  background: radial-gradient(ellipse at center, rgba(16, 185, 129, 0.4), transparent 70%);
+  filter: blur(6px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Error Toast */
+[data-sonner-toast][data-type='error'] {
+  border-color: rgba(225, 29, 72, 0.3) !important;
+}
+[data-sonner-toast][data-type='error'] [data-icon] {
+  color: #e11d48 !important; /* Stronger Rose */
+}
+[data-sonner-toast][data-type='error']::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50%;
+  height: 12px;
+  background: radial-gradient(ellipse at center, rgba(225, 29, 72, 0.4), transparent 70%);
+  filter: blur(6px);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Dark Mode Overrides */
+.dark [data-sonner-toast] {
+  background: rgba(15, 23, 42, 0.95) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 
+    0 25px 30px -5px rgba(0, 0, 0, 0.5),
+    0 15px 15px -5px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important; /* Pure white for dark mode */
+}
+
+.dark [data-sonner-toast][data-type='success'] {
+  background: linear-gradient(to bottom right, rgba(16, 185, 129, 0.15), rgba(15, 23, 42, 0.95)) !important;
+  border-color: rgba(16, 185, 129, 0.5) !important;
+}
+
+.dark [data-sonner-toast][data-type='error'] {
+  background: linear-gradient(to bottom right, rgba(225, 29, 72, 0.15), rgba(15, 23, 42, 0.95)) !important;
+  border-color: rgba(225, 29, 72, 0.5) !important;
+}
+
+/* Typography Enhancements */
+[data-sonner-toast] [data-title] {
+  font-size: 14.5px !important;
+  font-weight: 800 !important; /* Extra bold */
+  letter-spacing: -0.01em;
+}
+[data-sonner-toast] [data-description] {
+  font-size: 13.5px !important;
+  font-weight: 600 !important; /* Semi-bold */
+  opacity: 0.9 !important;
+  line-height: 1.4;
 }

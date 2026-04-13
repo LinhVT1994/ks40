@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition, useEffect } from 'react';
 import AdminHeader from '@/features/admin/components/AdminHeader';
 import ArticleStep1 from '@/features/admin/components/ArticleStep1';
 import ArticleStep2 from '@/features/admin/components/ArticleStep2';
@@ -8,32 +8,12 @@ import ArticleStep3 from '@/features/admin/components/ArticleStep3';
 import { useRouter } from 'next/navigation';
 import { updateArticleAction, addResourceAction, deleteResourceAction } from '@/features/admin/actions/article';
 import type { ResourceDraft } from '@/features/admin/actions/article';
-import { ArticleCategory, ArticleBadge, ArticleAudience } from '@prisma/client';
-
-// Map DB enum → UI label
-const CATEGORY_UI: Record<ArticleCategory, string> = {
-  SYSTEM_DESIGN: 'System Design',
-  AI_ML:         'AI / ML',
-  DEVOPS:        'DevOps',
-  BLOCKCHAIN:    'Blockchain',
-  FRONTEND:      'Frontend',
-  BACKEND:       'Backend',
-  OTHER:         'Other',
-};
+import { ArticleBadge, ArticleAudience } from '@prisma/client';
+import { getTopicTreeAction } from '@/features/admin/actions/topic';
+import type { TopicItem } from '@/features/admin/actions/topic';
 
 const BADGE_UI: Record<ArticleBadge, string> = {
   HOT: 'Hot', NEW: 'New', TRENDING: 'Trending', FEATURED: 'Featured',
-};
-
-// Map UI label → DB enum
-const CATEGORY_MAP: Record<string, ArticleCategory> = {
-  'System Design': ArticleCategory.SYSTEM_DESIGN,
-  'AI / ML':       ArticleCategory.AI_ML,
-  'DevOps':        ArticleCategory.DEVOPS,
-  'Blockchain':    ArticleCategory.BLOCKCHAIN,
-  'Frontend':      ArticleCategory.FRONTEND,
-  'Backend':       ArticleCategory.BACKEND,
-  'Other':         ArticleCategory.OTHER,
 };
 
 const BADGE_MAP: Record<string, ArticleBadge> = {
@@ -60,7 +40,7 @@ type ArticleWithTags = {
   coverPosition: string | null;
   thumbnail: string | null;
   thumbnailPosition: string | null;
-  category: ArticleCategory;
+  topicId: string;
   badges: ArticleBadge[];
   audience: ArticleAudience;
   seriesId: string | null;
@@ -75,10 +55,13 @@ export default function EditArticlePage({ article }: { article: ArticleWithTags 
   const [isPending, startTransition] = useTransition();
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [topics, setTopics] = useState<TopicItem[]>([]);
+
+  useEffect(() => { getTopicTreeAction().then(setTopics); }, []);
 
   const [title,            setTitle]            = useState(article.title);
   const [slug,             setSlug]             = useState(article.slug);
-  const [category,         setCategory]         = useState(CATEGORY_UI[article.category] ?? 'Other');
+  const [category,         setCategory]         = useState(article.topicId);
   const [tags,             setTags]             = useState<string[]>(article.tags.map(t => t.tag.name));
   const [badges,           setBadges]           = useState<string[]>(article.badges.map(b => BADGE_UI[b]).filter(Boolean));
   const [summary,          setSummary]          = useState(article.summary ?? '');
@@ -121,7 +104,7 @@ export default function EditArticlePage({ article }: { article: ArticleWithTags 
         coverPosition:     coverPosition,
         thumbnail:         thumbnailPreview ?? undefined,
         thumbnailPosition: thumbnailPosition,
-        category:    CATEGORY_MAP[category]  ?? ArticleCategory.OTHER,
+        topicId:     category,
         badges:      badges.map(b => BADGE_MAP[b]).filter(Boolean) as ArticleBadge[],
         audience:    AUDIENCE_MAP[audience]  ?? ArticleAudience.MEMBERS,
         status:      scheduleType === 'now' ? 'PUBLISHED' : 'SCHEDULED',
@@ -143,7 +126,7 @@ export default function EditArticlePage({ article }: { article: ArticleWithTags 
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+    <div className="flex flex-col h-screen overflow-hidden bg-zinc-50 dark:bg-slate-900">
       <AdminHeader
         draftingTitle={step >= 2 ? title : undefined}
         breadcrumb={[
@@ -177,6 +160,7 @@ export default function EditArticlePage({ article }: { article: ArticleWithTags 
           thumbnailPreview={thumbnailPreview}
           thumbnailPosition={thumbnailPosition}
           slug={slug}
+          topics={topics}
           onTitleChange={setTitle}
           onSlugChange={setSlug}
           onCategoryChange={setCategory}

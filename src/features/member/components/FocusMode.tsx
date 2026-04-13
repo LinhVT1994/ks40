@@ -21,17 +21,48 @@ const DEFAULT_ZOOM = 1.0;
 const speedToPx = (s: number) => 0.15 * Math.pow(s, 1.6);
 
 export default function FocusMode({ readTime, headings, onToggleNotes }: { readTime: number; headings: Heading[]; onToggleNotes?: () => void }) {
-  const [active,      setActive]      = useState(false);
+  const [active,      setActive]      = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return localStorage.getItem('ks-focus-mode') === 'true';
+  });
   const [progress,    setProgress]    = useState(0);
-  const [zoom,        setZoom]        = useState(DEFAULT_ZOOM);
+  const [zoom,        setZoom]        = useState(() => {
+    if (typeof window === 'undefined') return DEFAULT_ZOOM;
+    const saved = localStorage.getItem('ks-reader-settings');
+    if (saved) {
+      try { return JSON.parse(saved).zoom || DEFAULT_ZOOM; } catch (e) { return DEFAULT_ZOOM; }
+    }
+    return DEFAULT_ZOOM;
+  });
   const [visible,     setVisible]     = useState(true);
   const [barHovered,  setBarHovered]  = useState(false);
   const [scrolling,   setScrolling]   = useState(false);
-  const [speed,       setSpeed]       = useState(1.5);
+  const [speed,       setSpeed]       = useState(() => {
+    if (typeof window === 'undefined') return 1.5;
+    const saved = localStorage.getItem('ks-reader-settings');
+    if (saved) {
+      try { return JSON.parse(saved).speed || 1.5; } catch (e) { return 1.5; }
+    }
+    return 1.5;
+  });
   const [activeId,    setActiveId]    = useState('');
   const [tocOpen,     setTocOpen]     = useState(false);
-  const [activeSound, setActiveSound] = useState<string | null>(null);
-  const [volume,      setVolume]      = useState(0.4);
+  const [activeSound, setActiveSound] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
+    const saved = localStorage.getItem('ks-reader-settings');
+    if (saved) {
+      try { return JSON.parse(saved).activeSound || null; } catch (e) { return null; }
+    }
+    return null;
+  });
+  const [volume,      setVolume]      = useState(() => {
+    if (typeof window === 'undefined') return 0.4;
+    const saved = localStorage.getItem('ks-reader-settings');
+    if (saved) {
+      try { return JSON.parse(saved).volume || 0.4; } catch (e) { return 0.4; }
+    }
+    return 0.4;
+  });
   const [showLibrary, setShowLibrary] = useState(false);
   const [sessionTime, setSessionTime] = useState(0);
 
@@ -43,17 +74,35 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
   const expectedPosRef  = useRef(0);
   const audioRef        = useRef<HTMLAudioElement | null>(null);
 
-  // ── Persistence ─────────────────────────────────────────────
-  useEffect(() => {
-    const saved = localStorage.getItem('ks-focus-mode');
-    if (saved === 'true') {
+  // ── Sync Focus Mode State & Styles ───────────────────────
+  // Use useLayoutEffect to prevent layout shift before paint
+  const useIsomorphicLayoutEffect = typeof window !== 'undefined' ? React.useLayoutEffect : React.useEffect;
+  
+  useIsomorphicLayoutEffect(() => {
+    if (active) {
       document.documentElement.classList.add('focus-mode');
-      document.documentElement.style.setProperty('--focus-zoom', `${DEFAULT_ZOOM}`);
-      setActive(true);
+      document.documentElement.style.setProperty('--focus-zoom', `${zoom}`);
       setVisible(true);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [active, zoom]);
+
+  // Initial load effect (already partially handled by sync state init, but ensures CSS vars)
+  useEffect(() => {
+    if (active) {
+       document.documentElement.style.setProperty('--focus-zoom', `${zoom}`);
+    } else {
+       document.documentElement.style.setProperty('--focus-zoom', `${DEFAULT_ZOOM}`);
+    }
+  }, []); // Only on mount
+
+  // Save changes
+  useEffect(() => {
+    const settings = { zoom, speed, activeSound, volume };
+    localStorage.setItem('ks-reader-settings', JSON.stringify(settings));
+    if (active) {
+       document.documentElement.style.setProperty('--focus-zoom', `${zoom}`);
+    }
+  }, [zoom, speed, activeSound, volume, active]);
 
   // ── Toggle focus mode ──────────────────────────────────────
   const enter = useCallback(() => {
@@ -129,11 +178,7 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
     return () => window.removeEventListener('keydown', handler);
   }, [toggle, exit, active]);
 
-  // ── Cleanup on unmount ─────────────────────────────────────
-  useEffect(() => () => {
-    document.documentElement.classList.remove('focus-mode');
-    document.documentElement.style.removeProperty('--focus-font-size');
-  }, []);
+
 
   // ── Scroll progress + active heading tracking ─────────────
   useEffect(() => {
@@ -317,14 +362,14 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
         >
         {/* Zoom slider */}
         <div className="flex items-center gap-2">
-          <ZoomOut className="w-3 h-3 text-slate-500" />
+          <ZoomOut className="w-3 h-3 text-zinc-500" />
           <input
             type="range" min={MIN_ZOOM} max={MAX_ZOOM} step={0.1} value={zoom}
             onChange={e => changeZoom(Number(e.target.value))}
             className="focus-bar-slider" title={`Độ phóng: ${Math.round(zoom * 100)}%`}
           />
-          <ZoomIn className="w-3.5 h-3.5 text-slate-500" />
-          <span className="text-[10px] text-slate-500 tabular-nums w-10">{Math.round(zoom * 100)}%</span>
+          <ZoomIn className="w-3.5 h-3.5 text-zinc-500" />
+          <span className="text-[10px] text-zinc-500 tabular-nums w-10">{Math.round(zoom * 100)}%</span>
         </div>
 
         <div className="focus-bar-divider" />
@@ -334,7 +379,7 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
           <>
             <button
               onClick={onToggleNotes}
-              className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-white/5 rounded-xl text-slate-400 hover:text-white transition-all group"
+              className="flex items-center gap-1.5 px-3 py-1.5 hover:bg-white/5 rounded-xl text-zinc-400 hover:text-white transition-all group"
               title="Ghi chú cá nhân"
             >
               <FileEdit className="w-4 h-4 group-hover:text-primary transition-colors" />
@@ -352,7 +397,7 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
             className={`p-2 rounded-xl transition-all ${
               activeSound 
                 ? 'bg-primary/20 text-primary shadow-lg shadow-primary/10' 
-                : 'text-slate-500 hover:text-white hover:bg-white/10'
+                : 'text-zinc-400 hover:text-white hover:bg-white/10'
             }`}
             title="Thư viện âm thanh"
           >
@@ -361,11 +406,11 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
 
           {showLibrary && (
             <div 
-              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-5 w-52 bg-slate-900/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl p-2.5 overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-bottom-3 duration-200"
+              className="absolute bottom-full left-1/2 -translate-x-1/2 mb-5 w-52 bg-zinc-800/95 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl p-2.5 overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-bottom-3 duration-200"
               onMouseLeave={() => setShowLibrary(false)}
             >
               <div className="px-2 py-1.5 mb-2 border-b border-white/5 flex items-center justify-between">
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Library</span>
+                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] opacity-80">Library</span>
                 {activeSound && (
                    <button 
                      onClick={() => setActiveSound(null)}
@@ -386,7 +431,7 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
                         isActive 
                           ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02] active:scale-95' 
-                          : 'text-slate-400 hover:text-white hover:bg-white/5 active:scale-95'
+                          : 'text-zinc-400 hover:text-white hover:bg-white/5 active:scale-95'
                       }`}
                     >
                       <div className={`p-1.5 rounded-lg ${isActive ? 'bg-white/20' : 'bg-white/5'}`}>
@@ -402,7 +447,7 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
               {/* Volume Slider in Library */}
               {activeSound && (
                 <div className="mt-4 px-2 pt-4 border-t border-white/5 flex items-center gap-3 animate-in fade-in slide-in-from-top-2 duration-300">
-                   <Volume2 className="w-3.5 h-3.5 text-slate-500" />
+                   <Volume2 className="w-3.5 h-3.5 text-zinc-400" />
                    <input
                      type="range" min="0" max="1" step="0.01" value={volume}
                      onChange={(e) => setVolume(parseFloat(e.target.value))}
@@ -433,13 +478,13 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
 
           {/* Speed slider */}
           <div className="flex items-center gap-1.5" title="Tốc độ cuộn">
-            <Gauge className="w-3 h-3 text-slate-500 shrink-0" />
+            <Gauge className="w-3 h-3 text-zinc-400 shrink-0" />
             <input
               type="range" min={1} max={5} step={0.5} value={speed}
               onChange={e => setSpeed(Number(e.target.value))}
               className="focus-bar-slider w-16"
             />
-            <span className="text-[10px] text-slate-500 tabular-nums w-6">{speed}x</span>
+            <span className="text-[10px] text-zinc-400 tabular-nums w-6">{speed}x</span>
           </div>
         </div>
 
@@ -456,8 +501,8 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
 
         {/* Stopwatch & Time Left */}
         <div className="flex items-baseline gap-2.5 min-w-fit px-1">
-          <div className="flex flex-col items-start">
-            <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] leading-none mb-1">Session</span>
+          <div className="flex flex-col items-start translate-y-[-1px]">
+            <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] leading-none mb-1.5 opacity-90">Session</span>
             <span className="text-sm font-black text-white tabular-nums leading-none tracking-tight">
               {formatSessionTime(sessionTime)}
             </span>
@@ -465,9 +510,9 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
           
           <div className="w-[1px] h-6 bg-white/10 self-center mx-1" />
 
-          <div className="flex flex-col items-start opacity-60">
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">Remain</span>
-            <span className="text-xs font-bold text-slate-300 whitespace-nowrap leading-none">
+          <div className="flex flex-col items-start opacity-70 translate-y-[-1px]">
+            <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1.5 opacity-90">Remain</span>
+            <span className="text-xs font-bold text-zinc-200 whitespace-nowrap leading-none">
               ~{minutesLeft} min
             </span>
           </div>

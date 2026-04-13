@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useTransition } from 'react';
+import React, { useState, useTransition, useEffect } from 'react';
 import AdminHeader from '@/features/admin/components/AdminHeader';
 import ArticleStep1 from '@/features/admin/components/ArticleStep1';
 import ArticleStep2 from '@/features/admin/components/ArticleStep2';
@@ -8,7 +8,9 @@ import ArticleStep3 from '@/features/admin/components/ArticleStep3';
 import { useRouter } from 'next/navigation';
 import { createArticleAction } from '@/features/admin/actions/article';
 import type { ArticleFormData, ResourceDraft } from '@/features/admin/actions/article';
-import { ArticleCategory, ArticleBadge, ArticleAudience } from '@prisma/client';
+import { ArticleBadge, ArticleAudience } from '@prisma/client';
+import { getTopicTreeAction } from '@/features/admin/actions/topic';
+import type { TopicItem } from '@/features/admin/actions/topic';
 
 function toSlug(title: string): string {
   return title
@@ -19,16 +21,6 @@ function toSlug(title: string): string {
     .replace(/\s+/g, '-')
     .trim();
 }
-
-const CATEGORY_MAP: Record<string, ArticleCategory> = {
-  'System Design': ArticleCategory.SYSTEM_DESIGN,
-  'AI / ML':       ArticleCategory.AI_ML,
-  'DevOps':        ArticleCategory.DEVOPS,
-  'Blockchain':    ArticleCategory.BLOCKCHAIN,
-  'Frontend':      ArticleCategory.FRONTEND,
-  'Backend':       ArticleCategory.BACKEND,
-  'Other':         ArticleCategory.OTHER,
-};
 
 const BADGE_MAP: Record<string, ArticleBadge> = {
   'Hot':      ArticleBadge.HOT,
@@ -49,11 +41,14 @@ export default function NewArticlePage() {
   const [isPending, startTransition] = useTransition();
   const [step, setStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
+  const [topics, setTopics] = useState<TopicItem[]>([]);
+
+  useEffect(() => { getTopicTreeAction().then(setTopics); }, []);
 
   // Step 1 state
   const [title,            setTitle]            = useState('');
   const [slug,             setSlug]             = useState('');
-  const [category,         setCategory]         = useState('DevOps');
+  const [category,         setCategory]         = useState('');
   const [tags,             setTags]             = useState<string[]>([]);
   const [badges,           setBadges]           = useState<string[]>([]);
   const [summary,          setSummary]          = useState('');
@@ -74,7 +69,6 @@ export default function NewArticlePage() {
 
   const handlePublish = (audience: string, scheduleType: 'now' | 'later', scheduleDate: string, resources: ResourceDraft[], seriesId: string | null, seriesOrder: number | null, nextArticleId: string | null) => {
     setError(null);
-    const mappedCategory  = CATEGORY_MAP[category]  ?? ArticleCategory.OTHER;
     const mappedBadges    = badges.map(b => BADGE_MAP[b]).filter(Boolean) as ArticleBadge[];
     const mappedAudience  = AUDIENCE_MAP[audience]  ?? ArticleAudience.MEMBERS;
 
@@ -89,7 +83,7 @@ export default function NewArticlePage() {
       coverPosition:     coverPosition,
       thumbnail:         thumbnailPreview ?? undefined,
       thumbnailPosition: thumbnailPosition,
-      category:    mappedCategory,
+      topicId:     category,
       badges:      mappedBadges,
       audience:    mappedAudience,
       status:      scheduleType === 'now' ? 'PUBLISHED' : 'SCHEDULED',
@@ -113,7 +107,7 @@ export default function NewArticlePage() {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+    <div className="flex flex-col h-screen overflow-hidden bg-zinc-50 dark:bg-slate-900">
       <AdminHeader
         draftingTitle={step >= 2 ? title : undefined}
         breadcrumb={[
@@ -147,6 +141,7 @@ export default function NewArticlePage() {
           thumbnailPreview={thumbnailPreview}
           thumbnailPosition={thumbnailPosition}
           slug={slug}
+          topics={topics}
           onTitleChange={handleTitleChange}
           onSlugChange={setSlug}
           onCategoryChange={setCategory}

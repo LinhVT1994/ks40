@@ -6,9 +6,12 @@ import { CommentStatus } from '@prisma/client';
 import { eventBus, EVENTS } from '@/lib/events/bus';
 import { createNotificationAction } from '@/features/notifications/actions/notification';
 
+const MAX_COMMENT_IMAGES = 4;
+
 export type CommentWithAuthor = {
   id: string;
   content: string;
+  images: string[];
   createdAt: Date;
   parentId: string | null;
   author: { id: string; name: string; image: string | null };
@@ -30,25 +33,29 @@ export async function getCommentsAction(articleId: string): Promise<CommentWithA
     orderBy: { createdAt: 'desc' },
     include: {
       author:  { select: { id: true, name: true, image: true } },
-      likes:   userId ? { where: { userId }, select: { type: true } } : false,
+      likes:   { select: { userId: true, type: true } },
       _count:  { select: { replies: { where: { status: CommentStatus.VISIBLE } } } },
     },
   });
 
-  const mapComment = (c: any): CommentWithAuthor => ({
-    id:            c.id,
-    content:       c.content,
-    createdAt:     c.createdAt,
-    parentId:      c.parentId,
-    author:        c.author,
-    replies:       [],
-    replyCount:    c._count?.replies ?? 0,
-    repliesLoaded: false,
-    likeCount:     0,
-    dislikeCount:  0,
-    isLiked:       Array.isArray(c.likes) && c.likes.some((l: any) => l.type === 'LIKE'),
-    isDisliked:    Array.isArray(c.likes) && c.likes.some((l: any) => l.type === 'DISLIKE'),
-  });
+  const mapComment = (c: any): CommentWithAuthor => {
+    const likes: { userId: string; type: 'LIKE' | 'DISLIKE' }[] = c.likes ?? [];
+    return {
+      id:            c.id,
+      content:       c.content,
+      images:        c.images ?? [],
+      createdAt:     c.createdAt,
+      parentId:      c.parentId,
+      author:        c.author,
+      replies:       [],
+      replyCount:    c._count?.replies ?? 0,
+      repliesLoaded: false,
+      likeCount:     likes.filter(l => l.type === 'LIKE').length,
+      dislikeCount:  likes.filter(l => l.type === 'DISLIKE').length,
+      isLiked:       !!userId && likes.some(l => l.userId === userId && l.type === 'LIKE'),
+      isDisliked:    !!userId && likes.some(l => l.userId === userId && l.type === 'DISLIKE'),
+    };
+  };
 
   return comments.map(mapComment);
 }
@@ -62,41 +69,60 @@ export async function getRepliesAction(commentId: string): Promise<CommentWithAu
     orderBy: { createdAt: 'asc' },
     include: {
       author: { select: { id: true, name: true, image: true } },
-      likes:  userId ? { where: { userId }, select: { type: true } } : false,
+      likes:  { select: { userId: true, type: true } },
     },
   });
 
-  return replies.map((r: any) => ({
-    id:            r.id,
-    content:       r.content,
-    createdAt:     r.createdAt,
-    parentId:      r.parentId,
-    author:        r.author,
-    replies:       [],
-    replyCount:    0,
-    repliesLoaded: true,
-    likeCount:     0,
-    dislikeCount:  0,
-    isLiked:       Array.isArray(r.likes) && r.likes.some((l: any) => l.type === 'LIKE'),
-    isDisliked:    Array.isArray(r.likes) && r.likes.some((l: any) => l.type === 'DISLIKE'),
-  }));
+  return replies.map((r: any) => {
+    const likes: { userId: string; type: 'LIKE' | 'DISLIKE' }[] = r.likes ?? [];
+    return {
+      id:            r.id,
+      content:       r.content,
+      images:        r.images ?? [],
+      createdAt:     r.createdAt,
+      parentId:      r.parentId,
+      author:        r.author,
+      replies:       [],
+      replyCount:    0,
+      repliesLoaded: true,
+      likeCount:     likes.filter(l => l.type === 'LIKE').length,
+      dislikeCount:  likes.filter(l => l.type === 'DISLIKE').length,
+      isLiked:       !!userId && likes.some(l => l.userId === userId && l.type === 'LIKE'),
+      isDisliked:    !!userId && likes.some(l => l.userId === userId && l.type === 'DISLIKE'),
+    };
+  });
 }
 
 export async function createCommentAction(
   articleId: string,
   content: string,
   parentId?: string,
+  images: string[] = [],
 ): Promise<{ success: boolean; error?: string; comment?: CommentWithAuthor }> {
   const session = await auth();
   const userId  = session?.user?.id;
   if (!userId) return { success: false, error: 'Bạn cần đăng nhập để bình luận.' };
 
   const trimmed = content.trim();
-  if (!trimmed)              return { success: false, error: 'Bình luận không được để trống.' };
   if (trimmed.length > 1000) return { success: false, error: 'Bình luận tối đa 1000 ký tự.' };
 
+  // Validate images: chặn URL bên ngoài, chỉ cho phép file đã upload qua endpoint comment-image
+  const cleanImages = (Array.isArray(images) ? images : [])
+    .filter(u => typeof u === 'string' && u.startsWith('/uploads/comments/'))
+    .slice(0, MAX_COMMENT_IMAGES);
+
+  if (!trimmed && cleanImages.length === 0) {
+    return { success: false, error: 'Bình luận phải có nội dung hoặc ít nhất 1 ảnh.' };
+  }
+
   const comment = await db.comment.create({
-    data: { content: trimmed, articleId, authorId: userId, parentId: parentId ?? null },
+    data: {
+      content:  trimmed,
+      images:   cleanImages,
+      articleId,
+      authorId: userId,
+      parentId: parentId ?? null,
+    },
     include: { author: { select: { id: true, name: true, image: true } } },
   });
 
@@ -118,14 +144,16 @@ export async function createCommentAction(
       actorId:      userId,
     });
 
-    // Notify tác giả bài viết (nếu không phải chính mình comment)
+    // Notify tác giả bài viết (nếu không phải chính mình comment) — fire-and-forget
     if (article.authorId !== userId) {
-      await createNotificationAction(
+      void createNotificationAction(
         article.authorId,
         'COMMENT_REPLY',
         `${commenterName} đã bình luận bài viết của bạn`,
         {
-          message: `"${trimmed.slice(0, 80)}${trimmed.length > 80 ? '...' : ''}"`,
+          message: trimmed
+            ? `"${trimmed.slice(0, 80)}${trimmed.length > 80 ? '...' : ''}"`
+            : `[đã gửi ${cleanImages.length} ảnh]`,
           link:    `/article/${article.slug}`,
         },
       );
@@ -138,12 +166,14 @@ export async function createCommentAction(
         select: { authorId: true },
       });
       if (parentComment && parentComment.authorId !== userId && parentComment.authorId !== article.authorId) {
-        await createNotificationAction(
+        void createNotificationAction(
           parentComment.authorId,
           'COMMENT_REPLY',
           `${commenterName} đã trả lời bình luận của bạn`,
           {
-            message: `"${trimmed.slice(0, 80)}${trimmed.length > 80 ? '...' : ''}"`,
+            message: trimmed
+            ? `"${trimmed.slice(0, 80)}${trimmed.length > 80 ? '...' : ''}"`
+            : `[đã gửi ${cleanImages.length} ảnh]`,
             link:    `/article/${article.slug}`,
           },
         );
@@ -153,7 +183,17 @@ export async function createCommentAction(
 
   return {
     success: true,
-    comment: { ...comment, replies: [], replyCount: 0, repliesLoaded: true, likeCount: 0, dislikeCount: 0, isLiked: false, isDisliked: false } as unknown as CommentWithAuthor,
+    comment: {
+      ...comment,
+      images:        cleanImages,
+      replies:       [],
+      replyCount:    0,
+      repliesLoaded: true,
+      likeCount:     0,
+      dislikeCount:  0,
+      isLiked:       false,
+      isDisliked:    false,
+    } as unknown as CommentWithAuthor,
   };
 }
 

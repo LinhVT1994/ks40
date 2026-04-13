@@ -13,8 +13,8 @@ export default function TermsPage() {
       <div className="space-y-12">
         {/* Header */}
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Điều khoản Dịch vụ</h1>
-          <p className="text-slate-500 dark:text-slate-400">Cập nhật lần cuối: 04 tháng 04, 2026</p>
+          <h1 className="text-4xl font-bold tracking-tight text-zinc-800 dark:text-white">Điều khoản Dịch vụ</h1>
+          <p className="text-zinc-500 dark:text-slate-400">Cập nhật lần cuối: 04 tháng 04, 2026</p>
         </div>
 
         {/* TL;DR Section */}
@@ -23,7 +23,7 @@ export default function TermsPage() {
             <span className="material-icons text-sm">bolt</span>
             Tóm tắt nhanh (TL;DR)
           </h2>
-          <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+          <ul className="space-y-2 text-sm text-zinc-600 dark:text-slate-400">
             <li>• Đây là dự án cá nhân, không phải công ty. Mọi thứ được xây dựng bằng sự tâm huyết.</li>
             <li>• Kiến thức là để chia sẻ, nhưng vui lòng không copy-paste bài viết của tôi đi nơi khác.</li>
             <li>• Đăng ký Premium là một hình thức ủng hộ để tôi duy trì và phát triển nền tảng.</li>
@@ -36,7 +36,7 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-bold">1. Chấp thuận điều khoản</h2>
             <p>
-              Bằng việc truy cập hoặc đăng ký tài khoản tại <strong>Lenote.dev</strong>, bạn mặc nhiên đồng ý với các điều khoản này. 
+              Bằng việc truy cập hoặc đăng ký tài khoản tại <strong>Lenote</strong>, bạn mặc nhiên đồng ý với các điều khoản này. 
               Nếu bạn không đồng ý, thật tiếc là bạn nên dừng việc sử dụng dịch vụ tại đây.
             </p>
           </section>
@@ -44,7 +44,7 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-bold">2. Bản quyền & Nội dung</h2>
             <p>
-              Mọi bài viết, giáo trình, sơ đồ kiến trúc và mã nguồn mẫu trên nền tảng này đều do tôi (người sáng lập Lenote.dev) biên soạn. 
+              Mọi bài viết, giáo trình, sơ đồ kiến trúc và mã nguồn mẫu trên nền tảng này đều do tôi (người sáng lập Lenote) biên soạn. 
               Bạn được quyền sử dụng kiến thức này cho công việc và học tập cá nhân, nhưng:
             </p>
             <ul className="list-disc pl-6 space-y-2">
@@ -57,7 +57,7 @@ export default function TermsPage() {
           <section className="space-y-4">
             <h2 className="text-2xl font-bold">3. Đăng ký & Ủng hộ</h2>
             <p>
-              Lenote.dev cung cấp các gói đặc quyền để tiếp cận nội dung chuyên sâu (System Design, DevOps, AI...). 
+              Lenote cung cấp các gói đặc quyền để tiếp cận nội dung chuyên sâu (System Design, DevOps, AI...). 
               Việc bạn đăng ký là sự đóng góp trực tiếp giúp tôi duy trì server và dành thời gian nghiên cứu nội dung chất lượng hơn.
             </p>
             <ul className="list-disc pl-6 space-y-2">
@@ -87,8 +87,8 @@ export default function TermsPage() {
         </div>
 
         {/* Footer Link back */}
-        <div className="pt-10 border-t border-slate-200 dark:border-slate-800 text-center">
-          <Link href="/" className="text-sm font-medium text-slate-500 hover:text-primary transition-colors">
+        <div className="pt-10 border-t border-zinc-300 dark:border-slate-800 text-center">
+          <Link href="/" className="text-sm font-medium text-zinc-500 hover:text-primary transition-colors">
             ← Quay lại Trang chủ
           </Link>
         </div>

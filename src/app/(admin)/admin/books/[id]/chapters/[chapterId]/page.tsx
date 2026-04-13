@@ -13,7 +13,7 @@ export default async function ChapterEditPage({ params }: { params: Promise<{ id
   if (!isNew && !chapter) notFound();
 
   return (
-    <div className="flex-1 w-full h-full min-h-[calc(100vh-64px)] overflow-hidden flex flex-col bg-slate-50 dark:bg-slate-900">
+    <div className="flex-1 w-full h-full min-h-[calc(100vh-64px)] overflow-hidden flex flex-col bg-zinc-50 dark:bg-slate-900">
       <ChapterEditorClient book={book} chapter={chapter || null} />
     </div>
   );

@@ -71,7 +71,7 @@ export default function ChapterSidebar({
       {/* Backdrop (Mobile & Desktop Overlay) */}
       {isOpen && (
         <div 
-          className="fixed inset-0 z-[90] bg-slate-900/10 dark:bg-slate-950/40 backdrop-blur-sm lg:backdrop-blur-[2px] transition-opacity duration-300"
+          className="fixed inset-0 z-[90] bg-zinc-800/10 dark:bg-slate-950/40 backdrop-blur-sm lg:backdrop-blur-[2px] transition-opacity duration-300"
           onClick={() => setIsOpen(false)}
         />
       )}
@@ -89,7 +89,7 @@ export default function ChapterSidebar({
         title="Curriculum"
       >
         <div className={`select-none ${isLeft ? '-rotate-90' : 'rotate-90'} origin-center whitespace-nowrap opacity-20 group-hover:opacity-100 transition-opacity duration-300`}>
-           <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.6em] flex items-center gap-4">
+           <span className="text-[10px] font-black text-zinc-500 dark:text-slate-400 uppercase tracking-[0.6em] flex items-center gap-4">
               <ChevronLeft className={`w-3 h-3 ${isLeft ? 'rotate-90' : '-rotate-90'}`} /> Curriculum
            </span>
         </div>
@@ -103,7 +103,7 @@ export default function ChapterSidebar({
         <aside
           className={`absolute top-0 w-full sm:w-64 h-full lg:h-screen bg-white/90 dark:bg-slate-950/90 backdrop-blur-2xl shadow-2xl pt-[100px] pb-7 flex flex-col justify-center transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] ${
             isLeft ? 'left-0 border-r translate-x-0' : 'right-0 border-l'
-          } border-slate-100 dark:border-white/5 ${
+          } border-zinc-200 dark:border-white/5 ${
             isOpen 
               ? 'opacity-100 translate-x-0' 
               : `opacity-0 ${isLeft ? '-translate-x-full' : 'translate-x-full'}`
@@ -114,7 +114,7 @@ export default function ChapterSidebar({
           {/* Mobile Close Button */}
           <button 
             onClick={() => setIsOpen(false)}
-            className="lg:hidden absolute top-[76px] right-6 p-2 rounded-xl bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 z-10"
+            className="lg:hidden absolute top-[76px] right-6 p-2 rounded-xl bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-slate-400 z-10"
           >
             <X className="w-5 h-5" />
           </button>
@@ -143,19 +143,19 @@ export default function ChapterSidebar({
                       
                       {/* Text */}
                       <div className="flex-1 min-w-0">
-                        <div className={`text-[9px] font-black uppercase tracking-widest mb-0.5 flex items-center gap-2 ${isActive ? 'text-primary' : 'text-slate-400'}`}>
+                        <div className={`text-[9px] font-black uppercase tracking-widest mb-0.5 flex items-center gap-2 ${isActive ? 'text-primary' : 'text-zinc-500'}`}>
                           Phase {String(chapter.order).padStart(2, '0')}
                           {chapter.isCompleted && (
                              <CheckCircle2 className="w-3 h-3 text-emerald-500" />
                           )}
                           {!chapter.isFree && false && (
-                             <Lock className="w-3 h-3 text-slate-400" />
+                             <Lock className="w-3 h-3 text-zinc-500" />
                           )}
                         </div>
                         <div className={`text-[13px] leading-snug line-clamp-2 font-semibold ${
                           isActive
                             ? 'text-primary'
-                            : 'text-slate-700 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white'
+                            : 'text-zinc-700 dark:text-slate-300 group-hover:text-zinc-800 dark:group-hover:text-white'
                         }`}>
                           {chapter.title}
                         </div>

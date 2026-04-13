@@ -26,41 +26,41 @@ export default function SettingsSecurity() {
             <Key className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">Đổi mật khẩu</h3>
-            <p className="text-xs text-slate-500 mt-1">Cập nhật mật khẩu để bảo vệ tài khoản tốt hơn.</p>
+            <h3 className="text-base font-bold text-zinc-800 dark:text-white">Đổi mật khẩu</h3>
+            <p className="text-xs text-zinc-500 mt-1">Cập nhật mật khẩu để bảo vệ tài khoản tốt hơn.</p>
           </div>
         </div>
 
         <form onSubmit={handleSavePassword} className="space-y-4 max-w-md">
           <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Mật khẩu hiện tại</label>
+            <label className="text-sm font-semibold text-zinc-700 dark:text-slate-300">Mật khẩu hiện tại</label>
             <input 
               type="password" 
               placeholder="••••••••"
-              className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all dark:text-white"
+              className="w-full bg-zinc-50 dark:bg-black/20 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all dark:text-white"
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Mật khẩu mới</label>
+            <label className="text-sm font-semibold text-zinc-700 dark:text-slate-300">Mật khẩu mới</label>
             <input 
               type="password" 
               placeholder="Ít nhất 8 ký tự"
-              className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all dark:text-white"
+              className="w-full bg-zinc-50 dark:bg-black/20 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all dark:text-white"
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Xác nhận mật khẩu mới</label>
+            <label className="text-sm font-semibold text-zinc-700 dark:text-slate-300">Xác nhận mật khẩu mới</label>
             <input 
               type="password" 
               placeholder="Nhập lại mật khẩu mới"
-              className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all dark:text-white"
+              className="w-full bg-zinc-50 dark:bg-black/20 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all dark:text-white"
             />
           </div>
           <div className="flex items-center gap-3 pt-3">
             <button
               type="submit"
               disabled={isPending}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-slate-900/20 dark:shadow-white/10"
+              className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-zinc-800 dark:bg-white text-white dark:text-slate-900 text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-zinc-800/20 dark:shadow-white/10"
             >
               {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Cập nhật mật khẩu'}
             </button>

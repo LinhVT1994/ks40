@@ -1,10 +1,45 @@
 'use client';
 
-import { useState, useTransition, useMemo } from 'react';
-import { MessageCircle, Send, User, Reply, Trash2, ArrowDownUp, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { useState, useTransition, useMemo, useRef } from 'react';
+import { MessageCircle, Send, User, Reply, Trash2, ArrowDownUp, ThumbsUp, ThumbsDown, ImagePlus, X } from 'lucide-react';
 import { createCommentAction, deleteCommentAction, toggleCommentLikeAction, getRepliesAction, type CommentWithAuthor } from '@/features/articles/actions/comment';
 import { useSession } from 'next-auth/react';
 import AvatarImg from '@/components/shared/Avatar';
+import { toast } from 'sonner';
+
+const MAX_IMAGES = 4;
+const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB per image
+
+async function uploadCommentImage(file: File): Promise<string> {
+  const fd = new FormData();
+  fd.append('file', file);
+  const res = await fetch('/api/upload/comment-image', { method: 'POST', body: fd });
+  if (!res.ok) {
+    const { error } = await res.json().catch(() => ({ error: 'Upload lỗi' }));
+    throw new Error(error ?? 'Upload lỗi');
+  }
+  const { url } = await res.json();
+  return url as string;
+}
+
+function CommentImages({ images }: { images: string[] }) {
+  if (!images || images.length === 0) return null;
+  return (
+    <div className={`mb-3 grid gap-2 ${images.length === 1 ? 'grid-cols-1 max-w-xs' : 'grid-cols-2 max-w-md'}`}>
+      {images.map((src, i) => (
+        // eslint-disable-next-line @next/next/no-img-element
+        <a key={i} href={src} target="_blank" rel="noopener noreferrer" className="block">
+          <img
+            src={src}
+            alt={`Ảnh ${i + 1}`}
+            loading="lazy"
+            className="w-full h-auto max-h-64 object-cover rounded-xl border border-zinc-200 dark:border-white/5"
+          />
+        </a>
+      ))}
+    </div>
+  );
+}
 
 type SortOption = 'newest' | 'oldest' | 'mine';
 
@@ -40,6 +75,67 @@ export default function ArticleComments({
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
   const [isPending,     startTransition]  = useTransition();
 
+  // Image attachment state
+  const [files,     setFiles]     = useState<File[]>([]);
+  const [previews,  setPreviews]  = useState<string[]>([]);
+  const [replyFiles,    setReplyFiles]    = useState<File[]>([]);
+  const [replyPreviews, setReplyPreviews] = useState<string[]>([]);
+  const fileInputRef       = useRef<HTMLInputElement>(null);
+  const replyFileInputRef  = useRef<HTMLInputElement>(null);
+
+  const validateFiles = (picked: File[], existingCount: number): File[] => {
+    const remaining = MAX_IMAGES - existingCount;
+    if (remaining <= 0) {
+      toast.error(`Tối đa ${MAX_IMAGES} ảnh / bình luận`);
+      return [];
+    }
+    const accepted: File[] = [];
+    for (const f of picked.slice(0, remaining)) {
+      if (!f.type.startsWith('image/')) { toast.error(`${f.name}: không phải ảnh`); continue; }
+      if (f.size > MAX_IMAGE_SIZE)      { toast.error(`${f.name}: quá 2MB`); continue; }
+      accepted.push(f);
+    }
+    return accepted;
+  };
+
+  const handleFilePick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = Array.from(e.target.files ?? []);
+    const ok = validateFiles(picked, files.length);
+    if (ok.length) {
+      setFiles(prev => [...prev, ...ok]);
+      setPreviews(prev => [...prev, ...ok.map(f => URL.createObjectURL(f))]);
+    }
+    e.target.value = '';
+  };
+
+  const removeFile = (i: number) => {
+    URL.revokeObjectURL(previews[i]);
+    setFiles(prev    => prev.filter((_, idx) => idx !== i));
+    setPreviews(prev => prev.filter((_, idx) => idx !== i));
+  };
+
+  const handleReplyFilePick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = Array.from(e.target.files ?? []);
+    const ok = validateFiles(picked, replyFiles.length);
+    if (ok.length) {
+      setReplyFiles(prev    => [...prev, ...ok]);
+      setReplyPreviews(prev => [...prev, ...ok.map(f => URL.createObjectURL(f))]);
+    }
+    e.target.value = '';
+  };
+
+  const removeReplyFile = (i: number) => {
+    URL.revokeObjectURL(replyPreviews[i]);
+    setReplyFiles(prev    => prev.filter((_, idx) => idx !== i));
+    setReplyPreviews(prev => prev.filter((_, idx) => idx !== i));
+  };
+
+  const resetReplyAttachments = () => {
+    replyPreviews.forEach(URL.revokeObjectURL);
+    setReplyFiles([]);
+    setReplyPreviews([]);
+  };
+
   const toggleReplies = async (commentId: string) => {
     const isExpanded = expandedReplies.has(commentId);
     if (isExpanded) {
@@ -63,28 +159,50 @@ export default function ArticleComments({
   }, [comments, sort, userId]);
 
   const handleSubmit = () => {
-    if (!text.trim()) return;
+    if (!text.trim() && files.length === 0) return;
     startTransition(async () => {
-      const result = await createCommentAction(articleId, text);
-      if (result.success && result.comment) {
-        setText('');
-        setComments(prev => [result.comment!, ...prev]);
+      try {
+        const urls = files.length
+          ? await Promise.all(files.map(uploadCommentImage))
+          : [];
+        const result = await createCommentAction(articleId, text, undefined, urls);
+        if (result.success && result.comment) {
+          setText('');
+          previews.forEach(URL.revokeObjectURL);
+          setFiles([]);
+          setPreviews([]);
+          setComments(prev => [result.comment!, ...prev]);
+        } else if (result.error) {
+          toast.error(result.error);
+        }
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Đăng bình luận thất bại');
       }
     });
   };
 
   const handleReply = () => {
-    if (!replyText.trim() || !replyTo) return;
+    if ((!replyText.trim() && replyFiles.length === 0) || !replyTo) return;
     const { topLevelId } = replyTo;
     startTransition(async () => {
-      const content = `@${replyTo.name} ${replyText.trim()}`;
-      const result = await createCommentAction(articleId, content, topLevelId);
-      if (result.success && result.comment) {
-        setReplyText('');
-        setReplyTo(null);
-        setComments(prev => prev.map(c =>
-          c.id === topLevelId ? { ...c, replies: [...c.replies, result.comment!], replyCount: c.replyCount + 1, repliesLoaded: true } : c,
-        ));
+      try {
+        const urls = replyFiles.length
+          ? await Promise.all(replyFiles.map(uploadCommentImage))
+          : [];
+        const content = replyText.trim() ? `@${replyTo.name} ${replyText.trim()}` : `@${replyTo.name}`;
+        const result = await createCommentAction(articleId, content, topLevelId, urls);
+        if (result.success && result.comment) {
+          setReplyText('');
+          setReplyTo(null);
+          resetReplyAttachments();
+          setComments(prev => prev.map(c =>
+            c.id === topLevelId ? { ...c, replies: [...c.replies, result.comment!], replyCount: c.replyCount + 1, repliesLoaded: true } : c,
+          ));
+        } else if (result.error) {
+          toast.error(result.error);
+        }
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : 'Trả lời thất bại');
       }
     });
   };
@@ -122,21 +240,21 @@ export default function ArticleComments({
   };
 
   return (
-    <div className="mt-20 border-t border-slate-100 dark:border-white/5 pt-12">
+    <div className="mt-20 border-t border-zinc-200 dark:border-white/5 pt-12">
       <div className="flex items-start justify-between gap-4 mb-10 flex-wrap">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
             <MessageCircle className="w-6 h-6" />
           </div>
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white font-display">Bình luận</h2>
-            <p className="text-sm text-slate-500">{comments.length} bình luận</p>
+            <h2 className="text-2xl font-bold text-zinc-800 dark:text-white font-display">Bình luận</h2>
+            <p className="text-sm text-zinc-500">{comments.length} bình luận</p>
           </div>
         </div>
 
         {comments.length > 0 && (
-          <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-white/5 p-1 rounded-xl">
-            <ArrowDownUp className="w-3.5 h-3.5 text-slate-400 ml-2 shrink-0" />
+          <div className="flex items-center gap-1.5 bg-zinc-100 dark:bg-white/5 p-1 rounded-xl">
+            <ArrowDownUp className="w-3.5 h-3.5 text-zinc-500 ml-2 shrink-0" />
             {([
               ['newest', 'Mới nhất'],
               ['oldest', 'Cũ nhất'],
@@ -148,7 +266,7 @@ export default function ArticleComments({
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   sort === key
                     ? 'bg-white dark:bg-white/10 text-primary shadow-sm'
-                    : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+                    : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-slate-300'
                 }`}
               >
                 {label}
@@ -168,13 +286,48 @@ export default function ArticleComments({
               onChange={e => setText(e.target.value)}
               placeholder="Viết bình luận của bạn..."
               disabled={isPending}
-              className="w-full bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 rounded-2xl p-4 pr-14 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all min-h-[100px] resize-none text-slate-900 dark:text-white placeholder:text-slate-400 disabled:opacity-60"
+              className="w-full bg-white dark:bg-white/[0.02] border border-zinc-300 dark:border-white/10 rounded-2xl p-4 pr-24 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all min-h-[100px] resize-none text-zinc-800 dark:text-white placeholder:text-zinc-500 disabled:opacity-60"
+            />
+            {previews.length > 0 && (
+              <div className="mt-2 flex flex-wrap gap-2">
+                {previews.map((src, i) => (
+                  <div key={i} className="relative group">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={src} alt="" className="h-20 w-20 object-cover rounded-lg border border-zinc-200 dark:border-white/10" />
+                    <button
+                      type="button"
+                      onClick={() => removeFile(i)}
+                      className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-zinc-900/80 text-white opacity-0 group-hover:opacity-100 transition"
+                      aria-label="Xoá ảnh"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              multiple
+              hidden
+              onChange={handleFilePick}
             />
             <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isPending || files.length >= MAX_IMAGES}
+              className="absolute bottom-3 right-14 p-2 rounded-xl bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:text-primary hover:bg-primary/10 transition-all disabled:opacity-40"
+              title={`Đính kèm ảnh (tối đa ${MAX_IMAGES})`}
+            >
+              <ImagePlus className="w-4 h-4" />
+            </button>
+            <button
               onClick={handleSubmit}
-              disabled={!text.trim() || isPending}
+              disabled={(!text.trim() && files.length === 0) || isPending}
               className={`absolute bottom-3 right-3 p-2 rounded-xl transition-all ${
-                text.trim() ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:scale-105 active:scale-95' : 'bg-slate-100 dark:bg-white/5 text-slate-400 cursor-not-allowed'
+                (text.trim() || files.length > 0) ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:scale-105 active:scale-95' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 cursor-not-allowed'
               }`}
             >
               <Send className="w-4 h-4" />
@@ -182,7 +335,7 @@ export default function ArticleComments({
           </div>
         </div>
       ) : (
-        <p className="text-sm text-slate-500 mb-12 p-4 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-100 dark:border-white/5">
+        <p className="text-sm text-zinc-500 mb-12 p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/5">
           <a href="/login" className="text-primary font-semibold hover:underline">Đăng nhập</a> để bình luận.
         </p>
       )}
@@ -195,23 +348,24 @@ export default function ArticleComments({
               <Avatar image={c.author.image} name={c.author.name} />
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-sm text-slate-900 dark:text-white">{c.author.name}</span>
+                  <span className="font-bold text-sm text-zinc-800 dark:text-white">{c.author.name}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-slate-400">{timeAgo(c.createdAt)}</span>
+                    <span className="text-[11px] text-zinc-500">{timeAgo(c.createdAt)}</span>
                     {userId === c.author.id && (
-                      <button onClick={() => handleDelete(c.id, null)} className="text-slate-300 hover:text-rose-500 transition-colors">
+                      <button onClick={() => handleDelete(c.id, null)} className="text-zinc-300 hover:text-rose-500 transition-colors">
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     )}
                   </div>
                 </div>
-                <p className="text-slate-600 dark:text-slate-300 text-[15px] leading-relaxed mb-3">{c.content}</p>
+                {c.content && <p className="text-zinc-600 dark:text-slate-300 text-[15px] leading-relaxed mb-3">{c.content}</p>}
+                <CommentImages images={c.images} />
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => handleLike(c.id, null, 'LIKE')}
                     disabled={!session || isPending}
                     className={`flex items-center gap-1.5 text-xs font-semibold transition-all ${
-                      c.isLiked ? 'text-emerald-500' : 'text-slate-400 hover:text-emerald-500'
+                      c.isLiked ? 'text-emerald-500' : 'text-zinc-500 hover:text-emerald-500'
                     } disabled:cursor-default`}
                   >
                     <ThumbsUp className={`w-3.5 h-3.5 transition-all ${c.isLiked ? 'fill-emerald-500' : ''}`} />
@@ -221,7 +375,7 @@ export default function ArticleComments({
                     onClick={() => handleLike(c.id, null, 'DISLIKE')}
                     disabled={!session || isPending}
                     className={`flex items-center gap-1.5 text-xs font-semibold transition-all ${
-                      c.isDisliked ? 'text-rose-500' : 'text-slate-400 hover:text-rose-500'
+                      c.isDisliked ? 'text-rose-500' : 'text-zinc-500 hover:text-rose-500'
                     } disabled:cursor-default`}
                   >
                     <ThumbsDown className={`w-3.5 h-3.5 transition-all ${c.isDisliked ? 'fill-rose-500' : ''}`} />
@@ -233,7 +387,7 @@ export default function ArticleComments({
                       setReplyTo(replyTo?.topLevelId === c.id && !replyTo?.name ? null : { topLevelId: c.id, name: c.author.name });
                       setExpandedReplies(prev => new Set(prev).add(c.id));
                     }}
-                      className="flex items-center gap-1.5 text-slate-400 hover:text-primary transition-all text-xs font-semibold"
+                      className="flex items-center gap-1.5 text-zinc-500 hover:text-primary transition-all text-xs font-semibold"
                     >
                       <Reply className="w-3.5 h-3.5" />
                       Trả lời
@@ -245,7 +399,7 @@ export default function ArticleComments({
                 {c.replyCount > 0 && (
                   <button
                     onClick={() => toggleReplies(c.id)}
-                    className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-primary transition-colors"
+                    className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-primary transition-colors"
                   >
                     <Reply className="w-3.5 h-3.5" />
                     {expandedReplies.has(c.id) ? 'Ẩn trả lời' : `${c.replyCount} trả lời`}
@@ -254,36 +408,39 @@ export default function ArticleComments({
 
                 {/* Replies + reply input */}
                 {(expandedReplies.has(c.id) || replyTo?.topLevelId === c.id) && (
-                  <div className="mt-4 space-y-4 pl-4 border-l-2 border-slate-100 dark:border-white/5">
+                  <div className="mt-4 space-y-4 pl-4 border-l-2 border-zinc-200 dark:border-white/5">
                     {expandedReplies.has(c.id) && c.replies.map(r => (
                       <div key={r.id} className="flex gap-3">
                         <Avatar image={r.author.image} name={r.author.name} />
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-sm text-slate-900 dark:text-white">{r.author.name}</span>
+                            <span className="font-bold text-sm text-zinc-800 dark:text-white">{r.author.name}</span>
                             <div className="flex items-center gap-2">
-                              <span className="text-[11px] text-slate-400">{timeAgo(r.createdAt)}</span>
+                              <span className="text-[11px] text-zinc-500">{timeAgo(r.createdAt)}</span>
                               {userId === r.author.id && (
-                                <button onClick={() => handleDelete(r.id, c.id)} className="text-slate-300 hover:text-rose-500 transition-colors">
+                                <button onClick={() => handleDelete(r.id, c.id)} className="text-zinc-300 hover:text-rose-500 transition-colors">
                                   <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                               )}
                             </div>
                           </div>
-                          <p className="text-slate-600 dark:text-slate-300 text-[14px] leading-relaxed mb-2">
-                            {r.content.startsWith('@') ? (() => {
-                              const spaceIdx = r.content.indexOf(' ');
-                              const mention = spaceIdx > 0 ? r.content.slice(0, spaceIdx) : r.content;
-                              const rest = spaceIdx > 0 ? r.content.slice(spaceIdx + 1) : '';
-                              return <><span className="text-primary font-semibold">{mention}</span>{rest ? ` ${rest}` : ''}</>;
-                            })() : r.content}
-                          </p>
+                          {r.content && (
+                            <p className="text-zinc-600 dark:text-slate-300 text-[14px] leading-relaxed mb-2">
+                              {r.content.startsWith('@') ? (() => {
+                                const spaceIdx = r.content.indexOf(' ');
+                                const mention = spaceIdx > 0 ? r.content.slice(0, spaceIdx) : r.content;
+                                const rest = spaceIdx > 0 ? r.content.slice(spaceIdx + 1) : '';
+                                return <><span className="text-primary font-semibold">{mention}</span>{rest ? ` ${rest}` : ''}</>;
+                              })() : r.content}
+                            </p>
+                          )}
+                          <CommentImages images={r.images} />
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() => handleLike(r.id, c.id, 'LIKE')}
                               disabled={!session || isPending}
                               className={`flex items-center gap-1.5 text-xs font-semibold transition-all ${
-                                r.isLiked ? 'text-emerald-500' : 'text-slate-400 hover:text-emerald-500'
+                                r.isLiked ? 'text-emerald-500' : 'text-zinc-500 hover:text-emerald-500'
                               } disabled:cursor-default`}
                             >
                               <ThumbsUp className={`w-3 h-3 transition-all ${r.isLiked ? 'fill-emerald-500' : ''}`} />
@@ -293,7 +450,7 @@ export default function ArticleComments({
                               onClick={() => handleLike(r.id, c.id, 'DISLIKE')}
                               disabled={!session || isPending}
                               className={`flex items-center gap-1.5 text-xs font-semibold transition-all ${
-                                r.isDisliked ? 'text-rose-500' : 'text-slate-400 hover:text-rose-500'
+                                r.isDisliked ? 'text-rose-500' : 'text-zinc-500 hover:text-rose-500'
                               } disabled:cursor-default`}
                             >
                               <ThumbsDown className={`w-3 h-3 transition-all ${r.isDisliked ? 'fill-rose-500' : ''}`} />
@@ -306,7 +463,7 @@ export default function ArticleComments({
                                     ? null
                                     : { topLevelId: c.id, name: r.author.name }
                                 )}
-                                className="flex items-center gap-1.5 text-slate-400 hover:text-primary transition-all text-xs font-semibold"
+                                className="flex items-center gap-1.5 text-zinc-500 hover:text-primary transition-all text-xs font-semibold"
                               >
                                 <Reply className="w-3 h-3" />
                                 Trả lời
@@ -328,13 +485,48 @@ export default function ArticleComments({
                             placeholder={`Trả lời ${replyTo.name}...`}
                             disabled={isPending}
                             autoFocus
-                            className="w-full bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 rounded-xl p-3 pr-12 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none min-h-[80px] resize-none text-slate-900 dark:text-white placeholder:text-slate-400 disabled:opacity-60"
+                            className="w-full bg-white dark:bg-white/[0.02] border border-zinc-300 dark:border-white/10 rounded-xl p-3 pr-20 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none min-h-[80px] resize-none text-zinc-800 dark:text-white placeholder:text-zinc-500 disabled:opacity-60"
+                          />
+                          {replyPreviews.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                              {replyPreviews.map((src, i) => (
+                                <div key={i} className="relative group">
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img src={src} alt="" className="h-16 w-16 object-cover rounded-lg border border-zinc-200 dark:border-white/10" />
+                                  <button
+                                    type="button"
+                                    onClick={() => removeReplyFile(i)}
+                                    className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-zinc-900/80 text-white opacity-0 group-hover:opacity-100 transition"
+                                    aria-label="Xoá ảnh"
+                                  >
+                                    <X className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <input
+                            ref={replyFileInputRef}
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            multiple
+                            hidden
+                            onChange={handleReplyFilePick}
                           />
                           <button
+                            type="button"
+                            onClick={() => replyFileInputRef.current?.click()}
+                            disabled={isPending || replyFiles.length >= MAX_IMAGES}
+                            className="absolute bottom-2 right-11 p-1.5 rounded-lg bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:text-primary hover:bg-primary/10 transition disabled:opacity-40"
+                            title={`Đính kèm ảnh (tối đa ${MAX_IMAGES})`}
+                          >
+                            <ImagePlus className="w-3.5 h-3.5" />
+                          </button>
+                          <button
                             onClick={handleReply}
-                            disabled={!replyText.trim() || isPending}
+                            disabled={(!replyText.trim() && replyFiles.length === 0) || isPending}
                             className={`absolute bottom-2 right-2 p-1.5 rounded-lg transition-all ${
-                              replyText.trim() ? 'bg-primary text-white' : 'bg-slate-100 dark:bg-white/5 text-slate-400 cursor-not-allowed'
+                              (replyText.trim() || replyFiles.length > 0) ? 'bg-primary text-white' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 cursor-not-allowed'
                             }`}
                           >
                             <Send className="w-3.5 h-3.5" />
@@ -351,14 +543,14 @@ export default function ArticleComments({
       </div>
 
       {filtered.length === 0 && sort === 'mine' && comments.length > 0 && (
-        <div className="py-12 text-center text-slate-400">
+        <div className="py-12 text-center text-zinc-500">
           <User className="w-8 h-8 mx-auto mb-3 opacity-30" />
           <p className="text-sm">Bạn chưa có bình luận nào.</p>
         </div>
       )}
 
       {comments.length === 0 && (
-        <div className="py-16 text-center text-slate-400">
+        <div className="py-16 text-center text-zinc-500">
           <MessageCircle className="w-10 h-10 mx-auto mb-3 opacity-30" />
           <p className="text-sm">Chưa có bình luận nào. Hãy là người đầu tiên!</p>
         </div>

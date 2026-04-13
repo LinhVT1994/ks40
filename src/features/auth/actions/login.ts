@@ -2,6 +2,7 @@
 
 import { signIn } from '@/auth';
 import { AuthError } from 'next-auth';
+import { isRedirectError } from 'next/dist/client/components/redirect-error';
 
 export type LoginResult =
   | { success: true }
@@ -20,6 +21,10 @@ export async function loginAction(formData: FormData): Promise<LoginResult> {
     await signIn('credentials', { email, password, remember: String(remember), redirect: false });
     return { success: true };
   } catch (err) {
+    // Auth.js v5 server-side signIn throws NEXT_REDIRECT on success — let Next.js handle it
+    if (isRedirectError(err)) {
+      return { success: true };
+    }
     if (err instanceof AuthError) {
       switch (err.type) {
         case 'CredentialsSignin':

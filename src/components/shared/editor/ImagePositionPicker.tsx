@@ -63,7 +63,7 @@ export default function ImagePositionPicker({
   return (
     <div
       ref={containerRef}
-      className={`relative w-full ${aspectClass} rounded-xl overflow-hidden cursor-crosshair select-none border border-slate-200 dark:border-white/10`}
+      className={`relative w-full ${aspectClass} rounded-xl overflow-hidden cursor-crosshair select-none border border-zinc-300 dark:border-white/10`}
       style={{ backgroundImage: `url('${src}')`, backgroundSize: 'cover', backgroundPosition: position }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}

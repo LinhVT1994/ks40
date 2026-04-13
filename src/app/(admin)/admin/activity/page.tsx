@@ -19,8 +19,8 @@ export default async function ActivityPage({
       <AdminHeader breadcrumb={[{ label: 'Admin', href: '/admin/overview' }, { label: 'Hoạt động' }]} />
       <div className="flex-1 p-6 md:p-8 space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-display">Nhật ký hoạt động</h1>
-          <p className="text-sm text-slate-500 mt-1">{total.toLocaleString('vi-VN')} sự kiện được ghi lại</p>
+          <h1 className="text-2xl font-bold text-zinc-800 dark:text-white font-display">Nhật ký hoạt động</h1>
+          <p className="text-sm text-zinc-500 mt-1">{total.toLocaleString('vi-VN')} sự kiện được ghi lại</p>
         </div>
 
         <ActivityLogClient

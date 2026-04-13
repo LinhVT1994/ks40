@@ -18,7 +18,7 @@ interface Props {
   counts: { all: number; Admin: number; Premium: number; Member: number; active: number; locked: number };
 }
 
-const selectClass = 'px-3 py-2.5 text-sm font-semibold bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 dark:text-white text-slate-700 cursor-pointer';
+const selectClass = 'px-3 py-2.5 text-sm font-semibold bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 dark:text-white text-zinc-700 cursor-pointer';
 
 export default function UserFiltersBar({
   search, onSearchChange, activeRole, onRoleChange, activeStatus, onStatusChange, sortKey, onSortChange, counts,
@@ -26,12 +26,12 @@ export default function UserFiltersBar({
   return (
     <div className="flex flex-col md:flex-row md:items-center gap-4">
       <div className="relative flex-1 max-w-sm">
-        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+        <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" />
         <input
           value={search}
           onChange={e => onSearchChange(e.target.value)}
           placeholder="Tìm theo tên, email..."
-          className="w-full pl-9 pr-4 py-2.5 text-sm bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 dark:text-white placeholder:text-slate-400"
+          className="w-full pl-9 pr-4 py-2.5 text-sm bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 dark:text-white placeholder:text-zinc-500"
         />
       </div>
       <div className="md:ml-auto flex items-center gap-3">

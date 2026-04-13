@@ -28,7 +28,7 @@ export default function ArticleNavigation({ prev, next }: Props) {
         <div className="relative group">
           <Link 
             href={`/article/${next.slug}`}
-            className="block relative w-full h-64 sm:h-80 overflow-hidden rounded-[2.5rem] border border-slate-100 dark:border-white/5 transition-all duration-700 hover:shadow-2xl hover:shadow-primary/20 active:scale-[0.99]"
+            className="block relative w-full h-64 sm:h-80 overflow-hidden rounded-[2.5rem] border border-zinc-200 dark:border-white/5 transition-all duration-700 hover:shadow-2xl hover:shadow-primary/20 active:scale-[0.99]"
           >
             {/* Background Image with Parallax-like scale */}
             <div 
@@ -36,8 +36,8 @@ export default function ArticleNavigation({ prev, next }: Props) {
               style={next.thumbnail ? { backgroundImage: `url('${next.thumbnail}')` } : undefined}
             />
             {/* Dark & Glassy Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent" />
-            <div className="absolute inset-0 bg-slate-900/20 backdrop-blur-[1px] group-hover:backdrop-blur-0 transition-all duration-700" />
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-800 via-zinc-800/40 to-transparent" />
+            <div className="absolute inset-0 bg-zinc-800/20 backdrop-blur-[1px] group-hover:backdrop-blur-0 transition-all duration-700" />
             
             <div className="absolute inset-0 p-8 sm:p-12 flex flex-col justify-end">
               <div className="flex items-center gap-3 mb-4">
@@ -77,16 +77,16 @@ export default function ArticleNavigation({ prev, next }: Props) {
         <div className="flex justify-center md:justify-start">
           <Link 
             href={`/article/${prev.slug}`}
-            className="group flex items-center gap-4 px-6 py-4 rounded-full border border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 backdrop-blur-md hover:bg-white dark:hover:bg-white/10 hover:shadow-xl hover:shadow-slate-200/50 dark:hover:shadow-none transition-all duration-500 active:scale-95"
+            className="group flex items-center gap-4 px-6 py-4 rounded-full border border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-white/5 backdrop-blur-md hover:bg-white dark:hover:bg-white/10 hover:shadow-xl hover:shadow-zinc-200/50 dark:hover:shadow-none transition-all duration-500 active:scale-95"
           >
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-200 dark:bg-white/10 group-hover:bg-primary group-hover:text-white transition-all duration-500">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-200 dark:bg-white/10 group-hover:bg-primary group-hover:text-white transition-all duration-500">
               <ArrowLeft className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[9px] font-black text-slate-400 dark:text-slate-500 min-w-0 uppercase tracking-[0.2em] leading-none mb-1">
+              <span className="text-[9px] font-black text-zinc-500 dark:text-slate-500 min-w-0 uppercase tracking-[0.2em] leading-none mb-1">
                 Quay lại bài trước
               </span>
-              <span className="text-sm font-bold text-slate-700 dark:text-slate-300 group-hover:text-primary transition-colors line-clamp-1 max-w-[200px] sm:max-w-sm">
+              <span className="text-sm font-bold text-zinc-700 dark:text-slate-300 group-hover:text-primary transition-colors line-clamp-1 max-w-[200px] sm:max-w-sm">
                 {prev.title}
               </span>
             </div>

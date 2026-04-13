@@ -23,13 +23,14 @@ interface ArticleContentProps {
   isLiked: boolean;
   isBookmarked: boolean;
   isGated?: boolean;
+  isPreview?: boolean;
   audience?: string;
 }
 
 export default function ArticleContent({
   articleId, content, overview, objectives,
   likeCount, commentCount, isLiked, isBookmarked,
-  isGated = false, audience,
+  isGated = false, isPreview = false, audience,
 }: ArticleContentProps) {
   const { data: session } = useSession();
   const router = useRouter();
@@ -49,6 +50,7 @@ export default function ArticleContent({
   const saveTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
+    if (isPreview) return;
     // Tăng view — dedup 24h theo articleId trong localStorage
     const key = `viewed:${articleId}`;
     const last = Number(localStorage.getItem(key) ?? 0);
@@ -59,6 +61,7 @@ export default function ArticleContent({
   }, [articleId]);
 
   useEffect(() => {
+    if (isPreview) return;
     // Ghi nhận đã mở bài, sync lastSaved
     lastSavedRef.current = 0.02;
     upsertReadHistoryAction(articleId, 0.02);
@@ -138,7 +141,7 @@ export default function ArticleContent({
         />
       </div>
       {overview && (
-        <div className="bg-slate-50 dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 p-8 rounded-3xl mb-6 relative overflow-hidden group">
+        <div className="bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 p-8 rounded-3xl mb-6 relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-8 text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none">
             <Sparkles className="w-24 h-24" />
           </div>
@@ -147,7 +150,7 @@ export default function ArticleContent({
               <Sparkles className="w-5 h-5" />
               <h3 className="font-display font-bold text-sm uppercase tracking-widest">Tóm tắt</h3>
             </div>
-            <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-base italic max-w-4xl">
+            <p className="text-zinc-600 dark:text-slate-400 leading-relaxed text-base italic max-w-4xl">
               "{overview}"
             </p>
           </div>
@@ -165,9 +168,9 @@ export default function ArticleContent({
               <h3 className="font-display font-bold text-sm uppercase tracking-widest">Sau bài này bạn sẽ</h3>
             </div>
             <div className="prose prose-sm dark:prose-invert max-w-none
-              prose-ul:space-y-1.5 prose-li:text-slate-700 dark:prose-li:text-slate-300
+              prose-ul:space-y-1.5 prose-li:text-zinc-700 dark:prose-li:text-slate-300
               prose-li:marker:text-emerald-500">
-              <ReactMarkdown>{objectives}</ReactMarkdown>
+              <MarkdownViewer content={objectives} />
             </div>
           </div>
         </div>
@@ -185,7 +188,7 @@ export default function ArticleContent({
           </div>
 
           {/* Bottom-aligned Gate Overlay with smooth fade */}
-          <div className="absolute inset-x-0 bottom-0 h-[300px] bg-gradient-to-t from-slate-50 dark:from-slate-950 via-slate-50/98 dark:via-slate-950/98 via-30% to-transparent flex flex-col items-center justify-end pb-12 px-6 text-center">
+          <div className="absolute inset-x-0 bottom-0 h-[300px] bg-gradient-to-t from-zinc-50 dark:from-slate-950 via-zinc-50/98 dark:via-slate-950/98 via-30% to-transparent flex flex-col items-center justify-end pb-12 px-6 text-center">
             <div className="max-w-sm w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               {/* Icon */}
               <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center shadow-lg ${audience === 'PREMIUM' ? 'bg-amber-500/10 text-amber-500' : 'bg-primary/10 text-primary'}`}>
@@ -194,10 +197,10 @@ export default function ArticleContent({
 
               {/* Text */}
               <div className="space-y-1">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                <h3 className="text-base font-bold text-zinc-800 dark:text-white">
                   {!session ? 'Đăng nhập để đọc tiếp' : audience === 'PREMIUM' ? 'Nội dung Premium' : 'Dành cho thành viên'}
                 </h3>
-                <p className="text-sm text-slate-500 dark:text-slate-400 leading-normal">
+                <p className="text-sm text-zinc-500 dark:text-slate-400 leading-normal">
                   {!session 
                     ? 'Tạo tài khoản miễn phí để đọc toàn bộ bài viết này và hàng trăm bài học khác.'
                     : audience === 'PREMIUM' 
@@ -219,7 +222,7 @@ export default function ArticleContent({
                     </a>
                     <a
                       href="/register"
-                      className="w-full sm:w-auto px-8 py-2.5 bg-white dark:bg-white/5 text-slate-700 dark:text-slate-300 text-sm font-bold rounded-xl border border-slate-200 dark:border-white/10 hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+                      className="w-full sm:w-auto px-8 py-2.5 bg-white dark:bg-white/5 text-zinc-700 dark:text-slate-300 text-sm font-bold rounded-xl border border-zinc-300 dark:border-white/10 hover:border-primary/40 hover:text-primary transition-all active:scale-95"
                     >
                       Đăng ký miễn phí
                     </a>
@@ -239,12 +242,12 @@ export default function ArticleContent({
       )}
 
       {/* Interaction Bar */}
-      <div className="mt-16 pt-8 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+      <div className="mt-16 pt-8 border-t border-zinc-200 dark:border-white/5 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <button
             onClick={handleLike}
             disabled={likePending}
-            className={`flex items-center gap-2 transition-all group ${liked ? 'text-rose-500' : 'text-slate-500 hover:text-rose-500'}`}
+            className={`flex items-center gap-2 transition-all group ${liked ? 'text-rose-500' : 'text-zinc-500 hover:text-rose-500'}`}
           >
             <div className="p-2 rounded-full group-hover:bg-rose-50 dark:group-hover:bg-rose-500/10 transition-colors">
               <Heart className={`w-6 h-6 group-hover:scale-110 transition-transform ${liked ? 'fill-current' : ''}`} />
@@ -252,7 +255,7 @@ export default function ArticleContent({
             <span className="font-bold text-sm">{likes}</span>
           </button>
 
-          <span className="flex items-center gap-2 text-slate-500">
+          <span className="flex items-center gap-2 text-zinc-500">
             <div className="p-2 rounded-full">
               <MessageCircle className="w-6 h-6" />
             </div>
@@ -264,14 +267,14 @@ export default function ArticleContent({
           <button
             onClick={handleBookmark}
             disabled={bookmarkPending}
-            className={`p-2 rounded-full transition-all ${bookmarked ? 'text-primary bg-primary/10' : 'text-slate-400 hover:text-primary hover:bg-slate-100 dark:hover:bg-white/5'}`}
+            className={`p-2 rounded-full transition-all ${bookmarked ? 'text-primary bg-primary/10' : 'text-zinc-500 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/5'}`}
             title={bookmarked ? 'Bỏ lưu' : 'Lưu bài viết'}
           >
             <Bookmark className={`w-5 h-5 transition-all ${bookmarked ? 'fill-current' : ''}`} />
           </button>
           <button
             onClick={() => navigator.share?.({ title: document.title, url: window.location.href })}
-            className="p-2 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
+            className="p-2 rounded-full text-zinc-500 hover:text-zinc-800 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition-all"
           >
             <Share2 className="w-5 h-5" />
           </button>
@@ -280,7 +283,7 @@ export default function ArticleContent({
 
       {/* Bookmark toast */}
       {bookmarkToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold rounded-2xl shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 bg-zinc-800 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold rounded-2xl shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
           <Bookmark className="w-4 h-4 fill-current" />
           {bookmarkToast}
         </div>

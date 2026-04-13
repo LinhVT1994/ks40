@@ -45,12 +45,12 @@ export default function NotePopover({ rect, content, onClose, onEdit }: NotePopo
 
         <div className="relative z-10 p-5">
           {/* Elegant Micro-Header */}
-          <div className="flex items-center justify-between mb-3 border-b border-slate-200/50 dark:border-white/5 pb-3">
+          <div className="flex items-center justify-between mb-3 border-b border-zinc-200 dark:border-white/5 pb-3">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-primary to-blue-400 flex items-center justify-center text-white shadow-sm shadow-primary/20">
                 <Sparkles className="w-3 h-3" />
               </div>
-              <span className="text-[10px] uppercase tracking-widest font-black text-slate-500 dark:text-slate-400">
+              <span className="text-[10px] uppercase tracking-widest font-black text-zinc-500 dark:text-slate-400">
                 Ghi chú
               </span>
             </div>
@@ -59,7 +59,7 @@ export default function NotePopover({ rect, content, onClose, onEdit }: NotePopo
               {onEdit && (
                 <button 
                   onClick={onEdit} 
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 transition-all duration-200"
+                  className="p-1.5 rounded-lg text-zinc-500 hover:text-primary hover:bg-primary/10 dark:hover:bg-primary/20 transition-all duration-200"
                   title="Chỉnh sửa ghi chú"
                 >
                   <FileEdit className="w-3.5 h-3.5" />
@@ -69,7 +69,7 @@ export default function NotePopover({ rect, content, onClose, onEdit }: NotePopo
           </div>
           
           {/* Note Content */}
-          <p className="text-[15px] leading-relaxed text-slate-800 dark:text-slate-200 font-medium whitespace-pre-wrap">
+          <p className="text-[15px] leading-relaxed text-zinc-800 dark:text-slate-200 font-medium whitespace-pre-wrap">
             {content}
           </p>
         </div>

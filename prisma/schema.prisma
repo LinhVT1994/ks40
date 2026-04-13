@@ -10,13 +10,22 @@ model User {
   id                String            @id @default(cuid())
   name              String
   email             String            @unique
+  username          String?           @unique
   password          String?
   role              Role              @default(MEMBER)
   status            UserStatus        @default(ACTIVE)
+  canWrite          Boolean           @default(false)
   image             String?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
   bio               String?
+  websiteUrl        String?
+  facebookUrl       String?
+  instagramUrl      String?
+  twitterUrl        String?
+  linkedinUrl       String?
+  githubUrl         String?
+  youtubeUrl        String?
   accounts          Account[]
   activities        Activity[]
   articles          Article[]
@@ -33,6 +42,8 @@ model User {
   sharedPackages    SharedPackage[]
   onboarding        UserOnboarding?
   notes             Note[]
+  topicFollows      TopicFollow[]
+  ratings           ArticleRating[]
 }
 
 model Note {
@@ -59,16 +70,16 @@ model Follow {
 }
 
 model UserOnboarding {
-  id                   String            @id @default(cuid())
-  userId               String            @unique
-  occupation           Occupation?
-  interestedCategories ArticleCategory[]
-  completedAt          DateTime?
-  skippedAt            DateTime?
-  createdAt            DateTime          @default(now())
-  updatedAt            DateTime          @updatedAt
-  codeTheme            String?           @default("dracula")
-  user                 User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String      @id @default(cuid())
+  userId           String      @unique
+  occupation       Occupation?
+  interestedTopics String[]
+  completedAt      DateTime?
+  skippedAt        DateTime?
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  codeTheme        String?     @default("dracula")
+  user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Account {
@@ -113,6 +124,35 @@ model Series {
   @@index([slug])
 }
 
+model Topic {
+  id        String        @id @default(cuid())
+  slug      String        @unique
+  label     String
+  emoji     String?
+  color     String?       @default("#64748b")
+  order     Int           @default(0)
+  enabled   Boolean       @default(true)
+  parentId  String?
+  parent    Topic?        @relation("TopicTree", fields: [parentId], references: [id])
+  children  Topic[]       @relation("TopicTree")
+  createdAt DateTime      @default(now())
+  articles  Article[]
+  followers TopicFollow[]
+
+  @@index([parentId])
+}
+
+model TopicFollow {
+  userId    String
+  topicId   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topic     Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([userId, topicId])
+  @@index([topicId])
+}
+
 model Article {
   id                String          @id @default(cuid())
   title             String
@@ -121,7 +161,8 @@ model Article {
   content           String
   cover             String?
   thumbnail         String?
-  category          ArticleCategory
+  topicId           String
+  topic             Topic           @relation(fields: [topicId], references: [id])
   badges            ArticleBadge[]
   audience          ArticleAudience @default(MEMBERS)
   status            ArticleStatus   @default(DRAFT)
@@ -138,6 +179,7 @@ model Article {
   seriesId          String?
   seriesOrder       Int?
   nextArticleId     String?
+  rejectionReason   String?
   author            User            @relation(fields: [authorId], references: [id])
   nextArticle       Article?        @relation("ArticleNext", fields: [nextArticleId], references: [id])
   prevForArticles   Article[]       @relation("ArticleNext")
@@ -148,10 +190,11 @@ model Article {
   likes             Like[]
   readHistories     ReadHistory[]
   resources         Resource[]
+  ratings           ArticleRating[]
 
   @@index([status, publishedAt])
   @@index([authorId])
-  @@index([category])
+  @@index([topicId])
   @@index([seriesId, seriesOrder])
 }
 
@@ -174,6 +217,7 @@ model ArticleTag {
 model Comment {
   id        String        @id @default(cuid())
   content   String
+  images    String[]      @default([])
   status    CommentStatus @default(VISIBLE)
   articleId String
   authorId  String
@@ -209,6 +253,23 @@ model Like {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@id([userId, articleId])
+}
+
+model ArticleRating {
+  userId    String
+  articleId String
+  score     Int              @db.SmallInt
+  review    String?
+  hidden    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, articleId])
+  @@index([articleId])
+  @@index([userId])
 }
 
 model Bookmark {
@@ -368,16 +429,6 @@ enum UserStatus {
   LOCKED
 }
 
-enum ArticleCategory {
-  SYSTEM_DESIGN
-  AI_ML
-  DEVOPS
-  BLOCKCHAIN
-  FRONTEND
-  BACKEND
-  OTHER
-}
-
 enum ArticleBadge {
   HOT
   NEW
@@ -394,6 +445,8 @@ enum ArticleAudience {
 
 enum ArticleStatus {
   DRAFT
+  PENDING
+  REJECTED
   PUBLISHED
   SCHEDULED
 }
@@ -414,11 +467,17 @@ enum NotificationType {
   NEW_ARTICLE
   COMMENT_REPLY
   LIKE
+  ARTICLE_APPROVED
+  ARTICLE_REJECTED
+  ARTICLE_SUBMITTED
+  RATING
 }
 
 enum ActivityType {
   USER_REGISTERED
   ARTICLE_PUBLISHED
+  ARTICLE_REJECTED
+  ARTICLE_SUBMITTED
   COMMENT_POSTED
   USER_UPGRADED
   SYSTEM_ALERT

@@ -13,7 +13,7 @@ interface Props {
 export default function AdminPagination({ currentPage, totalPages, total, label, onPageChange }: Props) {
   if (totalPages <= 1) return null;
 
-  const btnCls = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-medium text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors';
+  const btnCls = 'flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-300 dark:border-white/10 text-sm font-medium text-zinc-600 dark:text-slate-300 hover:bg-zinc-50 dark:hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-colors';
 
   const pages = Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
     if (totalPages <= 7) return i + 1;
@@ -24,7 +24,7 @@ export default function AdminPagination({ currentPage, totalPages, total, label,
 
   return (
     <div className="flex items-center justify-between pt-2">
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-zinc-500 dark:text-slate-400">
         Trang {currentPage}/{totalPages} · {total.toLocaleString('vi-VN')} {label}
       </p>
       <div className="flex items-center gap-2">
@@ -35,13 +35,13 @@ export default function AdminPagination({ currentPage, totalPages, total, label,
         <div className="flex items-center gap-1">
           {pages.map((p, i) =>
             p === -1 ? (
-              <span key={`e-${i}`} className="px-1 text-slate-400 text-sm">…</span>
+              <span key={`e-${i}`} className="px-1 text-zinc-500 dark:text-slate-300 text-sm">…</span>
             ) : (
               <button key={p} onClick={() => onPageChange(p)}
                 className={`w-8 h-8 rounded-lg text-sm font-semibold transition-colors ${
                   p === currentPage
                     ? 'bg-primary text-white'
-                    : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5'
+                    : 'text-zinc-600 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-white/5'
                 }`}>
                 {p}
               </button>

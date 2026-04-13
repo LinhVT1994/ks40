@@ -26,7 +26,7 @@ export default function Avatar({ src, name, size = 40, className = '' }: AvatarP
         src={fallbackUrl(name)}
         alt={name ?? 'avatar'}
         style={sizeStyle}
-        className={`rounded-full object-cover border border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 ${className}`}
+        className={`rounded-full object-cover border border-zinc-300 dark:border-white/10 bg-zinc-100 dark:bg-white/5 ${className}`}
         onError={e => {
           // ui-avatars failed → show icon placeholder
           (e.currentTarget as HTMLImageElement).style.display = 'none';
@@ -42,16 +42,16 @@ export default function Avatar({ src, name, size = 40, className = '' }: AvatarP
         src={src}
         alt={name ?? 'avatar'}
         style={sizeStyle}
-        className={`rounded-full object-cover border border-slate-200 dark:border-white/10 ${className}`}
+        className={`rounded-full object-cover border border-zinc-300 dark:border-white/10 ${className}`}
         onError={() => setErrored(true)}
       />
       {/* Icon fallback — shown only if ui-avatars also fails */}
       <div
         hidden
         style={sizeStyle}
-        className={`rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-center justify-center shrink-0 ${className}`}
+        className={`rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-300 dark:border-white/10 flex items-center justify-center shrink-0 ${className}`}
       >
-        <User className="text-slate-400" style={{ width: size * 0.5, height: size * 0.5 }} />
+        <User className="text-zinc-500" style={{ width: size * 0.5, height: size * 0.5 }} />
       </div>
     </>
   );

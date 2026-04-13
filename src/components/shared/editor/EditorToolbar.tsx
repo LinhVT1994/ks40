@@ -35,18 +35,18 @@ const formatActions = [
 
 export default function EditorToolbar({ viewMode, onViewChange, onInsert }: EditorToolbarProps) {
   return (
-    <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-200 dark:border-white/5 bg-transparent shrink-0">
+    <div className="flex items-center gap-2 px-4 py-2 border-b border-zinc-300 dark:border-white/5 bg-transparent shrink-0">
       {/* Format buttons */}
       <div className="flex items-center gap-0.5 flex-1">
         {formatActions.map((action, i) => {
           if ('divider' in action && action.divider) {
-            return <div key={i} className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1" />;
+            return <div key={i} className="w-px h-4 bg-zinc-200 dark:bg-white/10 mx-1" />;
           }
           const Icon = action.icon!;
           return (
             <button key={i} title={action.label}
               onClick={() => onInsert(action.syntax!, action.wrap)}
-              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
+              className="p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/5 text-zinc-500 hover:text-zinc-800 dark:hover:text-white transition-colors">
               <Icon className="w-3.5 h-3.5" />
             </button>
           );
@@ -54,7 +54,7 @@ export default function EditorToolbar({ viewMode, onViewChange, onInsert }: Edit
       </div>
 
       {/* View mode toggle */}
-      <div className="flex items-center bg-slate-100 dark:bg-white/5 rounded-xl p-1 gap-0.5 shrink-0">
+      <div className="flex items-center bg-zinc-100 dark:bg-white/5 rounded-xl p-1 gap-0.5 shrink-0">
         {([
           { mode: 'editor', icon: Edit3, label: 'Editor' },
           { mode: 'split', icon: Columns, label: 'Split' },
@@ -63,8 +63,8 @@ export default function EditorToolbar({ viewMode, onViewChange, onInsert }: Edit
           <button key={mode} title={label} onClick={() => onViewChange(mode)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
               viewMode === mode
-                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                ? 'bg-white dark:bg-slate-700 text-zinc-800 dark:text-white shadow-sm'
+                : 'text-zinc-500 hover:text-zinc-600 dark:hover:text-slate-300'
             }`}>
             <Icon className="w-3 h-3" />{label}
           </button>

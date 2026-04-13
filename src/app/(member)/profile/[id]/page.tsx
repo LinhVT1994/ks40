@@ -2,10 +2,16 @@ import { auth } from '@/auth';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Calendar, FileText, Eye, Heart } from 'lucide-react';
-import { getPublicProfileAction } from '@/features/member/actions/profile';
+import { getPublicProfileAction, getProfileArticlesAction } from '@/features/member/actions/profile';
 import { getBookmarksAction } from '@/features/articles/actions/bookmark';
 import { getReadHistoryAction } from '@/features/articles/actions/read-history';
+import { getMemberDraftsAction } from '@/features/member/actions/write';
+import { getFollowersAction } from '@/features/member/actions/profile-follow';
+import { getAuthorInfoAction } from '@/features/member/actions/follow';
+import { getDashboardStatsAction, getContinueReadingAction } from '@/features/member/actions/dashboard';
+import { getArticleRatingsAction } from '@/features/articles/actions/rating';
 import ProfileClient from './ProfileClient';
+import PublicProfileClient from './PublicProfileClient';
 
 function formatViews(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
@@ -19,8 +25,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!data) return {};
 
   const { user } = data;
-  const title       = `${user.name} | Lenote.dev`;
-  const description = user.bio ?? `Xem hồ sơ và bài viết của ${user.name} trên Lenote.dev`;
+  const title       = `${user.name} | Lenote`;
+  const description = user.bio ?? `Xem hồ sơ và bài viết của ${user.name} trên Lenote`;
   const image       = user.image ?? null;
 
   return {
@@ -47,74 +53,85 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const session = await auth();
   const currentUserId = session?.user?.id;
   const isOwner = currentUserId === id;
+  const userRole = (session?.user as { role?: string })?.role;
+  const canWrite = (session?.user as { canWrite?: boolean })?.canWrite || userRole === 'ADMIN';
 
-  const [data, bookmarks, history] = await Promise.all([
+  const [data, bookmarks, history, drafts, followersData, authorInfo, articlesData, dashboardStats, lastActivity, ratingsData] = await Promise.all([
     getPublicProfileAction(id),
     isOwner ? getBookmarksAction() : Promise.resolve(null),
     isOwner ? getReadHistoryAction() : Promise.resolve(null),
+    isOwner && canWrite ? getMemberDraftsAction() : Promise.resolve(null),
+    getFollowersAction(id),
+    !isOwner ? getAuthorInfoAction(id) : Promise.resolve(null),
+    getProfileArticlesAction(id),
+    isOwner ? getDashboardStatsAction() : Promise.resolve(null),
+    isOwner ? getContinueReadingAction() : Promise.resolve(null),
+    isOwner && canWrite ? getArticleRatingsAction({ authorId: id, limit: 20, includeHidden: true }) : Promise.resolve(null),
   ]);
 
   if (!data) notFound();
-  const { user, articles, totalViews, totalLikes } = data;
+  const { user, totalViews, totalLikes } = data;
+  const articles = articlesData.data ?? [];
+  const totalArticles = articlesData.total ?? 0;
+  const totalArticlePages = articlesData.totalPages ?? 0;
 
   const avatarUrl = user.image
     ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name ?? 'User')}&background=e2e8f0&color=0f172a`;
 
-  return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      {/* Profile card */}
-      <div className="bg-white dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-3xl p-8">
-        <div className="flex items-start gap-5">
-          <img
-            src={avatarUrl}
-            alt={user.name ?? ''}
-            className="w-20 h-20 rounded-2xl object-cover border-2 border-primary/20 shadow-sm shrink-0"
-          />
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-3 flex-wrap">
-              <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-display">{user.name}</h1>
-              {isOwner && (
-                <a href="/settings"
-                  className="text-xs font-semibold text-slate-400 hover:text-primary transition-colors border border-slate-200 dark:border-white/10 px-2.5 py-1 rounded-lg">
-                  Chỉnh sửa
-                </a>
-              )}
-            </div>
-            {user.bio && (
-              <p className="text-sm text-slate-500 mt-1.5 leading-relaxed">{user.bio}</p>
-            )}
-            <div className="flex items-center gap-1.5 mt-3 text-xs text-slate-400">
-              <Calendar className="w-3.5 h-3.5" />
-              <span>Tham gia từ {new Date(user.createdAt).toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}</span>
-            </div>
-          </div>
-        </div>
+  const followersArr = followersData.success && followersData.data ? followersData.data : [];
+  const totalFollowers = followersData.total ?? 0;
+  const totalFollowerPages = followersData.totalPages ?? 0;
 
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mt-6 pt-6 border-t border-slate-100 dark:border-white/5">
-          {[
-            { icon: FileText, label: 'Bài viết',    value: user._count.articles },
-            { icon: Eye,      label: 'Lượt xem',    value: formatViews(totalViews) },
-            { icon: Heart,    label: 'Lượt thích',  value: formatViews(totalLikes) },
-          ].map(({ icon: Icon, label, value }) => (
-            <div key={label} className="text-center">
-              <p className="text-2xl font-bold text-slate-900 dark:text-white font-display">{value}</p>
-              <div className="flex items-center justify-center gap-1 mt-1 text-slate-500">
-                <Icon className="w-3.5 h-3.5" />
-                <span className="text-xs">{label}</span>
-              </div>
-            </div>
-          ))}
+  // Public profile view for non-owners
+  if (!isOwner) {
+    return (
+      <div className="relative min-h-[calc(100vh-64px)] -mt-[64px] pb-20">
+        <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-b from-primary/10 via-accent-purple/5 to-transparent -z-10" />
+        <div className="absolute top-0 left-0 right-0 h-[400px] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] -z-10" />
+
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-40">
+          <PublicProfileClient
+            user={{ ...user, avatarUrl, totalViews, totalLikes }}
+            articles={articles as any}
+            followers={followersArr}
+            isFollowing={authorInfo?.isFollowing ?? false}
+            followerCount={authorInfo?.followerCount ?? followersArr.length}
+          />
         </div>
       </div>
+    );
+  }
 
-      {/* Tabs: bài viết + (nếu là chủ) bookmark & history */}
-      <ProfileClient
-        articles={articles as any}
-        bookmarks={bookmarks as any}
-        history={history as any}
-        isOwner={isOwner}
-      />
+  return (
+    <div className="relative min-h-[calc(100vh-64px)] -mt-[64px] pb-20">
+      {/* Immersive Cover Gradient */}
+      <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-b from-primary/10 via-accent-purple/5 to-transparent -z-10" />
+      <div className="absolute top-0 left-0 right-0 h-[400px] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] -z-10" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-40">
+        <ProfileClient
+          user={{
+            ...user,
+            avatarUrl,
+            totalViews,
+            totalLikes,
+          }}
+          articles={articles as any}
+          totalArticles={totalArticles}
+          totalArticlePages={totalArticlePages}
+          bookmarks={bookmarks as any}
+          history={history as any}
+          drafts={drafts?.articles as any}
+          followers={followersArr}
+          totalFollowers={totalFollowers}
+          totalFollowerPages={totalFollowerPages}
+          isOwner={isOwner}
+          canWrite={isOwner && canWrite}
+          stats={dashboardStats}
+          lastActivity={lastActivity}
+          ratingsData={ratingsData}
+        />
+      </div>
     </div>
   );
 }

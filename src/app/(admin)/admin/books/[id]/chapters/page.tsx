@@ -9,7 +9,7 @@ export default async function BookChaptersPage({ params }: { params: Promise<{ i
   if (!book) notFound();
 
   return (
-    <div className="flex-1 w-full min-h-screen bg-slate-50 dark:bg-slate-900 flex flex-col">
+    <div className="flex-1 w-full min-h-screen bg-zinc-50 dark:bg-slate-900 flex flex-col">
       <AdminHeader
         breadcrumb={[
           { label: 'Admin', href: '/admin/overview' },

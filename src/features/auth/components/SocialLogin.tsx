@@ -21,10 +21,10 @@ export default function SocialLogin() {
     <button
       onClick={handleGoogle}
       disabled={isPending}
-      className="w-full flex items-center justify-center gap-3 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+      className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white dark:bg-white/[0.03] border border-zinc-200 dark:border-white/5 rounded-xl text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.08] hover:border-zinc-300 dark:hover:border-white/10 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed group"
     >
       {isPending ? (
-        <Loader2 className="w-5 h-5 animate-spin text-slate-400" />
+        <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />
       ) : (
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />

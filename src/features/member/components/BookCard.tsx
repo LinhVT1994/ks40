@@ -27,10 +27,10 @@ export default function BookCard({ book }: BookCardProps) {
   return (
     <Link 
       href={`/books/${book.slug}`}
-      className="group relative flex flex-col h-full bg-white dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-500"
+      className="group relative flex flex-col h-full bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-500"
     >
       {/* Cover Image */}
-      <div className="relative aspect-[4/3] overflow-hidden bg-slate-100 dark:bg-white/5">
+      <div className="relative aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-white/5">
         {book.cover ? (
           <img 
             src={book.cover} 
@@ -38,7 +38,7 @@ export default function BookCard({ book }: BookCardProps) {
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-slate-300 dark:text-white/10">
+          <div className="w-full h-full flex items-center justify-center text-zinc-300 dark:text-white/10">
             <Book className="w-16 h-16" />
           </div>
         )}
@@ -68,27 +68,27 @@ export default function BookCard({ book }: BookCardProps) {
       {/* Content */}
       <div className="flex-1 p-6 flex flex-col justify-between">
         <div>
-          <h3 className="text-xl font-bold text-slate-900 dark:text-white font-display group-hover:text-primary transition-colors leading-tight mb-2">
+          <h3 className="text-xl font-bold text-zinc-800 dark:text-white font-display group-hover:text-primary transition-colors leading-tight mb-2">
             {book.title}
           </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-3 leading-relaxed mb-4">
+          <p className="text-sm text-zinc-500 dark:text-slate-400 line-clamp-3 leading-relaxed mb-4">
             {book.description || 'Khám phá kiến thức chuyên sâu thông qua lộ trình được thiết kế bài bản và khoa học.'}
           </p>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-slate-100 dark:border-white/5">
+        <div className="flex items-center justify-between pt-4 border-t border-zinc-200 dark:border-white/5">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/10 flex items-center justify-center overflow-hidden border border-slate-200 dark:border-white/10">
+            <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/10 flex items-center justify-center overflow-hidden border border-zinc-300 dark:border-white/10">
                {book.author.image ? (
                  <img src={book.author.image} alt={book.author.name} className="w-full h-full object-cover" />
                ) : (
-                 <Users className="w-4 h-4 text-slate-400" />
+                 <Users className="w-4 h-4 text-zinc-500" />
                )}
             </div>
-            <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{book.author.name}</span>
+            <span className="text-xs font-bold text-zinc-600 dark:text-slate-300">{book.author.name}</span>
           </div>
           
-          <div className="p-2 rounded-xl bg-slate-50 dark:bg-white/5 text-slate-400 group-hover:bg-primary group-hover:text-white transition-all transform group-hover:translate-x-1">
+          <div className="p-2 rounded-xl bg-zinc-50 dark:bg-white/5 text-zinc-500 group-hover:bg-primary group-hover:text-white transition-all transform group-hover:translate-x-1">
             <ChevronRight className="w-4 h-4" />
           </div>
         </div>

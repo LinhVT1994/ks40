@@ -26,7 +26,7 @@ export default function InlineNoteEditor({ selection, onSave, onCancel }: Inline
       initial={{ opacity: 0, scale: 0.95, y: showAbove ? -10 : 10 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95, y: showAbove ? -10 : 10 }}
-      className="fixed z-[101] w-[300px] bg-white/95 dark:bg-slate-900/95 rounded-[1.25rem] shadow-[0_16px_48px_-12px_rgba(0,0,0,0.3)] border border-slate-200 dark:border-white/10 overflow-hidden backdrop-blur-2xl"
+      className="fixed z-[101] w-[300px] bg-white/95 dark:bg-slate-900/95 rounded-[1.25rem] shadow-[0_16px_48px_-12px_rgba(0,0,0,0.3)] border border-zinc-300 dark:border-white/10 overflow-hidden backdrop-blur-2xl"
       style={{
         left: `calc(${selection.rect.left + selection.rect.width / 2}px)`,
         top: showAbove ? selection.rect.top - 240 : selection.rect.bottom + 8,
@@ -34,10 +34,10 @@ export default function InlineNoteEditor({ selection, onSave, onCancel }: Inline
       }}
     >
       {/* Header */}
-      <div className="py-2.5 px-4 bg-slate-50/50 dark:bg-white/5 border-b border-slate-200 dark:border-white/5">
+      <div className="py-2.5 px-4 bg-zinc-50/50 dark:bg-white/5 border-b border-zinc-300 dark:border-white/5">
         <div className="flex items-center gap-2">
           <FileEdit className="w-3.5 h-3.5 text-primary opacity-80" />
-          <p className="text-[11px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-[0.15em]">
+          <p className="text-[11px] font-black text-zinc-500 dark:text-slate-400 uppercase tracking-[0.15em]">
             Ghi chú
           </p>
         </div>
@@ -50,7 +50,7 @@ export default function InlineNoteEditor({ selection, onSave, onCancel }: Inline
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="Nhập nội dung ghi chú..."
-          className="w-full h-24 bg-transparent text-sm text-slate-900 dark:text-white placeholder:text-slate-400 resize-none outline-none font-medium leading-relaxed"
+          className="w-full h-24 bg-transparent text-sm text-zinc-800 dark:text-white placeholder:text-zinc-500 resize-none outline-none font-medium leading-relaxed"
         />
       </div>
       
@@ -58,7 +58,7 @@ export default function InlineNoteEditor({ selection, onSave, onCancel }: Inline
       <div className="px-3 pb-3 flex items-center justify-between gap-2">
         <button
           onClick={onCancel}
-          className="px-4 py-2 text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+          className="px-4 py-2 text-xs font-bold text-zinc-500 hover:text-zinc-600 dark:hover:text-white transition-colors"
         >
           Hủy
         </button>

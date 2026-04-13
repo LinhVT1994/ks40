@@ -3,12 +3,38 @@
 import { useState, useTransition } from 'react';
 import { User } from 'next-auth';
 import { useSession } from 'next-auth/react';
-import { Camera, Loader2, CheckCircle2 } from 'lucide-react';
+import { Camera, Loader2, CheckCircle2, Globe, Facebook, Instagram, Twitter, Linkedin, Github, Youtube } from 'lucide-react';
 import { updateProfileAction } from '@/features/member/actions/profile';
 
-export default function SettingsProfile({ user }: { user: User & { bio?: string | null } }) {
+type SocialUser = User & {
+  bio?: string | null;
+  websiteUrl?: string | null;
+  facebookUrl?: string | null;
+  instagramUrl?: string | null;
+  twitterUrl?: string | null;
+  linkedinUrl?: string | null;
+  githubUrl?: string | null;
+  youtubeUrl?: string | null;
+};
+
+const SOCIAL_FIELDS = [
+  { key: 'websiteUrl',   label: 'Website',   icon: Globe,     placeholder: 'https://example.com' },
+  { key: 'facebookUrl',  label: 'Facebook',  icon: Facebook,  placeholder: 'https://facebook.com/username' },
+  { key: 'instagramUrl', label: 'Instagram', icon: Instagram, placeholder: 'https://instagram.com/username' },
+  { key: 'twitterUrl',   label: 'X (Twitter)', icon: Twitter,   placeholder: 'https://x.com/username' },
+  { key: 'linkedinUrl',  label: 'LinkedIn',  icon: Linkedin,  placeholder: 'https://linkedin.com/in/username' },
+  { key: 'githubUrl',    label: 'GitHub',    icon: Github,    placeholder: 'https://github.com/username' },
+  { key: 'youtubeUrl',   label: 'YouTube',   icon: Youtube,   placeholder: 'https://youtube.com/@channel' },
+] as const;
+
+export default function SettingsProfile({ user }: { user: SocialUser }) {
   const [name, setName] = useState(user.name ?? '');
   const [bio,  setBio]  = useState(user.bio ?? '');
+  const [socials, setSocials] = useState<Record<string, string>>(() => {
+    const init: Record<string, string> = {};
+    for (const f of SOCIAL_FIELDS) init[f.key] = (user as any)[f.key] ?? '';
+    return init;
+  });
   const [isPending, startTransition] = useTransition();
   const [saved, setSaved] = useState(false);
   const { update } = useSession();
@@ -18,8 +44,12 @@ export default function SettingsProfile({ user }: { user: User & { bio?: string 
 
   const handleSave = () => {
     if (!name.trim()) return;
+    const socialData: Record<string, string> = {};
+    for (const f of SOCIAL_FIELDS) {
+      socialData[f.key] = socials[f.key]?.trim() || '';
+    }
     startTransition(async () => {
-      const res = await updateProfileAction({ name: name.trim(), bio: bio.trim() });
+      const res = await updateProfileAction({ name: name.trim(), bio: bio.trim(), ...socialData });
       if (res.success) {
         await update({ name: name.trim() });
         setSaved(true);
@@ -30,14 +60,15 @@ export default function SettingsProfile({ user }: { user: User & { bio?: string 
     });
   };
 
-  const isDirty = name.trim() !== (user.name ?? '') || bio.trim() !== (user.bio ?? '');
+  const socialsDirty = SOCIAL_FIELDS.some(f => (socials[f.key]?.trim() ?? '') !== ((user as any)[f.key] ?? ''));
+  const isDirty = name.trim() !== (user.name ?? '') || bio.trim() !== (user.bio ?? '') || socialsDirty;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-6">
         <div className="relative group cursor-pointer">
           <div 
-            className="w-20 h-20 rounded-full bg-cover bg-center border-2 border-slate-200 dark:border-white/10 overflow-hidden shadow-sm"
+            className="w-20 h-20 rounded-full bg-cover bg-center border-2 border-zinc-300 dark:border-white/10 overflow-hidden shadow-sm"
             style={{ backgroundImage: `url('${avatarUrl}')` }}
           />
           <button className="absolute inset-0 bg-black/50 text-white flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
@@ -45,50 +76,71 @@ export default function SettingsProfile({ user }: { user: User & { bio?: string 
           </button>
         </div>
         <div>
-          <h3 className="text-sm font-bold text-slate-900 dark:text-white">Ảnh đại diện</h3>
-          <p className="text-xs text-slate-500 mt-1 max-w-xs leading-relaxed">Định dạng JPG, GIF hoặc PNG.<br/>Dung lượng tối đa 2MB.</p>
+          <h3 className="text-sm font-bold text-zinc-800 dark:text-white">Ảnh đại diện</h3>
+          <p className="text-xs text-zinc-500 mt-1 max-w-xs leading-relaxed">Định dạng JPG, GIF hoặc PNG.<br/>Dung lượng tối đa 2MB.</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Họ và tên</label>
+          <label className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 block">Tên hiển thị</label>
           <input
             type="text"
             value={name}
             onChange={e => setName(e.target.value)}
-            className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white"
+            className="w-full bg-zinc-50 dark:bg-black/20 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all text-zinc-800 dark:text-white"
           />
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Email liên kết</label>
+          <label className="text-sm font-semibold text-zinc-700 dark:text-slate-300">Email liên kết</label>
           <input
             type="email"
             value={user.email ?? ''}
             disabled
-            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/5 rounded-xl px-4 py-2.5 text-sm text-slate-500 cursor-not-allowed"
+            className="w-full bg-zinc-100 dark:bg-white/5 border border-zinc-300 dark:border-white/5 rounded-xl px-4 py-2.5 text-sm text-zinc-500 cursor-not-allowed"
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Giới thiệu bản thân</label>
+        <label className="text-sm font-semibold text-zinc-700 dark:text-slate-300">Giới thiệu bản thân</label>
         <textarea
           value={bio}
           onChange={e => setBio(e.target.value)}
           maxLength={300}
           rows={3}
           placeholder="Viết vài dòng giới thiệu về bạn..."
-          className="w-full bg-slate-50 dark:bg-black/20 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all text-slate-900 dark:text-white placeholder:text-slate-400 resize-none"
+          className="w-full bg-zinc-50 dark:bg-black/20 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all text-zinc-800 dark:text-white placeholder:text-zinc-500 resize-none"
         />
-        <p className="text-[11px] text-slate-400 text-right">{bio.length}/300</p>
+        <p className="text-[11px] text-zinc-500 text-right">{bio.length}/300</p>
       </div>
 
-      <div className="flex items-center gap-3 pt-4 border-t border-slate-100 dark:border-white/5">
+      {/* Social Links */}
+      <div className="space-y-2">
+        <label className="text-sm font-semibold text-zinc-700 dark:text-slate-300">Mạng xã hội</label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {SOCIAL_FIELDS.map(({ key, label, icon: Icon, placeholder }) => (
+            <div key={key} className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
+                <Icon className="w-4 h-4" />
+              </div>
+              <input
+                type="url"
+                value={socials[key]}
+                onChange={e => setSocials(prev => ({ ...prev, [key]: e.target.value }))}
+                placeholder={placeholder}
+                className="w-full bg-zinc-50 dark:bg-black/20 border border-zinc-300 dark:border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all text-zinc-800 dark:text-white placeholder:text-zinc-400"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3 pt-4 border-t border-zinc-200 dark:border-white/5">
         <button
           onClick={handleSave}
           disabled={!isDirty || isPending || !name.trim()}
-          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 shadow-lg shadow-slate-900/20 dark:shadow-white/10"
+          className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-zinc-800 dark:bg-white text-white dark:text-slate-900 text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 shadow-lg shadow-zinc-800/20 dark:shadow-white/10"
         >
           {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Lưu hồ sơ'}
         </button>

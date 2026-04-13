@@ -25,7 +25,7 @@ export const COMMENT_STATUS_CONFIG: Record<CommentStatus, { label: string; class
   },
   hidden: {
     label: 'Đã ẩn',
-    className: 'bg-slate-100 text-slate-500 dark:bg-white/5 dark:text-slate-400',
+    className: 'bg-zinc-100 text-zinc-500 dark:bg-white/5 dark:text-slate-400',
   },
   spam: {
     label: 'Spam',

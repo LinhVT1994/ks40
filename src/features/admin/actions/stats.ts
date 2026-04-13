@@ -43,7 +43,8 @@ export async function getTopArticlesAction(limit = 5) {
     orderBy: { viewCount: 'desc' },
     take:    limit,
     select: {
-      id: true, title: true, slug: true, category: true,
+      id: true, title: true, slug: true, thumbnail: true,
+      topic: { select: { id: true, slug: true, label: true, emoji: true, color: true } },
       viewCount: true, publishedAt: true,
       _count: { select: { likes: true, comments: true } },
       author: { select: { name: true, image: true } },

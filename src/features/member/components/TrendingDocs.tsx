@@ -26,19 +26,19 @@ export default function TrendingDocs() {
     <div className="w-full transition-all duration-300">
       <div className="flex items-center gap-2 mb-4 px-2">
         <TrendingUp className="w-4 h-4 text-primary" />
-        <h3 className="font-display font-bold text-sm uppercase tracking-wider text-slate-900 dark:text-white">Xu hướng</h3>
+        <h3 className="font-display font-bold text-sm uppercase tracking-wider text-zinc-800 dark:text-white">Xu hướng</h3>
       </div>
       
       <div className="flex flex-col gap-1">
         {trending.map((doc, i) => (
           <Link href={`/article/${i}`} key={i} className="block group">
-            <div className="flex gap-3 cursor-pointer p-2 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-all duration-300 rounded-xl">
-              <div className="w-14 h-14 rounded-lg bg-cover bg-center shrink-0 border border-slate-100 dark:border-white/5 overflow-hidden shadow-sm transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url('${doc.img}')` }}>
+            <div className="flex gap-3 cursor-pointer p-2 hover:bg-zinc-50/50 dark:hover:bg-white/[0.02] transition-all duration-300 rounded-xl">
+              <div className="w-14 h-14 rounded-lg bg-cover bg-center shrink-0 border border-zinc-200 dark:border-white/5 overflow-hidden shadow-sm transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url('${doc.img}')` }}>
                 <div className="w-full h-full bg-black/0 group-hover:bg-black/10 transition-colors" />
               </div>
               <div className="flex-1 min-w-0 pt-1">
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors leading-tight mb-1.5">{doc.title}</h4>
-                <div className="flex items-center gap-2 text-slate-400">
+                <h4 className="text-sm font-bold text-zinc-800 dark:text-white truncate group-hover:text-primary transition-colors leading-tight mb-1.5">{doc.title}</h4>
+                <div className="flex items-center gap-2 text-zinc-500">
                   <div className="flex items-center gap-1 group/like">
                     <Heart className="w-3.5 h-3.5 text-rose-500 fill-rose-500/10 group-hover/like:fill-rose-500 transition-all" />
                     <span className="text-[11px] font-semibold">{doc.likes}</span>
@@ -50,7 +50,7 @@ export default function TrendingDocs() {
         ))}
       </div>
       
-      <button className="w-full mt-4 py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-all text-left group">
+      <button className="w-full mt-4 py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-primary transition-all text-left group">
         <span className="inline-block transition-transform group-hover:translate-x-1">Xem tất cả tài liệu &rarr;</span>
       </button>
     </div>

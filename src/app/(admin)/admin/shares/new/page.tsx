@@ -16,14 +16,14 @@ function FileIcon({ t, cls = 'w-4 h-4' }: { t: string; cls?: string }) {
   if (t.startsWith('image/')) return <ImageIcon className={`${cls} text-sky-500`} />;
   if (/zip|rar|tar|7z|gzip/.test(t)) return <FileArchive className={`${cls} text-amber-500`} />;
   if (t.includes('pdf')) return <FileText className={`${cls} text-rose-500`} />;
-  return <File className={`${cls} text-slate-400`} />;
+  return <File className={`${cls} text-zinc-500`} />;
 }
 
 const AUDIENCE = [
   { value: 'PUBLIC',  label: 'Công khai',  icon: Globe,  cls: 'text-emerald-500' },
   { value: 'MEMBERS', label: 'Thành viên', icon: Users,  cls: 'text-blue-500'    },
   { value: 'PREMIUM', label: 'Premium',    icon: Star,   cls: 'text-amber-500'   },
-  { value: 'PRIVATE', label: 'Riêng tư',   icon: Lock,   cls: 'text-slate-400'   },
+  { value: 'PRIVATE', label: 'Riêng tư',   icon: Lock,   cls: 'text-zinc-500'   },
 ];
 
 const EXPIRES = [
@@ -73,7 +73,7 @@ export default function NewSharePage() {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-50 dark:bg-slate-900">
+    <div className="flex flex-col h-screen overflow-hidden bg-zinc-50 dark:bg-slate-900">
       <AdminHeader
         breadcrumb={[
           { label: 'Admin', href: '/admin/overview' },
@@ -85,46 +85,46 @@ export default function NewSharePage() {
       <div className="flex-1 overflow-y-auto p-6 md:p-12">
         <div className="max-w-5xl mx-auto">
 
-          <div className="mb-10 border-b border-slate-100 dark:border-white/5 pb-6">
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Tạo gói tài liệu</h2>
-            <p className="text-slate-500 mt-1">Upload file và chia sẻ với người dùng qua một link duy nhất.</p>
+          <div className="mb-10 border-b border-zinc-200 dark:border-white/5 pb-6">
+            <h2 className="text-2xl font-bold text-zinc-800 dark:text-white">Tạo gói tài liệu</h2>
+            <p className="text-zinc-500 mt-1">Upload file và chia sẻ với người dùng qua một link duy nhất.</p>
           </div>
 
           <div className="space-y-10">
 
             {/* Tiêu đề */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
                 <Type className="w-3.5 h-3.5" /> Tiêu đề <span className="text-rose-500">*</span>
               </label>
               <input
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="Nhập tiêu đề gói tài liệu..."
-                className="w-full max-w-lg text-sm bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-900 dark:text-white placeholder:text-slate-400"
+                className="w-full max-w-lg text-sm bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-zinc-800 dark:text-white placeholder:text-zinc-500"
               />
             </div>
 
             {/* Slug */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
                 <LinkIcon className="w-3.5 h-3.5" /> Slug{' '}
-                <span className="font-normal normal-case text-slate-400">(tuỳ chọn, để trống sẽ tự tạo)</span>
+                <span className="font-normal normal-case text-zinc-500">(tuỳ chọn, để trống sẽ tự tạo)</span>
               </label>
               <input
                 value={slug}
                 onChange={e => setSlug(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '').replace(/--+/g, '-'))}
                 placeholder="slug-tuy-chon"
-                className="w-full max-w-lg text-sm bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-900 dark:text-white placeholder:text-slate-400 font-mono"
+                className="w-full max-w-lg text-sm bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-zinc-800 dark:text-white placeholder:text-zinc-500 font-mono"
               />
-              <p className="text-[11px] text-slate-400 font-mono pl-1">
+              <p className="text-[11px] text-zinc-500 font-mono pl-1">
                 /share/<span className="text-primary">{slug || <span className="italic">tu-dong-tao</span>}</span>
               </p>
             </div>
 
             {/* Mô tả */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
                 <AlignLeft className="w-3.5 h-3.5" /> Mô tả
               </label>
               <textarea
@@ -132,16 +132,16 @@ export default function NewSharePage() {
                 onChange={e => setDesc(e.target.value)}
                 placeholder="Mô tả ngắn về gói tài liệu này..."
                 rows={3}
-                className="w-full text-sm bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none text-slate-900 dark:text-white placeholder:text-slate-400"
+                className="w-full text-sm bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none text-zinc-800 dark:text-white placeholder:text-zinc-500"
               />
             </div>
 
-            <div className="h-px bg-slate-100 dark:bg-white/5" />
+            <div className="h-px bg-zinc-100 dark:bg-white/5" />
 
             {/* Audience + Expires */}
             <div className="flex flex-col gap-8">
               <div className="space-y-3">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
                   <Shield className="w-3.5 h-3.5" /> Quyền truy cập
                 </label>
                 <div className="grid grid-cols-2 gap-2 max-w-xs">
@@ -153,7 +153,7 @@ export default function NewSharePage() {
                         className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
                           active
                             ? 'bg-primary border-primary text-white shadow-sm'
-                            : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:border-primary/50 hover:text-primary'
+                            : 'bg-white dark:bg-white/5 border-zinc-300 dark:border-white/10 text-zinc-500 hover:border-primary/50 hover:text-primary'
                         }`}>
                         <Icon className={`w-4 h-4 ${active ? 'text-white' : a.cls}`} />
                         {a.label}
@@ -164,7 +164,7 @@ export default function NewSharePage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
                   <Clock className="w-3.5 h-3.5" /> Thời hạn
                 </label>
                 <div className="flex flex-wrap gap-2">
@@ -173,7 +173,7 @@ export default function NewSharePage() {
                       className={`px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
                         expires === e.value
                           ? 'bg-primary border-primary text-white shadow-sm'
-                          : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:border-primary/50 hover:text-primary'
+                          : 'bg-white dark:bg-white/5 border-zinc-300 dark:border-white/10 text-zinc-500 hover:border-primary/50 hover:text-primary'
                       }`}>
                       {e.label}
                     </button>
@@ -182,36 +182,36 @@ export default function NewSharePage() {
               </div>
             </div>
 
-            <div className="h-px bg-slate-100 dark:bg-white/5" />
+            <div className="h-px bg-zinc-100 dark:bg-white/5" />
 
             {/* Files */}
             <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
                 <Upload className="w-3.5 h-3.5" /> Files <span className="text-rose-500">*</span>
               </label>
               <div
                 onDragOver={e => e.preventDefault()}
                 onDrop={e => { e.preventDefault(); addFiles(e.dataTransfer.files); }}
                 onClick={() => inputRef.current?.click()}
-                className="border-2 border-dashed border-slate-200 dark:border-white/10 rounded-xl p-10 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-primary/50 hover:bg-primary/[0.02] transition-all text-slate-400 hover:text-primary"
+                className="border-2 border-dashed border-zinc-300 dark:border-white/10 rounded-xl p-10 flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-primary/50 hover:bg-primary/[0.02] transition-all text-zinc-500 hover:text-primary"
               >
                 <input ref={inputRef} type="file" multiple className="hidden" onChange={e => addFiles(e.target.files)} />
                 <Upload className="w-8 h-8" />
                 <div className="text-center">
                   <p className="text-sm font-semibold">Kéo thả hoặc nhấn để chọn file</p>
-                  <p className="text-xs text-slate-400 mt-1">Tối đa 200MB mỗi file</p>
+                  <p className="text-xs text-zinc-500 mt-1">Tối đa 200MB mỗi file</p>
                 </div>
               </div>
 
               {files.length > 0 && (
                 <div className="space-y-2">
                   {files.map((f, i) => (
-                    <div key={i} className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-white/5 rounded-xl border border-slate-200 dark:border-white/5">
+                    <div key={i} className="flex items-center gap-3 px-4 py-3 bg-white dark:bg-white/5 rounded-xl border border-zinc-300 dark:border-white/5">
                       <FileIcon t={f.type} />
-                      <span className="text-sm text-slate-700 dark:text-slate-300 flex-1 truncate font-medium">{f.name}</span>
-                      <span className="text-xs text-slate-400 shrink-0">{fmt(f.size)}</span>
+                      <span className="text-sm text-zinc-700 dark:text-slate-300 flex-1 truncate font-medium">{f.name}</span>
+                      <span className="text-xs text-zinc-500 shrink-0">{fmt(f.size)}</span>
                       <button onClick={() => setFiles(p => p.filter((_, j) => j !== i))}
-                        className="text-slate-400 hover:text-rose-500 transition-colors ml-1">
+                        className="text-zinc-500 hover:text-rose-500 transition-colors ml-1">
                         <X className="w-4 h-4" />
                       </button>
                     </div>
@@ -225,13 +225,13 @@ export default function NewSharePage() {
             )}
 
             {/* Navigation */}
-            <div className="pt-6 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+            <div className="pt-6 border-t border-zinc-200 dark:border-white/5 flex items-center justify-between">
               <button onClick={() => router.push('/admin/shares')}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 transition-all">
+                className="flex items-center gap-2 px-6 py-3 rounded-xl border border-zinc-300 dark:border-white/10 text-sm font-bold text-zinc-500 hover:text-zinc-800 dark:hover:text-white hover:border-zinc-300 transition-all">
                 Hủy bỏ
               </button>
               <button onClick={submit} disabled={uploading || !title.trim() || !files.length}
-                className="flex items-center gap-2 px-8 py-3 rounded-xl bg-slate-900 dark:bg-primary text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                className="flex items-center gap-2 px-8 py-3 rounded-xl bg-zinc-800 dark:bg-primary text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
                 {uploading
                   ? <><Loader2 className="w-4 h-4 animate-spin" />Đang upload…</>
                   : <><Upload className="w-4 h-4" />Tạo gói & Upload</>

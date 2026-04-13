@@ -8,7 +8,7 @@ export default function BackButton() {
   return (
     <button
       onClick={() => router.back()}
-      className="p-2 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all"
+      className="p-2 rounded-xl text-zinc-500 hover:text-zinc-700 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition-all"
       title="Quay lại"
     >
       <ArrowLeft className="w-5 h-5" />

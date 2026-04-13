@@ -1,11 +1,15 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getArticleBySlugAction, getArticlePreviewAction, getArticlesAction } from '@/features/articles/actions/article';
+import { getReadHistoryAction } from '@/features/articles/actions/read-history';
+import { getArticleBySlugAction, getArticlePreviewAction, getArticlesAction, getArticleNavigationAction, getSeriesContextAction } from '@/features/articles/actions/article';
+import type { ArticleCard } from '@/features/articles/actions/article';
 import { getCommentsAction } from '@/features/articles/actions/comment';
 import { getAuthorInfoAction } from '@/features/member/actions/follow';
 import ArticleHero from '@/features/member/components/ArticleHero';
 import ArticleContent from '@/features/member/components/ArticleContent';
 import ArticleComments from '@/features/member/components/ArticleComments';
+import ArticleRating from '@/features/member/components/ArticleRating';
+import { getArticleRatingSummaryAction } from '@/features/articles/actions/rating';
 import ArticleSidebar from '@/features/member/components/ArticleSidebar';
 import RelatedArticles from '@/features/member/components/RelatedArticles';
 import ArticleNavigation from '@/features/member/components/ArticleNavigation';
@@ -13,14 +17,12 @@ import ArticleResources from '@/features/member/components/ArticleResources';
 import FloatingTOC from '@/features/member/components/FloatingTOC';
 import JsonLd from '@/components/shared/JsonLd';
 import { parseHeadings } from '@/lib/slugify';
-import { getArticleNavigationAction, getSeriesContextAction } from '@/features/articles/actions/article';
+import { SITE_URL, SITE_NAME } from '@/lib/seo';
 import SeriesBanner from '@/features/member/components/SeriesBanner';
 import NextArticleCard from '@/features/member/components/NextArticleCard';
 import FocusMode from '@/features/member/components/FocusMode';
 import MemberContainer from '@/components/layout/MemberContainer';
 import BackButton from '@/components/shared/BackButton';
-
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://lenote.dev';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -29,15 +31,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const article = await getArticlePreviewAction(slug);
   if (!article) return {};
 
-  const title       = `${article.title} | Lenote.dev`;
-  const description = article.summary ?? `Đọc bài viết ${article.title} trên Lenote.dev`;
+  const isPrivate   = article.audience === 'PRIVATE';
+  const title       = `${article.title} | ${SITE_NAME}`;
+  const description = article.summary ?? `Đọc bài viết ${article.title} trên ${SITE_NAME}`;
   const ogImage     = article.thumbnail ?? article.cover
-    ?? `${BASE_URL}/og?title=${encodeURIComponent(article.title)}&author=${encodeURIComponent(article.author.name)}&category=${article.category}`;
+    ?? `${SITE_URL}/og?title=${encodeURIComponent(article.title)}&author=${encodeURIComponent(article.author.name)}&topic=${encodeURIComponent(article.topic?.label ?? '')}&color=${encodeURIComponent(article.topic?.color ?? '#64748b')}`;
 
   return {
     title,
     description,
-    robots: { index: true, follow: true },
+    robots: isPrivate
+      ? { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false } }
+      : { index: true,  follow: true },
     openGraph: {
       title,
       description,
@@ -73,15 +78,25 @@ export default async function ArticleDetailPage({ params }: Props) {
 
   const seriesId = (article as { seriesId?: string | null })?.seriesId ?? null;
 
-  const [comments, { articles }, authorInfo, navigation, seriesCtx] = await Promise.all([
+  const [comments, { articles }, authorInfo, navigation, seriesCtx, history, ratingSummary] = await Promise.all([
     !isGated ? getCommentsAction(data.id) : Promise.resolve([]),
     getArticlesAction({ limit: 20 }),
     !isGated && authorId ? getAuthorInfoAction(authorId) : Promise.resolve(null),
     !isGated ? getArticleNavigationAction(data.publishedAt) : Promise.resolve({ prev: null, next: null }),
     !isGated && seriesId ? getSeriesContextAction(seriesId, data.id) : Promise.resolve(null),
+    getReadHistoryAction(),
+    !isGated ? getArticleRatingSummaryAction(data.id) : Promise.resolve(null),
   ]);
 
-  const related  = articles.filter(a => a.id !== data.id && a.category === data.category).slice(0, 7);
+  const historyArticles = history
+    .filter(h => h.article.id !== data.id)
+    .slice(0, 5)
+    .map(h => ({
+      article: h.article as ArticleCard,
+      progress: h.progress
+    }));
+
+  const related  = articles.filter(a => a.id !== data.id && a.topic.id === (data as { topic?: { id: string } }).topic?.id).slice(0, 7);
   const trending = [...articles].sort((a, b) => b.viewCount - a.viewCount).filter(a => a.id !== data.id).slice(0, 4);
   const headings = isGated ? [] : parseHeadings(data.content);
 
@@ -103,7 +118,18 @@ export default async function ArticleDetailPage({ params }: Props) {
   };
 
   const isPublic = data.audience === 'PUBLIC';
-  const image    = data.thumbnail ?? data.cover ?? null;
+  const rawImage = data.thumbnail ?? data.cover ?? null;
+  const image    = rawImage
+    ? (rawImage.startsWith('http') ? rawImage : `${SITE_URL}${rawImage}`)
+    : null;
+
+  // wordCount approx — bỏ HTML/markdown tag thô
+  const wordCount = typeof data.content === 'string'
+    ? data.content.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length
+    : 0;
+
+  const articleUrl = `${SITE_URL}/article/${data.slug}`;
+  const updatedAt  = (data as { updatedAt?: Date }).updatedAt;
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -112,9 +138,22 @@ export default async function ArticleDetailPage({ params }: Props) {
     description: data.summary ?? '',
     ...(image && { image }),
     author: { '@type': 'Person', name: data.author.name },
-    publisher: { '@type': 'Organization', name: 'KS4.0 Academy', url: BASE_URL },
+    publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` } },
     ...(data.publishedAt && { datePublished: data.publishedAt.toISOString() }),
-    url: `${BASE_URL}/article/${data.slug}`,
+    ...(updatedAt && { dateModified: new Date(updatedAt).toISOString() }),
+    url: articleUrl,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl },
+    inLanguage: 'vi-VN',
+    ...(wordCount > 0 && { wordCount }),
+    ...(ratingSummary && ratingSummary.totalCount > 0 && {
+      aggregateRating: {
+        '@type':      'AggregateRating',
+        ratingValue:  ratingSummary.averageScore,
+        reviewCount:  ratingSummary.totalCount,
+        bestRating:   5,
+        worstRating:  1,
+      },
+    }),
     isAccessibleForFree: isPublic ? 'True' : 'False',
     ...(!isPublic && {
       hasPart: {
@@ -126,9 +165,9 @@ export default async function ArticleDetailPage({ params }: Props) {
     breadcrumb: {
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: BASE_URL },
-        { '@type': 'ListItem', position: 2, name: data.category, item: `${BASE_URL}/category/${data.category.toLowerCase()}` },
-        { '@type': 'ListItem', position: 3, name: data.title,    item: `${BASE_URL}/article/${data.slug}` },
+        { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: SITE_URL },
+        { '@type': 'ListItem', position: 2, name: (data as { topic?: { label: string; slug: string } }).topic?.label ?? '', item: `${SITE_URL}/topic/${(data as { topic?: { slug: string } }).topic?.slug ?? ''}` },
+        { '@type': 'ListItem', position: 3, name: data.title,    item: `${SITE_URL}/article/${data.slug}` },
       ],
     },
   };
@@ -166,26 +205,38 @@ export default async function ArticleDetailPage({ params }: Props) {
 
           {!isGated && (
             <>
-              <div data-focus-hide>
+              <div>
                 <ArticleResources resources={article!.resources ?? []} />
                 <ArticleNavigation prev={navigation.prev} next={navigation.next} />
                 {(article as any).nextArticle && (
                   <NextArticleCard article={(article as any).nextArticle} />
                 )}
               </div>
-              <div data-focus-hide>
+              {ratingSummary && (
+                <ArticleRating
+                  articleId={data.id}
+                  initialSummary={ratingSummary}
+                />
+              )}
+              <div>
                 <ArticleComments articleId={data.id} initialComments={comments as any} />
               </div>
             </>
           )}
-          <div data-focus-hide>
+          <div>
             <RelatedArticles articles={related} />
           </div>
         </main>
 
         {/* Sidebar — right */}
-        <aside data-focus-hide className="hidden xl:block xl:col-span-3 shrink-0 xl:sticky xl:top-[100px] xl:border-l xl:border-slate-100 dark:xl:border-white/5 xl:pl-4">
-          <ArticleSidebar related={related} trending={trending} headings={[]} author={authorInfo} />
+        <aside data-focus-hide className="hidden xl:block xl:col-span-3 shrink-0 xl:sticky xl:top-[100px] xl:border-l xl:border-zinc-200 dark:xl:border-white/5 xl:pl-4">
+          <ArticleSidebar 
+            related={related} 
+            trending={trending} 
+            history={historyArticles}
+            headings={[]} 
+            author={authorInfo} 
+          />
         </aside>
       </div>
     </MemberContainer>

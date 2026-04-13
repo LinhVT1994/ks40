@@ -26,7 +26,8 @@ export async function toggleLikeAction(articleId: string): Promise<{ liked: bool
 
     if (article && article.authorId !== userId) {
       const likerName = (session.user as { name?: string }).name ?? 'Ai đó';
-      await createNotificationAction(
+      // Fire-and-forget — không chặn response
+      void createNotificationAction(
         article.authorId,
         'LIKE',
         `${likerName} đã thích bài viết của bạn`,

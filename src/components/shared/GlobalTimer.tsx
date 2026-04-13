@@ -99,10 +99,10 @@ export default function GlobalTimer() {
       <div className="fixed bottom-[82px] right-6 z-[9999] animate-in fade-in slide-in-from-bottom-4 duration-500">
         <button 
           onClick={() => setIsMinimized(false)}
-          className="flex items-center gap-4 px-5 py-3 bg-slate-900/90 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl hover:bg-slate-800 transition-all hover:scale-105 group ring-1 ring-white/5"
+          className="flex items-center gap-4 px-5 py-3 bg-zinc-800/90 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl hover:bg-zinc-800 transition-all hover:scale-105 group ring-1 ring-white/5"
         >
           <div className="relative flex items-center justify-center">
-            <Timer className={`w-4 h-4 ${isRunning ? 'text-primary' : 'text-slate-500'} relative z-10`} />
+            <Timer className={`w-4 h-4 ${isRunning ? 'text-primary' : 'text-zinc-400'} relative z-10`} />
             {isRunning && (
               <div className="absolute inset-0 bg-primary/20 blur-md rounded-full animate-pulse" />
             )}
@@ -110,17 +110,17 @@ export default function GlobalTimer() {
           <span className="text-sm font-black text-white tabular-nums tracking-wide">
             {formatTime(elapsed)}
           </span>
-          <Maximize2 className="w-3.5 h-3.5 text-slate-500 group-hover:text-primary transition-colors" />
+          <Maximize2 className="w-3.5 h-3.5 text-zinc-400 group-hover:text-primary transition-colors" />
         </button>
       </div>
     );
   }
 
   return (
-    <div className="fixed bottom-[82px] right-6 z-[9999] w-64 bg-slate-950/80 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.6)] overflow-hidden animate-in fade-in slide-in-from-bottom-6 zoom-in-95 duration-700 ring-1 ring-white/5 group/timer">
+    <div className="fixed bottom-[82px] right-6 z-[9999] w-64 bg-zinc-900/80 backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.6)] overflow-hidden animate-in fade-in slide-in-from-bottom-6 zoom-in-95 duration-700 ring-1 ring-white/5 group/timer">
       {/* Dynamic Background Glow */}
       <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 blur-[50px] transition-all duration-1000 ${
-        isRunning ? 'bg-primary/20' : 'bg-slate-500/10'
+        isRunning ? 'bg-primary/20' : 'bg-zinc-500/10'
       }`} />
 
       {/* Sheen Effect */}
@@ -130,25 +130,29 @@ export default function GlobalTimer() {
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5 bg-white/5 relative z-10">
         <div className="flex items-center gap-2.5">
           <div className="relative">
-            <Timer className={`w-3.5 h-3.5 ${isRunning ? 'text-primary animate-pulse' : 'text-slate-500'}`} />
+            <Timer className={`w-3.5 h-3.5 ${isRunning ? 'text-primary animate-pulse' : 'text-zinc-400'}`} />
             <div className={`absolute -inset-1 bg-primary/20 blur-sm rounded-full transition-opacity ${isRunning ? 'opacity-100' : 'opacity-0'}`} />
           </div>
-          <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Sử dụng thời gian</span>
+          <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] opacity-90">Sử dụng thời gian</span>
         </div>
         <div className="flex items-center gap-1.5">
           <button 
             onClick={() => setIsMinimized(true)} 
-            className="p-1.5 hover:bg-white/10 rounded-lg text-slate-500 hover:text-white transition-all active:scale-90"
+            className="p-1.5 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-all active:scale-90"
             title="Thu nhỏ"
           >
-            <Minus className="w-3.5 h-3.5" />
+            <div className="flex items-center justify-center">
+              <Minus className="w-3.5 h-3.5" />
+            </div>
           </button>
           <button 
             onClick={() => setIsVisible(false)} 
-            className="p-1.5 hover:bg-red-500/20 rounded-lg text-slate-500 hover:text-red-400 transition-all active:scale-90"
+            className="p-1.5 hover:bg-red-500/20 rounded-lg text-zinc-400 hover:text-red-400 transition-all active:scale-90"
             title="Đóng"
           >
-            <X className="w-3.5 h-3.5" />
+            <div className="flex items-center justify-center">
+              <X className="w-3.5 h-3.5" />
+            </div>
           </button>
         </div>
       </div>
@@ -168,7 +172,7 @@ export default function GlobalTimer() {
               cy="64"
             />
             <circle
-              className={`${isRunning ? 'text-primary' : 'text-slate-700'} transition-all duration-1000 ease-out`}
+              className={`${isRunning ? 'text-primary' : 'text-zinc-700'} transition-all duration-1000 ease-out`}
               strokeWidth="5"
               strokeDasharray={364}
               strokeDashoffset={364 - (364 * (elapsed % 60)) / 60}
@@ -183,11 +187,11 @@ export default function GlobalTimer() {
           
           <div className="absolute inset-0 flex flex-col items-center justify-center">
             <div className={`text-3xl font-black tabular-nums tracking-tighter mb-0.5 transition-all duration-500 ${
-              isRunning ? 'text-white scale-105' : 'text-slate-500'
+              isRunning ? 'text-white scale-105' : 'text-zinc-400'
             }`}>
               {formatTime(elapsed)}
             </div>
-            <div className="text-[8px] font-black text-slate-500 uppercase tracking-widest">
+            <div className="text-[8px] font-black text-zinc-400 uppercase tracking-widest opacity-80">
               {isRunning ? 'Đang chạy' : 'Đã dừng'}
             </div>
           </div>
@@ -205,7 +209,7 @@ export default function GlobalTimer() {
             className={`flex-1 flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 shadow-lg ${
               isRunning 
                 ? 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border border-amber-500/20 ring-1 ring-amber-500/20' 
-                : 'bg-primary text-slate-950 hover:bg-primary-hover shadow-primary/20'
+                : 'bg-primary text-zinc-900 hover:bg-primary-hover shadow-primary/20'
             }`}
           >
             {isRunning ? (
@@ -223,7 +227,7 @@ export default function GlobalTimer() {
 
           <button 
             onClick={() => { setElapsed(0); setIsRunning(false); }}
-            className="p-3.5 bg-white/5 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-all border border-white/5 group/reset active:rotate-180"
+            className="p-3.5 bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 rounded-xl transition-all border border-white/5 group/reset active:rotate-180"
             title="Làm mới"
           >
             <RotateCcw className="w-4 h-4 transition-transform duration-500" />

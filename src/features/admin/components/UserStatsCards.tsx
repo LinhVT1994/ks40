@@ -28,16 +28,16 @@ export default function UserStatsCards({ users }: Props) {
         return (
           <div
             key={i}
-            className="bg-white dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-3xl p-6 hover:shadow-lg hover:shadow-slate-100 dark:hover:shadow-black/10 transition-all duration-300 group"
+            className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-3xl p-6 hover:shadow-lg hover:shadow-zinc-100 dark:hover:shadow-black/10 transition-all duration-300 group"
           >
             <div className="flex items-start justify-between mb-5">
               <div className={`p-3 rounded-2xl ${stat.bg} transition-transform group-hover:scale-110`}>
                 <Icon className={`w-5 h-5 ${stat.color}`} />
               </div>
-              <span className="text-xs font-semibold text-slate-400">{stat.sub}</span>
+              <span className="text-xs font-semibold text-zinc-500">{stat.sub}</span>
             </div>
-            <p className="text-3xl font-bold text-slate-900 dark:text-white font-display mb-1">{stat.value}</p>
-            <p className="text-sm text-slate-500 font-medium">{stat.label}</p>
+            <p className="text-3xl font-bold text-zinc-800 dark:text-white font-display mb-1">{stat.value}</p>
+            <p className="text-sm text-zinc-500 font-medium">{stat.label}</p>
           </div>
         );
       })}

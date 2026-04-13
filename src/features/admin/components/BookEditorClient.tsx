@@ -63,8 +63,8 @@ export default function BookEditorClient({ book }: { book: Book }) {
       {/* Header - Phẳng & Clean (Tham khảo Quản lý Nội dung) */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 px-1 py-2">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tight font-display mb-1">Biên soạn sách</h1>
-          <p className="text-sm text-slate-500 dark:text-slate-400">
+          <h1 className="text-2xl font-bold text-zinc-800 dark:text-white tracking-tight font-display mb-1">Biên soạn sách</h1>
+          <p className="text-sm text-zinc-500 dark:text-slate-400">
             {chapters.length} chương nội dung trong hệ thống
           </p>
         </div>
@@ -72,7 +72,7 @@ export default function BookEditorClient({ book }: { book: Book }) {
           <Link
             href={`/books/${book.slug}`}
             target="_blank"
-            className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 text-slate-600 dark:text-slate-300 rounded-2xl text-xs font-bold uppercase tracking-wider hover:bg-slate-50 dark:hover:bg-white/10 transition-all border border-slate-100 dark:border-white/5 shadow-sm shrink-0"
+            className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-white/5 text-zinc-600 dark:text-slate-300 rounded-2xl text-xs font-bold uppercase tracking-wider hover:bg-zinc-50 dark:hover:bg-white/10 transition-all border border-zinc-200 dark:border-white/5 shadow-sm shrink-0"
           >
             <Play className="w-3.5 h-3.5 fill-current" /> Xem Landing page
           </Link>
@@ -88,11 +88,11 @@ export default function BookEditorClient({ book }: { book: Book }) {
       {/* Danh sách chương - Table style */}
       <div className="flex flex-col">
         {/* Table Header */}
-        <div className="flex items-center gap-4 px-6 py-3 border-b border-slate-100 dark:border-white/5 mb-2">
+        <div className="flex items-center gap-4 px-6 py-3 border-b border-zinc-200 dark:border-white/5 mb-2">
           <div className="w-12 shrink-0"></div>
-          <div className="flex-1 text-[11px] font-black text-slate-400 uppercase tracking-widest">Tiêu đề</div>
-          <div className="w-32 text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">Quyền</div>
-          <div className="w-32 text-[11px] font-black text-slate-400 uppercase tracking-widest text-right pr-4">Hành động</div>
+          <div className="flex-1 text-[11px] font-black text-zinc-500 uppercase tracking-widest">Tiêu đề</div>
+          <div className="w-32 text-[11px] font-black text-zinc-500 uppercase tracking-widest text-center">Quyền</div>
+          <div className="w-32 text-[11px] font-black text-zinc-500 uppercase tracking-widest text-right pr-4">Hành động</div>
         </div>
 
         <div className="space-y-1">
@@ -103,9 +103,9 @@ export default function BookEditorClient({ book }: { book: Book }) {
               onDragStart={() => onDragStart(chapter.id)}
               onDragOver={e => onDragOver(e, chapter.id)}
               onDragEnd={onDragEnd}
-              className={`flex items-center gap-4 px-6 py-4 rounded-2xl bg-transparent hover:bg-slate-50 dark:hover:bg-white/[0.02] border border-transparent transition-all group ${dragging === chapter.id ? 'opacity-40 scale-95 grayscale' : ''}`}
+              className={`flex items-center gap-4 px-6 py-4 rounded-2xl bg-transparent hover:bg-zinc-50 dark:hover:bg-white/[0.02] border border-transparent transition-all group ${dragging === chapter.id ? 'opacity-40 scale-95 grayscale' : ''}`}
             >
-              <div className="cursor-grab active:cursor-grabbing text-slate-300 dark:text-slate-600 hover:text-primary transition-colors shrink-0">
+              <div className="cursor-grab active:cursor-grabbing text-zinc-300 dark:text-slate-600 hover:text-primary transition-colors shrink-0">
                 <GripVertical className="w-5 h-5" />
               </div>
               
@@ -113,11 +113,11 @@ export default function BookEditorClient({ book }: { book: Book }) {
                 <div className="flex flex-col">
                   <Link 
                     href={`/admin/books/${book.id}/chapters/${chapter.id}`} 
-                    className="text-sm font-bold text-slate-800 dark:text-slate-200 hover:text-primary transition-colors truncate tracking-tight"
+                    className="text-sm font-bold text-zinc-800 dark:text-slate-200 hover:text-primary transition-colors truncate tracking-tight"
                   >
                     {chapter.title}
                   </Link>
-                  <span className="text-[11px] text-slate-400 mt-0.5 uppercase tracking-wider font-medium font-sans">Chương {chapter.order.toString().padStart(2, '0')}</span>
+                  <span className="text-[11px] text-zinc-500 mt-0.5 uppercase tracking-wider font-medium font-sans">Chương {chapter.order.toString().padStart(2, '0')}</span>
                 </div>
               </div>
               
@@ -137,14 +137,14 @@ export default function BookEditorClient({ book }: { book: Book }) {
               <div className="w-32 shrink-0 flex items-center justify-end gap-2 pr-2">
                 <Link
                   href={`/admin/books/${book.id}/chapters/${chapter.id}`}
-                  className="p-2 rounded-xl text-slate-400 hover:text-primary hover:bg-primary/5 transition-all"
+                  className="p-2 rounded-xl text-zinc-500 hover:text-primary hover:bg-primary/5 transition-all"
                   title="Chỉnh sửa nội dung"
                 >
                   <Edit2 className="w-4 h-4" />
                 </Link>
                 <button
                   onClick={(e) => handleDelete(chapter.id, e)}
-                  className="p-2 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-500/5 transition-all"
+                  className="p-2 rounded-xl text-zinc-500 hover:text-rose-500 hover:bg-rose-500/5 transition-all"
                   title="Xóa chương này"
                 >
                   <Trash2 className="w-4 h-4" />
@@ -154,12 +154,12 @@ export default function BookEditorClient({ book }: { book: Book }) {
           ))}
 
           {chapters.length === 0 && (
-            <div className="text-center py-32 border-2 border-dashed border-slate-200 dark:border-white/5 rounded-[4rem] bg-slate-50/50 dark:bg-white/[0.01]">
-              <div className="w-24 h-24 rounded-[2.5rem] bg-white dark:bg-white/5 flex items-center justify-center mx-auto mb-8 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-100 dark:border-white/5">
-                <Layers className="w-10 h-10 text-slate-300 dark:text-slate-700" />
+            <div className="text-center py-32 border-2 border-dashed border-zinc-300 dark:border-white/5 rounded-[4rem] bg-zinc-50/50 dark:bg-white/[0.01]">
+              <div className="w-24 h-24 rounded-[2.5rem] bg-white dark:bg-white/5 flex items-center justify-center mx-auto mb-8 shadow-xl shadow-zinc-200/50 dark:shadow-none border border-zinc-200 dark:border-white/5">
+                <Layers className="w-10 h-10 text-zinc-300 dark:text-slate-700" />
               </div>
-              <h3 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Lộ trình chương đang trống</h3>
-              <p className="text-sm font-medium text-slate-400 mt-3 mb-10 max-w-sm mx-auto leading-relaxed">Cuốn sách này chưa có chương nào. Hãy bắt đầu xây dựng cấu trúc nội dung để giúp học viên dễ dàng theo dõi nhé.</p>
+              <h3 className="text-xl font-black text-zinc-800 dark:text-white tracking-tight">Lộ trình chương đang trống</h3>
+              <p className="text-sm font-medium text-zinc-500 mt-3 mb-10 max-w-sm mx-auto leading-relaxed">Cuốn sách này chưa có chương nào. Hãy bắt đầu xây dựng cấu trúc nội dung để giúp học viên dễ dàng theo dõi nhé.</p>
               <Link href={`/admin/books/${book.id}/chapters/new`} className="inline-flex items-center gap-3 px-10 py-4 rounded-[2rem] bg-primary text-white hover:bg-primary/95 transition-all font-black text-xs uppercase tracking-widest shadow-2xl shadow-primary/30 hover:-translate-y-1">
                 <Plus className="w-5 h-5" /> Bắt đầu tạo ngay
               </Link>

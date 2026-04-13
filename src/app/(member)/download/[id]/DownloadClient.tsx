@@ -23,7 +23,7 @@ function FileIcon({ mimeType, size = 6 }: { mimeType: string; size?: number }) {
     return <FileArchive className={`${cls} text-amber-500`} />;
   if (mimeType.includes('pdf'))
     return <FileText className={`${cls} text-rose-500`} />;
-  return <File className={`${cls} text-slate-400`} />;
+  return <File className={`${cls} text-zinc-500`} />;
 }
 
 const COUNTDOWN = 10;
@@ -51,7 +51,7 @@ export default function DownloadClient({ resource }: { resource: Resource }) {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4 gap-8">
+    <div className="min-h-screen bg-zinc-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4 gap-8">
       {/* AdSense script */}
       {ADSENSE_CLIENT && (
         <Script
@@ -63,14 +63,14 @@ export default function DownloadClient({ resource }: { resource: Resource }) {
       )}
 
       {/* File info card */}
-      <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-slate-100 dark:border-white/10 rounded-3xl shadow-xl p-8 flex flex-col items-center gap-5 text-center">
-        <div className="p-5 rounded-2xl bg-slate-50 dark:bg-white/5">
+      <div className="w-full max-w-md bg-white dark:bg-slate-900 border border-zinc-200 dark:border-white/10 rounded-3xl shadow-xl p-8 flex flex-col items-center gap-5 text-center">
+        <div className="p-5 rounded-2xl bg-zinc-50 dark:bg-white/5">
           <FileIcon mimeType={resource.mimeType} size={10} />
         </div>
 
         <div>
-          <p className="font-bold text-slate-900 dark:text-white text-lg leading-snug">{resource.name}</p>
-          <p className="text-sm text-slate-400 mt-1">{formatBytes(resource.size)}</p>
+          <p className="font-bold text-zinc-800 dark:text-white text-lg leading-snug">{resource.name}</p>
+          <p className="text-sm text-zinc-500 mt-1">{formatBytes(resource.size)}</p>
         </div>
 
         {downloaded ? (
@@ -90,7 +90,7 @@ export default function DownloadClient({ resource }: { resource: Resource }) {
             {/* Progress ring */}
             <div className="relative w-16 h-16">
               <svg className="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
-                <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="4" className="text-slate-100 dark:text-white/10" />
+                <circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="4" className="text-zinc-100 dark:text-white/10" />
                 <circle
                   cx="32" cy="32" r="28" fill="none" stroke="currentColor" strokeWidth="4"
                   strokeLinecap="round" className="text-primary transition-all duration-1000"
@@ -98,11 +98,11 @@ export default function DownloadClient({ resource }: { resource: Resource }) {
                   strokeDashoffset={`${2 * Math.PI * 28 * (count / COUNTDOWN)}`}
                 />
               </svg>
-              <span className="absolute inset-0 flex items-center justify-center text-xl font-bold text-slate-900 dark:text-white">
+              <span className="absolute inset-0 flex items-center justify-center text-xl font-bold text-zinc-800 dark:text-white">
                 {count}
               </span>
             </div>
-            <p className="text-sm text-slate-500">Vui lòng chờ {count} giây…</p>
+            <p className="text-sm text-zinc-500">Vui lòng chờ {count} giây…</p>
           </div>
         )}
       </div>
@@ -124,7 +124,7 @@ export default function DownloadClient({ resource }: { resource: Resource }) {
 
       {/* Placeholder khi chưa cấu hình AdSense */}
       {!ADSENSE_CLIENT && (
-        <div className="w-full max-w-2xl h-24 rounded-2xl border-2 border-dashed border-slate-200 dark:border-white/10 flex items-center justify-center text-slate-400 text-sm">
+        <div className="w-full max-w-2xl h-24 rounded-2xl border-2 border-dashed border-zinc-300 dark:border-white/10 flex items-center justify-center text-zinc-500 text-sm">
           Khu vực quảng cáo Google AdSense
         </div>
       )}

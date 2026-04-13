@@ -6,7 +6,7 @@ import {
   Link2, Code, Image, Minus, List, ListOrdered,
   Quote, Eye, Columns, Edit3, ArrowLeft, ArrowRight, Target, ChevronDown, AlignLeft, Loader2, Youtube
 } from 'lucide-react';
-import MarkdownPreview from './MarkdownPreview';
+import MarkdownPreview from '@/components/shared/editor/MarkdownPreview';
 import { uploadImage } from '@/lib/compress-image';
 
 type ViewMode = 'editor' | 'split' | 'preview';
@@ -113,7 +113,7 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Toolbar */}
-      <div className="flex items-center gap-2 px-4 py-2 border-b border-slate-200 dark:border-white/5 bg-transparent shrink-0">
+      <div className="flex items-center gap-2 px-4 py-2 border-b border-zinc-300 dark:border-white/5 bg-transparent shrink-0">
         {/* Format buttons */}
         <div className="flex items-center gap-0.5 flex-1">
           <input
@@ -125,7 +125,7 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
             disabled={uploadingImage}
           />
           {formatActions.map((action, i) => {
-            if ('divider' in action && action.divider) return <div key={i} className="w-px h-4 bg-slate-200 dark:bg-white/10 mx-1" />;
+            if ('divider' in action && action.divider) return <div key={i} className="w-px h-4 bg-zinc-200 dark:bg-white/10 mx-1" />;
             const Icon = action.icon!;
             const isImageBtn = action.action === 'upload_image';
 
@@ -143,7 +143,7 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
 
             return (
               <button key={i} onClick={handleClick} disabled={isImageBtn && uploadingImage}
-                className={`p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 transition-colors disabled:opacity-50 ${isVideoBtn && videoPromptOpen ? 'bg-primary/10 text-primary' : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'}`}>
+                className={`p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors disabled:opacity-50 ${isVideoBtn && videoPromptOpen ? 'bg-primary/10 text-primary' : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-white'}`}>
                 {isImageBtn && uploadingImage
                   ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   : <Icon className="w-3.5 h-3.5" />
@@ -154,7 +154,7 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
         </div>
 
         {/* View toggle */}
-        <div className="flex items-center bg-slate-100 dark:bg-white/5 rounded-xl p-1 gap-0.5 shrink-0">
+        <div className="flex items-center bg-zinc-100 dark:bg-white/5 rounded-xl p-1 gap-0.5 shrink-0">
           {([
             { mode: 'editor' as ViewMode, icon: Edit3, label: 'Editor' },
             { mode: 'split' as ViewMode, icon: Columns, label: 'Split' },
@@ -162,7 +162,7 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
           ]).map(({ mode, icon: Icon, label }) => (
             <button key={mode} title={label} onClick={() => setViewMode(mode)}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                viewMode === mode ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
+                viewMode === mode ? 'bg-white dark:bg-slate-700 text-zinc-800 dark:text-white shadow-sm' : 'text-zinc-500 hover:text-zinc-600 dark:hover:text-slate-300'
               }`}>
               <Icon className="w-3 h-3" />{label}
             </button>
@@ -172,7 +172,7 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
 
       {/* Video URL prompt panel */}
       {videoPromptOpen && (
-        <div className="shrink-0 border-b border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-white/[0.02] px-4 py-3 flex items-center gap-2 animate-in slide-in-from-top-1 fade-in duration-150">
+        <div className="shrink-0 border-b border-zinc-300 dark:border-white/5 bg-zinc-50 dark:bg-white/[0.02] px-4 py-3 flex items-center gap-2 animate-in slide-in-from-top-1 fade-in duration-150">
           <Youtube className="w-4 h-4 text-rose-500 shrink-0" />
           <input
             type="url"
@@ -181,18 +181,18 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
             onKeyDown={e => { if (e.key === 'Enter') handleInsertVideo(); if (e.key === 'Escape') setVideoPromptOpen(false); }}
             placeholder="Dán link YouTube hoặc Vimeo..."
             autoFocus
-            className="flex-1 text-sm bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-slate-800 dark:text-slate-200 placeholder:text-slate-400"
+            className="flex-1 text-sm bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-lg px-3 py-1.5 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-zinc-800 dark:text-slate-200 placeholder:text-zinc-500"
           />
           <button
             onClick={handleInsertVideo}
             disabled={!videoUrl.trim()}
-            className="px-3 py-1.5 text-xs font-bold bg-slate-900 dark:bg-primary text-white rounded-lg hover:opacity-90 transition-all disabled:opacity-40"
+            className="px-3 py-1.5 text-xs font-bold bg-zinc-800 dark:bg-primary text-white rounded-lg hover:opacity-90 transition-all disabled:opacity-40"
           >
             Chèn
           </button>
           <button
             onClick={() => { setVideoPromptOpen(false); setVideoUrl(''); }}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+            className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-600 dark:hover:text-slate-300 hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
           >
             <span className="text-xs">✕</span>
           </button>
@@ -200,15 +200,15 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
       )}
 
       {/* Summary collapsible panel */}
-      <div className="shrink-0 border-b border-slate-200 dark:border-white/5 bg-transparent">
+      <div className="shrink-0 border-b border-zinc-300 dark:border-white/5 bg-transparent">
         <button
           onClick={() => setSummaryOpen(v => !v)}
-          className="w-full flex items-center gap-2 px-4 py-2 text-left text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors"
+          className="w-full flex items-center gap-2 px-4 py-2 text-left text-xs font-bold text-zinc-500 hover:text-zinc-600 dark:hover:text-slate-300 hover:bg-zinc-50 dark:hover:bg-white/[0.02] transition-colors"
         >
           <AlignLeft className="w-3.5 h-3.5 text-primary" />
           <span className="text-primary/80">Tóm tắt bài viết</span>
           {overview && !summaryOpen && (
-            <span className="ml-2 text-[10px] text-slate-400 font-normal truncate max-w-xs">{overview}</span>
+            <span className="ml-2 text-[10px] text-zinc-500 font-normal truncate max-w-xs">{overview}</span>
           )}
           <ChevronDown className={`ml-auto w-3.5 h-3.5 transition-transform ${summaryOpen ? 'rotate-180' : ''}`} />
         </button>
@@ -219,22 +219,22 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
               onChange={e => onOverviewChange(e.target.value)}
               rows={3}
               placeholder="Tóm tắt nội dung bài viết, hiển thị trong box nổi bật đầu bài..."
-              className="w-full text-sm bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 transition-all"
+              className="w-full text-sm bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none text-zinc-800 dark:text-slate-200 placeholder:text-zinc-500 transition-all"
             />
           </div>
         )}
       </div>
 
       {/* Objectives collapsible panel */}
-      <div className="shrink-0 border-b border-slate-200 dark:border-white/5 bg-transparent">
+      <div className="shrink-0 border-b border-zinc-300 dark:border-white/5 bg-transparent">
         <button
           onClick={() => setObjOpen(v => !v)}
-          className="w-full flex items-center gap-2 px-4 py-2 text-left text-xs font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors"
+          className="w-full flex items-center gap-2 px-4 py-2 text-left text-xs font-bold text-zinc-500 hover:text-zinc-600 dark:hover:text-slate-300 hover:bg-zinc-50 dark:hover:bg-white/[0.02] transition-colors"
         >
           <Target className="w-3.5 h-3.5 text-emerald-500" />
           <span className="text-emerald-600 dark:text-emerald-400">Mục tiêu bài viết</span>
           {objectives && !objOpen && (
-            <span className="ml-2 text-[10px] text-slate-400 font-normal truncate max-w-xs">{objectives.split('\n')[0]}</span>
+            <span className="ml-2 text-[10px] text-zinc-500 font-normal truncate max-w-xs">{objectives.split('\n')[0]}</span>
           )}
           <ChevronDown className={`ml-auto w-3.5 h-3.5 transition-transform ${objOpen ? 'rotate-180' : ''}`} />
         </button>
@@ -245,9 +245,9 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
               onChange={e => onObjectivesChange(e.target.value)}
               rows={4}
               placeholder={`- Hiểu được kiến trúc X\n- Biết cách triển khai Y\n- Áp dụng được Z vào thực tế`}
-              className="w-full text-sm font-mono bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none text-slate-800 dark:text-slate-200 placeholder:text-slate-400 transition-all"
+              className="w-full text-sm font-mono bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none text-zinc-800 dark:text-slate-200 placeholder:text-zinc-500 transition-all"
             />
-            <p className="text-[11px] text-slate-400 mt-1">Dùng <code className="bg-slate-100 dark:bg-white/10 px-1 rounded">-</code> để tạo danh sách. Hiển thị dạng box nổi bật đầu bài.</p>
+            <p className="text-[11px] text-zinc-500 mt-1">Dùng <code className="bg-zinc-100 dark:bg-white/10 px-1 rounded">-</code> để tạo danh sách. Hiển thị dạng box nổi bật đầu bài.</p>
           </div>
         )}
       </div>
@@ -255,16 +255,16 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
       {/* Editor + Preview */}
       <div className="flex flex-1 overflow-hidden">
         {(viewMode === 'editor' || viewMode === 'split') && (
-          <div className={`flex flex-col ${viewMode === 'split' ? 'w-1/2 border-r border-slate-200 dark:border-white/5' : 'flex-1'}`}>
-            <div className="flex items-center px-4 py-2 bg-transparent border-b border-slate-100 dark:border-white/5">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Markdown</span>
-              <span className="ml-auto text-[10px] text-slate-400">{content.length} ký tự</span>
+          <div className={`flex flex-col ${viewMode === 'split' ? 'w-1/2 border-r border-zinc-300 dark:border-white/5' : 'flex-1'}`}>
+            <div className="flex items-center px-4 py-2 bg-transparent border-b border-zinc-200 dark:border-white/5">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Markdown</span>
+              <span className="ml-auto text-[10px] text-zinc-500">{content.length} ký tự</span>
             </div>
             <textarea
               ref={textareaRef}
               value={content}
               onChange={(e) => onContentChange(e.target.value)}
-              className="flex-1 w-full resize-none p-6 font-mono text-sm leading-relaxed outline-none bg-transparent text-slate-800 dark:text-slate-200 placeholder:text-slate-300"
+              className="flex-1 w-full resize-none p-6 font-mono text-sm leading-relaxed outline-none bg-transparent text-zinc-800 dark:text-slate-200 placeholder:text-zinc-300"
               spellCheck={false}
               placeholder="Bắt đầu viết nội dung Markdown ở đây..."
             />
@@ -272,8 +272,8 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
         )}
         {(viewMode === 'preview' || viewMode === 'split') && (
           <div className={`flex flex-col ${viewMode === 'split' ? 'w-1/2' : 'flex-1'} overflow-hidden`}>
-            <div className="flex items-center px-4 py-2 bg-transparent border-b border-slate-100 dark:border-white/5">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Live Preview</span>
+            <div className="flex items-center px-4 py-2 bg-transparent border-b border-zinc-200 dark:border-white/5">
+              <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Live Preview</span>
             </div>
             <div className="flex-1 overflow-hidden"><MarkdownPreview content={content} /></div>
           </div>
@@ -281,11 +281,11 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
       </div>
 
       {/* Footer Navigation */}
-      <div className="px-6 py-4 bg-transparent border-t border-slate-200 dark:border-white/5 shrink-0 flex items-center justify-between">
-        <button onClick={onBack} className="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 transition-all">
+      <div className="px-6 py-4 bg-transparent border-t border-zinc-300 dark:border-white/5 shrink-0 flex items-center justify-between">
+        <button onClick={onBack} className="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-zinc-300 dark:border-white/10 text-sm font-bold text-zinc-500 hover:text-zinc-800 dark:hover:text-white hover:border-zinc-300 dark:hover:border-white/20 transition-all">
           <ArrowLeft className="w-4 h-4" /> Quay lại
         </button>
-        <button onClick={onNext} className="flex items-center gap-2 px-8 py-2.5 rounded-xl bg-slate-900 dark:bg-primary text-white text-sm font-bold hover:opacity-90 transition-all">
+        <button onClick={onNext} className="flex items-center gap-2 px-8 py-2.5 rounded-xl bg-zinc-800 dark:bg-primary text-white text-sm font-bold hover:opacity-90 transition-all">
           Tiếp theo <ArrowRight className="w-4 h-4" />
         </button>
       </div>

@@ -29,7 +29,7 @@ export default function TableOfContents({ headings }: { headings: Heading[] }) {
 
   return (
     <div>
-      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 mb-4">
+      <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500 dark:text-slate-500 mb-4">
         Mục lục
       </p>
 
@@ -52,7 +52,7 @@ export default function TableOfContents({ headings }: { headings: Heading[] }) {
               } ${
                 isActive
                   ? 'bg-primary/10 text-primary font-medium'
-                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-slate-900 dark:hover:text-white'
+                  : 'text-zinc-600 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-800 dark:hover:text-white'
               }`}
             >
               {text}

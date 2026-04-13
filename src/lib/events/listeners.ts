@@ -53,34 +53,26 @@ export function registerEventListeners() {
         });
       }
 
-      // Tạo notification cho tất cả users (trừ tác giả)
+      // Tạo notification cho tất cả users (trừ tác giả) và push ngay khi mỗi record được tạo
       const users = await db.user.findMany({
         where: { id: { not: payload.actorId } },
         select: { id: true },
       });
       if (users.length === 0) return;
 
-      await db.notification.createMany({
-        data: users.map(u => ({
-          userId:  u.id,
-          type:    NotificationType.NEW_ARTICLE,
-          title:   `Bài viết mới: "${payload.title}"`,
-          message: `${payload.authorName} vừa đăng bài mới`,
-          link:    `/article/${payload.slug}`,
-        })),
+      const base = {
+        type:    NotificationType.NEW_ARTICLE,
+        title:   `Bài viết mới: "${payload.title}"`,
+        message: `${payload.authorName} vừa đăng bài mới`,
+        link:    `/article/${payload.slug}`,
+      };
+
+      // createManyAndReturn cho phép lấy id ngay, không cần findMany lần hai
+      const created = await db.notification.createManyAndReturn({
+        data: users.map(u => ({ userId: u.id, ...base })),
       });
 
-      // Push SSE real-time đến users đang online — lấy lại records để có đúng ID
-      const created = await db.notification.findMany({
-        where: {
-          type: NotificationType.NEW_ARTICLE,
-          link: `/article/${payload.slug}`,
-          userId: { in: users.map(u => u.id) },
-        },
-        orderBy: { createdAt: 'desc' },
-        take: users.length,
-      });
-
+      // Push SSE song song — không đợi tuần tự
       for (const notif of created) {
         pushToUser(notif.userId, 'notification', notif);
       }

@@ -46,15 +46,15 @@ export default function AnnouncementEditor({ initial }: { initial: SiteAnnouncem
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* ── Left: Form ── */}
-      <div className="bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 rounded-2xl p-6 space-y-6">
+      <div className="bg-white dark:bg-white/[0.02] border border-zinc-300 dark:border-white/10 rounded-2xl p-6 space-y-6">
         <div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">Cấu hình banner</h3>
-          <p className="text-xs text-slate-500 mt-0.5">Hiển thị thông báo ghim ở đầu trang cho tất cả người dùng</p>
+          <h3 className="text-base font-bold text-zinc-800 dark:text-white">Cấu hình banner</h3>
+          <p className="text-xs text-zinc-500 mt-0.5">Hiển thị thông báo ghim ở đầu trang cho tất cả người dùng</p>
         </div>
 
         {/* Type */}
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Loại</p>
+          <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Loại</p>
           <div className="flex flex-wrap gap-2">
             {ANN_TYPES.map(t => {
               const TIcon = t.icon;
@@ -64,7 +64,7 @@ export default function AnnouncementEditor({ initial }: { initial: SiteAnnouncem
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 text-sm font-semibold transition-all w-fit ${
                     isActive
                       ? `${t.bg} ${t.text} ${t.border}`
-                      : 'border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-white/20 bg-slate-50 dark:bg-white/5'
+                      : 'border-zinc-300 dark:border-white/10 text-zinc-600 dark:text-slate-400 hover:border-zinc-300 dark:hover:border-white/20 bg-zinc-50 dark:bg-white/5'
                   }`}>
                   <TIcon className="w-4 h-4 shrink-0" />
                   {t.label}
@@ -76,7 +76,7 @@ export default function AnnouncementEditor({ initial }: { initial: SiteAnnouncem
 
         {/* Message */}
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+          <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">
             Nội dung <span className="text-rose-400 normal-case">*</span>
           </p>
           <textarea
@@ -84,23 +84,23 @@ export default function AnnouncementEditor({ initial }: { initial: SiteAnnouncem
             onChange={e => set('message', e.target.value)}
             rows={3}
             placeholder="Hệ thống sẽ bảo trì vào Chủ nhật 02:00 – 04:00 AM..."
-            className="w-full px-4 py-3 text-sm bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary dark:text-white placeholder:text-slate-400 resize-none transition-all"
+            className="w-full px-4 py-3 text-sm bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary dark:text-white placeholder:text-zinc-500 resize-none transition-all"
           />
         </div>
 
         {/* Expiry */}
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hiển thị đến (tuỳ chọn)</p>
+          <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Hiển thị đến (tuỳ chọn)</p>
           <div className="flex items-center gap-2">
             <input
               type="datetime-local"
               value={form.expiresAt ?? ''}
               onChange={e => set('expiresAt', e.target.value || undefined)}
-              className="flex-1 px-4 py-2.5 text-sm bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 dark:text-white dark:[color-scheme:dark] transition-all"
+              className="flex-1 px-4 py-2.5 text-sm bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 dark:text-white dark:[color-scheme:dark] transition-all"
             />
             {form.expiresAt && (
               <button type="button" onClick={() => set('expiresAt', '')}
-                className="p-2.5 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-slate-200 dark:border-white/10 transition-all">
+                className="p-2.5 rounded-xl text-zinc-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-zinc-300 dark:border-white/10 transition-all">
                 <X className="w-4 h-4" />
               </button>
             )}
@@ -108,13 +108,13 @@ export default function AnnouncementEditor({ initial }: { initial: SiteAnnouncem
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-white/5">
+        <div className="flex items-center justify-between pt-2 border-t border-zinc-200 dark:border-white/5">
           <label className="flex items-center gap-3 cursor-pointer select-none">
             <button type="button" onClick={() => set('active', !form.active)}
-              className={`relative w-11 h-6 rounded-full transition-colors ${form.active ? 'bg-primary' : 'bg-slate-200 dark:bg-white/10'}`}>
+              className={`relative w-11 h-6 rounded-full transition-colors ${form.active ? 'bg-primary' : 'bg-zinc-200 dark:bg-white/10'}`}>
               <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${form.active ? 'translate-x-5' : ''}`} />
             </button>
-            <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+            <span className="text-sm font-medium text-zinc-700 dark:text-slate-300">
               {form.active ? 'Đang hiển thị' : 'Đang ẩn'}
             </span>
           </label>
@@ -122,7 +122,7 @@ export default function AnnouncementEditor({ initial }: { initial: SiteAnnouncem
           <div className="flex items-center gap-2">
             {form.active && (
               <button onClick={deactivate} disabled={isPending}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-slate-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-slate-200 dark:border-white/10 hover:border-rose-200 transition-all">
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-zinc-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 border border-zinc-300 dark:border-white/10 hover:border-rose-200 transition-all">
                 <PinOff className="w-3.5 h-3.5" /> Tắt banner
               </button>
             )}
@@ -139,22 +139,22 @@ export default function AnnouncementEditor({ initial }: { initial: SiteAnnouncem
 
       {/* ── Right: Preview ── */}
       <div className="space-y-4">
-        <div className="bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 rounded-2xl p-6 space-y-4">
+        <div className="bg-white dark:bg-white/[0.02] border border-zinc-300 dark:border-white/10 rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-2">
-            <Eye className="w-4 h-4 text-slate-400" />
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Xem trước</p>
+            <Eye className="w-4 h-4 text-zinc-500" />
+            <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Xem trước</p>
           </div>
 
           {/* Browser chrome mockup */}
-          <div className="border border-slate-200 dark:border-white/10 rounded-xl overflow-hidden">
+          <div className="border border-zinc-300 dark:border-white/10 rounded-xl overflow-hidden">
             {/* Browser bar */}
-            <div className="bg-slate-100 dark:bg-white/5 px-3 py-2 flex items-center gap-2 border-b border-slate-200 dark:border-white/10">
+            <div className="bg-zinc-100 dark:bg-white/5 px-3 py-2 flex items-center gap-2 border-b border-zinc-300 dark:border-white/10">
               <div className="flex gap-1.5">
                 <div className="w-2.5 h-2.5 rounded-full bg-rose-400" />
                 <div className="w-2.5 h-2.5 rounded-full bg-amber-400" />
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-400" />
               </div>
-              <div className="flex-1 bg-white dark:bg-white/10 rounded-md px-3 py-1 text-[10px] text-slate-400">
+              <div className="flex-1 bg-white dark:bg-white/10 rounded-md px-3 py-1 text-[10px] text-zinc-500">
                 yoursite.com
               </div>
             </div>
@@ -169,38 +169,38 @@ export default function AnnouncementEditor({ initial }: { initial: SiteAnnouncem
                 <X className="w-3.5 h-3.5 opacity-50 shrink-0" />
               </div>
             ) : (
-              <div className="bg-slate-50 dark:bg-white/5 px-4 py-3 flex items-center justify-center">
-                <p className="text-[11px] text-slate-400 italic">Nhập nội dung để xem trước banner...</p>
+              <div className="bg-zinc-50 dark:bg-white/5 px-4 py-3 flex items-center justify-center">
+                <p className="text-[11px] text-zinc-500 italic">Nhập nội dung để xem trước banner...</p>
               </div>
             )}
 
             {/* Page mockup */}
             <div className="p-4 space-y-2 bg-white dark:bg-slate-900">
-              <div className="h-3 bg-slate-100 dark:bg-white/10 rounded w-2/3" />
-              <div className="h-2 bg-slate-50 dark:bg-white/5 rounded w-full" />
-              <div className="h-2 bg-slate-50 dark:bg-white/5 rounded w-4/5" />
+              <div className="h-3 bg-zinc-100 dark:bg-white/10 rounded w-2/3" />
+              <div className="h-2 bg-zinc-50 dark:bg-white/5 rounded w-full" />
+              <div className="h-2 bg-zinc-50 dark:bg-white/5 rounded w-4/5" />
             </div>
           </div>
         </div>
 
         {/* Status info */}
-        <div className="bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 rounded-2xl p-6 space-y-3">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Trạng thái</p>
+        <div className="bg-white dark:bg-white/[0.02] border border-zinc-300 dark:border-white/10 rounded-2xl p-6 space-y-3">
+          <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Trạng thái</p>
           <div className="space-y-2.5">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-500">Hiển thị</span>
-              <span className={`font-semibold ${form.active ? 'text-emerald-500' : 'text-slate-400'}`}>
+              <span className="text-zinc-500">Hiển thị</span>
+              <span className={`font-semibold ${form.active ? 'text-emerald-500' : 'text-zinc-500'}`}>
                 {form.active ? 'Đang bật' : 'Đang tắt'}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-slate-500">Loại</span>
-              <span className="font-semibold text-slate-700 dark:text-slate-300">{cfg.label}</span>
+              <span className="text-zinc-500">Loại</span>
+              <span className="font-semibold text-zinc-700 dark:text-slate-300">{cfg.label}</span>
             </div>
             {form.expiresAt && (
               <div className="flex items-center justify-between text-sm">
-                <span className="text-slate-500">Hết hạn</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-300">
+                <span className="text-zinc-500">Hết hạn</span>
+                <span className="font-semibold text-zinc-700 dark:text-slate-300">
                   {new Date(form.expiresAt).toLocaleString('vi-VN', { dateStyle: 'short', timeStyle: 'short' })}
                 </span>
               </div>

@@ -18,6 +18,7 @@ export type AdminUser = {
   image: string | null;
   role: Role;
   status: UserStatus;
+  canWrite: boolean;
   createdAt: Date;
   _count: { articles: number; readHistories: number };
 };
@@ -52,7 +53,7 @@ export async function getAdminUsersAction(options: {
       take:    limit,
       select: {
         id: true, name: true, email: true, image: true,
-        role: true, status: true, createdAt: true,
+        role: true, status: true, canWrite: true, createdAt: true,
         _count: { select: { articles: true, readHistories: true } },
       },
     }),
@@ -85,5 +86,13 @@ export async function toggleUserStatusAction(id: string) {
   if (!user) throw new Error('User not found');
   const next = user.status === 'ACTIVE' ? UserStatus.LOCKED : UserStatus.ACTIVE;
   await db.user.update({ where: { id }, data: { status: next } });
+  revalidatePath('/admin/users');
+}
+
+export async function toggleUserCanWriteAction(id: string) {
+  await requireAdmin();
+  const user = await db.user.findUnique({ where: { id }, select: { canWrite: true } });
+  if (!user) throw new Error('User not found');
+  await db.user.update({ where: { id }, data: { canWrite: !user.canWrite } });
   revalidatePath('/admin/users');
 }

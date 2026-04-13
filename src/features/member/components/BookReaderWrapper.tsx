@@ -47,7 +47,7 @@ export default function BookReaderWrapper({ bookTitle, bookSlug, chapter, chapte
 
   return (
     <div className="flex h-[100dvh] overflow-hidden bg-white dark:bg-slate-950">
-      <div className={`h-full shrink-0 transition-all duration-300 ease-in-out border-r border-slate-100 dark:border-white/5 ${isSidebarOpen ? 'w-80 opacity-100' : 'w-0 opacity-0 overflow-hidden border-none'}`}>
+      <div className={`h-full shrink-0 transition-all duration-300 ease-in-out border-r border-zinc-200 dark:border-white/5 ${isSidebarOpen ? 'w-80 opacity-100' : 'w-0 opacity-0 overflow-hidden border-none'}`}>
         <ChapterSidebar
           bookTitle={bookTitle}
           bookSlug={bookSlug}

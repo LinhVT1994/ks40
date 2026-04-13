@@ -6,11 +6,12 @@ import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, FileText, Users, MessageSquare,
   Settings, ChevronLeft, ChevronRight,
-  GraduationCap, Activity, Bell, Share2,
+  GraduationCap, Activity, Bell, Share2, LayoutGrid, BarChart3,
 } from 'lucide-react';
 
 const navItems: { href: string; icon: React.ElementType; label: string; badge?: number }[] = [
   { href: '/admin/overview',       icon: LayoutDashboard, label: 'Dashboard'    },
+  { href: '/admin/analytics',      icon: BarChart3,       label: 'Phân tích'    },
   { href: '/admin/documents',      icon: FileText,        label: 'Bài viết'     },
   { href: '/admin/users',          icon: Users,           label: 'Người dùng'  },
   { href: '/admin/comments',       icon: MessageSquare,   label: 'Bình luận'   },
@@ -46,18 +47,18 @@ export default function AdminSidebar() {
 
       {/* Sidebar Wrapper */}
       <aside className={`
-        fixed lg:sticky top-0 left-0 z-50 h-[100dvh] flex flex-col bg-white dark:bg-slate-950 border-r border-slate-200 dark:border-white/5 transition-transform duration-300 ease-in-out shrink-0
+        fixed lg:sticky top-0 left-0 z-50 h-[100dvh] flex flex-col bg-white dark:bg-slate-950 border-r border-zinc-300 dark:border-white/5 transition-transform duration-300 ease-in-out shrink-0
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         ${collapsed ? 'lg:w-20 w-64' : 'w-64'}
       `}>
       {/* Logo */}
-      <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-200 dark:border-white/5 shrink-0">
-        <div className="inline-flex items-center justify-center bg-gradient-to-br from-primary to-accent-purple rounded-lg p-1.5 shadow-[0_0_15px_rgba(59,130,246,0.4)] shrink-0">
+      <div className="flex items-center gap-3 px-5 py-5 border-b border-zinc-300 dark:border-white/5 shrink-0">
+        <div className="inline-flex items-center justify-center bg-gradient-to-br from-primary to-accent-purple rounded-lg p-1.5 shadow-sm dark:shadow-[0_0_15px_rgba(59,130,246,0.4)] shrink-0">
           <GraduationCap className="text-white w-5 h-5" />
         </div>
         {!collapsed && (
-          <span className="font-bold text-lg tracking-tight text-slate-900 dark:text-white whitespace-nowrap">
-            KS4.0 <span className="text-slate-400 font-normal">Admin</span>
+          <span className="font-bold text-lg tracking-tight text-zinc-800 dark:text-white whitespace-nowrap">
+            KS4.0 <span className="text-zinc-500 font-normal">Admin</span>
           </span>
         )}
       </div>
@@ -75,7 +76,7 @@ export default function AdminSidebar() {
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
                 isActive
                   ? 'bg-primary/10 text-primary border border-primary/20'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5'
+                  : 'text-zinc-500 dark:text-slate-400 hover:text-zinc-800 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5'
               }`}
             >
               <Icon className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-primary' : ''}`} />
@@ -96,10 +97,10 @@ export default function AdminSidebar() {
       </nav>
 
       {/* Collapse Toggle */}
-      <div className="px-3 py-4 border-t border-slate-200 dark:border-white/5 shrink-0">
+      <div className="px-3 py-4 border-t border-zinc-300 dark:border-white/5 shrink-0">
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden lg:flex w-full items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/5 transition-all text-sm font-medium"
+          className="hidden lg:flex w-full items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-zinc-500 dark:text-slate-400 hover:text-zinc-800 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition-all text-sm font-medium"
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : (
             <>

@@ -3,34 +3,12 @@ import { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
-const CATEGORY_COLORS: Record<string, { bg: string; text: string }> = {
-  SYSTEM_DESIGN: { bg: '#eff6ff', text: '#2563eb' },
-  AI_ML:         { bg: '#f5f3ff', text: '#7c3aed' },
-  DEVOPS:        { bg: '#fff7ed', text: '#ea580c' },
-  BLOCKCHAIN:    { bg: '#fffbeb', text: '#d97706' },
-  FRONTEND:      { bg: '#f0f9ff', text: '#0284c7' },
-  BACKEND:       { bg: '#f0fdf4', text: '#16a34a' },
-  OTHER:         { bg: '#f8fafc', text: '#64748b' },
-};
-
-const CATEGORY_LABELS: Record<string, string> = {
-  SYSTEM_DESIGN: 'System Design',
-  AI_ML:         'AI / ML',
-  DEVOPS:        'DevOps',
-  BLOCKCHAIN:    'Blockchain',
-  FRONTEND:      'Frontend',
-  BACKEND:       'Backend',
-  OTHER:         'Khác',
-};
-
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl;
-  const title    = searchParams.get('title')    ?? 'Lenote.dev';
-  const author   = searchParams.get('author')   ?? '';
-  const category = searchParams.get('category') ?? 'OTHER';
-
-  const color = CATEGORY_COLORS[category] ?? CATEGORY_COLORS.OTHER;
-  const label = CATEGORY_LABELS[category] ?? category;
+  const title  = searchParams.get('title')  ?? 'Lenote.dev';
+  const author = searchParams.get('author') ?? '';
+  const label  = searchParams.get('topic')  ?? '';
+  const color  = searchParams.get('color')  ?? '#64748b';
 
   return new ImageResponse(
     (
@@ -50,19 +28,21 @@ export async function GET(req: NextRequest) {
             backgroundColor: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: 'white', fontWeight: 800, fontSize: 16,
           }}>L</div>
-          <span style={{ color: '#94a3b8', fontSize: 18, fontWeight: 600 }}>Lenote.dev</span>
+          <span style={{ color: '#94a3b8', fontSize: 18, fontWeight: 600 }}>Lenote</span>
         </div>
 
         {/* Middle — title */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 20, flex: 1, justifyContent: 'center' }}>
-          <span style={{
-            display: 'inline-flex', alignSelf: 'flex-start',
-            fontSize: 14, fontWeight: 700,
-            padding: '6px 14px', borderRadius: 999,
-            backgroundColor: color.bg, color: color.text,
-          }}>
-            {label}
-          </span>
+          {label && (
+            <span style={{
+              display: 'inline-flex', alignSelf: 'flex-start',
+              fontSize: 14, fontWeight: 700,
+              padding: '6px 14px', borderRadius: 999,
+              backgroundColor: color + '22', color,
+            }}>
+              {label}
+            </span>
+          )}
           <div style={{
             fontSize: title.length > 60 ? 36 : title.length > 40 ? 42 : 52,
             fontWeight: 800, color: '#f1f5f9',

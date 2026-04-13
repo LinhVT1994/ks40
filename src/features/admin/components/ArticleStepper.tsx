@@ -15,7 +15,7 @@ interface StepperProps {
 
 export default function ArticleStepper({ currentStep }: StepperProps) {
   return (
-    <div className="flex items-center gap-0 px-8 py-4 border-b border-slate-200 dark:border-white/5 bg-white dark:bg-slate-950 shrink-0">
+    <div className="flex items-center gap-0 px-8 py-4 border-b border-zinc-300 dark:border-white/5 bg-white dark:bg-slate-950 shrink-0">
       {steps.map((step, i) => {
         const isDone = currentStep > step.number;
         const isActive = currentStep === step.number;
@@ -29,13 +29,13 @@ export default function ArticleStepper({ currentStep }: StepperProps) {
                   ? 'bg-primary text-white'
                   : isActive
                     ? 'bg-primary/10 text-primary border-2 border-primary'
-                    : 'bg-slate-100 dark:bg-white/5 text-slate-400 border-2 border-slate-200 dark:border-white/10'
+                    : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 border-2 border-zinc-300 dark:border-white/10'
               }`}>
                 {isDone ? <Check className="w-4 h-4" /> : step.number}
               </div>
               {/* Label */}
               <span className={`text-sm font-bold transition-colors ${
-                isActive ? 'text-slate-900 dark:text-white' : isDone ? 'text-primary' : 'text-slate-400'
+                isActive ? 'text-zinc-800 dark:text-white' : isDone ? 'text-primary' : 'text-zinc-500'
               }`}>
                 {step.label}
               </span>
@@ -44,7 +44,7 @@ export default function ArticleStepper({ currentStep }: StepperProps) {
             {/* Connector line */}
             {i < steps.length - 1 && (
               <div className={`flex-1 h-px mx-6 transition-colors max-w-24 ${
-                currentStep > step.number ? 'bg-primary/40' : 'bg-slate-200 dark:bg-white/10'
+                currentStep > step.number ? 'bg-primary/40' : 'bg-zinc-200 dark:bg-white/10'
               }`} />
             )}
           </React.Fragment>

@@ -18,19 +18,19 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     <MemberContainer className="max-w-3xl">
       <div className="mb-8 space-y-6">
         <form action="/search" className="relative group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-primary transition-colors" />
           <input
             type="text"
             name="q"
             defaultValue={query}
             placeholder="Tìm kiếm bài viết khác..."
-            className="w-full pl-12 pr-4 py-3 bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all text-slate-900 dark:text-white"
+            className="w-full pl-12 pr-4 py-3 bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all text-zinc-800 dark:text-white"
           />
         </form>
 
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-display flex-1">
+            <h1 className="text-2xl font-bold text-zinc-800 dark:text-white font-display flex-1">
               {tagSlug && query ? (
                 <>Tìm kiếm <span className="text-primary">"{query}"</span> trong thẻ <span className="text-primary">#{tagSlug}</span></>
               ) : tagSlug ? (
@@ -44,7 +44,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
             <BackButton />
           </div>
           {(query || tagSlug) && (
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-zinc-500">
               {total > 0 ? `${total} bài viết được tìm thấy` : 'Không tìm thấy kết quả nào'}
             </p>
           )}

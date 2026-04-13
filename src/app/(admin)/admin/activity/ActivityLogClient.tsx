@@ -42,7 +42,7 @@ function renderMessage(msg: string) {
   const parts = msg.split(/\*\*(.*?)\*\*/g);
   return parts.map((part, i) =>
     i % 2 === 1
-      ? <span key={i} className="font-bold text-slate-900 dark:text-white">{part}</span>
+      ? <span key={i} className="font-bold text-zinc-800 dark:text-white">{part}</span>
       : <span key={i}>{part}</span>
   );
 }
@@ -100,16 +100,16 @@ export default function ActivityLogClient({
       <div className="flex flex-col sm:flex-row gap-3">
         {/* Search — bên trái */}
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
           <input
             value={q}
             onChange={e => { setQ(e.target.value); navigate({ q: e.target.value, page: '1' }); }}
             placeholder="Tìm kiếm..."
-            className="w-full pl-9 pr-8 py-2.5 text-sm bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 dark:text-white placeholder:text-slate-400"
+            className="w-full pl-9 pr-8 py-2.5 text-sm bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 dark:text-white placeholder:text-zinc-500"
           />
           {q && (
             <button type="button" onClick={() => { setQ(''); navigate({ q: '', page: '1' }); }}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-600">
               <X className="w-3.5 h-3.5" />
             </button>
           )}
@@ -127,9 +127,9 @@ export default function ActivityLogClient({
                 className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-semibold transition-all border ${
                   isActive
                     ? ft.key === 'all'
-                      ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-transparent'
+                      ? 'bg-zinc-800 dark:bg-white text-white dark:text-slate-900 border-transparent'
                       : `${cfg.bg} ${cfg.color} border-current ring-1 ${cfg.ring}`
-                    : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:border-slate-300 dark:hover:border-white/20'
+                    : 'bg-white dark:bg-white/5 border-zinc-300 dark:border-white/10 text-zinc-500 hover:border-zinc-300 dark:hover:border-white/20'
                 }`}
               >
                 {cfg && React.createElement(cfg.icon, { className: 'w-3 h-3' })}
@@ -145,7 +145,7 @@ export default function ActivityLogClient({
       {/* List */}
       <div className={`transition-opacity duration-200 ${isPending ? 'opacity-50' : 'opacity-100'}`}>
         {activities.length === 0 ? (
-          <div className="bg-white dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-2xl py-16 flex flex-col items-center gap-3 text-slate-400">
+          <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-2xl py-16 flex flex-col items-center gap-3 text-zinc-500">
             <Bell className="w-8 h-8 opacity-30" />
             <p className="text-sm">Không có hoạt động nào</p>
           </div>
@@ -155,12 +155,12 @@ export default function ActivityLogClient({
               <div key={date}>
                 {/* Date header */}
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest whitespace-nowrap">{date}</span>
-                  <div className="flex-1 h-px bg-slate-100 dark:bg-white/5" />
+                  <span className="text-xs font-bold text-zinc-500 dark:text-slate-500 uppercase tracking-widest whitespace-nowrap">{date}</span>
+                  <div className="flex-1 h-px bg-zinc-100 dark:bg-white/5" />
                 </div>
 
                 {/* Items */}
-                <div className="bg-white dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-2xl overflow-hidden divide-y divide-slate-50 dark:divide-white/5">
+                <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden divide-y divide-zinc-200 dark:divide-white/5">
                   {items.map((activity) => {
                     const cfg = TYPE_CONFIG[activity.type] ?? TYPE_CONFIG.SYSTEM_ALERT;
                     const Icon = cfg.icon;
@@ -170,7 +170,7 @@ export default function ActivityLogClient({
                         : null);
 
                     const row = (
-                      <div className="flex items-start gap-4 px-5 py-3.5 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors group">
+                      <div className="flex items-start gap-4 px-5 py-3.5 hover:bg-zinc-50 dark:hover:bg-white/[0.02] transition-colors group">
                         {/* Type icon */}
                         <div className={`p-2 rounded-xl shrink-0 mt-0.5 ${cfg.bg}`}>
                           <Icon className={`w-3.5 h-3.5 ${cfg.color}`} />
@@ -178,7 +178,7 @@ export default function ActivityLogClient({
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                          <p className="text-sm text-zinc-600 dark:text-slate-300 leading-relaxed">
                             {renderMessage(activity.message)}
                           </p>
                           {activity.actor && (
@@ -186,14 +186,14 @@ export default function ActivityLogClient({
                               {avatarUrl && (
                                 <img src={avatarUrl} alt="" className="w-4 h-4 rounded-full object-cover" />
                               )}
-                              <span className="text-[11px] text-slate-400">{activity.actor.name}</span>
+                              <span className="text-[11px] text-zinc-500">{activity.actor.name}</span>
                             </div>
                           )}
                         </div>
 
                         {/* Right: time + type badge */}
                         <div className="shrink-0 text-right space-y-1">
-                          <p className="text-[11px] text-slate-400 font-medium whitespace-nowrap">
+                          <p className="text-[11px] text-zinc-500 font-medium whitespace-nowrap">
                             {format(new Date(activity.createdAt), 'HH:mm')}
                           </p>
                           <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full ${cfg.bg} ${cfg.color}`}>

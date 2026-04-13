@@ -13,6 +13,7 @@ export const authConfig: NextAuthConfig = {
         (session.user as { role?: string }).role                   = token.role as string;
         (session.user as { status?: string }).status               = token.status as string;
         (session.user as { onboardingDone?: boolean }).onboardingDone = token.onboardingDone as boolean;
+        (session.user as { canWrite?: boolean }).canWrite          = (token.canWrite as boolean) ?? false;
       }
       return session;
     },
@@ -27,7 +28,7 @@ export const authConfig: NextAuthConfig = {
       const isResetRoute      = path === '/reset-password';
 
       // Các route yêu cầu login (member area)
-      const isProtectedRoute  = ['/settings', '/history', '/bookmarks', '/notifications'].some(p => path.startsWith(p));
+      const isProtectedRoute  = ['/settings', '/history', '/bookmarks', '/notifications', '/write'].some(p => path.startsWith(p));
 
       const role           = (auth?.user as { role?: string })?.role;
       const onboardingDone = (auth?.user as { onboardingDone?: boolean })?.onboardingDone;
@@ -51,8 +52,8 @@ export const authConfig: NextAuthConfig = {
         return Response.redirect(new URL('/onboarding', nextUrl));
       }
 
-      // Đã onboarding → không vào lại /onboarding
-      if (isLoggedIn && onboardingDone && isOnboardingRoute) {
+      // Đã onboarding → không vào lại /onboarding (trừ trang thành công để xem animation)
+      if (isLoggedIn && onboardingDone && isOnboardingRoute && path !== '/onboarding/success') {
         return Response.redirect(new URL('/', nextUrl));
       }
 

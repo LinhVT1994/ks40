@@ -2,9 +2,9 @@ import { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name:             'Lenote.dev',
+    name:             'Lenote',
     short_name:       'Lenote',
-    description:      'Nền tảng học tập công nghệ tinh tế — System Design, AI/ML, DevOps, Blockchain, Frontend, Backend.',
+    description:      'Lenote — Nền tảng học tập công nghệ tinh tế — System Design, AI/ML, DevOps, Frontend, Backend.',
     start_url:        '/',
     display:          'standalone',
     background_color: '#0f172a',

@@ -3,7 +3,7 @@
 import React, { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { loginAction } from '@/features/auth/actions/login';
+import { signIn } from 'next-auth/react';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 export default function LoginForm() {
@@ -25,22 +25,41 @@ export default function LoginForm() {
     e.preventDefault();
     setError('');
     const formData = new FormData(e.currentTarget);
-    const email = formData.get('email') as string;
+    const email = ((formData.get('email') as string) || '').trim().toLowerCase();
+    const password = formData.get('password') as string;
     const remember = formData.get('remember') === 'on';
 
     startTransition(async () => {
-      const result = await loginAction(formData);
-      if (result.success) {
+      if (!email || !password) {
+        setError('Vui lòng nhập email và mật khẩu.');
+        return;
+      }
+
+      const result = await signIn('credentials', {
+        email,
+        password,
+        remember: String(remember),
+        redirect: false,
+        callbackUrl: callbackUrl || '/',
+      });
+
+      if (result?.error) {
+        setError('Email hoặc mật khẩu không đúng.');
+        return;
+      }
+
+      if (result?.ok) {
         if (remember) {
           localStorage.setItem('remembered_email', email);
         } else {
           localStorage.removeItem('remembered_email');
         }
         router.refresh();
-        router.push(callbackUrl || '/');
-      } else {
-        setError(result.error);
+        router.push(result.url || callbackUrl || '/');
+        return;
       }
+
+      setError('Tài khoản bị khoá hoặc có lỗi xảy ra.');
     });
   };
 
@@ -53,9 +72,9 @@ export default function LoginForm() {
       )}
 
       <div>
-        <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300" htmlFor="email">Email</label>
+        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-zinc-400 px-1" htmlFor="email">Email</label>
         <input
-          className="w-full bg-white/50 dark:bg-black/30 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+          className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700"
           id="email"
           name="email"
           defaultValue={initialEmail}
@@ -68,13 +87,13 @@ export default function LoginForm() {
       </div>
 
       <div>
-        <div className="flex justify-between items-center mb-1.5">
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300" htmlFor="password">Mật khẩu</label>
-          <Link href="/forgot-password" className="text-xs text-primary hover:text-primary/80 transition-colors">Quên mật khẩu?</Link>
+        <div className="flex justify-between items-center mb-2 px-1">
+          <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400" htmlFor="password">Mật khẩu</label>
+          <Link href="/forgot-password" alt-target="true" className="text-[10px] font-black uppercase tracking-wider text-primary hover:text-primary/80 transition-colors">Quên mật khẩu?</Link>
         </div>
         <div className="relative">
           <input
-            className="w-full bg-white/50 dark:bg-black/30 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2.5 pr-10 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+            className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 pr-10 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700"
             id="password"
             name="password"
             placeholder="••••••••"
@@ -85,38 +104,38 @@ export default function LoginForm() {
           <button
             type="button"
             onClick={() => setShowPassword(v => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-primary transition-colors p-1"
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
         </div>
       </div>
 
-      <div className="flex items-center gap-2 group/check px-0.5">
+      <div className="flex items-center gap-2 group/check px-1">
         <div className="relative flex items-center">
           <input
             type="checkbox"
             id="remember"
             name="remember"
             defaultChecked
-            className="peer w-4 h-4 appearance-none rounded border border-slate-300 dark:border-slate-700 bg-white/50 dark:bg-black/30 checked:bg-primary checked:border-primary transition-all cursor-pointer"
+            className="peer w-4 h-4 appearance-none rounded-md border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-black/30 checked:bg-primary checked:border-primary transition-all cursor-pointer"
           />
           <svg className="absolute w-2.5 h-2.5 pointer-events-none hidden peer-checked:block left-0.5" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4">
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-        <label htmlFor="remember" className="text-xs text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 transition-colors cursor-pointer select-none">
+        <label htmlFor="remember" className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-primary transition-colors cursor-pointer select-none">
           Ghi nhớ đăng nhập
         </label>
       </div>
 
       <button
-        className="w-full bg-gradient-to-r from-primary to-accent-purple text-white font-medium rounded-lg px-4 py-2.5 text-sm hover:opacity-90 transition-opacity mt-6 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+        className="w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black rounded-xl px-4 py-4 text-sm hover:opacity-90 active:scale-[0.98] transition-all mt-6 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shadow-xl shadow-zinc-200 dark:shadow-none"
         type="submit"
         disabled={isPending}
       >
         {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-        {isPending ? 'Đang đăng nhập...' : 'Đăng nhập'}
+        {isPending ? 'Đang xác thực...' : 'Đăng nhập vào hệ thống'}
       </button>
     </form>
   );

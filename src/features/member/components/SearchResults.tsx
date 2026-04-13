@@ -5,10 +5,6 @@ import Link from 'next/link';
 import { Heart, MessageCircle, Clock, Eye, Tag, Search, Lock, Star } from 'lucide-react';
 import type { ArticleCard } from '@/features/articles/actions/article';
 
-const CATEGORY_LABELS: Record<string, string> = {
-  SYSTEM_DESIGN: 'System Design', AI_ML: 'AI/ML', DEVOPS: 'DevOps',
-  BLOCKCHAIN: 'Blockchain', FRONTEND: 'Frontend', BACKEND: 'Backend', OTHER: 'Khác',
-};
 
 const BADGE_LABELS: Record<string, string> = {
   HOT: 'Hot', NEW: 'New', TRENDING: 'Trending', FEATURED: 'Featured',
@@ -44,8 +40,8 @@ export default function SearchResults({ articles, query, tag }: { articles: Arti
   if (!query && !tag) {
     return (
       <div className="py-24 text-center">
-        <Search className="w-12 h-12 mx-auto mb-4 text-slate-200 dark:text-white/10" />
-        <p className="text-slate-400">Nhập từ khóa vào ô tìm kiếm phía trên để bắt đầu.</p>
+        <Search className="w-12 h-12 mx-auto mb-4 text-zinc-200 dark:text-white/10" />
+        <p className="text-zinc-500">Nhập từ khóa vào ô tìm kiếm phía trên để bắt đầu.</p>
       </div>
     );
   }
@@ -53,21 +49,21 @@ export default function SearchResults({ articles, query, tag }: { articles: Arti
   if (articles.length === 0) {
     return (
       <div className="py-24 text-center">
-        <Search className="w-12 h-12 mx-auto mb-4 text-slate-200 dark:text-white/10" />
-        <p className="font-semibold text-slate-700 dark:text-slate-200 mb-2">Không tìm thấy kết quả</p>
-        <p className="text-sm text-slate-400">Thử tìm với từ khóa khác hoặc kiểm tra lại chính tả.</p>
+        <Search className="w-12 h-12 mx-auto mb-4 text-zinc-200 dark:text-white/10" />
+        <p className="font-semibold text-zinc-700 dark:text-slate-200 mb-2">Không tìm thấy kết quả</p>
+        <p className="text-sm text-zinc-500">Thử tìm với từ khóa khác hoặc kiểm tra lại chính tả.</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col divide-y divide-slate-100 dark:divide-white/5">
+    <div className="flex flex-col divide-y divide-zinc-200 dark:divide-white/5">
       {articles.map(article => (
         <Link key={article.id} href={`/article/${article.slug}`} className="block group py-5 first:pt-0">
           <div className="flex gap-4 items-start">
             {/* Thumbnail */}
             <div
-              className="w-28 h-20 rounded-xl shrink-0 bg-slate-100 dark:bg-white/5 bg-cover bg-center flex items-center justify-center text-slate-300 dark:text-white/20 font-bold text-xl overflow-hidden"
+              className="w-28 h-20 rounded-xl shrink-0 bg-zinc-100 dark:bg-white/5 bg-cover bg-center flex items-center justify-center text-zinc-300 dark:text-white/20 font-bold text-xl overflow-hidden"
               style={article.thumbnail ? { backgroundImage: `url('${article.thumbnail}')`, backgroundPosition: article.thumbnailPosition ?? '50% 50%' } : undefined}
             >
               {!article.thumbnail && article.title[0]}
@@ -76,7 +72,7 @@ export default function SearchResults({ articles, query, tag }: { articles: Arti
             {/* Content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start gap-2 mb-1">
-                <h2 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors font-display leading-snug flex-1">
+                <h2 className="text-base font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors font-display leading-snug flex-1">
                   {highlight(article.title, query)}
                 </h2>
                 <div className="shrink-0 flex items-center gap-1.5 mt-0.5">
@@ -90,20 +86,20 @@ export default function SearchResults({ articles, query, tag }: { articles: Arti
                       <Lock className="w-2.5 h-2.5" /> Members
                     </span>
                   )}
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/5 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider border border-slate-200 dark:border-white/5">
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider border border-zinc-300 dark:border-white/5">
                     <Tag className="w-2.5 h-2.5" />
-                    {CATEGORY_LABELS[article.category]}
+                    {article.topic.label}
                   </span>
                 </div>
               </div>
 
               {article.summary && (
-                <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-2">
+                <p className="text-sm text-zinc-500 dark:text-slate-300 line-clamp-2 leading-relaxed mb-2">
                   {highlight(article.summary, query)}
                 </p>
               )}
 
-              <div className="flex items-center gap-4 text-slate-400 text-xs">
+              <div className="flex items-center gap-4 text-zinc-500 text-xs">
                 <span className="flex items-center gap-1">
                   <Heart className="w-3.5 h-3.5" />{article._count.likes}
                 </span>

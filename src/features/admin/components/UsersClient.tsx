@@ -9,7 +9,7 @@ import UserDetailModal from './UserDetailModal';
 import AdminPagination from './AdminPagination';
 import type { User, UserRole, UserStatus } from '@/features/admin/data/users';
 import type { AdminUser } from '@/features/admin/actions/user';
-import { updateUserRoleAction, toggleUserStatusAction } from '@/features/admin/actions/user';
+import { updateUserRoleAction, toggleUserStatusAction, toggleUserCanWriteAction } from '@/features/admin/actions/user';
 import { Role } from '@prisma/client';
 
 type RoleFilter   = UserRole | 'all';
@@ -28,6 +28,7 @@ function toUser(u: AdminUser): User {
     email:           u.email,
     role:            roleMap[u.role] ?? 'Member',
     status:          statusMap[u.status] ?? 'active',
+    canWrite:        u.canWrite,
     joinedAt:        u.createdAt instanceof Date ? u.createdAt.toISOString().slice(0, 10) : String(u.createdAt),
     lastActive:      u.createdAt instanceof Date ? u.createdAt.toISOString().slice(0, 10) : String(u.createdAt),
     docsViewed:      u._count.readHistories,
@@ -59,6 +60,7 @@ export default function UsersClient({
 
   const [localUsers,   setLocalUsers]   = useState<User[]>(initialUsers.map(toUser));
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [modalMode,    setModalMode]    = useState<'view' | 'edit'>('view');
   const [sortKey,      setSortKey]      = useState<UserSortKey>('joinedAt');
 
   useEffect(() => {
@@ -94,10 +96,35 @@ export default function UsersClient({
     startTransition(async () => { await toggleUserStatusAction(id); });
   };
 
-  const handleChangeRole = (id: string, role: UserRole) => {
-    setLocalUsers(prev => prev.map(u => u.id === id ? { ...u, role } : u));
-    setSelectedUser(prev => prev?.id === id ? { ...prev, role } : prev);
-    startTransition(async () => { await updateUserRoleAction(id, ROLE_UP_MAP[role]); });
+  const handleSaveUser = (id: string, changes: { role?: UserRole; canWrite?: boolean; status?: 'active' | 'locked' }) => {
+    // Optimistic update
+    setLocalUsers(prev => prev.map(u => {
+      if (u.id !== id) return u;
+      return {
+        ...u,
+        ...(changes.role !== undefined && { role: changes.role }),
+        ...(changes.canWrite !== undefined && { canWrite: changes.canWrite }),
+        ...(changes.status !== undefined && { status: changes.status }),
+      };
+    }));
+    setSelectedUser(prev => {
+      if (!prev || prev.id !== id) return prev;
+      return {
+        ...prev,
+        ...(changes.role !== undefined && { role: changes.role }),
+        ...(changes.canWrite !== undefined && { canWrite: changes.canWrite }),
+        ...(changes.status !== undefined && { status: changes.status }),
+      };
+    });
+
+    // Persist
+    startTransition(async () => {
+      const promises: Promise<void>[] = [];
+      if (changes.role !== undefined) promises.push(updateUserRoleAction(id, ROLE_UP_MAP[changes.role]));
+      if (changes.canWrite !== undefined) promises.push(toggleUserCanWriteAction(id));
+      if (changes.status !== undefined) promises.push(toggleUserStatusAction(id));
+      await Promise.all(promises);
+    });
   };
 
   const roleParam   = searchParams.get('role')   ?? '';
@@ -111,8 +138,8 @@ export default function UsersClient({
     <>
       <div className="flex-1 p-6 md:p-8 space-y-8">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-display">Quản lý Người dùng</h1>
-          <p className="text-sm text-slate-500 mt-1">{total} thành viên trong hệ thống</p>
+          <h1 className="text-2xl font-bold text-zinc-800 dark:text-white font-display">Quản lý Người dùng</h1>
+          <p className="text-sm text-zinc-500 mt-1">{total} thành viên trong hệ thống</p>
         </div>
 
         <UserStatsCards users={localUsers} />
@@ -131,7 +158,8 @@ export default function UsersClient({
 
         <UserTable
           users={sortedUsers}
-          onView={setSelectedUser}
+          onView={u => { setSelectedUser(u); setModalMode('view'); }}
+          onEdit={u => { setSelectedUser(u); setModalMode('edit'); }}
           onToggleStatus={handleToggleStatus}
         />
         <AdminPagination
@@ -145,9 +173,10 @@ export default function UsersClient({
 
       <UserDetailModal
         user={selectedUser}
+        mode={modalMode}
+        isPending={isPending}
         onClose={() => setSelectedUser(null)}
-        onToggleStatus={handleToggleStatus}
-        onChangeRole={handleChangeRole}
+        onSave={handleSaveUser}
       />
     </>
   );

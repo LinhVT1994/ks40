@@ -2,11 +2,12 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { ImagePlus, ArrowRight, Tag, Type, AlignLeft, Hash, X, Star, Link as LinkIcon, Plus, Loader2 } from 'lucide-react';
-import ImagePositionPicker from './ImagePositionPicker';
+import ImagePositionPicker from '@/components/shared/editor/ImagePositionPicker';
 import { getTagsAction } from '@/features/admin/actions/article';
 import { uploadImage } from '@/lib/compress-image';
+import type { TopicItem } from '@/features/admin/actions/topic';
+import TopicSelector from '@/components/shared/editor/TopicSelector';
 
-const categories = ['System Design', 'AI / ML', 'DevOps', 'Blockchain', 'Frontend', 'Backend', 'Other'];
 const badgeOptions = ['Hot', 'New', 'Trending', 'Featured'];
 
 interface Step1Props {
@@ -20,6 +21,7 @@ interface Step1Props {
   thumbnailPreview: string | null;
   thumbnailPosition: string;
   slug: string;
+  topics: TopicItem[];
   onTitleChange: (v: string) => void;
   onSlugChange: (v: string) => void;
   onCategoryChange: (v: string) => void;
@@ -37,7 +39,7 @@ interface Step1Props {
 export default function ArticleStep1({
   title, category, tags, badges, summary,
   coverPreview, coverPosition, thumbnailPreview, thumbnailPosition,
-  slug,
+  slug, topics,
   onTitleChange, onSlugChange, onCategoryChange, onTagsChange, onBadgesChange, onSummaryChange,
   onCoverChange, onCoverPositionChange, onThumbnailChange, onThumbnailPositionChange,
   onCancel, onNext,
@@ -153,9 +155,9 @@ export default function ArticleStep1({
       <div className="max-w-5xl mx-auto">
         
         {/* Header */}
-        <div className="mb-10 border-b border-slate-100 dark:border-white/5 pb-6">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Thông tin bài viết</h2>
-          <p className="text-slate-500 mt-1">Cung cấp các thông tin cơ bản và hình ảnh hiển thị cho bài viết của bạn.</p>
+        <div className="mb-10 border-b border-zinc-200 dark:border-white/5 pb-6">
+          <h2 className="text-2xl font-bold text-zinc-800 dark:text-white">Thông tin bài viết</h2>
+          <p className="text-zinc-500 mt-1">Cung cấp các thông tin cơ bản và hình ảnh hiển thị cho bài viết của bạn.</p>
         </div>
 
         <div className="space-y-10">
@@ -172,7 +174,7 @@ export default function ArticleStep1({
 
             {/* Cover Image */}
             <div className="space-y-2 w-full max-w-lg">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Ảnh bìa (16:9)</label>
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Ảnh bìa (16:9)</label>
               <input ref={coverRef} type="file" accept="image/*" className="hidden" onChange={handleCoverFile} disabled={uploadingCover} />
               {validPreview(coverPreview) ? (
                 <ImagePositionPicker
@@ -187,21 +189,21 @@ export default function ArticleStep1({
                 <div className="space-y-2">
                   <div className="flex gap-2">
                     <div className="relative flex-1">
-                      <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
                       <input
                         type="url"
                         value={coverUrl}
                         onChange={e => setCoverUrl(e.target.value)}
                         onBlur={handleCoverUrlBlur}
                         placeholder="https://images.unsplash.com/..."
-                        className="w-full pl-9 pr-4 py-2.5 text-sm bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-slate-900 dark:text-white placeholder:text-slate-400"
+                        className="w-full pl-9 pr-4 py-2.5 text-sm bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-zinc-800 dark:text-white placeholder:text-zinc-500"
                       />
                     </div>
                     <button
                       type="button"
                       onClick={() => coverRef.current?.click()}
                       disabled={uploadingCover}
-                      className="shrink-0 p-2.5 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-400 hover:text-primary hover:border-primary/40 transition-colors disabled:opacity-50"
+                      className="shrink-0 p-2.5 rounded-xl border border-zinc-300 dark:border-white/10 bg-zinc-50 dark:bg-white/5 text-zinc-500 hover:text-primary hover:border-primary/40 transition-colors disabled:opacity-50"
                       title="Upload ảnh"
                     >
                       {uploadingCover ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImagePlus className="w-4 h-4" />}
@@ -209,11 +211,11 @@ export default function ArticleStep1({
                   </div>
                   <div
                     onClick={() => !uploadingCover && coverRef.current?.click()}
-                    className={`w-full aspect-video rounded-xl border-2 border-dashed border-slate-200 dark:border-white/10 flex flex-col items-center justify-center transition-all group bg-slate-50 dark:bg-white/5 ${uploadingCover ? 'opacity-60 cursor-wait' : 'cursor-pointer hover:border-primary/50 hover:bg-primary/5'}`}
+                    className={`w-full aspect-video rounded-xl border-2 border-dashed border-zinc-300 dark:border-white/10 flex flex-col items-center justify-center transition-all group bg-zinc-50 dark:bg-white/5 ${uploadingCover ? 'opacity-60 cursor-wait' : 'cursor-pointer hover:border-primary/50 hover:bg-primary/5'}`}
                   >
                     {uploadingCover
-                      ? <><Loader2 className="w-6 h-6 text-primary animate-spin" /><span className="text-xs text-slate-400 mt-1">Đang nén & upload...</span></>
-                      : <><ImagePlus className="w-6 h-6 text-slate-300 group-hover:text-primary transition-colors" /><span className="text-xs text-slate-400 group-hover:text-primary mt-1">Kéo thả hoặc click để chọn ảnh</span></>
+                      ? <><Loader2 className="w-6 h-6 text-primary animate-spin" /><span className="text-xs text-zinc-500 mt-1">Đang nén & upload...</span></>
+                      : <><ImagePlus className="w-6 h-6 text-zinc-300 group-hover:text-primary transition-colors" /><span className="text-xs text-zinc-500 group-hover:text-primary mt-1">Kéo thả hoặc click để chọn ảnh</span></>
                     }
                   </div>
                 </div>
@@ -222,7 +224,7 @@ export default function ArticleStep1({
 
             {/* Thumbnail */}
             <div className="space-y-2 w-52 shrink-0">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Thumbnail (4:3)</label>
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider">Thumbnail (4:3)</label>
               <input ref={thumbRef} type="file" accept="image/*" className="hidden" onChange={handleThumbFile} disabled={uploadingThumb} />
               {validPreview(thumbnailPreview) ? (
                 <ImagePositionPicker
@@ -237,21 +239,21 @@ export default function ArticleStep1({
                 <div className="space-y-2">
                   <div className="flex gap-2">
                     <div className="relative flex-1">
-                      <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
+                      <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500" />
                       <input
                         type="url"
                         value={thumbUrl}
                         onChange={e => setThumbUrl(e.target.value)}
                         onBlur={handleThumbUrlBlur}
                         placeholder="https://..."
-                        className="w-full pl-8 pr-3 py-2 text-xs bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-slate-900 dark:text-white placeholder:text-slate-400"
+                        className="w-full pl-8 pr-3 py-2 text-xs bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary text-zinc-800 dark:text-white placeholder:text-zinc-500"
                       />
                     </div>
                     <button
                       type="button"
                       onClick={() => thumbRef.current?.click()}
                       disabled={uploadingThumb}
-                      className="shrink-0 p-2 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 text-slate-400 hover:text-primary hover:border-primary/40 transition-colors disabled:opacity-50"
+                      className="shrink-0 p-2 rounded-xl border border-zinc-300 dark:border-white/10 bg-zinc-50 dark:bg-white/5 text-zinc-500 hover:text-primary hover:border-primary/40 transition-colors disabled:opacity-50"
                       title="Upload ảnh"
                     >
                       {uploadingThumb ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImagePlus className="w-3.5 h-3.5" />}
@@ -259,11 +261,11 @@ export default function ArticleStep1({
                   </div>
                   <div
                     onClick={() => !uploadingThumb && thumbRef.current?.click()}
-                    className={`w-full aspect-[4/3] rounded-xl border-2 border-dashed border-slate-200 dark:border-white/10 flex flex-col items-center justify-center transition-all group bg-slate-50 dark:bg-white/5 ${uploadingThumb ? 'opacity-60 cursor-wait' : 'cursor-pointer hover:border-primary/50 hover:bg-primary/5'}`}
+                    className={`w-full aspect-[4/3] rounded-xl border-2 border-dashed border-zinc-300 dark:border-white/10 flex flex-col items-center justify-center transition-all group bg-zinc-50 dark:bg-white/5 ${uploadingThumb ? 'opacity-60 cursor-wait' : 'cursor-pointer hover:border-primary/50 hover:bg-primary/5'}`}
                   >
                     {uploadingThumb
-                      ? <><Loader2 className="w-5 h-5 text-primary animate-spin" /><span className="text-[10px] text-slate-400 mt-1">Uploading...</span></>
-                      : <><ImagePlus className="w-5 h-5 text-slate-300 group-hover:text-primary transition-colors" /><span className="text-[10px] text-slate-400 group-hover:text-primary mt-1 uppercase font-bold">Thêm ảnh</span></>
+                      ? <><Loader2 className="w-5 h-5 text-primary animate-spin" /><span className="text-[10px] text-zinc-500 mt-1">Uploading...</span></>
+                      : <><ImagePlus className="w-5 h-5 text-zinc-300 group-hover:text-primary transition-colors" /><span className="text-[10px] text-zinc-500 group-hover:text-primary mt-1 uppercase font-bold">Thêm ảnh</span></>
                     }
                   </div>
                 </div>
@@ -272,48 +274,38 @@ export default function ArticleStep1({
 
           </div>
 
-          <div className="h-px bg-slate-100 dark:bg-white/5 my-4" />
+          <div className="h-px bg-zinc-100 dark:bg-white/5 my-4" />
 
           {/* BOTTOM SECTION: Text Fields */}
           <div className="space-y-8">
             {/* Title */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
                 <Type className="w-3.5 h-3.5" /> Tiêu đề bài viết <span className="text-rose-500">*</span>
               </label>
               <input
                 value={title}
                 onChange={(e) => onTitleChange(e.target.value)}
                 placeholder="Nhập tiêu đề hấp dẫn cho bài viết..."
-                className="w-full max-w-[500px] text-base font-normal bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-slate-900 dark:text-white placeholder:text-slate-400"
+                className="w-full max-w-[500px] text-base font-normal bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-zinc-800 dark:text-white placeholder:text-zinc-500"
               />
             </div>
 
-            {/* Category */}
+            {/* Topic */}
             <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                <Tag className="w-3.5 h-3.5" /> Danh mục <span className="text-rose-500">*</span>
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
+                <Tag className="w-3.5 h-3.5" /> Chủ đề <span className="text-rose-500">*</span>
               </label>
-              <div className="flex flex-wrap gap-2">
-                {categories.map(c => (
-                  <button 
-                    key={c} 
-                    onClick={() => onCategoryChange(c)}
-                    className={`px-4 py-2 rounded-lg text-xs font-bold transition-all border ${
-                      category === c
-                        ? 'bg-primary border-primary text-white shadow-sm'
-                        : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:border-primary/50 hover:text-primary'
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
+              <TopicSelector 
+                topics={topics}
+                selectedId={category}
+                onSelect={onCategoryChange}
+              />
             </div>
 
             {/* Badges */}
             <div className="space-y-3">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
                 <Star className="w-3.5 h-3.5" /> Nhãn nổi bật (Badges)
               </label>
               <div className="flex flex-wrap gap-2">
@@ -330,7 +322,7 @@ export default function ArticleStep1({
                     className={`px-4 py-2 rounded-lg text-xs font-bold transition-all border ${
                       badges.includes(b)
                         ? 'bg-amber-500 border-amber-500 text-white shadow-sm'
-                        : 'bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-500 hover:border-amber-500/50 hover:text-amber-500'
+                        : 'bg-white dark:bg-white/5 border-zinc-300 dark:border-white/10 text-zinc-500 hover:border-amber-500/50 hover:text-amber-500'
                     }`}
                   >
                     {b}
@@ -341,21 +333,21 @@ export default function ArticleStep1({
 
             {/* Tags */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
                 <Hash className="w-3.5 h-3.5" /> Từ khóa (Tags)
               </label>
               <div className="relative">
                 <div
-                  className="flex flex-wrap gap-2 p-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl min-h-[52px] items-center focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all cursor-text"
+                  className="flex flex-wrap gap-2 p-2 bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl min-h-[52px] items-center focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all cursor-text"
                   onClick={() => tagInputRef.current?.focus()}
                 >
                   {tags.map(tag => (
-                    <span key={tag} className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-lg text-[13px] font-semibold text-slate-700 dark:text-slate-200 shadow-sm">
+                    <span key={tag} className="flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-slate-800 border border-zinc-300 dark:border-white/10 rounded-lg text-[13px] font-semibold text-zinc-700 dark:text-slate-200 shadow-sm">
                       {tag}
                       <button
                         type="button"
                         onClick={e => { e.stopPropagation(); removeTag(tag); }}
-                        className="text-slate-400 hover:text-rose-500 transition-colors"
+                        className="text-zinc-500 hover:text-rose-500 transition-colors"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -370,7 +362,7 @@ export default function ArticleStep1({
                     onFocus={() => setShowSuggest(true)}
                     onBlur={() => setTimeout(() => setShowSuggest(false), 150)}
                     onKeyDown={handleTagKeyDown}
-                    className="flex-1 bg-transparent border-none outline-none text-sm text-slate-900 dark:text-white px-2 placeholder:text-slate-400 min-w-[160px]"
+                    className="flex-1 bg-transparent border-none outline-none text-sm text-zinc-800 dark:text-white px-2 placeholder:text-zinc-500 min-w-[160px]"
                   />
                 </div>
 
@@ -378,7 +370,7 @@ export default function ArticleStep1({
                 {showSuggest && (
                   <div
                     ref={suggestRef}
-                    className="absolute top-full left-0 right-0 mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl shadow-lg z-50 overflow-hidden max-h-52 overflow-y-auto"
+                    className="absolute top-full left-0 right-0 mt-1.5 bg-white dark:bg-slate-900 border border-zinc-300 dark:border-white/10 rounded-xl shadow-lg z-50 overflow-hidden max-h-52 overflow-y-auto"
                   >
                     {suggestions.length > 0 && (
                       <div className="p-1">
@@ -390,7 +382,7 @@ export default function ArticleStep1({
                             className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center gap-2 ${
                               i === activeIndex
                                 ? 'bg-primary text-white'
-                                : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5'
+                                : 'text-zinc-700 dark:text-slate-200 hover:bg-zinc-100 dark:hover:bg-white/5'
                             }`}
                           >
                             <Hash className="w-3.5 h-3.5 opacity-50 shrink-0" />
@@ -402,7 +394,7 @@ export default function ArticleStep1({
 
                     {/* Tạo mới */}
                     {tagInput.trim() && !allTags.some(t => t.toLowerCase() === tagInput.trim().toLowerCase()) && (
-                      <div className="border-t border-slate-100 dark:border-white/5 p-1">
+                      <div className="border-t border-zinc-200 dark:border-white/5 p-1">
                         <button
                           type="button"
                           onMouseDown={() => addTag(tagInput)}
@@ -415,7 +407,7 @@ export default function ArticleStep1({
                     )}
 
                     {suggestions.length === 0 && !tagInput.trim() && (
-                      <p className="px-4 py-3 text-xs text-slate-400">Chưa có tag nào. Gõ để tạo mới.</p>
+                      <p className="px-4 py-3 text-xs text-zinc-500">Chưa có tag nào. Gõ để tạo mới.</p>
                     )}
                   </div>
                 )}
@@ -424,7 +416,7 @@ export default function ArticleStep1({
 
             {/* Summary */}
             <div className="space-y-2">
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+              <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
                 <AlignLeft className="w-3.5 h-3.5" /> Mô tả bài viết
               </label>
               <textarea
@@ -432,24 +424,24 @@ export default function ArticleStep1({
                 onChange={e => onSummaryChange(e.target.value)}
                 rows={3}
                 placeholder="Mô tả ngắn hiển thị trên card và kết quả tìm kiếm..."
-                className="w-full text-sm bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none text-slate-900 dark:text-white placeholder:text-slate-400"
+                className="w-full text-sm bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-3.5 outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all resize-none text-zinc-800 dark:text-white placeholder:text-zinc-500"
               />
             </div>
 
             {/* Navigation */}
-            <div className="pt-6 border-t border-slate-100 dark:border-white/5 flex items-center justify-between">
+            <div className="pt-6 border-t border-zinc-200 dark:border-white/5 flex items-center justify-between">
               <button
                 onClick={onCancel}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl border border-slate-200 dark:border-white/10 text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 transition-all"
+                className="flex items-center gap-2 px-6 py-3 rounded-xl border border-zinc-300 dark:border-white/10 text-sm font-bold text-zinc-500 hover:text-zinc-800 dark:hover:text-white hover:border-zinc-300 dark:hover:border-white/20 transition-all"
               >
                 Hủy bỏ
               </button>
               <div className="flex items-center gap-4">
-                <p className="text-[11px] text-slate-400 italic hidden sm:block">* Điền đủ Tiêu đề và Danh mục để tiếp tục</p>
+                <p className="text-[11px] text-zinc-500 italic hidden sm:block">* Điền đủ Tiêu đề và Chủ đề để tiếp tục</p>
                 <button
                   onClick={onNext}
                   disabled={!title.trim() || !category}
-                  className="flex items-center gap-2 px-8 py-3 rounded-xl bg-slate-900 dark:bg-primary text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-8 py-3 rounded-xl bg-zinc-800 dark:bg-primary text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Tiếp thao: Viết nội dung
                   <ArrowRight className="w-4 h-4" />

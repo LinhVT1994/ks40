@@ -27,15 +27,15 @@ export default function NextArticleCard({ article }: { article: NextArticle }) {
 
   return (
     <div className="mt-16 mb-8">
-      <p className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-        <span className="h-px flex-1 bg-slate-200 dark:bg-white/5" />
+      <p className="text-xs font-black text-zinc-500 dark:text-slate-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+        <span className="h-px flex-1 bg-zinc-200 dark:bg-white/5" />
         Bài tiếp theo nên đọc
-        <span className="h-px flex-1 bg-slate-200 dark:bg-white/5" />
+        <span className="h-px flex-1 bg-zinc-200 dark:bg-white/5" />
       </p>
 
       <Link
         href={`/article/${article.slug}`}
-        className="group relative flex flex-col sm:flex-row gap-0 rounded-[2rem] overflow-hidden border border-slate-200 dark:border-white/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 active:scale-[0.99] bg-white dark:bg-slate-900"
+        className="group relative flex flex-col sm:flex-row gap-0 rounded-[2rem] overflow-hidden border border-zinc-300 dark:border-white/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 active:scale-[0.99] bg-white dark:bg-slate-900"
       >
         {/* Image */}
         {image ? (
@@ -58,18 +58,18 @@ export default function NextArticleCard({ article }: { article: NextArticle }) {
             <span className="inline-block px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest mb-3">
               {CATEGORY_LABELS[article.category] ?? article.category}
             </span>
-            <h3 className="font-display font-black text-xl sm:text-2xl text-slate-900 dark:text-white leading-snug group-hover:text-primary transition-colors duration-300 mb-2">
+            <h3 className="font-display font-black text-xl sm:text-2xl text-zinc-800 dark:text-white leading-snug group-hover:text-primary transition-colors duration-300 mb-2">
               {article.title}
             </h3>
             {article.summary && (
-              <p className="text-sm text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+              <p className="text-sm text-zinc-500 dark:text-slate-300 line-clamp-2 leading-relaxed">
                 {article.summary}
               </p>
             )}
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 text-xs text-slate-400">
+            <div className="flex items-center gap-4 text-xs text-zinc-500">
               <span className="flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5" /> {article.readTime} phút
               </span>

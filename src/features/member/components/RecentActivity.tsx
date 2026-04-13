@@ -28,23 +28,23 @@ export default function RecentActivity() {
   ];
 
   return (
-    <div className="bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl p-5 shadow-sm mt-6">
+    <div className="bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-2xl p-5 shadow-sm mt-6">
       <div className="flex items-center gap-2 mb-6">
         <History className="w-4 h-4 text-primary" />
-        <h3 className="font-display font-bold text-sm uppercase tracking-wider text-slate-900 dark:text-white">Hoạt động</h3>
+        <h3 className="font-display font-bold text-sm uppercase tracking-wider text-zinc-800 dark:text-white">Hoạt động</h3>
       </div>
       
-      <div className="space-y-6 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[1px] before:bg-slate-100 dark:before:bg-white/5">
+      <div className="space-y-6 relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[1px] before:bg-zinc-100 dark:before:bg-white/5">
         {activities.map((act, i) => (
           <div key={i} className="flex gap-4 relative z-10">
             <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 shadow-sm ${act.color}`}>
               {act.icon}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs text-slate-500 dark:text-slate-400 leading-snug">
-                {act.text} <span className="font-bold text-slate-900 dark:text-white">{act.target}</span>
+              <p className="text-xs text-zinc-500 dark:text-slate-400 leading-snug">
+                {act.text} <span className="font-bold text-zinc-800 dark:text-white">{act.target}</span>
               </p>
-              <span className="text-[10px] font-medium text-slate-400 mt-1 block uppercase tracking-tight">{act.time}</span>
+              <span className="text-[10px] font-medium text-zinc-500 mt-1 block uppercase tracking-tight">{act.time}</span>
             </div>
           </div>
         ))}

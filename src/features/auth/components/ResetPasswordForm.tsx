@@ -32,8 +32,8 @@ function ResetPasswordFormInner() {
         <div className="flex justify-center">
           <CheckCircle className="w-12 h-12 text-emerald-500" />
         </div>
-        <p className="font-semibold text-slate-900 dark:text-white">Đặt lại mật khẩu thành công!</p>
-        <p className="text-sm text-slate-500">Bạn có thể đăng nhập với mật khẩu mới ngay bây giờ.</p>
+        <p className="font-semibold text-zinc-800 dark:text-white">Đặt lại mật khẩu thành công!</p>
+        <p className="text-sm text-zinc-500">Bạn có thể đăng nhập với mật khẩu mới ngay bây giờ.</p>
         <Link
           href="/login"
           className="inline-block w-full bg-gradient-to-r from-primary to-accent-purple text-white font-medium rounded-lg px-4 py-2.5 text-sm text-center hover:opacity-90 transition-opacity mt-2"
@@ -69,12 +69,12 @@ function ResetPasswordFormInner() {
       )}
 
       <div>
-        <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300" htmlFor="password">
+        <label className="block text-sm font-medium mb-1.5 text-zinc-700 dark:text-slate-300" htmlFor="password">
           Mật khẩu mới
         </label>
         <div className="relative">
           <input
-            className="w-full bg-white/50 dark:bg-black/30 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2.5 pr-10 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+            className="w-full bg-white/50 dark:bg-black/30 border border-zinc-300 dark:border-slate-700 rounded-lg px-4 py-2.5 pr-10 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
             id="password"
             name="password"
             type={showPassword ? 'text' : 'password'}
@@ -85,7 +85,7 @@ function ResetPasswordFormInner() {
           <button
             type="button"
             onClick={() => setShowPassword(v => !v)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-600 dark:hover:text-slate-300"
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
@@ -93,11 +93,11 @@ function ResetPasswordFormInner() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-300" htmlFor="confirm">
+        <label className="block text-sm font-medium mb-1.5 text-zinc-700 dark:text-slate-300" htmlFor="confirm">
           Xác nhận mật khẩu
         </label>
         <input
-          className="w-full bg-white/50 dark:bg-black/30 border border-slate-300 dark:border-slate-700 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
+          className="w-full bg-white/50 dark:bg-black/30 border border-zinc-300 dark:border-slate-700 rounded-lg px-4 py-2.5 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all outline-none"
           id="confirm"
           name="confirm"
           type="password"
@@ -121,7 +121,7 @@ function ResetPasswordFormInner() {
 
 export default function ResetPasswordForm() {
   return (
-    <Suspense fallback={<div className="text-center text-sm text-slate-400">Đang tải...</div>}>
+    <Suspense fallback={<div className="text-center text-sm text-zinc-500">Đang tải...</div>}>
       <ResetPasswordFormInner />
     </Suspense>
   );

@@ -23,7 +23,7 @@ function renderMessage(msg: string) {
   const parts = msg.split(/\*\*(.*?)\*\*/g);
   return parts.map((part, i) =>
     i % 2 === 1
-      ? <span key={i} className="font-bold text-slate-900 dark:text-white">{part}</span>
+      ? <span key={i} className="font-bold text-zinc-800 dark:text-white">{part}</span>
       : <span key={i}>{part}</span>
   );
 }
@@ -33,31 +33,31 @@ export default function ActivityFeed({ activities = [] }: { activities: Activity
   useEffect(() => setMounted(true), []);
 
   return (
-    <div className="bg-white dark:bg-white/[0.02] border border-slate-100 dark:border-white/5 rounded-3xl overflow-hidden">
-      <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100 dark:border-white/5">
-        <h3 className="font-display font-bold text-slate-900 dark:text-white">Hoạt động gần đây</h3>
+    <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-3xl overflow-hidden">
+      <div className="flex items-center justify-between px-6 py-5 border-b border-zinc-200 dark:border-white/5">
+        <h3 className="font-display font-bold text-zinc-800 dark:text-white">Hoạt động gần đây</h3>
         <Link href="/admin/activity" className="text-xs font-bold text-primary hover:text-primary/70 transition-colors flex items-center gap-1">
           Xem tất cả <ExternalLink className="w-3 h-3" />
         </Link>
       </div>
-      <div className="divide-y divide-slate-100 dark:divide-white/5">
+      <div className="divide-y divide-zinc-200 dark:divide-white/5">
         {activities.length === 0 ? (
-          <div className="px-6 py-8 text-center text-sm text-slate-400">Không có hoạt động nào.</div>
+          <div className="px-6 py-8 text-center text-sm text-zinc-500">Không có hoạt động nào.</div>
         ) : (
           activities.map((activity) => {
             const config = TYPE_CONFIG[activity.type] || TYPE_CONFIG.SYSTEM_ALERT;
             const Icon = config.icon;
             
             const content = (
-              <div className="flex items-start gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors h-full">
+              <div className="flex items-start gap-4 px-6 py-4 hover:bg-zinc-50 dark:hover:bg-white/[0.02] transition-colors h-full">
                 <div className={`p-2 rounded-xl shrink-0 ${config.bg}`}>
                   <Icon className={`w-4 h-4 ${config.color}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                  <p className="text-sm text-zinc-600 dark:text-slate-300 leading-relaxed">
                     {renderMessage(activity.message)}
                   </p>
-                  <p className="text-[11px] text-slate-400 mt-1 font-medium">
+                  <p className="text-[11px] text-zinc-500 mt-1 font-medium">
                     {mounted ? formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true, locale: vi }) : ''}
                   </p>
                 </div>

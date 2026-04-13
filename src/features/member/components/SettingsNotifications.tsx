@@ -32,12 +32,12 @@ export default function SettingsNotifications() {
   }) => (
     <div className="flex items-center justify-between py-2">
       <div className="pr-4">
-        <p className="text-sm font-semibold text-slate-900 dark:text-white">{label}</p>
-        <p className="text-xs text-slate-500 mt-1 leading-relaxed">{desc}</p>
+        <p className="text-sm font-semibold text-zinc-800 dark:text-white">{label}</p>
+        <p className="text-xs text-zinc-500 mt-1 leading-relaxed">{desc}</p>
       </div>
       <button
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex justify-center shrink-0 h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${checked ? 'bg-primary shadow-lg shadow-primary/30' : 'bg-slate-200 dark:bg-white/10'}`}
+        className={`relative inline-flex justify-center shrink-0 h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${checked ? 'bg-primary shadow-lg shadow-primary/30' : 'bg-zinc-200 dark:bg-white/10'}`}
       >
         <div className={`transform transition-transform duration-200 ease-in-out bg-white rounded-full w-4 h-4 shadow-sm flex items-center justify-center ${checked ? 'translate-x-[10px]' : '-translate-x-[10px]'}`} />
       </button>
@@ -48,13 +48,13 @@ export default function SettingsNotifications() {
     <div className="space-y-8">
       {/* Push Notifications */}
       <section>
-        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100 dark:border-white/5">
+        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-zinc-200 dark:border-white/5">
           <div className="w-10 h-10 rounded-full bg-violet-500/10 flex items-center justify-center text-violet-500 border border-violet-500/20">
             <BellRing className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-base font-bold text-slate-900 dark:text-white">Thông báo Push (Hệ thống)</h3>
-            <p className="text-xs text-slate-500 mt-1">Thông báo đẩy trực tiếp trên trình duyệt hoặc điện thoại.</p>
+            <h3 className="text-base font-bold text-zinc-800 dark:text-white">Thông báo Push (Hệ thống)</h3>
+            <p className="text-xs text-zinc-500 mt-1">Thông báo đẩy trực tiếp trên trình duyệt hoặc điện thoại.</p>
           </div>
         </div>
 
@@ -98,7 +98,7 @@ export default function SettingsNotifications() {
           <button
             onClick={handleSave}
             disabled={isPending}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 shadow-lg shadow-slate-900/20 dark:shadow-white/10"
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-zinc-800 dark:bg-white text-white dark:text-slate-900 text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed active:scale-95 shadow-lg shadow-zinc-800/20 dark:shadow-white/10"
           >
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Lưu tất cả tùy chọn'}
           </button>

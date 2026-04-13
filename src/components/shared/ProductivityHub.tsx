@@ -12,10 +12,13 @@ import {
   Zap,
   Info,
   FileEdit,
-  Lock
+  Lock,
+  Sun,
+  Moon
 } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
-const AUTH_PATHS = ['/login', '/register', '/forgot-password', '/reset-password'];
+const HIDE_PATHS = ['/login', '/register', '/forgot-password', '/reset-password', '/write'];
 
 export default function ProductivityHub() {
   const pathname = usePathname();
@@ -24,15 +27,18 @@ export default function ProductivityHub() {
   const [isFocusActive, setIsFocusActive] = useState(false);
   const [isTimerActive, setIsTimerActive] = useState(false);
   const hubRef = useRef<HTMLDivElement>(null);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
 
   const roleX = (session?.user as { role?: string })?.role;
   const isPremium = roleX === 'PREMIUM' || roleX === 'ADMIN';
 
-  // Check auth path last among hooks to avoid hook mismatch
-  const isAuthPath = AUTH_PATHS.some(p => pathname.startsWith(p));
+  // Check hidden path last among hooks to avoid hook mismatch
+  const isHiddenPath = HIDE_PATHS.some(p => pathname.startsWith(p));
 
   // ── Global State Sync ──────────────────────────────────────
   useEffect(() => {
+    setMounted(true);
     // Initial check
     setIsFocusActive(document.documentElement.classList.contains('focus-mode'));
     
@@ -92,7 +98,7 @@ export default function ProductivityHub() {
     window.dispatchEvent(new CustomEvent('toggle-global-timer'));
   };
 
-  if (isAuthPath) return null;
+  if (isHiddenPath) return null;
 
   return (
     <div 
@@ -105,9 +111,9 @@ export default function ProductivityHub() {
           ? 'opacity-100 translate-y-0 scale-100' 
           : 'opacity-0 translate-y-8 scale-95 pointer-events-none origin-bottom-right'
       }`}>
-        <div className="bg-slate-950/90 backdrop-blur-3xl border border-white/10 rounded-2xl overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.8)]">
+        <div className="bg-white/95 dark:bg-slate-900/90 backdrop-blur-3xl border border-zinc-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl dark:shadow-[0_32px_120px_rgba(0,0,0,0.8)]">
           {/* Header Bar */}
-          <div className="px-5 pt-5 pb-1 flex items-center justify-between opacity-30">
+          <div className="px-5 pt-5 pb-1 flex items-center justify-between opacity-50 dark:opacity-30">
             <span className="text-[9px] font-black tracking-widest uppercase">Launcher</span>
             <div className="flex gap-1">
               <div className={`w-1 h-1 rounded-full ${isFocusActive ? 'bg-primary' : 'bg-white/20'}`} />
@@ -123,7 +129,7 @@ export default function ProductivityHub() {
                 <CompactButton
                   onClick={toggleFocus}
                   isActive={isFocusActive}
-                  activeClass="bg-primary text-slate-950"
+                  activeClass="bg-primary text-white"
                   icon={<Maximize2 className="w-3.5 h-3.5" />}
                   label="Focus"
                   isPremiumOnly={!isPremium}
@@ -132,7 +138,7 @@ export default function ProductivityHub() {
                 <CompactButton
                   onClick={toggleTimer}
                   isActive={isTimerActive}
-                  activeClass="bg-amber-400 text-slate-950"
+                  activeClass="bg-amber-400 text-zinc-900"
                   icon={<Timer className="w-3.5 h-3.5" />}
                   label="Timer"
                   isPremiumOnly={!isPremium}
@@ -168,6 +174,20 @@ export default function ProductivityHub() {
                 />
               </div>
             </div>
+
+            {/* Group: Giao diện */}
+            <div className="space-y-2">
+              <HubLabel label="Giao diện" />
+              <div className="grid grid-cols-2 gap-1.5">
+                <CompactButton
+                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  isActive={false}
+                  activeClass=""
+                  icon={mounted && theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+                  label={mounted && theme === 'dark' ? "Light Mode" : "Dark Mode"}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -177,8 +197,8 @@ export default function ProductivityHub() {
         onClick={() => setIsOpen(!isOpen)}
         className={`relative z-50 flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-500 shadow-2xl group ${
           isOpen 
-            ? 'bg-white text-slate-900 rotate-90 scale-90' 
-            : 'bg-slate-950/40 text-slate-400 hover:text-white backdrop-blur-3xl border border-white/10 hover:rounded-2xl hover:scale-110 active:scale-95'
+            ? 'bg-zinc-800 text-white dark:bg-white dark:text-zinc-800 rotate-90 scale-90' 
+            : 'bg-white/80 dark:bg-slate-900/80 text-zinc-600 dark:text-slate-300 hover:text-primary dark:hover:text-white backdrop-blur-3xl border border-zinc-200 dark:border-white/10 hover:rounded-2xl hover:scale-110 active:scale-95 hover:shadow-[0_4px_20px_rgba(39,39,42,0.15)] dark:hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]'
         }`}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent-purple/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />
@@ -188,7 +208,7 @@ export default function ProductivityHub() {
           <>
             <Zap className={`w-5 h-5 relative z-10 transition-transform ${isFocusActive || isTimerActive ? 'text-primary fill-primary/30 scale-110' : ''}`} />
             {(isFocusActive || isTimerActive) && (
-              <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full ring-4 ring-slate-950/20 animate-pulse" />
+              <span className="absolute top-2.5 right-2.5 w-2.5 h-2.5 bg-primary rounded-full ring-4 ring-zinc-900/20 animate-pulse" />
             )}
           </>
         )}
@@ -198,7 +218,7 @@ export default function ProductivityHub() {
 }
 
 function HubLabel({ label }: { label: string }) {
-  return <h4 className="text-[8px] font-black tracking-[0.2em] text-white/20 uppercase px-1">{label}</h4>;
+  return <h4 className="text-[8px] font-black tracking-[0.2em] text-zinc-400 dark:text-white/20 uppercase px-1">{label}</h4>;
 }
 
 function CompactButton({ 
@@ -228,8 +248,8 @@ function CompactButton({
         disabled && !isActive ? 'opacity-40 cursor-not-allowed grayscale-[0.5]' : ''
       } ${
         isActive 
-          ? `${activeClass} border-transparent shadow-lg shadow-white/5 font-black` 
-          : 'bg-white/5 text-slate-400 hover:text-white hover:bg-white/[0.08] border-white/5 hover:border-white/10'
+          ? `${activeClass} border-transparent shadow-lg shadow-zinc-800/5 dark:shadow-white/5 font-black` 
+          : 'bg-zinc-50 dark:bg-white/5 text-zinc-600 dark:text-slate-300 hover:text-primary dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/[0.08] border-zinc-200 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/10'
       }`}
     >
       {isPremiumOnly && (

@@ -20,8 +20,8 @@ export default async function SharePage({ params }: { params: Promise<{ slug: st
     return (
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center space-y-2">
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">Link đã hết hạn</p>
-          <p className="text-slate-400 text-sm">Gói tài liệu này không còn khả dụng.</p>
+          <p className="text-2xl font-bold text-zinc-800 dark:text-white">Link đã hết hạn</p>
+          <p className="text-zinc-500 text-sm">Gói tài liệu này không còn khả dụng.</p>
         </div>
       </div>
     );
@@ -43,8 +43,8 @@ export default async function SharePage({ params }: { params: Promise<{ slug: st
     return (
       <div className="flex-1 flex items-center justify-center p-8">
         <div className="text-center space-y-2">
-          <p className="text-2xl font-bold text-slate-900 dark:text-white">Không có quyền truy cập</p>
-          <p className="text-slate-400 text-sm">Bạn cần tài khoản phù hợp để tải gói tài liệu này.</p>
+          <p className="text-2xl font-bold text-zinc-800 dark:text-white">Không có quyền truy cập</p>
+          <p className="text-zinc-500 text-sm">Bạn cần tài khoản phù hợp để tải gói tài liệu này.</p>
         </div>
       </div>
     );

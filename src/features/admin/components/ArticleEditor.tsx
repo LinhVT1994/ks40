@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useRef, useCallback } from 'react';
-import EditorToolbar from './EditorToolbar';
-import MarkdownPreview from './MarkdownPreview';
+import EditorToolbar from '@/components/shared/editor/EditorToolbar';
+import MarkdownPreview from '@/components/shared/editor/MarkdownPreview';
 
 type ViewMode = 'editor' | 'split' | 'preview';
 
@@ -76,16 +76,16 @@ export default function ArticleEditor() {
       <div className="flex flex-1 overflow-hidden">
         {/* Editor Pane */}
         {(viewMode === 'editor' || viewMode === 'split') && (
-          <div className={`flex flex-col ${viewMode === 'split' ? 'w-1/2 border-r border-slate-200 dark:border-white/5' : 'flex-1'}`}>
-            <div className="flex items-center px-4 py-2 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-white/5">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Markdown</span>
-              <span className="ml-auto text-xs text-slate-400">{content.length} ký tự</span>
+          <div className={`flex flex-col ${viewMode === 'split' ? 'w-1/2 border-r border-zinc-300 dark:border-white/5' : 'flex-1'}`}>
+            <div className="flex items-center px-4 py-2 bg-zinc-50 dark:bg-slate-900/50 border-b border-zinc-200 dark:border-white/5">
+              <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Markdown</span>
+              <span className="ml-auto text-xs text-zinc-500">{content.length} ký tự</span>
             </div>
             <textarea
               ref={textareaRef}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="flex-1 w-full resize-none p-6 font-mono text-sm leading-relaxed outline-none bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200 placeholder:text-slate-300"
+              className="flex-1 w-full resize-none p-6 font-mono text-sm leading-relaxed outline-none bg-white dark:bg-slate-950 text-zinc-800 dark:text-slate-200 placeholder:text-zinc-300"
               spellCheck={false}
               placeholder="Bắt đầu viết Markdown ở đây..."
             />
@@ -95,8 +95,8 @@ export default function ArticleEditor() {
         {/* Preview Pane */}
         {(viewMode === 'preview' || viewMode === 'split') && (
           <div className={`flex flex-col ${viewMode === 'split' ? 'w-1/2' : 'flex-1'} overflow-hidden`}>
-            <div className="flex items-center px-4 py-2 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-white/5">
-              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Live Preview</span>
+            <div className="flex items-center px-4 py-2 bg-zinc-50 dark:bg-slate-900/50 border-b border-zinc-200 dark:border-white/5">
+              <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Live Preview</span>
             </div>
             <div className="flex-1 overflow-hidden">
               <MarkdownPreview content={content} />

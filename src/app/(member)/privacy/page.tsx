@@ -3,8 +3,8 @@ import MemberContainer from '@/components/layout/MemberContainer';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Chính sách Bảo mật | Lenote.dev',
-  description: 'Cách chúng tôi bảo vệ quyền riêng tư và dữ liệu của bạn tại Lenote.dev.',
+  title: 'Chính sách Bảo mật | Lenote',
+  description: 'Cách chúng tôi bảo vệ quyền riêng tư và dữ liệu của bạn tại Lenote.',
 };
 
 export default function PrivacyPage() {
@@ -13,8 +13,8 @@ export default function PrivacyPage() {
       <div className="space-y-12">
         {/* Header */}
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-white">Chính sách Bảo mật</h1>
-          <p className="text-slate-500 dark:text-slate-400">Cập nhật lần cuối: 04 tháng 04, 2026</p>
+          <h1 className="text-4xl font-bold tracking-tight text-zinc-800 dark:text-white">Chính sách Bảo mật</h1>
+          <p className="text-zinc-500 dark:text-slate-400">Cập nhật lần cuối: 04 tháng 04, 2026</p>
         </div>
 
         {/* TL;DR Section */}
@@ -23,7 +23,7 @@ export default function PrivacyPage() {
             <span className="material-icons text-sm">verified_user</span>
             Cam kết của tôi
           </h2>
-          <ul className="space-y-2 text-sm text-slate-600 dark:text-slate-400">
+          <ul className="space-y-2 text-sm text-zinc-600 dark:text-slate-400">
             <li>• Tôi chỉ thu thập những gì thực sự cần thiết để bạn học tập (Email, Tên).</li>
             <li>• Tuyệt đối không bán dữ liệu cho AI hay bên thứ 3 nào để quảng cáo.</li>
             <li>• Bạn có toàn quyền xóa tài khoản và mọi dữ liệu liên quan bất cứ lúc nào.</li>
@@ -85,8 +85,8 @@ export default function PrivacyPage() {
         </div>
 
         {/* Footer Link back */}
-        <div className="pt-10 border-t border-slate-200 dark:border-slate-800 text-center">
-          <Link href="/" className="text-sm font-medium text-slate-500 hover:text-primary transition-colors">
+        <div className="pt-10 border-t border-zinc-300 dark:border-slate-800 text-center">
+          <Link href="/" className="text-sm font-medium text-zinc-500 hover:text-primary transition-colors">
             ← Quay lại Trang chủ
           </Link>
         </div>

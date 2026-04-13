@@ -21,8 +21,8 @@ export default async function AdminDashboardPage() {
       <div className="flex-1 p-4 md:p-6 lg:p-8 space-y-6 md:space-y-8">
         {/* Page Title */}
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-white font-display">Tổng quan</h1>
-          <p className="text-sm text-slate-500 mt-1">Chào buổi sáng, Admin! Đây là cập nhật mới nhất.</p>
+          <h1 className="text-2xl font-bold text-zinc-800 dark:text-white font-display">Tổng quan</h1>
+          <p className="text-sm text-zinc-500 mt-1">Chào buổi sáng, Admin! Đây là cập nhật mới nhất.</p>
         </div>
 
         {/* Stats */}

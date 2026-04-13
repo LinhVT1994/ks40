@@ -7,6 +7,80 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const db = new PrismaClient({ adapter });
 
 async function main() {
+  // ── Topics (2-level) ────────────────────────────────────────────
+  const parentDefs = [
+    { slug: 'system-design', label: 'System Design', emoji: '🏗️', color: '#8b5cf6', order: 0, enabled: true },
+    { slug: 'backend',       label: 'Backend',       emoji: '⚙️', color: '#3b82f6', order: 1, enabled: true },
+    { slug: 'frontend',      label: 'Frontend',      emoji: '🎨', color: '#ec4899', order: 2, enabled: true },
+    { slug: 'devops',        label: 'DevOps',        emoji: '🚀', color: '#10b981', order: 3, enabled: true },
+    { slug: 'ai-ml',         label: 'AI / ML',       emoji: '🤖', color: '#f59e0b', order: 4, enabled: true },
+    { slug: 'blockchain',    label: 'Blockchain',    emoji: '⛓️', color: '#eab308', order: 5, enabled: true },
+    { slug: 'other',         label: 'Khác',          emoji: '📦', color: '#64748b', order: 6, enabled: false },
+  ];
+
+  const childDefs: Record<string, { slug: string; label: string }[]> = {
+    'system-design': [
+      { slug: 'distributed-systems', label: 'Distributed Systems' },
+      { slug: 'scalability',         label: 'Scalability' },
+      { slug: 'microservices',       label: 'Microservices' },
+    ],
+    'backend': [
+      { slug: 'postgresql',    label: 'PostgreSQL' },
+      { slug: 'redis',         label: 'Redis' },
+      { slug: 'api-design',    label: 'API Design' },
+      { slug: 'nodejs',        label: 'Node.js' },
+    ],
+    'frontend': [
+      { slug: 'react',    label: 'React' },
+      { slug: 'nextjs',   label: 'Next.js' },
+      { slug: 'css',      label: 'CSS & Tailwind' },
+      { slug: 'typescript-frontend', label: 'TypeScript' },
+    ],
+    'devops': [
+      { slug: 'docker',     label: 'Docker' },
+      { slug: 'kubernetes', label: 'Kubernetes' },
+      { slug: 'cicd',       label: 'CI/CD' },
+      { slug: 'monitoring', label: 'Monitoring' },
+    ],
+    'ai-ml': [
+      { slug: 'llm',               label: 'LLM' },
+      { slug: 'prompt-engineering', label: 'Prompt Engineering' },
+      { slug: 'rag',               label: 'RAG' },
+    ],
+    'blockchain': [
+      { slug: 'solidity', label: 'Solidity & Smart Contracts' },
+      { slug: 'web3',     label: 'Web3' },
+      { slug: 'zk-proof', label: 'Zero-Knowledge Proof' },
+    ],
+  };
+
+  const topicMap: Record<string, string> = {};
+
+  // Create parents
+  for (const t of parentDefs) {
+    const topic = await db.topic.upsert({
+      where:  { slug: t.slug },
+      update: {},
+      create: t,
+    });
+    topicMap[t.slug] = topic.id;
+  }
+
+  // Create children
+  let childOrder = 100;
+  for (const [parentSlug, children] of Object.entries(childDefs)) {
+    const parentId = topicMap[parentSlug];
+    const parent = parentDefs.find(p => p.slug === parentSlug)!;
+    for (const c of children) {
+      const topic = await db.topic.upsert({
+        where:  { slug: c.slug },
+        update: {},
+        create: { slug: c.slug, label: c.label, color: parent.color, parentId, order: childOrder++, enabled: true } as any,
+      });
+      topicMap[c.slug] = topic.id;
+    }
+  }
+
   // ── Users ──────────────────────────────────────────────────────
   const adminPassword   = await bcrypt.hash('admin123', 12);
   const memberPassword  = await bcrypt.hash('member123', 12);
@@ -49,10 +123,10 @@ async function main() {
       where:  { userId: u.id },
       update: {},
       create: {
-        userId:              u.id,
-        occupation:          ['DEVELOPER', 'DEVOPS_ENGINEER', 'DATA_SCIENTIST', 'STUDENT'][Math.floor(Math.random() * 4)] as 'DEVELOPER' | 'DEVOPS_ENGINEER' | 'DATA_SCIENTIST' | 'STUDENT',
-        interestedCategories: ['BACKEND', 'FRONTEND', 'DEVOPS', 'AI_ML', 'SYSTEM_DESIGN'].slice(0, Math.floor(Math.random() * 3) + 2) as ('BACKEND' | 'FRONTEND' | 'DEVOPS' | 'AI_ML' | 'SYSTEM_DESIGN')[],
-        completedAt:         new Date(),
+        userId:          u.id,
+        occupation:      ['DEVELOPER', 'DEVOPS_ENGINEER', 'DATA_SCIENTIST', 'STUDENT'][Math.floor(Math.random() * 4)] as 'DEVELOPER' | 'DEVOPS_ENGINEER' | 'DATA_SCIENTIST' | 'STUDENT',
+        interestedTopics: [topicMap['backend'], topicMap['frontend'], topicMap['devops'], topicMap['ai-ml'], topicMap['system-design']].slice(0, Math.floor(Math.random() * 3) + 2),
+        completedAt:     new Date(),
       },
     });
   }
@@ -62,10 +136,10 @@ async function main() {
     where:  { userId: admin.id },
     update: {},
     create: {
-      userId:              admin.id,
-      occupation:          'DEVELOPER',
-      interestedCategories: ['SYSTEM_DESIGN', 'BACKEND', 'DEVOPS'],
-      completedAt:         new Date(),
+      userId:          admin.id,
+      occupation:      'DEVELOPER',
+      interestedTopics: [topicMap['system-design'], topicMap['backend'], topicMap['devops']],
+      completedAt:     new Date(),
     },
   });
 
@@ -99,24 +173,6 @@ async function main() {
     tags[name] = tag.id;
   }
 
-  // ── SiteConfig ─────────────────────────────────────────────────
-  await db.siteConfig.upsert({
-    where:  { key: 'article_categories' },
-    update: {},
-    create: {
-      key:   'article_categories',
-      value: [
-        { value: 'SYSTEM_DESIGN', label: 'System Design', emoji: '🏗️',  color: 'purple',  enabled: true },
-        { value: 'BACKEND',       label: 'Backend',       emoji: '⚙️',   color: 'blue',    enabled: true },
-        { value: 'FRONTEND',      label: 'Frontend',      emoji: '🎨',   color: 'pink',    enabled: true },
-        { value: 'DEVOPS',        label: 'DevOps',        emoji: '🚀',   color: 'orange',  enabled: true },
-        { value: 'AI_ML',         label: 'AI / ML',       emoji: '🤖',   color: 'green',   enabled: true },
-        { value: 'BLOCKCHAIN',    label: 'Blockchain',    emoji: '⛓️',   color: 'yellow',  enabled: true },
-        { value: 'OTHER',         label: 'Khác',          emoji: '📦',   color: 'slate',   enabled: false },
-      ],
-    },
-  });
-
   // ── Series ─────────────────────────────────────────────────────
   const systemDesignSeries = await db.series.upsert({
     where:  { slug: 'system-design-masterclass' },
@@ -138,7 +194,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1618401471353-b98afee0b2eb?w=1400&auto=format&fit=crop',
       summary:   'Hướng dẫn xây dựng CI/CD pipeline hoàn chỉnh với GitHub Actions, từ chạy test đến deploy tự động lên cloud.',
       content:   `## Giới thiệu\n\nCI/CD (Continuous Integration / Continuous Deployment) là nền tảng của DevOps hiện đại. Bài viết này hướng dẫn bạn xây dựng pipeline hoàn chỉnh với GitHub Actions.\n\n## GitHub Actions là gì?\n\nGitHub Actions là nền tảng CI/CD tích hợp sẵn trong GitHub, cho phép bạn tự động hóa build, test và deploy.\n\n## Cấu trúc workflow\n\n\`\`\`yaml\nname: CI/CD Pipeline\non:\n  push:\n    branches: [main]\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v3\n      - run: npm ci\n      - run: npm test\n\`\`\`\n\n## Deploy lên production\n\nSau khi test pass, pipeline tự động deploy lên server thông qua SSH hoặc cloud provider.\n\n## Kết luận\n\nCI/CD giúp team phát triển nhanh hơn và giảm thiểu lỗi khi deploy.`,
-      category:  'DEVOPS'        as const,
+      topicSlug: 'cicd',
       badges:    ['HOT', 'NEW']  as const,
       audience:  'PUBLIC'        as const,
       status:    'PUBLISHED'     as const,
@@ -152,7 +208,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1400&auto=format&fit=crop',
       summary:   'Phân tích và thiết kế hệ thống rút gọn URL có thể xử lý hàng triệu request mỗi ngày.',
       content:   `## Yêu cầu hệ thống\n\n**Functional Requirements:**\n- Tạo short URL từ long URL\n- Redirect từ short URL về long URL\n- Thống kê lượt click\n\n**Non-functional Requirements:**\n- 100M URL/ngày\n- Độ trễ < 100ms\n- Uptime 99.9%\n\n## Ước tính capacity\n\n- Write: 100M/day = ~1200 RPS\n- Read: 10:1 ratio = 12000 RPS\n- Storage: 100M * 500 bytes * 365 days * 5 years = ~90TB\n\n## High-level Design\n\n\`\`\`\nClient → Load Balancer → API Servers → Cache (Redis) → Database\n\`\`\`\n\n## Database Schema\n\n\`\`\`sql\nCREATE TABLE urls (\n  id BIGINT PRIMARY KEY,\n  short_code VARCHAR(8) UNIQUE,\n  long_url TEXT,\n  created_at TIMESTAMP\n);\n\`\`\`\n\n## Kết luận\n\nURL Shortener là bài toán kinh điển trong System Design interviews.`,
-      category:  'SYSTEM_DESIGN'           as const,
+      topicSlug: 'distributed-systems',
       badges:    ['TRENDING', 'FEATURED']  as const,
       audience:  'MEMBERS'                 as const,
       status:    'PUBLISHED'               as const,
@@ -168,7 +224,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1516116216624-53e697fedbea?w=1400&auto=format&fit=crop',
       summary:   'Khám phá các kỹ thuật TypeScript nâng cao: Conditional Types, Mapped Types, Template Literal Types.',
       content:   `## Tại sao cần Advanced Types?\n\nKhi project lớn dần, TypeScript cơ bản không đủ để đảm bảo type safety. Advanced Types giúp bạn viết code linh hoạt hơn.\n\n## Conditional Types\n\n\`\`\`typescript\ntype IsArray<T> = T extends any[] ? true : false;\ntype A = IsArray<string[]>; // true\ntype B = IsArray<string>;   // false\n\`\`\`\n\n## Mapped Types\n\n\`\`\`typescript\ntype Readonly<T> = {\n  readonly [K in keyof T]: T[K];\n};\n\`\`\`\n\n## Template Literal Types\n\n\`\`\`typescript\ntype EventName = \`on\${Capitalize<string>}\`;\n// onCLick, onChange, onSubmit...\n\`\`\`\n\n## Infer keyword\n\n\`\`\`typescript\ntype ReturnType<T> = T extends (...args: any[]) => infer R ? R : never;\n\`\`\`\n\n## Kết luận\n\nMastering TypeScript advanced types giúp code của bạn robust và maintainable hơn.`,
-      category:  'FRONTEND'  as const,
+      topicSlug: 'typescript-frontend',
       badges:    ['NEW']      as const,
       audience:  'MEMBERS'   as const,
       status:    'PUBLISHED' as const,
@@ -182,7 +238,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1400&auto=format&fit=crop',
       summary:   'So sánh hai kiến trúc phổ biến và hướng dẫn ra quyết định phù hợp với từng giai đoạn phát triển.',
       content:   `## Monolith Architecture\n\nMọi thứ trong một codebase duy nhất. Đơn giản khi bắt đầu, nhưng khó scale khi lớn dần.\n\n**Ưu điểm:**\n- Đơn giản để phát triển\n- Dễ debug và test\n- Deployment đơn giản\n\n**Nhược điểm:**\n- Khó scale từng phần\n- Rủi ro khi deploy\n- Tech stack bị lock-in\n\n## Microservices Architecture\n\nTách thành các service nhỏ, độc lập, giao tiếp qua API hoặc message queue.\n\n**Ưu điểm:**\n- Scale độc lập từng service\n- Deploy nhanh và an toàn\n- Tech stack linh hoạt\n\n**Nhược điểm:**\n- Phức tạp về infrastructure\n- Distributed system challenges\n- Cần DevOps mature\n\n## Khi nào chọn Microservices?\n\nChỉ nên chuyển sang Microservices khi team đủ lớn (>10 engineers) và đã cảm thấy pain với Monolith.\n\n## Kết luận\n\nBắt đầu với Monolith, migrate sang Microservices khi cần thiết.`,
-      category:  'SYSTEM_DESIGN'   as const,
+      topicSlug: 'microservices',
       badges:    ['FEATURED']       as const,
       audience:  'PUBLIC'           as const,
       status:    'PUBLISHED'        as const,
@@ -198,7 +254,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=1400&auto=format&fit=crop',
       summary:   'Tìm hiểu cách xây dựng Retrieval-Augmented Generation system để tăng độ chính xác của LLM.',
       content:   `## RAG là gì?\n\nRAG (Retrieval-Augmented Generation) kết hợp retrieval từ knowledge base với generation của LLM để tạo ra câu trả lời chính xác hơn.\n\n## Kiến trúc RAG\n\n\`\`\`\nQuestion → Embedding → Vector Search → Context + Question → LLM → Answer\n\`\`\`\n\n## Các bước xây dựng\n\n1. **Indexing**: Chunk documents, tạo embeddings, lưu vào vector store\n2. **Retrieval**: Embed query, tìm top-k similar chunks\n3. **Generation**: Kết hợp context + query, gửi lên LLM\n\n## Code example với LangChain\n\n\`\`\`python\nfrom langchain.chains import RetrievalQA\n\nqa = RetrievalQA.from_chain_type(\n  llm=ChatOpenAI(),\n  retriever=vectorstore.as_retriever()\n)\nresult = qa.run("What is RAG?")\n\`\`\`\n\n## Kết luận\n\nRAG là pattern quan trọng khi muốn LLM trả lời dựa trên dữ liệu riêng của bạn.`,
-      category:  'AI_ML'               as const,
+      topicSlug: 'rag',
       badges:    ['HOT', 'TRENDING']   as const,
       audience:  'PREMIUM'             as const,
       status:    'PUBLISHED'           as const,
@@ -212,7 +268,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1605745341112-85968b19335b?w=1400&auto=format&fit=crop',
       summary:   'Hướng dẫn từng bước containerize Next.js app và deploy lên Kubernetes cluster.',
       content:   `## Dockerfile cho Next.js\n\n\`\`\`dockerfile\nFROM node:20-alpine AS builder\nWORKDIR /app\nCOPY package*.json ./\nRUN npm ci\nCOPY . .\nRUN npm run build\n\nFROM node:20-alpine AS runner\nWORKDIR /app\nCOPY --from=builder /app/.next ./.next\nCOPY --from=builder /app/node_modules ./node_modules\nEXPOSE 3000\nCMD ["npm", "start"]\n\`\`\`\n\n## Kubernetes Deployment\n\n\`\`\`yaml\napiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: nextjs-app\nspec:\n  replicas: 3\n  template:\n    spec:\n      containers:\n      - name: nextjs\n        image: myapp:latest\n        ports:\n        - containerPort: 3000\n\`\`\`\n\n## Kết luận\n\nContainerization giúp deployment nhất quán và dễ scale.`,
-      category:  'DEVOPS'           as const,
+      topicSlug: 'docker',
       badges:    ['NEW', 'HOT']     as const,
       audience:  'MEMBERS'          as const,
       status:    'PUBLISHED'        as const,
@@ -226,7 +282,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?w=1400&auto=format&fit=crop',
       summary:   'Tìm hiểu cách viết smart contract bằng Solidity và triển khai DeFi lending protocol.',
       content:   `## Solidity là gì?\n\nSolidity là ngôn ngữ lập trình smart contract chạy trên Ethereum Virtual Machine (EVM).\n\n## Smart Contract đơn giản\n\n\`\`\`solidity\n// SPDX-License-Identifier: MIT\npragma solidity ^0.8.0;\n\ncontract SimpleStorage {\n  uint256 private value;\n  \n  function setValue(uint256 _value) public {\n    value = _value;\n  }\n  \n  function getValue() public view returns (uint256) {\n    return value;\n  }\n}\n\`\`\`\n\n## DeFi Lending\n\nProtocol cho phép user deposit collateral và borrow tokens với lãi suất.\n\n## Kết luận\n\nSolidity và DeFi mở ra nhiều cơ hội cho developer Web3.`,
-      category:  'BLOCKCHAIN'      as const,
+      topicSlug: 'solidity',
       badges:    ['TRENDING']       as const,
       audience:  'MEMBERS'          as const,
       status:    'PUBLISHED'        as const,
@@ -240,7 +296,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=1400&auto=format&fit=crop',
       summary:   'Các kỹ thuật tối ưu PostgreSQL từ index strategy đến query planning và connection pooling.',
       content:   `## Tại sao query chậm?\n\nQuery chậm thường do thiếu index, bad query plan, hoặc N+1 problem.\n\n## EXPLAIN ANALYZE\n\n\`\`\`sql\nEXPLAIN ANALYZE\nSELECT * FROM articles\nWHERE category = 'DEVOPS'\nORDER BY published_at DESC;\n\`\`\`\n\n## Index Strategy\n\n\`\`\`sql\n-- Composite index\nCREATE INDEX idx_articles_category_published\nON articles(category, published_at DESC);\n\n-- Partial index\nCREATE INDEX idx_articles_published\nON articles(published_at)\nWHERE status = 'PUBLISHED';\n\`\`\`\n\n## Connection Pooling với PgBouncer\n\nGiảm overhead tạo connection bằng cách pool connections.\n\n## Kết luận\n\nPerformance tuning là kỹ năng quan trọng cho backend engineer.`,
-      category:  'BACKEND'               as const,
+      topicSlug: 'postgresql',
       badges:    ['FEATURED', 'HOT']     as const,
       audience:  'PREMIUM'               as const,
       status:    'PUBLISHED'             as const,
@@ -254,7 +310,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=1400&auto=format&fit=crop&sat=-50',
       summary:   'Khám phá sâu về Redis — từ caching chiến lược đến Pub/Sub messaging và Redis Streams cho real-time data.',
       content:   `## Redis là gì?\n\nRedis (Remote Dictionary Server) là in-memory data store cực nhanh, thường dùng làm cache, message broker và session store.\n\n## Caching Strategies\n\n### Cache-Aside\n\`\`\`python\ndef get_user(user_id):\n    cached = redis.get(f"user:{user_id}")\n    if cached:\n        return json.loads(cached)\n    user = db.query(User).get(user_id)\n    redis.setex(f"user:{user_id}", 3600, json.dumps(user))\n    return user\n\`\`\`\n\n### Write-Through\nGhi vào cache và DB cùng lúc, đảm bảo consistency.\n\n## Pub/Sub\n\n\`\`\`python\n# Publisher\nredis.publish('notifications', json.dumps({'type': 'new_message', 'userId': 123}))\n\n# Subscriber\npubsub = redis.pubsub()\npubsub.subscribe('notifications')\nfor message in pubsub.listen():\n    handle(message)\n\`\`\`\n\n## Redis Streams\n\nStreams cho phép lưu trữ và xử lý event log với consumer groups, tương tự Kafka nhưng đơn giản hơn.\n\n## Kết luận\n\nRedis là công cụ đa năng không thể thiếu trong stack của mọi backend engineer.`,
-      category:  'BACKEND'   as const,
+      topicSlug: 'redis',
       badges:    ['HOT']      as const,
       audience:  'MEMBERS'   as const,
       status:    'PUBLISHED' as const,
@@ -268,7 +324,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=1400&auto=format&fit=crop',
       summary:   'Hiểu sâu về React Server Components trong Next.js App Router — khi nào dùng, lợi ích và những cạm bẫy cần tránh.',
       content:   `## Server Components vs Client Components\n\nNext.js App Router mặc định là Server Component. Chỉ thêm \`"use client"\` khi cần interactivity.\n\n## Khi nào dùng Server Component?\n\n- Fetch data từ DB/API\n- Đọc environment variables\n- Không cần state, effects, browser APIs\n\n## Data Fetching\n\n\`\`\`tsx\n// Server Component - fetch trực tiếp\nasync function ArticlePage({ params }) {\n  const article = await db.article.findUnique({\n    where: { slug: params.slug }\n  });\n  return <ArticleContent article={article} />;\n}\n\`\`\`\n\n## Caching và Revalidation\n\n\`\`\`tsx\n// Revalidate mỗi 60 giây\nexport const revalidate = 60;\n\n// Revalidate theo tag\nimport { revalidateTag } from 'next/cache';\nrevalidateTag('articles');\n\`\`\`\n\n## Streaming với Suspense\n\n\`\`\`tsx\n<Suspense fallback={<ArticleSkeleton />}>\n  <ArticleContent />\n</Suspense>\n\`\`\`\n\n## Kết luận\n\nApp Router thay đổi cách chúng ta nghĩ về data fetching — ưu tiên server-side để giảm bundle size và tăng performance.`,
-      category:  'FRONTEND'             as const,
+      topicSlug: 'nextjs',
       badges:    ['NEW', 'TRENDING']    as const,
       audience:  'PUBLIC'               as const,
       status:    'PUBLISHED'            as const,
@@ -282,7 +338,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1400&auto=format&fit=crop',
       summary:   'Tổng hợp các best practices thiết kế RESTful API: versioning, error handling, pagination, authentication và documentation.',
       content:   `## Naming Conventions\n\nDùng danh từ số nhiều, lowercase, dấu gạch ngang:\n\`\`\`\nGET  /api/v1/articles\nGET  /api/v1/articles/:id\nPOST /api/v1/articles\nPUT  /api/v1/articles/:id\nDELETE /api/v1/articles/:id\n\`\`\`\n\n## HTTP Status Codes\n\n| Code | Meaning |\n|------|--------|\n| 200 | OK |\n| 201 | Created |\n| 400 | Bad Request |\n| 401 | Unauthorized |\n| 403 | Forbidden |\n| 404 | Not Found |\n| 500 | Internal Server Error |\n\n## Error Response Format\n\n\`\`\`json\n{\n  "error": {\n    "code": "VALIDATION_ERROR",\n    "message": "Email is invalid",\n    "details": [{ "field": "email", "message": "Must be a valid email" }]\n  }\n}\n\`\`\`\n\n## Pagination\n\n\`\`\`json\n{\n  "data": [...],\n  "pagination": {\n    "page": 1,\n    "limit": 20,\n    "total": 150,\n    "totalPages": 8\n  }\n}\n\`\`\`\n\n## Versioning\n\nDùng URL versioning: \`/api/v1/\`, \`/api/v2/\` để backward compatibility.\n\n## Kết luận\n\nAPI tốt là API mà developer không cần đọc docs vẫn hiểu được.`,
-      category:  'BACKEND'       as const,
+      topicSlug: 'api-design',
       badges:    ['FEATURED']     as const,
       audience:  'PUBLIC'         as const,
       status:    'PUBLISHED'      as const,
@@ -296,7 +352,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1400&auto=format&fit=crop',
       summary:   'Tailwind CSS v4 mang đến CSS-first configuration, Lightning CSS engine và nhiều cải tiến hiệu năng đáng kể.',
       content:   `## CSS-First Configuration\n\nTailwind v4 bỏ \`tailwind.config.js\`, thay bằng cấu hình trực tiếp trong CSS:\n\n\`\`\`css\n@import "tailwindcss";\n\n@theme {\n  --color-primary: #3b82f6;\n  --font-display: "Inter", sans-serif;\n}\n\`\`\`\n\n## Lightning CSS Engine\n\nTailwind v4 dùng Lightning CSS thay vì PostCSS, build nhanh hơn ~10x.\n\n## Custom Variants\n\n\`\`\`css\n@custom-variant dark (&:is(.dark *));\n@custom-variant hover (&:hover);\n\`\`\`\n\n## Utility Classes mới\n\n- \`text-balance\`, \`text-pretty\`\n- \`inset-shadow-*\`\n- \`field-sizing-content\`\n- Dynamic values: \`grid-cols-[repeat(auto-fill,minmax(200px,1fr))]\`\n\n## Migration từ v3\n\nDùng upgrade tool: \`npx @tailwindcss/upgrade\`\n\n## Kết luận\n\nTailwind v4 là bước tiến lớn về DX và performance.`,
-      category:  'FRONTEND'          as const,
+      topicSlug: 'css',
       badges:    ['NEW', 'HOT']       as const,
       audience:  'PUBLIC'             as const,
       status:    'PUBLISHED'          as const,
@@ -310,7 +366,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&auto=format&fit=crop',
       summary:   'Xây dựng hệ thống microservices loosely coupled với Kafka — producer, consumer, partitions và exactly-once semantics.',
       content:   `## Tại sao Event-Driven?\n\nThay vì gọi API trực tiếp giữa services (tight coupling), EDA dùng events để giao tiếp — loosely coupled, dễ scale.\n\n## Kafka Core Concepts\n\n- **Topic**: Kênh chứa events\n- **Partition**: Phân mảnh topic để scale\n- **Consumer Group**: Nhóm consumer xử lý song song\n- **Offset**: Vị trí đọc trong partition\n\n## Producer\n\n\`\`\`python\nfrom kafka import KafkaProducer\nimport json\n\nproducer = KafkaProducer(\n    bootstrap_servers=['localhost:9092'],\n    value_serializer=lambda v: json.dumps(v).encode()\n)\n\nproducer.send('user-events', {\n    'type': 'USER_REGISTERED',\n    'userId': '123',\n    'email': 'user@example.com'\n})\n\`\`\`\n\n## Consumer\n\n\`\`\`python\nfrom kafka import KafkaConsumer\n\nconsumer = KafkaConsumer(\n    'user-events',\n    group_id='email-service',\n    bootstrap_servers=['localhost:9092']\n)\n\nfor message in consumer:\n    event = json.loads(message.value)\n    if event['type'] == 'USER_REGISTERED':\n        send_welcome_email(event['email'])\n\`\`\`\n\n## Exactly-Once Semantics\n\nKafka hỗ trợ idempotent producer và transactional API để đảm bảo mỗi event chỉ được xử lý đúng một lần.\n\n## Kết luận\n\nKafka là backbone của nhiều hệ thống phân tán lớn như LinkedIn, Uber, Netflix.`,
-      category:  'SYSTEM_DESIGN'   as const,
+      topicSlug: 'microservices',
       badges:    ['TRENDING']       as const,
       audience:  'PREMIUM'          as const,
       status:    'PUBLISHED'        as const,
@@ -326,7 +382,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1655720828018-edd2daec9349?w=1400&auto=format&fit=crop',
       summary:   'Kỹ thuật viết prompt nâng cao để tối ưu output từ LLM — Chain-of-Thought, Few-Shot, Self-Consistency và Tree-of-Thought.',
       content:   `## Zero-Shot vs Few-Shot\n\n**Zero-Shot**: Đặt câu hỏi trực tiếp không có ví dụ.\n\n**Few-Shot**: Cung cấp 2-5 ví dụ trước câu hỏi để guide model.\n\n\`\`\`\nPhân loại cảm xúc:\n"Tôi rất vui" → Tích cực\n"Tệ quá" → Tiêu cực\n"Bình thường" → Trung lập\n"Hôm nay tôi mệt" → ?\n\`\`\`\n\n## Chain-of-Thought (CoT)\n\nYêu cầu model giải thích từng bước trước khi trả lời:\n\n\`\`\`\nHãy suy nghĩ từng bước:\n1. Phân tích vấn đề\n2. Liệt kê các phương án\n3. Đánh giá từng phương án\n4. Đưa ra kết luận\n\`\`\`\n\n## Self-Consistency\n\nGenerate nhiều CoT paths, lấy kết quả đa số (majority voting).\n\n## Tree-of-Thought\n\nMở rộng CoT thành cây quyết định, explore nhiều nhánh tư duy song song.\n\n## ReAct Pattern\n\nKết hợp Reasoning + Acting — model vừa suy nghĩ vừa gọi tools.\n\n## Kết luận\n\nPrompt engineering là kỹ năng thiết yếu khi làm việc với LLM trong production.`,
-      category:  'AI_ML'                as const,
+      topicSlug: 'prompt-engineering',
       badges:    ['HOT', 'FEATURED']    as const,
       audience:  'MEMBERS'              as const,
       status:    'PUBLISHED'            as const,
@@ -340,7 +396,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1623282033815-40b05d96c903?w=1400&auto=format&fit=crop',
       summary:   'So sánh chi tiết gRPC và REST — hiệu năng, use cases, pros/cons và khi nào nên dùng cái nào trong microservices.',
       content:   `## REST\n\nHTTP/1.1, JSON, stateless, dễ debug, widely supported.\n\n**Dùng khi:**\n- Public API\n- Browser clients\n- Simple CRUD operations\n\n## gRPC\n\nHTTP/2, Protocol Buffers, strongly typed, bidirectional streaming.\n\n**Dùng khi:**\n- Internal microservices\n- High-performance requirements\n- Streaming data\n- Polyglot environments\n\n## Performance so sánh\n\n| Metric | REST/JSON | gRPC/Protobuf |\n|--------|-----------|---------------|\n| Payload size | 100% | ~30% |\n| Serialization | Chậm | Nhanh 5-10x |\n| Latency | Cao hơn | Thấp hơn |\n\n## Proto Definition\n\n\`\`\`protobuf\nsyntax = "proto3";\n\nservice ArticleService {\n  rpc GetArticle (GetArticleRequest) returns (Article);\n  rpc ListArticles (ListRequest) returns (stream Article);\n}\n\nmessage Article {\n  string id = 1;\n  string title = 2;\n  string content = 3;\n}\n\`\`\`\n\n## Kết luận\n\nDùng REST cho public API, gRPC cho internal service-to-service communication cần hiệu năng cao.`,
-      category:  'BACKEND'   as const,
+      topicSlug: 'api-design',
       badges:    ['NEW']      as const,
       audience:  'MEMBERS'   as const,
       status:    'PUBLISHED' as const,
@@ -354,7 +410,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1620321023374-d1a68fbc720d?w=1400&auto=format&fit=crop',
       summary:   'Hiểu ZK-Proof từ nền tảng toán học đến ứng dụng thực tế trong blockchain — zk-SNARKs, zk-STARKs và ZK-Rollups.',
       content:   `## ZK-Proof là gì?\n\nZero-Knowledge Proof là cách chứng minh bạn biết một điều gì đó mà không tiết lộ thông tin đó.\n\n**Ví dụ**: Chứng minh bạn biết password mà không cần gửi password.\n\n## Ba tính chất\n\n1. **Completeness**: Prover trung thực luôn thuyết phục được Verifier\n2. **Soundness**: Prover gian lận không thể thuyết phục Verifier\n3. **Zero-Knowledge**: Verifier không học được gì ngoài tính đúng đắn\n\n## zk-SNARKs\n\n**S**uccinct **N**on-interactive **AR**guments of **K**nowledge\n\n- Proof size nhỏ, verify nhanh\n- Cần trusted setup\n- Dùng trong Zcash, Polygon\n\n## zk-STARKs\n\n- Không cần trusted setup\n- Quantum-resistant\n- Proof size lớn hơn\n- Dùng trong StarkNet\n\n## ZK-Rollups\n\nLayer 2 scaling solution: batch nhiều transactions, generate ZK proof, submit lên L1.\n\n## Kết luận\n\nZK-Proof là breakthrough công nghệ quan trọng nhất của blockchain trong thập kỷ này.`,
-      category:  'BLOCKCHAIN'              as const,
+      topicSlug: 'zk-proof',
       badges:    ['FEATURED', 'TRENDING']  as const,
       audience:  'PREMIUM'                 as const,
       status:    'PUBLISHED'               as const,
@@ -368,7 +424,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=1400&auto=format&fit=crop',
       summary:   'Xây dựng hệ thống observability hoàn chỉnh với ba trụ cột: Metrics (Prometheus), Logs (Loki) và Traces (Jaeger).',
       content:   `## Ba trụ cột của Observability\n\n1. **Metrics**: Số liệu theo thời gian (CPU, memory, request rate)\n2. **Logs**: Sự kiện có cấu trúc từ application\n3. **Traces**: Luồng request qua các services\n\n## Prometheus\n\n\`\`\`yaml\n# prometheus.yml\nscrape_configs:\n  - job_name: 'api'\n    static_configs:\n      - targets: ['api:3000']\n\`\`\`\n\n## Custom Metrics trong Node.js\n\n\`\`\`typescript\nimport { Counter, Histogram } from 'prom-client';\n\nconst httpRequests = new Counter({\n  name: 'http_requests_total',\n  labelNames: ['method', 'route', 'status']\n});\n\nconst responseTime = new Histogram({\n  name: 'http_response_time_seconds',\n  buckets: [0.1, 0.5, 1, 2, 5]\n});\n\`\`\`\n\n## Grafana Dashboard\n\nVisualize metrics với PromQL queries, alerting rules và notification channels.\n\n## OpenTelemetry\n\nStandard cho distributed tracing — tự động instrument frameworks phổ biến.\n\n## Kết luận\n\nObservability không phải luxury, đó là requirement cho production systems.`,
-      category:  'DEVOPS'    as const,
+      topicSlug: 'monitoring',
       badges:    ['NEW']      as const,
       audience:  'MEMBERS'   as const,
       status:    'PUBLISHED' as const,
@@ -382,7 +438,7 @@ async function main() {
       cover:     'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=1400&auto=format&fit=crop',
       summary:   'Tìm hiểu các chiến lược database sharding — horizontal partitioning, consistent hashing và cross-shard queries.',
       content:   `## Khi nào cần Sharding?\n\nKhi một database không đủ xử lý:\n- Hàng tỷ records\n- Hàng nghìn write/second\n- Dataset không fit vào một machine\n\n## Sharding Strategies\n\n### Range-Based\nPhân vùng theo range của shard key:\n\`\`\`\nShard 1: user_id 1 - 1,000,000\nShard 2: user_id 1,000,001 - 2,000,000\n\`\`\`\n\n### Hash-Based\n\`\`\`python\nshard_id = hash(user_id) % num_shards\n\`\`\`\n\n### Consistent Hashing\nThêm/bớt shard mà không cần rehash toàn bộ data.\n\n## Cross-Shard Queries\n\nVấn đề lớn nhất của sharding — queries cần join data từ nhiều shards. Giải pháp:\n- Scatter-gather: query tất cả shards, merge kết quả\n- Denormalization: duplicate data để tránh cross-shard join\n\n## Vitess\n\nKhông tự implement sharding — dùng Vitess (MySQL) hoặc Citus (PostgreSQL).\n\n## Kết luận\n\nSharding là last resort. Trước tiên hãy thử read replicas, caching và query optimization.`,
-      category:  'SYSTEM_DESIGN'               as const,
+      topicSlug: 'scalability',
       badges:    ['TRENDING', 'FEATURED']       as const,
       audience:  'PREMIUM'                      as const,
       status:    'PUBLISHED'                    as const,
@@ -395,13 +451,15 @@ async function main() {
 
   const createdArticles: { id: string }[] = [];
   for (const data of articles) {
-    const { tags: tagNames, badges, seriesId, seriesOrder, ...rest } = data as typeof data & { seriesId?: string; seriesOrder?: number };
+    const { tags: tagNames, badges, seriesId, seriesOrder, topicSlug, ...rest } = data as typeof data & { seriesId?: string; seriesOrder?: number; topicSlug: string };
+    const topicId = topicMap[topicSlug];
 
     const article = await db.article.upsert({
       where:  { slug: rest.slug },
       update: { thumbnail: rest.thumbnail, cover: rest.cover, seriesId: seriesId ?? null, seriesOrder: seriesOrder ?? null },
       create: {
         ...rest,
+        topicId,
         badges:      [...badges],
         publishedAt: new Date(Date.now() - Math.floor(Math.random() * 30) * 24 * 60 * 60 * 1000),
         authorId:    admin.id,

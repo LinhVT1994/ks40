@@ -15,7 +15,7 @@ function FileIcon({ mimeType }: { mimeType: string }) {
     return <FileArchive className="w-5 h-5 text-amber-500" />;
   }
   if (mimeType.includes('pdf')) return <FileText className="w-5 h-5 text-rose-500" />;
-  return <File className="w-5 h-5 text-slate-400" />;
+  return <File className="w-5 h-5 text-zinc-500" />;
 }
 
 interface Props {
@@ -58,7 +58,7 @@ export default function ArticleResourceUpload({ resources, onChange, existingRes
 
   return (
     <div className="space-y-4">
-      <label className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+      <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider flex items-center gap-2">
         <Paperclip className="w-3.5 h-3.5" /> Tài nguyên đính kèm
       </label>
 
@@ -67,7 +67,7 @@ export default function ArticleResourceUpload({ resources, onChange, existingRes
         onDragOver={e => e.preventDefault()}
         onDrop={e => { e.preventDefault(); handleFiles(e.dataTransfer.files); }}
         onClick={() => inputRef.current?.click()}
-        className="border-2 border-dashed border-slate-200 dark:border-white/10 rounded-2xl p-8 flex flex-col items-center gap-3 cursor-pointer hover:border-primary/40 hover:bg-primary/[0.02] transition-all group"
+        className="border-2 border-dashed border-zinc-300 dark:border-white/10 rounded-2xl p-8 flex flex-col items-center gap-3 cursor-pointer hover:border-primary/40 hover:bg-primary/[0.02] transition-all group"
       >
         <input
           ref={inputRef}
@@ -80,13 +80,13 @@ export default function ArticleResourceUpload({ resources, onChange, existingRes
         {uploading ? (
           <Loader2 className="w-8 h-8 text-primary animate-spin" />
         ) : (
-          <Upload className="w-8 h-8 text-slate-300 group-hover:text-primary transition-colors" />
+          <Upload className="w-8 h-8 text-zinc-300 group-hover:text-primary transition-colors" />
         )}
         <div className="text-center">
-          <p className="text-sm font-bold text-slate-600 dark:text-slate-300 group-hover:text-primary transition-colors">
+          <p className="text-sm font-bold text-zinc-600 dark:text-slate-300 group-hover:text-primary transition-colors">
             {uploading ? 'Đang tải lên…' : 'Kéo thả file hoặc click để chọn'}
           </p>
-          <p className="text-xs text-slate-400 mt-1">ZIP, RAR, 7Z, PDF, DOCX, XLSX… — tối đa 100MB mỗi file</p>
+          <p className="text-xs text-zinc-500 mt-1">ZIP, RAR, 7Z, PDF, DOCX, XLSX… — tối đa 100MB mỗi file</p>
         </div>
       </div>
 
@@ -97,18 +97,18 @@ export default function ArticleResourceUpload({ resources, onChange, existingRes
       {/* Existing resources */}
       {existingResources.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Đã đính kèm</p>
+          <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Đã đính kèm</p>
           {existingResources.map(r => (
-            <div key={r.id} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl">
+            <div key={r.id} className="flex items-center gap-3 p-3 bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl">
               <FileIcon mimeType={r.mimeType} />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{r.name}</p>
-                <p className="text-xs text-slate-400">{formatBytes(r.size)}</p>
+                <p className="text-sm font-medium text-zinc-800 dark:text-slate-200 truncate">{r.name}</p>
+                <p className="text-xs text-zinc-500">{formatBytes(r.size)}</p>
               </div>
               {onDeleteExisting && (
                 <button
                   onClick={() => onDeleteExisting(r.id)}
-                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+                  className="p-1.5 rounded-lg text-zinc-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -121,17 +121,17 @@ export default function ArticleResourceUpload({ resources, onChange, existingRes
       {/* New file list */}
       {resources.length > 0 && (
         <div className="space-y-2">
-          {existingResources.length > 0 && <p className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Thêm mới</p>}
+          {existingResources.length > 0 && <p className="text-[11px] font-bold text-zinc-500 uppercase tracking-wider">Thêm mới</p>}
           {resources.map((r, i) => (
-            <div key={i} className="flex items-center gap-3 p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl">
+            <div key={i} className="flex items-center gap-3 p-3 bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl">
               <FileIcon mimeType={r.mimeType} />
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-slate-800 dark:text-slate-200 truncate">{r.name}</p>
-                <p className="text-xs text-slate-400">{formatBytes(r.size)}</p>
+                <p className="text-sm font-medium text-zinc-800 dark:text-slate-200 truncate">{r.name}</p>
+                <p className="text-xs text-zinc-500">{formatBytes(r.size)}</p>
               </div>
               <button
                 onClick={() => remove(i)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
+                className="p-1.5 rounded-lg text-zinc-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
               >
                 <Trash2 className="w-4 h-4" />
               </button>

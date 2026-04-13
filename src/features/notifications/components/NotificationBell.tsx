@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Bell, FileText, MessageSquare, Heart, Zap, CheckCheck, X } from 'lucide-react';
+import { Bell, FileText, MessageSquare, Heart, Zap, CheckCheck, X, CheckCircle2, AlertCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import type { Notification } from '@prisma/client';
@@ -13,6 +13,8 @@ const TYPE_CFG: Record<string, { icon: React.ElementType; color: string; bg: str
   NEW_ARTICLE:   { icon: FileText,      color: 'text-blue-500',    bg: 'bg-blue-500/10'    },
   COMMENT_REPLY: { icon: MessageSquare, color: 'text-violet-500',  bg: 'bg-violet-500/10'  },
   LIKE:          { icon: Heart,         color: 'text-pink-500',    bg: 'bg-pink-500/10'    },
+  ARTICLE_APPROVED: { icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+  ARTICLE_REJECTED: { icon: AlertCircle, color: 'text-rose-500',    bg: 'bg-rose-500/10'    },
 };
 
 function timeAgo(date: Date | string) {
@@ -32,7 +34,7 @@ function NotifItem({
   const inner = (
     <div
       onClick={() => onRead(notif.id)}
-      className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-slate-50 dark:hover:bg-white/[0.03] ${
+      className={`flex items-start gap-3 px-4 py-3 cursor-pointer transition-colors hover:bg-zinc-50 dark:hover:bg-white/[0.03] ${
         !notif.read ? 'bg-primary/[0.03] dark:bg-primary/[0.05]' : ''
       }`}
     >
@@ -43,13 +45,13 @@ function NotifItem({
 
       {/* Content */}
       <div className="flex-1 min-w-0 space-y-0.5">
-        <p className={`text-sm leading-snug ${!notif.read ? 'font-semibold text-slate-900 dark:text-white' : 'font-medium text-slate-700 dark:text-slate-300'}`}>
+        <p className={`text-sm leading-snug ${!notif.read ? 'font-semibold text-zinc-800 dark:text-white' : 'font-medium text-zinc-700 dark:text-slate-300'}`}>
           {notif.title}
         </p>
         {notif.message && (
-          <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{notif.message}</p>
+          <p className="text-xs text-zinc-500 dark:text-slate-400 line-clamp-2">{notif.message}</p>
         )}
-        <p className="text-[11px] text-slate-400">{timeAgo(notif.createdAt)}</p>
+        <p className="text-[11px] text-zinc-500">{timeAgo(notif.createdAt)}</p>
       </div>
 
       {/* Unread dot */}
@@ -132,7 +134,7 @@ export default function NotificationBell() {
         className={`relative p-2 rounded-full transition-colors ${
           open
             ? 'bg-primary/10 text-primary'
-            : 'text-slate-500 hover:text-primary hover:bg-slate-100 dark:hover:bg-white/10'
+            : 'text-zinc-500 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/10'
         }`}
         aria-label="Thông báo"
       >
@@ -141,11 +143,11 @@ export default function NotificationBell() {
 
       {/* Dropdown panel */}
       {open && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 origin-top-right bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-2xl shadow-2xl z-[70] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute right-0 mt-2 w-80 sm:w-96 origin-top-right bg-white dark:bg-slate-900 border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[70] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3.5 border-b border-slate-100 dark:border-white/5">
+          <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-200 dark:border-white/5">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Thông báo</h3>
+              <h3 className="text-sm font-bold text-zinc-800 dark:text-white">Thông báo</h3>
               {unreadCount > 0 && (
                 <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
                   {unreadCount} mới
@@ -165,7 +167,7 @@ export default function NotificationBell() {
               )}
               <button
                 onClick={() => setOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+                className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -173,14 +175,14 @@ export default function NotificationBell() {
           </div>
 
           {/* List */}
-          <div className="max-h-[420px] overflow-y-auto divide-y divide-slate-50 dark:divide-white/5">
+          <div className="max-h-[420px] overflow-y-auto divide-y divide-zinc-200 dark:divide-white/5">
             {isLoading ? (
-              <div className="flex items-center justify-center py-12 gap-2 text-sm text-slate-400">
-                <span className="w-4 h-4 border-2 border-slate-200 border-t-primary rounded-full animate-spin" />
+              <div className="flex items-center justify-center py-12 gap-2 text-sm text-zinc-500">
+                <span className="w-4 h-4 border-2 border-zinc-300 border-t-primary rounded-full animate-spin" />
                 Đang tải...
               </div>
             ) : notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 gap-3 text-slate-400">
+              <div className="flex flex-col items-center justify-center py-12 gap-3 text-zinc-500">
                 <Bell className="w-8 h-8 opacity-30" />
                 <p className="text-sm">Không có thông báo nào</p>
               </div>
@@ -197,7 +199,7 @@ export default function NotificationBell() {
 
           {/* Footer */}
           {notifications.length > 0 && (
-            <div className="px-4 py-2.5 border-t border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/[0.02]">
+            <div className="px-4 py-2.5 border-t border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
               <a
                 href="/notifications"
                 className="text-xs font-semibold text-primary hover:underline"

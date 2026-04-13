@@ -123,16 +123,16 @@ export default function NotificationSendForm({
 
   const selectedUsers = users.filter(u => form.userIds.includes(u.id));
 
-  const inputCls = 'w-full px-4 py-3 text-sm bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary dark:text-white placeholder:text-slate-400 transition-all';
+  const inputCls = 'w-full px-4 py-3 text-sm bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary dark:text-white placeholder:text-zinc-500 transition-all';
 
   return (
-    <div className="bg-white dark:bg-white/[0.02] border border-slate-200 dark:border-white/10 rounded-2xl p-6 space-y-5">
+    <div className="bg-white dark:bg-white/[0.02] border border-zinc-300 dark:border-white/10 rounded-2xl p-6 space-y-5">
 
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-base font-bold text-slate-900 dark:text-white">Soạn thông báo</h3>
+        <h3 className="text-base font-bold text-zinc-800 dark:text-white">Soạn thông báo</h3>
         {!alwaysOpen && (
-          <button onClick={() => setOpen(false)} className="p-1 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors">
+          <button onClick={() => setOpen(false)} className="p-1 rounded-lg text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors">
             <X className="w-4 h-4" />
           </button>
         )}
@@ -141,7 +141,7 @@ export default function NotificationSendForm({
       {/* Target + Type — inline rows */}
       {/* Target */}
       <div className="space-y-2">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Đối tượng nhận</p>
+        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Đối tượng nhận</p>
         <div className="flex flex-wrap gap-2">
           {([
             { key: 'broadcast', label: 'Tất cả người dùng', icon: Users },
@@ -151,7 +151,7 @@ export default function NotificationSendForm({
               className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 text-sm font-semibold transition-all w-fit ${
                 form.target === t.key
                   ? 'border-primary bg-primary/5 text-primary'
-                  : 'border-slate-200 dark:border-white/10 text-slate-500 bg-slate-50 dark:bg-white/5 hover:border-slate-300'
+                  : 'border-zinc-300 dark:border-white/10 text-zinc-500 bg-zinc-50 dark:bg-white/5 hover:border-zinc-300'
               }`}>
               <t.icon className="w-4 h-4 shrink-0" />{t.label}
             </button>
@@ -161,7 +161,7 @@ export default function NotificationSendForm({
 
       {/* Type */}
       <div className="space-y-2">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Loại thông báo</p>
+        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Loại thông báo</p>
         <div className="flex flex-wrap gap-2">
           {Object.entries(TYPE_CFG).map(([key, c]) => {
             const TIcon = c.icon;
@@ -169,7 +169,7 @@ export default function NotificationSendForm({
             return (
               <button key={key} type="button" onClick={() => set('type', key)}
                 className={`flex items-center gap-2 px-3 py-1.5 rounded-xl border-2 text-sm font-semibold transition-all w-fit ${
-                  isActive ? `${c.bg} ${c.color} border-transparent` : 'border-slate-200 dark:border-white/10 text-slate-500 bg-slate-50 dark:bg-white/5 hover:border-slate-300'
+                  isActive ? `${c.bg} ${c.color} border-transparent` : 'border-zinc-300 dark:border-white/10 text-zinc-500 bg-zinc-50 dark:bg-white/5 hover:border-zinc-300'
                 }`}>
                 <TIcon className="w-4 h-4 shrink-0" />{c.label}
               </button>
@@ -181,13 +181,13 @@ export default function NotificationSendForm({
       {/* User mention picker */}
       {form.target === 'users' && (
         <div className="space-y-2">
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Người nhận</p>
+          <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Người nhận</p>
 
           {/* Chips + input box */}
           <div ref={mentionRef} className="relative">
             <div
               onClick={() => inputRef.current?.focus()}
-              className="min-h-[44px] flex flex-wrap gap-1.5 items-center px-3 py-2 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl cursor-text focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
+              className="min-h-[44px] flex flex-wrap gap-1.5 items-center px-3 py-2 bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl cursor-text focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary transition-all">
               {selectedUsers.map(u => (
                 <span key={u.id} className="flex items-center gap-1 pl-2 pr-1 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-semibold shrink-0">
                   @{u.name}
@@ -203,26 +203,26 @@ export default function NotificationSendForm({
                 onChange={handleMentionInput}
                 onKeyDown={handleMentionKey}
                 placeholder={selectedUsers.length === 0 ? 'Gõ @ để tìm người dùng...' : '@'}
-                className="flex-1 min-w-[140px] bg-transparent outline-none text-sm text-slate-700 dark:text-white placeholder:text-slate-400"
+                className="flex-1 min-w-[140px] bg-transparent outline-none text-sm text-zinc-700 dark:text-white placeholder:text-zinc-500"
               />
             </div>
 
             {/* Mention dropdown */}
             {showMention && (
-              <div className="absolute top-full left-0 right-0 mt-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-white/10 rounded-xl shadow-xl z-20 overflow-hidden">
+              <div className="absolute top-full left-0 right-0 mt-1.5 bg-white dark:bg-slate-900 border border-zinc-300 dark:border-white/10 rounded-xl shadow-xl z-20 overflow-hidden">
                 {mentionResults.length > 0 ? mentionResults.map((u, i) => (
                   <button key={u.id} type="button" onMouseDown={() => selectMention(u.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 transition-colors text-left ${i === highlightIdx ? 'bg-primary/5' : 'hover:bg-slate-50 dark:hover:bg-white/5'}`}>
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 transition-colors text-left ${i === highlightIdx ? 'bg-primary/5' : 'hover:bg-zinc-50 dark:hover:bg-white/5'}`}>
                     <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0 text-primary font-bold text-xs">
                       {u.name[0]}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white truncate">{u.name}</p>
-                      <p className="text-[11px] text-slate-400 truncate">{u.email}</p>
+                      <p className="text-sm font-semibold text-zinc-800 dark:text-white truncate">{u.name}</p>
+                      <p className="text-[11px] text-zinc-500 truncate">{u.email}</p>
                     </div>
                   </button>
                 )) : mention.length > 0 ? (
-                  <p className="px-4 py-4 text-sm text-slate-400 text-center">Không tìm thấy người dùng</p>
+                  <p className="px-4 py-4 text-sm text-zinc-500 text-center">Không tìm thấy người dùng</p>
                 ) : null}
               </div>
             )}
@@ -232,7 +232,7 @@ export default function NotificationSendForm({
 
       {/* Title */}
       <div className="space-y-2">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tiêu đề <span className="text-rose-400 normal-case">*</span></p>
+        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Tiêu đề <span className="text-rose-400 normal-case">*</span></p>
         <input value={form.title} onChange={e => set('title', e.target.value)}
           placeholder="Nhập tiêu đề thông báo..."
           className={inputCls} />
@@ -240,7 +240,7 @@ export default function NotificationSendForm({
 
       {/* Message */}
       <div className="space-y-2">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Nội dung phụ</p>
+        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Nội dung phụ</p>
         <textarea value={form.message} onChange={e => set('message', e.target.value)} rows={5}
           placeholder="Mô tả thêm..."
           className={`${inputCls} resize-none`} />
@@ -248,15 +248,15 @@ export default function NotificationSendForm({
 
       {/* Link */}
       <div className="space-y-2">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Link điều hướng</p>
+        <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Link điều hướng</p>
         <input value={form.link} onChange={e => set('link', e.target.value)}
           placeholder="/..."
           className={inputCls} />
       </div>
 
       {/* Footer */}
-      <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-white/5">
-        <p className="text-xs text-slate-400 flex items-center gap-1.5">
+      <div className="flex items-center justify-between pt-2 border-t border-zinc-200 dark:border-white/5">
+        <p className="text-xs text-zinc-500 flex items-center gap-1.5">
           {form.target === 'broadcast'
             ? <><Users className="w-3.5 h-3.5" /> {users.length} người dùng</>
             : selectedUsers.length > 0 ? `${selectedUsers.length} người được chọn` : 'Chưa chọn người dùng'

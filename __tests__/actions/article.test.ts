@@ -44,7 +44,7 @@ import { eventBus }       from '@/lib/events/bus';
 import { revalidatePath } from 'next/cache';
 import { createArticleAction } from '@/features/admin/actions/article';
 import type { ArticleFormData } from '@/features/admin/actions/article';
-import { ArticleCategory, ArticleAudience, ArticleStatus } from '@prisma/client';
+import { ArticleAudience, ArticleStatus } from '@prisma/client';
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -57,7 +57,7 @@ const VALID_DATA: ArticleFormData = {
   slug:     'huong-dan-devops-co-ban',
   summary:  'Bài viết giới thiệu DevOps',
   content:  'Nội dung bài viết chi tiết về DevOps...',
-  category: ArticleCategory.DEVOPS,
+  topicId: 'topic-devops',
   badges:   [],
   audience: ArticleAudience.MEMBERS,
   status:   ArticleStatus.PUBLISHED,

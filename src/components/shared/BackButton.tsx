@@ -25,9 +25,9 @@ export default function BackButton({ className = '', fallbackUrl = '/' }: BackBu
   return (
     <button
       onClick={handleBack}
-      className={`group flex items-center gap-2 text-slate-500 hover:text-primary transition-all duration-300 font-medium text-sm ${className}`}
+      className={`group flex items-center gap-2 text-zinc-500 hover:text-primary transition-all duration-300 font-medium text-sm ${className}`}
     >
-      <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
+      <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-all">
         <ArrowLeft className="w-4 h-4" />
       </div>
       <span>Quay lại</span>

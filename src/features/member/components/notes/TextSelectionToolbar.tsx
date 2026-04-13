@@ -70,7 +70,7 @@ export default function TextSelectionToolbar({
         initial={{ opacity: 0, scale: 0.9, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 10 }}
-        className="fixed z-[100] flex items-center gap-1 p-1 bg-slate-900/90 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl"
+        className="fixed z-[100] flex items-center gap-1 p-1 bg-zinc-800/90 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl"
         style={{
           left: selection.rect.left + selection.rect.width / 2,
           top: selection.rect.top - 54,
@@ -89,7 +89,7 @@ export default function TextSelectionToolbar({
               style={{ backgroundColor: c.color }}
               title={c.label}
             >
-              {activeColor.id === c.id && <Check className="w-3 h-3 text-slate-900" />}
+              {activeColor.id === c.id && <Check className="w-3 h-3 text-zinc-800" />}
             </button>
           ))}
         </div>

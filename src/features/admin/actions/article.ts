@@ -2,7 +2,7 @@
 
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
-import { ArticleAudience, ArticleBadge, ArticleCategory, ArticleStatus } from '@prisma/client';
+import { ArticleAudience, ArticleBadge, ArticleStatus } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { eventBus, EVENTS } from '@/lib/events/bus';
 
@@ -24,7 +24,7 @@ export type ArticleFormData = {
   thumbnail?: string;
   thumbnailPosition?: string;
   objectives?: string;
-  category: ArticleCategory;
+  topicId: string;
   badges: ArticleBadge[];
   audience: ArticleAudience;
   status: ArticleStatus;
@@ -86,7 +86,7 @@ export async function createArticleAction(data: ArticleFormData): Promise<Action
       coverPosition:     data.coverPosition,
       thumbnail:         data.thumbnail,
       thumbnailPosition: data.thumbnailPosition,
-      category:    data.category,
+      topicId:     data.topicId,
       badges:      data.badges,
       audience:    data.audience,
       status:      data.status,
@@ -153,7 +153,7 @@ export async function updateArticleAction(id: string, data: Partial<ArticleFormD
       ...(data.coverPosition     !== undefined && { coverPosition:     data.coverPosition }),
       ...(data.thumbnail         !== undefined && { thumbnail:         data.thumbnail }),
       ...(data.thumbnailPosition !== undefined && { thumbnailPosition: data.thumbnailPosition }),
-      ...(data.category    && { category:  data.category }),
+      ...(data.topicId     && { topicId:   data.topicId }),
       ...(data.badges      && { badges:    data.badges }),
       ...(data.audience    && { audience:  data.audience }),
       ...(data.readTime    && { readTime:  data.readTime }),
@@ -184,13 +184,20 @@ export async function updateArticleAction(id: string, data: Partial<ArticleFormD
 
 export async function quickUpdateArticleAction(
   id: string,
-  patch: { status?: ArticleStatus; audience?: ArticleAudience },
+  patch: { status?: ArticleStatus; audience?: ArticleAudience; badges?: ArticleBadge[] },
 ): Promise<ActionResult> {
   await requireAdmin();
   const article = await db.article.findUnique({ where: { id } });
   if (!article) return { success: false, error: 'Bài viết không tồn tại.' };
 
-  const updated = await db.article.update({ where: { id }, data: patch });
+  const { badges, ...rest } = patch;
+  const updated = await db.article.update({
+    where: { id },
+    data: {
+      ...rest,
+      ...(badges !== undefined && { badges: { set: badges } }),
+    },
+  });
 
   if (patch.status === 'PUBLISHED' && article.status !== 'PUBLISHED') {
     eventBus.emit(EVENTS.ARTICLE_PUBLISHED, {
@@ -237,18 +244,21 @@ export async function deleteArticleAction(id: string): Promise<ActionResult> {
 
 export async function getAdminArticlesAction(options: {
   search?: string;
-  category?: ArticleCategory;
+  topicId?: string;
   status?: ArticleStatus;
+  source?: 'admin' | 'member';
   page?: number;
   limit?: number;
 } = {}) {
   await requireAdmin();
 
-  const { search, category, status, page = 1, limit = 20 } = options;
+  const { search, topicId, status, source, page = 1, limit = 20 } = options;
 
   const where = {
-    ...(category && { category }),
+    ...(topicId  && { topicId }),
     ...(status   && { status }),
+    ...(source === 'admin'  && { author: { is: { role: 'ADMIN' as const } } }),
+    ...(source === 'member' && { author: { is: { role: { not: 'ADMIN' as const } } } }),
     ...(search   && {
       OR: [
         { title: { contains: search, mode: 'insensitive' as const } },
@@ -263,15 +273,21 @@ export async function getAdminArticlesAction(options: {
       skip:    (page - 1) * limit,
       take:    limit,
       include: {
-        author: { select: { name: true } },
+        author: { select: { name: true, role: true } },
         tags:   { include: { tag: { select: { name: true } } } },
         _count: { select: { likes: true, comments: true, bookmarks: true } },
+        topic:  { select: { id: true, slug: true, label: true, emoji: true, color: true } },
       },
     }),
     db.article.count({ where }),
   ]);
 
   return { articles, total, totalPages: Math.ceil(total / limit), page };
+}
+
+export async function getPendingArticlesCountAction(): Promise<number> {
+  await requireAdmin();
+  return db.article.count({ where: { status: 'PENDING' } });
 }
 
 // Minimal list for article pickers (next-article selector, series, etc.)

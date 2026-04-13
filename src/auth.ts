@@ -72,22 +72,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         token.onboardingDone = (session as { onboardingDone?: boolean }).onboardingDone;
         return token;
       }
-      if (user || trigger === 'update') {
+      // Refresh từ DB khi: đăng nhập, update session, token cũ thiếu canWrite, hoặc mỗi 5 phút
+      const now = Math.floor(Date.now() / 1000);
+      const lastRefresh = (token.lastRefresh as number) ?? 0;
+      const shouldRefresh = user || trigger === 'update' || token.canWrite === undefined || (now - lastRefresh > 300);
+      if (shouldRefresh) {
+        token.lastRefresh = now;
         try {
           const email = user?.email ?? (token.email as string | undefined);
           if (!email) return token;
           const dbUser = await db.user.findUnique({
             where:   { email },
-            include: { onboarding: { select: { completedAt: true, skippedAt: true } } },
+            select:  { id: true, role: true, status: true, canWrite: true, username: true, onboarding: { select: { completedAt: true, skippedAt: true } } },
           });
           if (dbUser) {
-            token.id     = dbUser.id;
-            token.role   = dbUser.role;
-            token.status = dbUser.status;
+            token.id       = dbUser.id;
+            token.role     = dbUser.role;
+            token.status   = dbUser.status;
+            token.canWrite = dbUser.canWrite;
+            token.username = dbUser.username;
           } else {
-            token.id     = user?.id ?? token.id ?? '';
-            token.role   = token.role ?? 'MEMBER';
-            token.status = token.status ?? 'ACTIVE';
+            token.id       = user?.id ?? token.id ?? '';
+            token.role     = token.role ?? 'MEMBER';
+            token.status   = token.status ?? 'ACTIVE';
+            token.canWrite = token.canWrite ?? false;
           }
           token.onboardingDone = !!(dbUser?.onboarding?.completedAt ?? dbUser?.onboarding?.skippedAt);
         } catch {
@@ -96,6 +104,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.role   = (user as { role?: string }).role ?? 'MEMBER';
             token.status = (user as { status?: string }).status ?? 'ACTIVE';
           }
+          token.canWrite = token.canWrite ?? false;
         }
       }
       return token;
@@ -105,7 +114,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       session.user.id = token.id as string;
       (session.user as { role?: string }).role               = token.role as string;
       (session.user as { status?: string }).status           = token.status as string;
+      (session.user as { username?: string | null }).username = token.username as string | null;
       (session.user as { onboardingDone?: boolean }).onboardingDone = token.onboardingDone as boolean;
+      (session.user as { canWrite?: boolean }).canWrite      = (token.canWrite as boolean) ?? false;
       return session;
     },
 

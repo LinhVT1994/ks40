@@ -9,7 +9,7 @@ export default async function ShareLayout({ children }: { children: React.ReactN
   const isLoggedIn = !!session?.user;
 
   return (
-    <div className="flex flex-col bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen relative">
+    <div className="flex flex-col bg-background-light dark:bg-background-dark font-display text-zinc-800 dark:text-slate-100 min-h-screen relative">
       {/* Background glow effects */}
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-[1200px] pointer-events-none z-0">
         <div className="absolute top-[-20%] left-[10%] w-[600px] h-[600px] bg-primary/20 rounded-full blur-[120px] mix-blend-screen" />

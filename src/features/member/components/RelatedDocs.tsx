@@ -27,26 +27,26 @@ export default function RelatedDocs() {
     <div className="w-full transition-all duration-300">
       <div className="flex items-center gap-2 mb-4 px-2">
         <BookOpen className="w-4 h-4 text-primary" />
-        <h3 className="font-display font-bold text-sm uppercase tracking-wider text-slate-900 dark:text-white">Liên quan</h3>
+        <h3 className="font-display font-bold text-sm uppercase tracking-wider text-zinc-800 dark:text-white">Liên quan</h3>
       </div>
       
       <div className="flex flex-col gap-1">
         {related.map((doc, i) => (
           <Link href={`/article/related-${i}`} key={i} className="block group">
-            <div className="flex gap-3 cursor-pointer p-2 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] transition-all duration-300 rounded-xl border border-transparent hover:border-slate-100 dark:hover:border-white/5">
-              <div className="w-16 h-16 rounded-lg bg-cover bg-center shrink-0 border border-slate-100 dark:border-white/5 overflow-hidden transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url('${doc.img}')` }}>
+            <div className="flex gap-3 cursor-pointer p-2 hover:bg-zinc-50/50 dark:hover:bg-white/[0.02] transition-all duration-300 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-white/5">
+              <div className="w-16 h-16 rounded-lg bg-cover bg-center shrink-0 border border-zinc-200 dark:border-white/5 overflow-hidden transition-transform duration-500 group-hover:scale-105" style={{ backgroundImage: `url('${doc.img}')` }}>
                 <div className="w-full h-full bg-black/0 group-hover:bg-black/10 transition-colors" />
               </div>
               <div className="flex-1 min-w-0 pt-0.5">
-                <h4 className="text-[13px] font-bold text-slate-900 dark:text-white truncate group-hover:text-primary transition-colors leading-tight mb-1.5">{doc.title}</h4>
-                <p className="text-[11px] text-slate-400 group-hover:text-slate-500 dark:group-hover:text-slate-300 transition-colors line-clamp-2 leading-relaxed">{doc.description}</p>
+                <h4 className="text-[13px] font-bold text-zinc-800 dark:text-white truncate group-hover:text-primary transition-colors leading-tight mb-1.5">{doc.title}</h4>
+                <p className="text-[11px] text-zinc-500 group-hover:text-zinc-500 dark:group-hover:text-slate-300 transition-colors line-clamp-2 leading-relaxed">{doc.description}</p>
               </div>
             </div>
           </Link>
         ))}
       </div>
 
-      <button className="w-full mt-4 py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-primary transition-all text-left flex items-center justify-between group border-t border-slate-100 dark:border-white/5 pt-6 mt-6">
+      <button className="w-full mt-4 py-3 px-4 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-primary transition-all text-left flex items-center justify-between group border-t border-zinc-200 dark:border-white/5 pt-6 mt-6">
         <span>Khám phá thêm</span>
         <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-1" />
       </button>
