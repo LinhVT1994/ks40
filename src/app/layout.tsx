@@ -94,7 +94,7 @@ export default function RootLayout({
           url:        SITE_URL,
           logo:       `${SITE_URL}/logo.png`,
           description: SITE_DESCRIPTION,
-          sameAs:     ['https://github.com/lenote', 'https://x.com/lenote_dev'],
+          sameAs:     ['https://github.com/lenote.dev', 'https://facebook.com/lenote.dev', 'https://youtube.com/@lenote.dev'],
           contactPoint: {
             '@type':       'ContactPoint',
             contactType:   'customer support',

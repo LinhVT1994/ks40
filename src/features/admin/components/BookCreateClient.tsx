@@ -1,3 +1,5 @@
+'use client';
+
 import Image from 'next/image';
 import React, { useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';

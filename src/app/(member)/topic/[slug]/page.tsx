@@ -17,7 +17,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!topic) return {};
 
   const title       = topic.label;
-  const description = topic.description ?? `Khám phá lộ trình học tập, bài viết chuyên sâu và tài liệu về ${topic.label} trên ${SITE_NAME}. Kiến thức thực chiến từ các chuyên gia.`;
+  const description = (topic as any).description ?? `Khám phá lộ trình học tập, bài viết chuyên sâu và tài liệu về ${topic.label} trên ${SITE_NAME}. Kiến thức thực chiến từ các chuyên gia.`;
   const ogImage     = `${SITE_URL}/og?title=${encodeURIComponent(topic.label)}&topic=${encodeURIComponent(topic.label)}&color=${encodeURIComponent(topic.color ?? '#64748b')}`;
 
   return {
@@ -92,7 +92,7 @@ export default async function TopicPage({ params }: Props) {
     '@context': 'https://schema.org',
     '@type':    'CollectionPage',
     name:       topic.label,
-    description: topic.description ?? `Khám phá các bài viết về ${topic.label} trên ${SITE_NAME}`,
+    description: (topic as any).description ?? `Khám phá các bài viết về ${topic.label} trên ${SITE_NAME}`,
     url:        topicUrl,
     mainEntity: {
       '@type': 'ItemList',

@@ -43,10 +43,10 @@ export default function MemberFooter() {
               Backend, DevOps và AI.
             </p>
             <div className="flex items-center gap-3">
-              <SocialLink href="#" icon={<Facebook className="w-5 h-5" />} label="Facebook" />
-              <SocialLink href="#" icon={<Github className="w-5 h-5" />} label="Github" />
-              <SocialLink href="#" icon={<Youtube className="w-5 h-5" />} label="Youtube" />
-              <SocialLink href="#" icon={<Mail className="w-5 h-5" />} label="Email" />
+              <SocialLink href="https://facebook.com/lenote.dev" icon={<Facebook className="w-5 h-5" />} label="Facebook" />
+              <SocialLink href="https://github.com/lenote.dev" icon={<Github className="w-5 h-5" />} label="Github" />
+              <SocialLink href="https://youtube.com/@lenote.dev" icon={<Youtube className="w-5 h-5" />} label="Youtube" />
+              <SocialLink href="mailto:admin@lenote.dev" icon={<Mail className="w-5 h-5" />} label="Email" />
             </div>
           </div>
 
