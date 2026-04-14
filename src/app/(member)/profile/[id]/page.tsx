@@ -12,6 +12,8 @@ import { getDashboardStatsAction, getContinueReadingAction } from '@/features/me
 import { getArticleRatingsAction } from '@/features/articles/actions/rating';
 import ProfileClient from './ProfileClient';
 import PublicProfileClient from './PublicProfileClient';
+import JsonLd from '@/components/shared/JsonLd';
+import { SITE_NAME, SITE_URL } from '@/lib/seo';
 
 function formatViews(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
@@ -25,22 +27,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!data) return {};
 
   const { user } = data;
-  const title       = `${user.name} | Lenote`;
-  const description = user.bio ?? `Xem hồ sơ và bài viết của ${user.name} trên Lenote`;
+  const title       = user.name;
+  const description = user.bio ?? `Hồ sơ chuyên gia của ${user.name} trên ${SITE_NAME}. Khám phá các bài viết kiến thức về công nghệ, kiến trúc hệ thống và AI.`;
   const image       = user.image ?? null;
 
   return {
     title,
     description,
     openGraph: {
-      title,
+      title: `${user.name} | ${SITE_NAME}`,
       description,
       type: 'profile',
       ...(image && { images: [{ url: image, alt: user.name ?? '' }] }),
     },
     twitter: {
       card:  image ? 'summary_large_image' : 'summary',
-      title,
+      title: `${user.name} | ${SITE_NAME}`,
       description,
       ...(image && { images: [image] }),
     },
@@ -71,6 +73,30 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
 
   if (!data) notFound();
   const { user, totalViews, totalLikes } = data;
+
+  const profileUrl = `${SITE_URL}/profile/${id}`;
+  const personJsonLd = {
+    '@context': 'https://schema.org',
+    '@type':    'Person',
+    name:       user.name,
+    description: user.bio,
+    image:      user.image,
+    url:        profileUrl,
+    sameAs:     [
+      user.websiteUrl,
+      user.facebookUrl,
+      user.instagramUrl,
+      user.twitterUrl,
+      user.linkedinUrl,
+      user.githubUrl,
+      user.youtubeUrl,
+    ].filter(Boolean),
+    worksFor: {
+      '@type': 'Organization',
+      name:    SITE_NAME,
+    },
+  };
+
   const articles = articlesData.data ?? [];
   const totalArticles = articlesData.total ?? 0;
   const totalArticlePages = articlesData.totalPages ?? 0;
@@ -86,6 +112,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   if (!isOwner) {
     return (
       <div className="relative min-h-[calc(100vh-64px)] -mt-[64px] pb-20">
+        <JsonLd data={personJsonLd} />
         <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-b from-primary/10 via-accent-purple/5 to-transparent -z-10" />
         <div className="absolute top-0 left-0 right-0 h-[400px] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] -z-10" />
 
@@ -104,6 +131,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
 
   return (
     <div className="relative min-h-[calc(100vh-64px)] -mt-[64px] pb-20">
+      <JsonLd data={personJsonLd} />
       {/* Immersive Cover Gradient */}
       <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-b from-primary/10 via-accent-purple/5 to-transparent -z-10" />
       <div className="absolute top-0 left-0 right-0 h-[400px] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] -z-10" />

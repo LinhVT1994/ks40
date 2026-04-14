@@ -1,5 +1,4 @@
-'use client';
-
+import Image from 'next/image';
 import React from 'react';
 import { Send, CheckCircle2, ChevronLeft } from 'lucide-react';
 import ArticleHero from '@/features/member/components/ArticleHero';
@@ -119,7 +118,15 @@ export default function MemberStep3({ data, onBack, onPublish, isPending }: Step
               <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Tác giả</h4>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-white/10 overflow-hidden relative border-2 border-primary/20">
-                   {data.author?.image && <img src={data.author.image} alt="Avatar" className="w-full h-full object-cover" />}
+                   {data.author?.image && (
+                     <Image
+                       src={data.author.image}
+                       alt="Avatar"
+                       fill
+                       sizes="48px"
+                       className="object-cover"
+                     />
+                   )}
                 </div>
                 <div>
                    <div className="text-sm font-bold text-zinc-800 dark:text-white">{data.author?.name || 'Tác giả'}</div>

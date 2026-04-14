@@ -12,21 +12,23 @@ import LandingPage from '@/features/landing/components/LandingPage';
 import { SITE_URL, SITE_NAME } from '@/lib/seo';
 
 export const metadata: Metadata = {
-  title:       `${SITE_NAME} — Học công nghệ đỉnh cao: System Design, AI/ML, DevOps`,
-  description: `${SITE_NAME} là nền tảng học tập công nghệ tinh gọn: System Design, AI/ML, DevOps, Frontend, Backend. Bài viết chất lượng, chuyên gia thực chiến, lộ trình rõ ràng.`,
+  title:       { 
+    absolute: `${SITE_NAME} — Học công nghệ đỉnh cao: System Design, AI/ML, DevOps` 
+  },
+  description: `${SITE_NAME} là nền tảng học tập công nghệ tinh gọn dành cho kỹ sư. Chuyên sâu về System Design, AI/ML, DevOps, Frontend và Backend với bài viết chất lượng cao từ chuyên gia thực chiến.`,
   alternates:  { canonical: '/' },
   openGraph: {
     type:        'website',
     url:         SITE_URL,
     siteName:    SITE_NAME,
-    title:       `${SITE_NAME} — Nền tảng học công nghệ`,
-    description: `Học System Design, AI/ML, DevOps, Frontend, Backend trên ${SITE_NAME}.`,
+    title:       `${SITE_NAME} — Nền tảng học công nghệ đỉnh cao`,
+    description: `Khám phá lộ trình học System Design, AI/ML, DevOps và kiến trúc hệ thống chuyên sâu trên ${SITE_NAME}.`,
     images:      [{ url: '/logo.png', width: 1200, height: 1200, alt: SITE_NAME }],
   },
   twitter: {
     card:        'summary_large_image',
-    title:       `${SITE_NAME} — Học công nghệ đỉnh cao`,
-    description: `Học System Design, AI/ML, DevOps, Frontend, Backend trên ${SITE_NAME}.`,
+    title:       `${SITE_NAME} — Nền tảng học công nghệ đỉnh cao`,
+    description: `Khám phá lộ trình học System Design, AI/ML, DevOps và kiến trúc hệ thống chuyên sâu trên ${SITE_NAME}.`,
     images:      ['/logo.png'],
   },
 };

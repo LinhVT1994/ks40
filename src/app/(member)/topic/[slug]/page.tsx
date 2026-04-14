@@ -7,6 +7,7 @@ import type { TopicItem } from '@/features/admin/actions/topic';
 import { db } from '@/lib/db';
 import TopicPageClient from '@/features/member/components/TopicPageClient';
 import { SITE_URL, SITE_NAME } from '@/lib/seo';
+import JsonLd from '@/components/shared/JsonLd';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -15,8 +16,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const topic = await getTopicBySlugAction(slug);
   if (!topic) return {};
 
-  const title       = `${topic.label} | ${SITE_NAME}`;
-  const description = `Khám phá các bài viết, tài liệu và khoá học về ${topic.label} trên ${SITE_NAME}.`;
+  const title       = topic.label;
+  const description = topic.description ?? `Khám phá lộ trình học tập, bài viết chuyên sâu và tài liệu về ${topic.label} trên ${SITE_NAME}. Kiến thức thực chiến từ các chuyên gia.`;
   const ogImage     = `${SITE_URL}/og?title=${encodeURIComponent(topic.label)}&topic=${encodeURIComponent(topic.label)}&color=${encodeURIComponent(topic.color ?? '#64748b')}`;
 
   return {
@@ -27,14 +28,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       type:        'website',
       url:         `${SITE_URL}/topic/${slug}`,
-      title,
+      title:       `${topic.label} | ${SITE_NAME}`,
       description,
       siteName:    SITE_NAME,
       images:      [{ url: ogImage, width: 1200, height: 630, alt: topic.label }],
     },
     twitter: {
       card:   'summary_large_image',
-      title,
+      title:  `${topic.label} | ${SITE_NAME}`,
       description,
       images: [ogImage],
     },
@@ -86,8 +87,35 @@ export default async function TopicPage({ params }: Props) {
   const childCountMap: Record<string, number> = {};
   for (const c of childCounts) childCountMap[c.id] = c._count.articles;
 
+  const topicUrl = `${SITE_URL}/topic/${slug}`;
+  const collectionJsonLd = {
+    '@context': 'https://schema.org',
+    '@type':    'CollectionPage',
+    name:       topic.label,
+    description: topic.description ?? `Khám phá các bài viết về ${topic.label} trên ${SITE_NAME}`,
+    url:        topicUrl,
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: articles.map((a, i) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        url: `${SITE_URL}/article/${a.slug}`,
+        name: a.title,
+      })),
+    },
+    breadcrumb: {
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: SITE_URL },
+        { '@type': 'ListItem', position: 2, name: topic.label, item: topicUrl },
+      ],
+    },
+  };
+
   return (
-    <TopicPageClient
+    <div className="min-h-screen">
+      <JsonLd data={collectionJsonLd} />
+      <TopicPageClient
       topic={isParent ? topic : { ...topic, emoji: parentTopic?.emoji ?? topic.emoji }}
       parentTopic={parentTopic}
       children={children}
@@ -102,5 +130,6 @@ export default async function TopicPage({ params }: Props) {
       followerCount={followStatus.followerCount}
       followTopicId={followTopicId}
     />
+    </div>
   );
 }

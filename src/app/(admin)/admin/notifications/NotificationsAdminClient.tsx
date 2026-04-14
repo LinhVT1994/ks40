@@ -1,5 +1,4 @@
-'use client';
-
+import Image from 'next/image';
 import React, { useState, useTransition } from 'react';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
@@ -208,7 +207,15 @@ export default function NotificationsAdminClient({
                           </div>
                         </div>
                         <div className="flex items-center gap-2 min-w-0">
-                          <img src={avatarUrl} alt="" className="w-6 h-6 rounded-full object-cover shrink-0" />
+                           <div className="relative w-6 h-6 shrink-0">
+                            <Image
+                              src={avatarUrl}
+                              alt=""
+                              fill
+                              sizes="24px"
+                              className="rounded-full object-cover"
+                            />
+                           </div>
                           <div className="min-w-0">
                             <p className="text-xs font-medium text-zinc-700 dark:text-slate-300 truncate">{n.user.name}</p>
                             <p className="text-[10px] text-zinc-500 truncate">{n.user.email}</p>

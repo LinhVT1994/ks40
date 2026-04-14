@@ -1,5 +1,4 @@
-'use client';
-
+import Image from 'next/image';
 import React, { useState, useTransition, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
@@ -174,7 +173,7 @@ export default function DocumentsClient({
               className="w-full pl-9 pr-4 py-2.5 text-sm bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 dark:text-white placeholder:text-zinc-500"
             />
           </div>
-          <button
+          <button 
             onClick={() => setShowFilters(!showFilters)}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-bold transition-all cursor-pointer rounded-xl border ${showFilters ? 'bg-primary/10 text-primary border-primary/20' : 'text-zinc-500 bg-white dark:bg-white/5 border-zinc-300 dark:border-white/10 hover:border-zinc-300'}`}
           >
@@ -244,22 +243,24 @@ export default function DocumentsClient({
             <div className="py-20 text-center text-zinc-500 text-sm">Không có bài viết nào được tìm thấy.</div>
           ) : (
             articles.map(doc => {
+              const coverUrl = (doc as any).thumbnail || (doc as any).cover;
               return (
                 <div
                   key={doc.id}
                   onContextMenu={(e) => handleContextMenu(e, doc)}
                   className="relative grid grid-cols-[80px_4fr_40px_2fr_1fr_1fr_1fr_1fr_1fr] gap-x-3 items-center px-6 py-4 hover:bg-zinc-50 dark:hover:bg-white/[0.02] transition-colors group cursor-default"
                 >
-                  <div className="w-20 rounded-xl overflow-hidden bg-zinc-100 dark:bg-white/5 border border-zinc-300/60 dark:border-white/5 shrink-0">
-                    {((doc as any).thumbnail || (doc as any).cover) ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={(doc as any).thumbnail || (doc as any).cover}
+                  <div className="relative w-20 aspect-video rounded-xl overflow-hidden bg-zinc-100 dark:bg-white/5 border border-zinc-300/60 dark:border-white/5 shrink-0">
+                    {coverUrl ? (
+                      <Image
+                        src={coverUrl}
                         alt={doc.title}
-                        className="w-full h-auto block"
+                        fill
+                        sizes="80px"
+                        className="object-cover"
                       />
                     ) : (
-                      <div className="aspect-video w-full flex items-center justify-center text-zinc-300 dark:text-white/20 text-[10px] font-bold">
+                      <div className="absolute inset-0 flex items-center justify-center text-zinc-300 dark:text-white/20 text-[10px] font-bold">
                         {doc.title.charAt(0).toUpperCase()}
                       </div>
                     )}

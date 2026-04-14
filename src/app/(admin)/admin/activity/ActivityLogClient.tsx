@@ -1,5 +1,4 @@
-'use client';
-
+import Image from 'next/image';
 import React, { useTransition } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { formatDistanceToNow, format } from 'date-fns';
@@ -178,13 +177,21 @@ export default function ActivityLogClient({
 
                         {/* Content */}
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm text-zinc-600 dark:text-slate-300 leading-relaxed">
+                          <div className="text-sm text-zinc-600 dark:text-slate-300 leading-relaxed">
                             {renderMessage(activity.message)}
-                          </p>
+                          </div>
                           {activity.actor && (
                             <div className="flex items-center gap-1.5 mt-1">
                               {avatarUrl && (
-                                <img src={avatarUrl} alt="" className="w-4 h-4 rounded-full object-cover" />
+                                <div className="relative w-4 h-4 shrink-0">
+                                  <Image
+                                    src={avatarUrl}
+                                    alt=""
+                                    fill
+                                    sizes="16px"
+                                    className="rounded-full object-cover"
+                                  />
+                                </div>
                               )}
                               <span className="text-[11px] text-zinc-500">{activity.actor.name}</span>
                             </div>

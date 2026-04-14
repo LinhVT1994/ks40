@@ -16,7 +16,7 @@ export default function LandingHero() {
         <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
         <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-indigo-500/20 rounded-full blur-[120px] animate-pulse delay-700" />
         <svg className="absolute inset-0 w-full h-full opacity-30 dark:opacity-50 pointer-events-none">
-          <filter id="luminous">
+          <filter id="luminous" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="60" />
           </filter>
           <circle cx="50%" cy="40%" r="20%" fill="url(#hero-gradient)" filter="url(#luminous)" className="animate-pulse" />
@@ -48,6 +48,7 @@ export default function LandingHero() {
           transition={{ duration: 1, ease: "easeOut" }}
           className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tighter text-zinc-800 dark:text-white leading-[1.1] mb-8 font-display"
         >
+          <span className="sr-only">Lenote — Nâng tầm tri thức công nghệ trong tĩnh lặng. </span>
           <motion.span 
             className="inline-block"
             whileHover={{ scale: 1.02, textShadow: "0 0 20px rgba(59,130,246,0.3)" }}

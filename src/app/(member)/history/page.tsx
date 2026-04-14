@@ -1,5 +1,11 @@
 import { getReadHistoryAction } from '@/features/articles/actions/read-history';
+import type { Metadata } from 'next';
 import { History, Clock } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title:  'Lịch sử đọc',
+  robots: { index: false, follow: false },
+};
 import Link from 'next/link';
 
 type HistoryRecord = {

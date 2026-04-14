@@ -1,5 +1,4 @@
-'use client';
-
+import Image from 'next/image';
 import React from 'react';
 import Link from 'next/link';
 import { Book, Users, Layers, ChevronRight, Star } from 'lucide-react';
@@ -32,10 +31,12 @@ export default function BookCard({ book }: BookCardProps) {
       {/* Cover Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-white/5">
         {book.cover ? (
-          <img 
+          <Image 
             src={book.cover} 
             alt={book.title} 
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover group-hover:scale-110 transition-transform duration-700" 
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-zinc-300 dark:text-white/10">
@@ -78,9 +79,15 @@ export default function BookCard({ book }: BookCardProps) {
 
         <div className="flex items-center justify-between pt-4 border-t border-zinc-200 dark:border-white/5">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/10 flex items-center justify-center overflow-hidden border border-zinc-300 dark:border-white/10">
+            <div className="relative w-8 h-8 rounded-full bg-zinc-100 dark:bg-white/10 flex items-center justify-center overflow-hidden border border-zinc-300 dark:border-white/10">
                {book.author.image ? (
-                 <img src={book.author.image} alt={book.author.name} className="w-full h-full object-cover" />
+                 <Image 
+                   src={book.author.image} 
+                   alt={book.author.name} 
+                   fill 
+                   sizes="32px"
+                   className="object-cover" 
+                 />
                ) : (
                  <Users className="w-4 h-4 text-zinc-500" />
                )}

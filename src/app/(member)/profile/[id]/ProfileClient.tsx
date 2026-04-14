@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
@@ -136,9 +137,11 @@ function ArticleList({ articles: initialArticles, totalArticles, totalPages: ini
             className="group relative cursor-pointer bg-white/40 dark:bg-white/[0.02] backdrop-blur-md max-md:backdrop-blur-sm border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
           >
             <div className="aspect-[16/10] overflow-hidden relative">
-              <img
+              <Image
                 src={a.thumbnail || '/placeholder-article.jpg'}
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transition-transform duration-700 group-hover:scale-110"
                 alt={a.title}
               />
               <div className="absolute top-3 left-3">
@@ -225,9 +228,11 @@ function BookmarkList({ bookmarks }: { bookmarks: Bookmark[] }) {
           className="group relative cursor-pointer bg-white/40 dark:bg-white/[0.02] backdrop-blur-md max-md:backdrop-blur-sm border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
         >
           <div className="aspect-[16/10] overflow-hidden relative">
-            <img 
+            <Image 
               src={b.thumbnail || '/placeholder-article.jpg'} 
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className="object-cover transition-transform duration-700 group-hover:scale-110"
               alt={b.title}
             />
             <div className="absolute top-3 left-3">
@@ -279,7 +284,13 @@ function HistoryList({ history }: { history: HistoryItem[] }) {
           className="group flex items-center gap-5 p-4 bg-white/40 dark:bg-white/[0.02] backdrop-blur-md border border-zinc-200 dark:border-white/5 rounded-2xl hover:shadow-xl hover:shadow-primary/5 transition-all animate-in fade-in slide-in-from-left-4 fill-mode-both"
         >
           <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 relative">
-            <img src={article.thumbnail || '/placeholder.jpg'} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" alt="" />
+            <Image 
+              src={article.thumbnail || '/placeholder.jpg'} 
+              fill
+              sizes="64px"
+              className="object-cover grayscale group-hover:grayscale-0 transition-all" 
+              alt={article.title} 
+            />
             {progress >= 0.95 && (
                <div className="absolute inset-0 bg-primary/20 backdrop-blur-[2px] max-md:backdrop-blur-none flex items-center justify-center">
                   <Heart className="w-6 h-6 text-white animate-pulse" />
@@ -387,7 +398,13 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
             {/* Thumbnail / Gradient Fallback */}
             <div className="w-full md:w-[240px] aspect-[16/10] md:aspect-square lg:aspect-[16/10] rounded-2xl overflow-hidden relative shrink-0">
                {d.thumbnail ? (
-                  <img src={d.thumbnail} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt="" />
+                  <Image 
+                    src={d.thumbnail} 
+                    fill
+                    sizes="(max-width: 768px) 100vw, 240px"
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                    alt={d.title || 'Draft'} 
+                  />
                ) : (
                   <div 
                     className="w-full h-full opacity-20 dark:opacity-40"
@@ -522,11 +539,15 @@ function FollowerList({ followers: initialFollowers, totalFollowers, totalPages:
             style={{ animationDelay: `${i * 50}ms` }}
             className="group flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors animate-in fade-in slide-in-from-left-2 fill-mode-both"
           >
-            <img
-              src={f.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name ?? 'User')}&background=e2e8f0&color=0f172a`}
-              className="w-10 h-10 rounded-full object-cover border border-zinc-300 dark:border-white/10 shrink-0"
-              alt={f.name ?? ''}
-            />
+            <div className="relative w-10 h-10 shrink-0">
+               <Image
+                 src={f.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name ?? 'User')}&background=e2e8f0&color=0f172a`}
+                 fill
+                 sizes="40px"
+                 className="rounded-full object-cover border border-zinc-300 dark:border-white/10"
+                 alt={f.name ?? ''}
+               />
+            </div>
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors truncate">{f.name}</h3>
               {f.bio && <p className="text-xs text-zinc-500 truncate mt-0.5">{f.bio}</p>}
@@ -619,7 +640,9 @@ function RatingsDashboard({ data }: { data: AuthorRatingStats | null }) {
               const avatarUrl = r.user.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(r.user.name)}&background=e2e8f0&color=0f172a&size=32`;
               return (
                 <div key={`${r.userId}`} className="flex gap-3 p-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-white/[0.02]">
-                  <img src={avatarUrl} alt={r.user.name} className="w-8 h-8 rounded-full shrink-0" />
+                  <div className="relative w-8 h-8 shrink-0">
+                     <Image src={avatarUrl} alt={r.user.name} fill sizes="32px" className="rounded-full" />
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-bold text-zinc-800 dark:text-white">{r.user.name}</span>
@@ -648,11 +671,15 @@ function RatingsDashboard({ data }: { data: AuthorRatingStats | null }) {
           {data.ratings.map(r => (
             <div key={`${r.userId}`} className="flex items-center justify-between p-3 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-white/[0.02]">
               <div className="flex items-center gap-3">
-                <img
-                  src={r.user.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(r.user.name)}&background=e2e8f0&color=0f172a&size=24`}
-                  alt={r.user.name}
-                  className="w-6 h-6 rounded-full"
-                />
+                <div className="relative w-6 h-6 shrink-0">
+                   <Image
+                     src={r.user.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(r.user.name)}&background=e2e8f0&color=0f172a&size=24`}
+                     alt={r.user.name}
+                     fill
+                     sizes="24px"
+                     className="rounded-full"
+                   />
+                </div>
                 <span className="text-sm font-medium text-zinc-700 dark:text-slate-300">{r.user.name}</span>
                 {r.hidden && <span className="text-[9px] font-bold text-rose-500 uppercase">Ẩn</span>}
               </div>
@@ -760,11 +787,15 @@ export default function ProfileClient({
       <div className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-24 space-y-12">
         {/* User Identity - Simplified Floating Version */}
         <div className="flex flex-col items-center px-4 text-center">
-          <img 
-            src={user.avatarUrl} 
-            alt={user.name ?? ''}
-            className="w-24 h-24 rounded-full object-cover border border-zinc-200 dark:border-white/10 shadow-sm"
-          />
+          <div className="relative w-24 h-24 shrink-0">
+             <Image 
+               src={user.avatarUrl} 
+               alt={user.name ?? ''}
+               fill
+               sizes="96px"
+               className="rounded-full object-cover border border-zinc-200 dark:border-white/10 shadow-sm"
+             />
+          </div>
           
           <div className="mt-6 flex items-center justify-center gap-2 group">
             <h1 className="text-xl font-black text-zinc-800 dark:text-white tracking-tight">

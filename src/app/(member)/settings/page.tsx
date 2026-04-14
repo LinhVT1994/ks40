@@ -5,6 +5,12 @@ import SettingsLayoutClient from '@/features/member/components/SettingsLayoutCli
 import { Occupation } from '@prisma/client';
 import { getEnabledTopicsAction } from '@/features/admin/actions/topic';
 import { db } from '@/lib/db';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title:  'Cài đặt',
+  robots: { index: false, follow: false },
+};
 
 export default async function SettingsPage() {
   const session = await auth();

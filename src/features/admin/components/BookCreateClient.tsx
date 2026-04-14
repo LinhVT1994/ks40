@@ -1,5 +1,4 @@
-'use client';
-
+import Image from 'next/image';
 import React, { useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { ImagePlus, Type, AlignLeft, ArrowLeft, Link as LinkIcon, Loader2, Globe, Users, Shield, Send } from 'lucide-react';
@@ -111,9 +110,15 @@ export default function BookCreateClient() {
               <input ref={coverRef} type="file" accept="image/*" className="hidden" onChange={handleCoverFile} disabled={uploadingCover} />
               
               {form.cover ? (
-                <div className="relative w-full rounded-xl overflow-hidden border border-zinc-300 dark:border-white/10 group bg-zinc-100 dark:bg-white/5 flex justify-center items-center">
-                  <img src={form.cover} alt="Cover" className="w-full h-auto max-h-[400px] object-contain" />
-                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 backdrop-blur-sm">
+                <div className="relative w-full rounded-xl overflow-hidden border border-zinc-300 dark:border-white/10 group bg-zinc-100 dark:bg-white/5 flex justify-center items-center h-[300px] md:h-[400px]">
+                  <Image
+                     src={form.cover}
+                     alt="Cover"
+                     fill
+                     sizes="(max-width: 768px) 100vw, 512px"
+                     className="object-contain"
+                  />
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 backdrop-blur-sm z-10">
                     <button onClick={() => coverRef.current?.click()} className="px-4 py-2 bg-white/20 hover:bg-white/40 text-white rounded-lg text-sm font-bold transition-all">
                       Đổi ảnh
                     </button>

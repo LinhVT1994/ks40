@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Inter } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import SessionProvider from "@/components/SessionProvider";
@@ -73,6 +74,18 @@ export default function RootLayout({
   return (
     <html lang="vi" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col relative bg-background-light dark:bg-background-dark text-zinc-800 dark:text-white transition-colors duration-300 overflow-x-hidden`}>
+        {/* Google tag (gtag.js) */}
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-5TFV08TJ3B" />
+        <Script id="google-analytics">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+
+            gtag('config', 'G-5TFV08TJ3B');
+          `}
+        </Script>
+
         <MaterialIconsCss />
         <JsonLd data={{
           '@context': 'https://schema.org',
@@ -80,7 +93,13 @@ export default function RootLayout({
           name:       SITE_NAME,
           url:        SITE_URL,
           logo:       `${SITE_URL}/logo.png`,
-          sameAs:     [],
+          description: SITE_DESCRIPTION,
+          sameAs:     ['https://github.com/lenote', 'https://x.com/lenote_dev'],
+          contactPoint: {
+            '@type':       'ContactPoint',
+            contactType:   'customer support',
+            email:         'support@lenote.dev',
+          }
         }} />
         <SessionProvider>
           <ThemeProvider

@@ -1,5 +1,4 @@
-'use client';
-
+import Image from 'next/image';
 import React from 'react';
 import { Play, Layers, Users, Clock, Share2, Bookmark, Star } from 'lucide-react';
 
@@ -21,9 +20,11 @@ export default function BookHero({ book }: BookHeroProps) {
       <div className="absolute inset-0 z-0 select-none pointer-events-none">
         {book.cover && (
           <>
-            <img 
+            <Image 
               src={book.cover} 
               alt="" 
+              fill
+              priority
               className="w-full h-full object-cover scale-125 blur-[120px] opacity-30 dark:opacity-40" 
             />
             <div className="absolute inset-0 bg-zinc-50/40 dark:bg-slate-950/60" />
@@ -50,7 +51,7 @@ export default function BookHero({ book }: BookHeroProps) {
               {/* Actual Book Cover */}
               <div className="relative w-64 md:w-85 aspect-[3/4.2] rounded-r-2xl overflow-hidden shadow-[30px_50px_100px_-20px_rgba(0,0,0,0.3)] dark:shadow-[30px_50px_100px_-20px_rgba(0,0,0,0.5)] border-l-[12px] border-zinc-800/10 dark:border-white/5 transform [transform-style:preserve-3d] rotate-y-15 group-hover:rotate-y-5 transition-all duration-1000 ease-out">
                 {book.cover ? (
-                  <img src={book.cover} alt={book.title} className="w-full h-full object-cover" />
+                  <Image src={book.cover} alt={book.title} fill priority sizes="(max-width: 768px) 256px, 340px" className="object-cover" />
                 ) : (
                   <div className="w-full h-full bg-zinc-200 dark:bg-slate-800 flex items-center justify-center text-zinc-500">
                     <Layers className="w-20 h-20" />
@@ -95,8 +96,8 @@ export default function BookHero({ book }: BookHeroProps) {
            {/* Meta Info Bar */}
            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-10 py-8 border-y border-zinc-300/60 dark:border-white/5">
               <div className="flex items-center gap-4">
-                 <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-white dark:border-white/10 shadow-lg ring-4 ring-primary/5">
-                    {book.author.image ? <img src={book.author.image} alt="" className="w-full h-full object-cover" /> : <div className="w-full h-full bg-zinc-200 dark:bg-slate-800 flex items-center justify-center font-bold text-zinc-500">?</div>}
+                 <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white dark:border-white/10 shadow-lg ring-4 ring-primary/5">
+                    {book.author.image ? <Image src={book.author.image} alt="" fill sizes="48px" className="object-cover" /> : <div className="w-full h-full bg-zinc-200 dark:bg-slate-800 flex items-center justify-center font-bold text-zinc-500">?</div>}
                  </div>
                  <div>
                     <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">Tác giả</div>

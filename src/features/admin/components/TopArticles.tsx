@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import React from 'react';
 import Link from 'next/link';
 import { Eye, Heart, MessageCircle, TrendingUp, ExternalLink } from 'lucide-react';
@@ -49,11 +50,13 @@ export default function TopArticles({ articles }: { articles: Article[] }) {
             
             {/* Thumbnail */}
             <div className="relative w-20 aspect-[16/10] rounded-lg overflow-hidden shrink-0 border border-zinc-200 dark:border-white/5 shadow-sm bg-zinc-50 dark:bg-white/5">
-              <img 
-                src={article.thumbnail || '/placeholder-article.jpg'} 
-                alt={article.title}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-              />
+               <Image 
+                 src={article.thumbnail || '/placeholder-article.jpg'} 
+                 alt={article.title}
+                 fill
+                 sizes="80px"
+                 className="object-cover transition-transform duration-500 group-hover:scale-110"
+               />
             </div>
 
             <div className="flex-1 min-w-0">

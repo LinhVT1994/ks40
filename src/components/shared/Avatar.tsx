@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState } from 'react';
 import { User } from 'lucide-react';
 
@@ -17,42 +18,33 @@ function fallbackUrl(name?: string | null) {
 export default function Avatar({ src, name, size = 40, className = '' }: AvatarProps) {
   const [errored, setErrored] = useState(false);
 
-  const sizeStyle = { width: size, height: size, minWidth: size };
+  const containerStyle = { width: size, height: size, minWidth: size };
 
-  if (!src || errored) {
-    // Try ui-avatars, but if that also fails → icon fallback
-    return (
-      <img
-        src={fallbackUrl(name)}
-        alt={name ?? 'avatar'}
-        style={sizeStyle}
-        className={`rounded-full object-cover border border-zinc-300 dark:border-white/10 bg-zinc-100 dark:bg-white/5 ${className}`}
-        onError={e => {
-          // ui-avatars failed → show icon placeholder
-          (e.currentTarget as HTMLImageElement).style.display = 'none';
-          (e.currentTarget.nextSibling as HTMLElement | null)?.removeAttribute('hidden');
-        }}
-      />
-    );
-  }
+  // If no src or explicit error, use ui-avatars fallback
+  const imageSrc = (!src || errored) ? fallbackUrl(name) : src;
 
   return (
-    <>
-      <img
-        src={src}
+    <div 
+      style={containerStyle} 
+      className={`relative rounded-full overflow-hidden border border-zinc-300 dark:border-white/10 bg-zinc-100 dark:bg-white/5 shrink-0 ${className}`}
+    >
+      <Image
+        src={imageSrc}
         alt={name ?? 'avatar'}
-        style={sizeStyle}
-        className={`rounded-full object-cover border border-zinc-300 dark:border-white/10 ${className}`}
-        onError={() => setErrored(true)}
+        fill
+        sizes={`${size}px`}
+        className="object-cover"
+        onError={() => {
+          if (!errored) setErrored(true);
+        }}
+        unoptimized={imageSrc.startsWith('https://ui-avatars.com')}
       />
-      {/* Icon fallback — shown only if ui-avatars also fails */}
-      <div
-        hidden
-        style={sizeStyle}
-        className={`rounded-full bg-zinc-100 dark:bg-white/5 border border-zinc-300 dark:border-white/10 flex items-center justify-center shrink-0 ${className}`}
-      >
-        <User className="text-zinc-500" style={{ width: size * 0.5, height: size * 0.5 }} />
-      </div>
-    </>
+      {/* Icon fallback — strictly hidden unless both src and ui-avatars fail (extremely rare) */}
+      {errored && !imageSrc.includes('ui-avatars.com') && (
+        <div className="absolute inset-0 flex items-center justify-center bg-zinc-100 dark:bg-white/5">
+          <User className="text-zinc-500" style={{ width: size * 0.5, height: size * 0.5 }} />
+        </div>
+      )}
+    </div>
   );
 }

@@ -1,3 +1,4 @@
+import type { Metadata } from 'next';
 import { auth } from '@/auth';
 import { redirect, notFound } from 'next/navigation';
 import { getEnabledTopicTreeAction } from '@/features/admin/actions/topic';
@@ -6,7 +7,10 @@ import MemberArticleStepper from '@/features/member/components/MemberArticleStep
 
 type Props = { params: Promise<{ id: string }> };
 
-export const metadata = { title: 'Chỉnh sửa bài viết | Lenote.dev' };
+export const metadata: Metadata = { 
+  title:  'Chỉnh sửa bài viết | Lenote.dev',
+  robots: { index: false, follow: false },
+};
 
 export default async function EditWritePage({ params }: Props) {
   const { id } = await params;

@@ -32,7 +32,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!article) return {};
 
   const isPrivate   = article.audience === 'PRIVATE';
-  const title       = `${article.title} | ${SITE_NAME}`;
+  const title       = article.title;
+  const fullTitle   = `${article.title} | ${SITE_NAME}`;
   const description = article.summary ?? `Đọc bài viết ${article.title} trên ${SITE_NAME}`;
   const ogImage     = article.thumbnail ?? article.cover
     ?? `${SITE_URL}/og?title=${encodeURIComponent(article.title)}&author=${encodeURIComponent(article.author.name)}&topic=${encodeURIComponent(article.topic?.label ?? '')}&color=${encodeURIComponent(article.topic?.color ?? '#64748b')}`;
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? { index: false, follow: false, nocache: true, googleBot: { index: false, follow: false } }
       : { index: true,  follow: true },
     openGraph: {
-      title,
+      title: fullTitle,
       description,
       type: 'article',
       ...(article.publishedAt && { publishedTime: article.publishedAt.toISOString() }),
@@ -54,7 +55,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card:   'summary_large_image',
-      title,
+      title:  fullTitle,
       description,
       images: [ogImage],
     },

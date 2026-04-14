@@ -1,5 +1,6 @@
-"use client";
+'use client';
 
+import Image from 'next/image';
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Globe, Lock, Users, Star, Calendar, Bell, Eye, Send, BookOpen, Hash, ArrowRight } from 'lucide-react';
 import ArticleResourceUpload from './ArticleResourceUpload';
@@ -216,7 +217,9 @@ export default function ArticleStep3({ title, articleId, onBack, onPublish, exis
                           className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors"
                         >
                           {a.thumbnail && (
-                            <img src={a.thumbnail} alt="" className="w-10 h-7 rounded-md object-cover shrink-0" />
+                            <div className="relative w-10 h-7 shrink-0">
+                               <Image src={a.thumbnail} alt="" fill sizes="40px" className="rounded-md object-cover" />
+                            </div>
                           )}
                           <span className="truncate text-zinc-700 dark:text-slate-200 font-medium">{a.title}</span>
                         </button>

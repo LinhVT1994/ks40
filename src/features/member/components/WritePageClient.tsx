@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import React, { useState, useTransition, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
@@ -302,8 +303,14 @@ export default function WritePageClient({ topics, editArticle }: Props) {
                 />
                 {cover && (
                   <div className="relative aspect-video rounded-xl overflow-hidden border border-zinc-300 dark:border-white/10 shadow-inner">
-                    <img src={cover} className="w-full h-full object-cover" alt="Cover preview" />
-                    <button onClick={() => setCover('')} className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-lg hover:bg-rose-500 transition-colors backdrop-blur-md">
+                    <Image
+                      src={cover}
+                      alt="Cover preview"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 320px"
+                      className="object-cover"
+                    />
+                    <button onClick={() => setCover('')} className="absolute top-2 right-2 p-1.5 bg-black/50 text-white rounded-lg hover:bg-rose-500 transition-colors backdrop-blur-md z-10">
                       <X className="w-3.5 h-3.5" />
                     </button>
                   </div>

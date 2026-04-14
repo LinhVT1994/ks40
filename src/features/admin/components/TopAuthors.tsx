@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import React from 'react';
 import Link from 'next/link';
 import { Eye, FileText, Users2 } from 'lucide-react';
@@ -19,7 +20,7 @@ export default function TopAuthors({ authors }: { authors: Author[] }) {
   const maxViews = authors[0]?.totalViews ?? 1;
 
   return (
-    <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-3xl overflow-hidden">
+    <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-3xl overflow-hidden shadow-sm">
       <div className="flex items-center gap-2 px-6 py-5 border-b border-zinc-200 dark:border-white/5">
         <Users2 className="w-4 h-4 text-emerald-500" />
         <h3 className="font-display font-bold text-zinc-800 dark:text-white">Top tác giả</h3>
@@ -34,11 +35,15 @@ export default function TopAuthors({ authors }: { authors: Author[] }) {
             <div key={author.id} className="flex items-center gap-3 px-6 py-3.5 hover:bg-zinc-50 dark:hover:bg-white/[0.02] transition-colors group">
               <span className="text-sm font-bold text-zinc-200 dark:text-white/10 w-4 shrink-0 text-center">{idx + 1}</span>
               <Link href={`/profile/${author.id}`} className="shrink-0">
-                <img
-                  src={avatarUrl}
-                  alt={author.name ?? ''}
-                  className="w-9 h-9 rounded-xl object-cover border border-zinc-200 dark:border-white/10"
-                />
+                <div className="relative w-9 h-9 shrink-0">
+                  <Image
+                    src={avatarUrl}
+                    alt={author.name ?? ''}
+                    fill
+                    sizes="36px"
+                    className="rounded-xl object-cover border border-zinc-200 dark:border-white/10"
+                  />
+                </div>
               </Link>
               <div className="flex-1 min-w-0">
                 <Link href={`/profile/${author.id}`} className="text-sm font-semibold text-zinc-800 dark:text-white group-hover:text-primary transition-colors block truncate">

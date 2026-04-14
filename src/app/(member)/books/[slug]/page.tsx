@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import Image from 'next/image';
 
 // Tạm thời tắt — xóa dòng notFound() phía dưới để bật lại
 import { ChevronRight, Globe, Lock, PlayCircle, MessageSquare, Info, Star, Users, CheckCircle2, Clock } from 'lucide-react';
@@ -97,8 +98,8 @@ export default async function BookLandingPage({
             <div className="p-10 bg-white dark:bg-white/[0.02] border border-zinc-300/60 dark:border-white/5 rounded-[3rem] shadow-sm flex flex-col items-center text-center group hover:border-primary/20 transition-all duration-700 backdrop-blur-xl max-md:backdrop-blur-lg">
                <div className="relative mb-8">
                  <div className="w-28 h-28 rounded-full p-1.5 bg-gradient-to-tr from-primary via-blue-500 to-indigo-600 group-hover:rotate-12 transition-transform duration-700 ring-4 ring-primary/5">
-                    <div className="w-full h-full rounded-full border-4 border-white dark:border-slate-950 overflow-hidden shadow-2xl">
-                       <img src={book.author.image ?? ''} alt="" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                    <div className="relative w-full h-full rounded-full border-4 border-white dark:border-slate-950 overflow-hidden shadow-2xl">
+                       <Image src={book.author.image || '/placeholder-avatar.jpg'} alt={book.author.name} fill sizes="112px" className="object-cover group-hover:scale-110 transition-transform duration-700" />
                     </div>
                  </div>
                  <div className="absolute bottom-0 right-0 w-10 h-10 bg-emerald-500 border-4 border-white dark:border-slate-950 rounded-full flex items-center justify-center text-white shadow-xl transform translate-x-1 translate-y-1">
@@ -110,7 +111,7 @@ export default async function BookLandingPage({
 
                {book.author.bio && (
                  <p className="text-base text-zinc-500 dark:text-slate-400 leading-relaxed mb-10 px-4 font-medium italic">
-                   &ldquo;{book.author.bio}&rdquo;
+                    &ldquo;{book.author.bio}&rdquo;
                  </p>
                )}
 

@@ -1,5 +1,4 @@
-'use client';
-
+import Image from 'next/image';
 import React, { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { Edit2, Trash2, Plus, Search, Book, Layers, Settings2 } from 'lucide-react';
@@ -27,7 +26,7 @@ export default function BookClient({ books }: { books: BookSummary[] }) {
 
   const handleDelete = (id: string) => {
     if (!confirm('Xoá book này? Tất cả chapters sẽ bị xoá theo.')) return;
-    setDeletingId(id);
+    deletingId && setDeletingId(id);
     startTransition(async () => {
       await deleteBookAction(id);
       router.refresh();
@@ -65,13 +64,19 @@ export default function BookClient({ books }: { books: BookSummary[] }) {
             {/* Cover */}
             <div className="w-full md:w-48 h-32 rounded-2xl overflow-hidden bg-zinc-100 dark:bg-white/5 relative shrink-0 shadow-sm border border-zinc-200 dark:border-white/5">
               {book.cover ? (
-                <img src={book.cover} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <Image
+                   src={book.cover}
+                   alt={book.title}
+                   fill
+                   sizes="(max-width: 768px) 100vw, 192px"
+                   className="object-cover group-hover:scale-105 transition-transform duration-500"
+                />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-zinc-300 dark:text-white/10">
                   <Book className="w-10 h-10" />
                 </div>
               )}
-              <div className="absolute top-2 left-2">
+              <div className="absolute top-2 left-2 z-10">
                 <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider backdrop-blur-md shadow-sm border border-white/20 ${AUDIENCE_CONFIG[book.audience]?.className}`}>
                   {AUDIENCE_CONFIG[book.audience]?.label}
                 </span>

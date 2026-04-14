@@ -1,5 +1,6 @@
-"use client";
+'use client';
 
+import Image from 'next/image';
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -93,7 +94,18 @@ export default function MarkdownViewer({ content }: { content: string }) {
         components={{
           code: CodeBlock as any,
           pre: ({ children }: any) => <>{children}</>,
-          img: ({ src, alt, ...props }: any) => src ? <img src={src} alt={alt ?? ''} {...props} /> : null,
+          img: ({ src, alt, ...props }: any) => src ? (
+            <div className="relative aspect-video w-full my-8">
+               <Image
+                 src={src}
+                 alt={alt ?? ''}
+                 fill
+                 sizes="(max-width: 768px) 100vw, 800px"
+                 className="rounded-3xl border border-zinc-200 dark:border-white/10 object-cover"
+                 {...props}
+               />
+            </div>
+          ) : null,
           h2: ({ children }: any) => { const id = slugify(String(children)); return <h2 id={id}>{children}</h2>; },
           h3: ({ children }: any) => { const id = slugify(String(children)); return <h3 id={id}>{children}</h3>; },
         }}

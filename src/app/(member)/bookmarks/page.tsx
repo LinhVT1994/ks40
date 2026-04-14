@@ -1,5 +1,11 @@
 import { getBookmarksAction } from '@/features/articles/actions/bookmark';
+import type { Metadata } from 'next';
 import { Bookmark, Heart, MessageCircle, Eye, Clock } from 'lucide-react';
+
+export const metadata: Metadata = {
+  title:  'Bài viết đã lưu',
+  robots: { index: false, follow: false },
+};
 import Link from 'next/link';
 
 function formatViews(n: number) {

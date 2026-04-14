@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useState, useTransition, useMemo, useRef } from 'react';
 import { MessageCircle, Send, User, Reply, Trash2, ArrowDownUp, ThumbsUp, ThumbsDown, ImagePlus, X } from 'lucide-react';
 import { createCommentAction, deleteCommentAction, toggleCommentLikeAction, getRepliesAction, type CommentWithAuthor } from '@/features/articles/actions/comment';
@@ -27,12 +28,12 @@ function CommentImages({ images }: { images: string[] }) {
   return (
     <div className={`mb-3 grid gap-2 ${images.length === 1 ? 'grid-cols-1 max-w-xs' : 'grid-cols-2 max-w-md'}`}>
       {images.map((src, i) => (
-        // eslint-disable-next-line @next/next/no-img-element
-        <a key={i} href={src} target="_blank" rel="noopener noreferrer" className="block">
-          <img
+        <a key={i} href={src} target="_blank" rel="noopener noreferrer" className="block relative aspect-video">
+          <Image
             src={src}
             alt={`Ảnh ${i + 1}`}
-            loading="lazy"
+            fill
+            sizes="(max-width: 768px) 100vw, 400px"
             className="w-full h-auto max-h-64 object-cover rounded-xl border border-zinc-200 dark:border-white/5"
           />
         </a>
@@ -291,13 +292,12 @@ export default function ArticleComments({
             {previews.length > 0 && (
               <div className="mt-2 flex flex-wrap gap-2">
                 {previews.map((src, i) => (
-                  <div key={i} className="relative group">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={src} alt="" className="h-20 w-20 object-cover rounded-lg border border-zinc-200 dark:border-white/10" />
+                  <div key={i} className="relative group w-20 h-20">
+                    <Image src={src} alt="" fill sizes="80px" className="object-cover rounded-lg border border-zinc-200 dark:border-white/10" />
                     <button
                       type="button"
                       onClick={() => removeFile(i)}
-                      className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-zinc-900/80 text-white opacity-0 group-hover:opacity-100 transition"
+                      className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-zinc-900/80 text-white opacity-0 group-hover:opacity-100 transition z-10"
                       aria-label="Xoá ảnh"
                     >
                       <X className="w-3 h-3" />
@@ -490,13 +490,12 @@ export default function ArticleComments({
                           {replyPreviews.length > 0 && (
                             <div className="mt-2 flex flex-wrap gap-2">
                               {replyPreviews.map((src, i) => (
-                                <div key={i} className="relative group">
-                                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                                  <img src={src} alt="" className="h-16 w-16 object-cover rounded-lg border border-zinc-200 dark:border-white/10" />
+                                <div key={i} className="relative group w-16 h-16">
+                                  <Image src={src} alt="" fill sizes="64px" className="object-cover rounded-lg border border-zinc-200 dark:border-white/10" />
                                   <button
                                     type="button"
                                     onClick={() => removeReplyFile(i)}
-                                    className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-zinc-900/80 text-white opacity-0 group-hover:opacity-100 transition"
+                                    className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-zinc-900/80 text-white opacity-0 group-hover:opacity-100 transition z-10"
                                     aria-label="Xoá ảnh"
                                   >
                                     <X className="w-3 h-3" />

@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import React, { useEffect, useRef, useState } from 'react';
 import { Users } from 'lucide-react';
 
@@ -83,10 +84,10 @@ export default function TestimonialsCarousel() {
           className="flex md:grid overflow-x-auto md:overflow-x-visible snap-x snap-mandatory md:snap-none md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-10 pb-12 md:pb-0 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         >
           {TESTIMONIALS.map((t) => (
-            <div key={t.id} className="w-[85vw] md:w-full shrink-0 snap-center p-8 md:p-10 bg-white dark:bg-white/[0.02] border border-zinc-300/60 dark:border-white/5 rounded-[2.5rem] md:rounded-[3.5rem] shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-500 group relative">
+            <div key={t.id} className="w-[85vw] md:w-full shrink-0 snap-center snap-always p-8 md:p-10 bg-white dark:bg-white/[0.02] border border-zinc-300/60 dark:border-white/5 rounded-[2.5rem] md:rounded-[3.5rem] shadow-sm hover:shadow-xl hover:border-primary/20 transition-all duration-500 group relative">
               <div className="flex items-center gap-4 md:gap-5 mb-8 md:mb-10">
-                <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl overflow-hidden p-1 bg-gradient-to-tr from-primary to-blue-500 ring-4 ring-primary/5">
-                  <img src={t.avatar} alt="" className="w-full h-full object-cover rounded-xl" />
+                <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-2xl overflow-hidden p-1 bg-gradient-to-tr from-primary to-blue-500 ring-4 ring-primary/5">
+                  <Image src={t.avatar} alt={t.name} fill sizes="64px" className="object-cover rounded-xl" />
                 </div>
                 <div>
                   <h5 className="text-lg md:text-xl font-black text-zinc-800 dark:text-white tracking-tight">{t.name}</h5>
