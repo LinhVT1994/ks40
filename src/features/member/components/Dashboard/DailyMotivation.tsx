@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Quote } from 'lucide-react';
 
 const QUOTES = [
@@ -14,11 +14,17 @@ const QUOTES = [
 ];
 
 export default function DailyMotivation() {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const quote = useMemo(() => {
+    if (!mounted) return null;
     // Stable random selection based on current date
     const day = new Date().getDate();
     return QUOTES[day % QUOTES.length];
-  }, []);
+  }, [mounted]);
+
+  if (!mounted || !quote) return null;
 
   return (
     <div className="mt-8 flex flex-col items-center justify-center gap-4 px-6 opacity-60 hover:opacity-100 transition-opacity duration-500 animate-in fade-in slide-in-from-bottom-2 delay-1000">

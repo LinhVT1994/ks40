@@ -18,19 +18,19 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     <MemberContainer className="max-w-3xl">
       <div className="mb-8 space-y-6">
         <form action="/search" className="relative group">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zinc-500 group-focus-within:text-primary transition-colors" />
+          <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-zinc-500 group-focus-within:text-primary transition-colors" />
           <input
             type="text"
             name="q"
             defaultValue={query}
             placeholder="Tìm kiếm bài viết khác..."
-            className="w-full pl-12 pr-4 py-3 bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all text-zinc-800 dark:text-white"
+            className="w-full pl-10 sm:pl-12 pr-4 py-2.5 sm:py-3 text-sm sm:text-base bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl sm:rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all text-zinc-800 dark:text-white"
           />
         </form>
 
         <div className="space-y-1">
           <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-bold text-zinc-800 dark:text-white font-display flex-1">
+            <h1 className="text-lg sm:text-2xl font-bold text-zinc-800 dark:text-white font-display flex-1">
               {tagSlug && query ? (
                 <>Tìm kiếm <span className="text-primary">"{query}"</span> trong thẻ <span className="text-primary">#{tagSlug}</span></>
               ) : tagSlug ? (

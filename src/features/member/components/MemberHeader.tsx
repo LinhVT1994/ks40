@@ -23,7 +23,7 @@ export default function MemberHeader() {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -35,9 +35,9 @@ export default function MemberHeader() {
 
   return (
     <>
-      <header className={`sticky top-0 z-50 w-full transition-all duration-500 ${
-        isScrolled 
-          ? 'bg-white/50 dark:bg-slate-950/40 backdrop-blur-md border-b border-zinc-200 dark:border-white/5 shadow-sm' 
+      <header className={`sticky top-0 z-50 w-full transition-[background-color,border-color] duration-300 ${
+        isScrolled
+          ? 'bg-white/80 dark:bg-slate-950/60 backdrop-blur-sm md:backdrop-blur-md border-b border-zinc-200 dark:border-white/5 shadow-sm'
           : 'bg-transparent border-transparent'
       }`}>
         <div className="max-w-[1600px] mx-auto w-full flex items-center justify-between py-3 px-4 md:px-8 gap-3">
@@ -120,15 +120,15 @@ function MobileSearchBar({ onClose }: { onClose: () => void }) {
 
   return (
     <div className="relative">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 pointer-events-none" />
+      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
       <input
         autoFocus
         type="text"
         value={query}
         onChange={e => setQuery(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Tìm kiếm bài viết... (Enter)"
-        className="w-full pl-9 pr-4 py-2.5 text-sm bg-zinc-100 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-zinc-800 dark:text-white placeholder:text-zinc-500"
+        placeholder="Tìm kiếm bài viết..."
+        className="w-full pl-8 pr-3 py-2 text-xs bg-zinc-100 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 text-zinc-800 dark:text-white placeholder:text-zinc-500"
       />
     </div>
   );

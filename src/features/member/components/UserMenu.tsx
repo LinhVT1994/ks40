@@ -45,15 +45,15 @@ export default function UserMenu() {
       <div className="flex items-center gap-2">
         <Link
           href="/login"
-          className="px-3 py-1.5 text-sm font-semibold text-zinc-600 dark:text-slate-300 hover:text-primary transition-colors"
+          className="hidden sm:inline-block px-3 py-1.5 text-sm font-semibold text-zinc-600 dark:text-slate-300 hover:text-primary transition-colors"
         >
           Đăng nhập
         </Link>
         <Link
-          href="/register"
-          className="px-3 py-1.5 text-sm font-semibold bg-primary text-white rounded-xl hover:bg-primary/90 transition-colors shadow-sm"
+          href="/login"
+          className="px-3 py-1.5 text-xs sm:text-sm font-semibold bg-primary text-white rounded-lg sm:rounded-xl hover:bg-primary/90 transition-colors shadow-sm"
         >
-          Đăng ký
+          Đăng nhập
         </Link>
       </div>
     );

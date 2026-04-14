@@ -147,8 +147,8 @@ export default function LandingZenPreview() {
                 </div>
              </motion.div>
 
-             {/* Background Glow */}
-             <div className="absolute -inset-10 bg-primary/5 dark:bg-primary/20 blur-[120px] -z-10 rounded-full" />
+             {/* Background Glow — hidden on mobile */}
+             <div className="hidden md:block absolute -inset-10 bg-primary/5 dark:bg-primary/20 blur-[60px] -z-10 rounded-full" />
           </div>
         </div>
       </div>

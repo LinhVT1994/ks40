@@ -63,9 +63,9 @@ export default function TestimonialsCarousel() {
 
   return (
     <section className="px-5 md:px-12 py-20 md:py-32 bg-zinc-50 dark:bg-slate-950/20 relative overflow-hidden">
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-        <div className="absolute top-[-10%] left-[20%] w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] dark:opacity-30" />
-        <div className="absolute bottom-[-10%] right-[20%] w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[100px] dark:opacity-20" />
+      <div className="absolute top-0 left-0 w-full h-full pointer-events-none hidden md:block">
+        <div className="absolute top-[-10%] left-[20%] w-[400px] h-[400px] bg-primary/10 rounded-full blur-[60px] dark:opacity-30" />
+        <div className="absolute bottom-[-10%] right-[20%] w-[300px] h-[300px] bg-blue-500/5 rounded-full blur-[60px] dark:opacity-20" />
       </div>
 
       <div className="max-w-[1600px] mx-auto relative z-10">

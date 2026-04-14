@@ -111,7 +111,7 @@ export default function ProductivityHub() {
           ? 'opacity-100 translate-y-0 scale-100' 
           : 'opacity-0 translate-y-8 scale-95 pointer-events-none origin-bottom-right'
       }`}>
-        <div className="bg-white/95 dark:bg-slate-900/90 backdrop-blur-3xl max-md:backdrop-blur-lg border border-zinc-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl dark:shadow-[0_32px_120px_rgba(0,0,0,0.8)]">
+        <div className="bg-white/95 dark:bg-slate-900/90 backdrop-blur-lg md:backdrop-blur-3xl border border-zinc-200 dark:border-white/10 rounded-2xl overflow-hidden shadow-2xl dark:shadow-[0_32px_120px_rgba(0,0,0,0.8)]">
           {/* Header Bar */}
           <div className="px-5 pt-5 pb-1 flex items-center justify-between opacity-50 dark:opacity-30">
             <span className="text-[9px] font-black tracking-widest uppercase">Launcher</span>
@@ -198,7 +198,7 @@ export default function ProductivityHub() {
         className={`relative z-50 flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-500 shadow-2xl group ${
           isOpen 
             ? 'bg-zinc-800 text-white dark:bg-white dark:text-zinc-800 rotate-90 scale-90' 
-            : 'bg-white/80 dark:bg-slate-900/80 text-zinc-600 dark:text-slate-300 hover:text-primary dark:hover:text-white backdrop-blur-3xl max-md:backdrop-blur-lg border border-zinc-200 dark:border-white/10 hover:rounded-2xl hover:scale-110 active:scale-95 hover:shadow-[0_4px_20px_rgba(39,39,42,0.15)] dark:hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]'
+            : 'bg-white/80 dark:bg-slate-900/80 text-zinc-600 dark:text-slate-300 hover:text-primary dark:hover:text-white backdrop-blur-lg md:backdrop-blur-3xl border border-zinc-200 dark:border-white/10 hover:rounded-2xl hover:scale-110 active:scale-95 hover:shadow-[0_4px_20px_rgba(39,39,42,0.15)] dark:hover:shadow-[0_0_20px_rgba(59,130,246,0.3)]'
         }`}
       >
         <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent-purple/20 opacity-0 group-hover:opacity-100 transition-opacity rounded-xl" />

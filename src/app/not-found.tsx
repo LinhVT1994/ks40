@@ -4,10 +4,10 @@ export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-transparent px-6 overflow-hidden relative">
 
-      {/* Background glow effects matching MemberLayout */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-[1200px] pointer-events-none z-0">
-        <div className="absolute top-[-20%] left-[10%] w-[600px] h-[600px] hidden dark:block bg-primary/20 rounded-full blur-[120px] mix-blend-screen"></div>
-        <div className="absolute top-[10%] right-[10%] w-[500px] h-[500px] hidden dark:block bg-accent-purple/20 rounded-full blur-[120px] mix-blend-screen"></div>
+      {/* Background glow effects — hidden on mobile for performance */}
+      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-[1200px] pointer-events-none z-0 hidden dark:md:block">
+        <div className="absolute top-[-20%] left-[10%] w-[400px] h-[400px] bg-primary/20 rounded-full blur-[80px] mix-blend-screen"></div>
+        <div className="absolute top-[10%] right-[10%] w-[350px] h-[350px] bg-accent-purple/20 rounded-full blur-[80px] mix-blend-screen"></div>
       </div>
 
       <style>{`

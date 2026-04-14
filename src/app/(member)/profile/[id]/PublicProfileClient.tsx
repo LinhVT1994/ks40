@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import React, { useState, useTransition } from 'react';
+import React, { useState, useEffect, useTransition } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import {
@@ -72,6 +72,8 @@ type Props = {
 
 /* ── Main Component ────────────────────────────────────── */
 export default function PublicProfileClient({ user, articles, followers, isFollowing: initialFollowing, followerCount: initialCount }: Props) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const { data: session } = useSession();
   const [isFollowing, setIsFollowing] = useState(initialFollowing);
   const [followerCount, setFollowerCount] = useState(initialCount);
@@ -123,7 +125,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
 
             <div className="mt-1.5 flex items-center justify-center sm:justify-start gap-1.5 text-xs text-zinc-500">
               <Calendar className="w-3.5 h-3.5" />
-              <span>Tham gia từ {fmtDate(user.createdAt)}</span>
+              <span>Tham gia từ {mounted ? fmtDate(user.createdAt) : ''}</span>
             </div>
 
             {/* Social Links */}

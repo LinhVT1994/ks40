@@ -11,15 +11,15 @@ export default function LandingHero() {
     <section className="relative min-h-[90vh] flex flex-col items-center justify-center pt-20 pb-16 overflow-hidden">
       <LandingSpotlight />
 
-      {/* Background Ornaments & Luminous Atmosphere */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/20 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-indigo-500/20 rounded-full blur-[120px] animate-pulse delay-700" />
+      {/* Background Ornaments — hidden on mobile for performance */}
+      <div className="absolute inset-0 z-0 hidden md:block">
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/20 rounded-full blur-[80px]" />
+        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-indigo-500/20 rounded-full blur-[80px]" />
         <svg className="absolute inset-0 w-full h-full opacity-30 dark:opacity-50 pointer-events-none">
           <filter id="luminous" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="60" />
+            <feGaussianBlur stdDeviation="40" />
           </filter>
-          <circle cx="50%" cy="40%" r="20%" fill="url(#hero-gradient)" filter="url(#luminous)" className="animate-pulse" />
+          <circle cx="50%" cy="40%" r="20%" fill="url(#hero-gradient)" filter="url(#luminous)" />
           <defs>
             <linearGradient id="hero-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />

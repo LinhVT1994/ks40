@@ -96,6 +96,8 @@ function ArticleList({ articles: initialArticles, totalArticles, totalPages: ini
   totalPages: number;
   userId: string;
 }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [page, setPage] = useState(1);
   const [articles, setArticles] = useState(initialArticles);
   const [totalPages, setTotalPages] = useState(initialTotalPages);
@@ -331,6 +333,8 @@ function HistoryList({ history }: { history: HistoryItem[] }) {
 }
 
 function DraftList({ drafts }: { drafts: Draft[] }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [items, setItems] = useState(drafts);
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -460,7 +464,7 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 tracking-wider">
                   <Calendar className="w-3 h-3 opacity-60" />
-                  <span>{timeAgo(d.updatedAt)}</span>
+                  <span>{mounted ? timeAgo(d.updatedAt) : ''}</span>
                 </div>
               </div>
             </div>
@@ -595,7 +599,11 @@ function FollowerList({ followers: initialFollowers, totalFollowers, totalPages:
 
 /* ── Main export ─────────────────────────────────────────────── */
 /* ── RatingsDashboard ───────────────────────────────────────── */
-function RatingsDashboard({ data }: { data: AuthorRatingStats | null }) {
+function RatingsDashboard({ data: initialData }: { data: AuthorRatingStats | null }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const [data, setData] = useState(initialData);
+
   if (!data || data.totalCount === 0)
     return (
       <div className="py-20 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
@@ -656,7 +664,9 @@ function RatingsDashboard({ data }: { data: AuthorRatingStats | null }) {
                       )}
                     </div>
                     <p className="mt-1 text-sm text-zinc-600 dark:text-slate-300 leading-relaxed">{r.review}</p>
-                    <p className="mt-1 text-[10px] text-zinc-400">{new Date(r.createdAt).toLocaleDateString('vi-VN')}</p>
+                    <p className="mt-1 text-[10px] text-zinc-400">
+                      {mounted ? new Date(r.createdAt).toLocaleDateString('vi-VN') : ''}
+                    </p>
                   </div>
                 </div>
               );
@@ -689,7 +699,9 @@ function RatingsDashboard({ data }: { data: AuthorRatingStats | null }) {
                     <Star key={i} className={`w-3 h-3 ${i <= r.score ? 'text-yellow-400 fill-yellow-400' : 'text-zinc-300 dark:text-white/10'}`} />
                   ))}
                 </div>
-                <span className="text-[10px] text-zinc-400">{new Date(r.createdAt).toLocaleDateString('vi-VN')}</span>
+                <span className="text-[10px] text-zinc-400">
+                  {mounted ? new Date(r.createdAt).toLocaleDateString('vi-VN') : ''}
+                </span>
               </div>
             </div>
           ))}
@@ -888,7 +900,7 @@ export default function ProfileClient({
         {tab === 'bookmarks' && <BookmarkList bookmarks={bookmarks?.articles ?? []} />}
         {tab === 'history'   && <HistoryList  history={history ?? []} />}
         {tab === 'followers' && <FollowerList followers={followers} totalFollowers={totalFollowers} totalPages={totalFollowerPages} userId={user.id} />}
-        {tab === 'ratings'  && <RatingsDashboard data={ratingsData} />}
+        {tab === 'ratings'   && <RatingsDashboard data={ratingsData} />}
       </div>
     </div>
   );

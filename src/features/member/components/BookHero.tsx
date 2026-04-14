@@ -20,21 +20,21 @@ export default function BookHero({ book }: BookHeroProps) {
       <div className="absolute inset-0 z-0 select-none pointer-events-none">
         {book.cover && (
           <>
-            <Image 
-              src={book.cover} 
-              alt="" 
+            <Image
+              src={book.cover}
+              alt=""
               fill
               priority
-              className="w-full h-full object-cover scale-125 blur-[120px] opacity-30 dark:opacity-40" 
+              className="w-full h-full object-cover scale-125 blur-3xl md:blur-[80px] opacity-30 dark:opacity-40"
             />
             <div className="absolute inset-0 bg-zinc-50/40 dark:bg-slate-950/60" />
-            
-            {/* Animated Gradient Orbs */}
-            <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/20 rounded-full blur-[100px] animate-pulse" />
-            <div className="absolute bottom-1/4 -right-20 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[120px] animate-pulse delay-1000" />
-            
+
+            {/* Gradient Orbs — hidden on mobile */}
+            <div className="hidden md:block absolute top-1/4 -left-20 w-96 h-96 bg-primary/20 rounded-full blur-[60px]" />
+            <div className="hidden md:block absolute bottom-1/4 -right-20 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[60px]" />
+
             {/* Glass Overlays */}
-            <div className="absolute inset-0 backdrop-blur-[80px]" />
+            <div className="absolute inset-0 backdrop-blur-xl md:backdrop-blur-[40px]" />
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-zinc-50/50 to-zinc-50 dark:via-slate-950/50 dark:to-slate-950" />
           </>
         )}

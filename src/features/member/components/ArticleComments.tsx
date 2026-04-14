@@ -350,7 +350,7 @@ export default function ArticleComments({
                 <div className="flex items-center justify-between mb-1">
                   <span className="font-bold text-sm text-zinc-800 dark:text-white">{c.author.name}</span>
                   <div className="flex items-center gap-2">
-                    <span className="text-[11px] text-zinc-500">{timeAgo(c.createdAt)}</span>
+                    <span className="text-[11px] text-zinc-500" suppressHydrationWarning>{timeAgo(c.createdAt)}</span>
                     {userId === c.author.id && (
                       <button onClick={() => handleDelete(c.id, null)} className="text-zinc-300 hover:text-rose-500 transition-colors">
                         <Trash2 className="w-3.5 h-3.5" />
@@ -416,7 +416,7 @@ export default function ArticleComments({
                           <div className="flex items-center justify-between mb-1">
                             <span className="font-bold text-sm text-zinc-800 dark:text-white">{r.author.name}</span>
                             <div className="flex items-center gap-2">
-                              <span className="text-[11px] text-zinc-500">{timeAgo(r.createdAt)}</span>
+                              <span className="text-[11px] text-zinc-500" suppressHydrationWarning>{timeAgo(r.createdAt)}</span>
                               {userId === r.author.id && (
                                 <button onClick={() => handleDelete(r.id, c.id)} className="text-zinc-300 hover:text-rose-500 transition-colors">
                                   <Trash2 className="w-3.5 h-3.5" />

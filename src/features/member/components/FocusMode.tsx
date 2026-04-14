@@ -21,50 +21,34 @@ const DEFAULT_ZOOM = 1.0;
 const speedToPx = (s: number) => 0.15 * Math.pow(s, 1.6);
 
 export default function FocusMode({ readTime, headings, onToggleNotes }: { readTime: number; headings: Heading[]; onToggleNotes?: () => void }) {
-  const [active,      setActive]      = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('ks-focus-mode') === 'true';
-  });
+  const [active,      setActive]      = useState(false);
   const [progress,    setProgress]    = useState(0);
-  const [zoom,        setZoom]        = useState(() => {
-    if (typeof window === 'undefined') return DEFAULT_ZOOM;
-    const saved = localStorage.getItem('ks-reader-settings');
-    if (saved) {
-      try { return JSON.parse(saved).zoom || DEFAULT_ZOOM; } catch (e) { return DEFAULT_ZOOM; }
-    }
-    return DEFAULT_ZOOM;
-  });
+  const [zoom,        setZoom]        = useState(DEFAULT_ZOOM);
   const [visible,     setVisible]     = useState(true);
   const [barHovered,  setBarHovered]  = useState(false);
   const [scrolling,   setScrolling]   = useState(false);
-  const [speed,       setSpeed]       = useState(() => {
-    if (typeof window === 'undefined') return 1.5;
-    const saved = localStorage.getItem('ks-reader-settings');
-    if (saved) {
-      try { return JSON.parse(saved).speed || 1.5; } catch (e) { return 1.5; }
-    }
-    return 1.5;
-  });
+  const [speed,       setSpeed]       = useState(1.5);
   const [activeId,    setActiveId]    = useState('');
   const [tocOpen,     setTocOpen]     = useState(false);
-  const [activeSound, setActiveSound] = useState<string | null>(() => {
-    if (typeof window === 'undefined') return null;
-    const saved = localStorage.getItem('ks-reader-settings');
-    if (saved) {
-      try { return JSON.parse(saved).activeSound || null; } catch (e) { return null; }
-    }
-    return null;
-  });
-  const [volume,      setVolume]      = useState(() => {
-    if (typeof window === 'undefined') return 0.4;
-    const saved = localStorage.getItem('ks-reader-settings');
-    if (saved) {
-      try { return JSON.parse(saved).volume || 0.4; } catch (e) { return 0.4; }
-    }
-    return 0.4;
-  });
+  const [activeSound, setActiveSound] = useState<string | null>(null);
+  const [volume,      setVolume]      = useState(0.4);
   const [showLibrary, setShowLibrary] = useState(false);
   const [sessionTime, setSessionTime] = useState(0);
+
+  // Hydrate state from localStorage after mount
+  useEffect(() => {
+    setActive(localStorage.getItem('ks-focus-mode') === 'true');
+    const saved = localStorage.getItem('ks-reader-settings');
+    if (saved) {
+      try {
+        const data = JSON.parse(saved);
+        if (data.zoom)        setZoom(data.zoom);
+        if (data.speed)       setSpeed(data.speed);
+        if (data.activeSound) setActiveSound(data.activeSound);
+        if (data.volume)      setVolume(data.volume);
+      } catch (e) { /* ignore */ }
+    }
+  }, []);
 
   const hideTimerRef    = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tocCloseTimer   = useRef<ReturnType<typeof setTimeout> | null>(null);

@@ -1,22 +1,20 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useSpring, useMotionValue } from 'framer-motion';
 
 export default function InteractiveGlow() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  // Use springs for smooth movement
   const springConfig = { damping: 25, stiffness: 150 };
   const springX = useSpring(mouseX, springConfig);
   const springY = useSpring(mouseY, springConfig);
 
   const [isVisible, setIsVisible] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(true); // Default to mobile to prevent flash
 
   useEffect(() => {
-    // Check if device supports hover (not a touch device)
     const isTouch = window.matchMedia('(hover: none)').matches;
     setIsMobile(isTouch);
     if (isTouch) return;
@@ -30,7 +28,7 @@ export default function InteractiveGlow() {
     const handleMouseLeave = () => setIsVisible(false);
     const handleMouseEnter = () => setIsVisible(true);
 
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     document.addEventListener('mouseleave', handleMouseLeave);
     document.addEventListener('mouseenter', handleMouseEnter);
 
@@ -58,11 +56,9 @@ export default function InteractiveGlow() {
         }}
         className="absolute w-[600px] h-[600px] rounded-full"
       >
-        {/* The Glow Blob */}
-        <div className="w-full h-full bg-radial-glow opacity-[0.15] dark:opacity-[0.25] blur-[100px]" />
+        <div className="w-full h-full bg-radial-glow opacity-[0.15] dark:opacity-[0.25] blur-[80px]" />
       </motion.div>
-      
-      {/* Decorative noise/texture if needed, but keeping it Zen for now */}
+
       <style jsx global>{`
         .bg-radial-glow {
           background: radial-gradient(

@@ -99,7 +99,7 @@ export default function GlobalTimer() {
       <div className="fixed bottom-[82px] right-6 z-[9999] animate-in fade-in slide-in-from-bottom-4 duration-500">
         <button 
           onClick={() => setIsMinimized(false)}
-          className="flex items-center gap-4 px-5 py-3 bg-zinc-800/90 backdrop-blur-3xl max-md:backdrop-blur-lg border border-white/10 rounded-2xl shadow-2xl hover:bg-zinc-800 transition-all hover:scale-105 group ring-1 ring-white/5"
+          className="flex items-center gap-4 px-5 py-3 bg-zinc-800/90 backdrop-blur-lg md:backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl hover:bg-zinc-800 transition-all hover:scale-105 group ring-1 ring-white/5"
         >
           <div className="relative flex items-center justify-center">
             <Timer className={`w-4 h-4 ${isRunning ? 'text-primary' : 'text-zinc-400'} relative z-10`} />
@@ -117,7 +117,7 @@ export default function GlobalTimer() {
   }
 
   return (
-    <div className="fixed bottom-[82px] right-6 z-[9999] w-64 bg-zinc-900/80 backdrop-blur-3xl max-md:backdrop-blur-lg border border-white/10 rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.6)] overflow-hidden animate-in fade-in slide-in-from-bottom-6 zoom-in-95 duration-700 ring-1 ring-white/5 group/timer">
+    <div className="fixed bottom-[82px] right-6 z-[9999] w-64 bg-zinc-900/80 backdrop-blur-lg md:backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.6)] overflow-hidden animate-in fade-in slide-in-from-bottom-6 zoom-in-95 duration-700 ring-1 ring-white/5 group/timer">
       {/* Dynamic Background Glow */}
       <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 blur-[50px] transition-all duration-1000 ${
         isRunning ? 'bg-primary/20' : 'bg-zinc-500/10'

@@ -14,7 +14,18 @@ export default function Loading() {
   const smoothX = useSpring(mouseX, springConfig);
   const smoothY = useSpring(mouseY, springConfig);
 
+  const [mounted, setMounted] = useState(false);
+  const [particles, setParticles] = useState<any[]>([]);
+
   useEffect(() => {
+    setMounted(true);
+    setParticles([...Array(6)].map(() => ({
+      x: Math.random() * 100 + '%',
+      y: Math.random() * 100 + '%',
+      duration: 5 + Math.random() * 5,
+      delay: Math.random() * 5
+    })));
+
     const handleMouseMove = (e: MouseEvent) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
@@ -103,13 +114,13 @@ export default function Loading() {
       </div>
 
       {/* Floating Particles (Faint) */}
-      {[...Array(6)].map((_, i) => (
+      {mounted && particles.map((p, i) => (
         <motion.div
           key={i}
           className="absolute w-1 h-1 bg-primary/20 rounded-full z-0"
           initial={{ 
-            x: Math.random() * 100 + '%', 
-            y: Math.random() * 100 + '%',
+            x: p.x, 
+            y: p.y,
             opacity: 0 
           }}
           animate={{ 
@@ -118,9 +129,9 @@ export default function Loading() {
             scale: [1, 1.5, 1]
           }}
           transition={{ 
-            duration: 5 + Math.random() * 5, 
+            duration: p.duration, 
             repeat: Infinity, 
-            delay: Math.random() * 5 
+            delay: p.delay 
           }}
         />
       ))}

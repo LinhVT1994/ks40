@@ -20,9 +20,9 @@ export default function LandingEarlyAccess() {
            viewport={{ once: true }}
            className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-[3rem] p-12 md:p-20 text-center shadow-xl shadow-zinc-200/50 dark:shadow-2xl dark:shadow-black relative overflow-hidden"
         >
-           {/* Decorative elements */}
-           <div className="absolute -top-24 -right-24 w-64 h-64 bg-primary/10 dark:bg-primary/20 rounded-full blur-[80px]" />
-           <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-accent-purple/10 dark:bg-accent-purple/20 rounded-full blur-[80px]" />
+           {/* Decorative elements — hidden on mobile */}
+           <div className="hidden md:block absolute -top-24 -right-24 w-64 h-64 bg-primary/10 dark:bg-primary/20 rounded-full blur-[60px]" />
+           <div className="hidden md:block absolute -bottom-24 -left-24 w-64 h-64 bg-accent-purple/10 dark:bg-accent-purple/20 rounded-full blur-[60px]" />
 
            <div className="relative z-10">
               <motion.div

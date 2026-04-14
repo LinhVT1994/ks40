@@ -15,9 +15,9 @@ export default function LandingCTA() {
           viewport={{ once: true }}
           className="relative rounded-[3.5rem] bg-white dark:bg-gradient-to-br dark:from-indigo-600 dark:via-primary dark:to-emerald-600 p-12 lg:p-20 overflow-hidden shadow-2xl shadow-zinc-200/50 dark:shadow-black border border-zinc-200 dark:border-white/10"
         >
-          {/* Abstract blobs */}
-          <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/10 dark:bg-white/20 rounded-full blur-[100px]" />
-          <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-400/10 dark:bg-emerald-400/20 rounded-full blur-[100px]" />
+          {/* Abstract blobs — hidden on mobile for performance */}
+          <div className="hidden md:block absolute -top-24 -right-24 w-96 h-96 bg-primary/10 dark:bg-white/20 rounded-full blur-[60px]" />
+          <div className="hidden md:block absolute -bottom-24 -left-24 w-96 h-96 bg-emerald-400/10 dark:bg-emerald-400/20 rounded-full blur-[60px]" />
 
           <div className="relative z-10 flex flex-col items-center text-center">
             <motion.div

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { Calendar, PenLine } from 'lucide-react';
 
@@ -9,12 +10,15 @@ export default function WelcomeSection({ name }: { name?: string }) {
   const role = (session?.user as { role?: string })?.role;
   const canWrite = (session?.user as { canWrite?: boolean })?.canWrite || role === 'ADMIN';
 
-  const today = new Intl.DateTimeFormat('vi-VN', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(new Date());
+  const [today, setToday] = useState('');
+  useEffect(() => {
+    setToday(new Intl.DateTimeFormat('vi-VN', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    }).format(new Date()));
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center text-center gap-5 pt-16 pb-10 animate-welcome-fade-up">

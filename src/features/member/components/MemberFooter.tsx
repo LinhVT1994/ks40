@@ -1,5 +1,6 @@
 'use client';
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Facebook, Github, Youtube, Mail, MapPin, Phone, ExternalLink, Sparkles } from 'lucide-react';
@@ -8,7 +9,8 @@ import BrandLogo from '@/components/shared/BrandLogo';
 export default function MemberFooter() {
   const pathname = usePathname();
   const { data: session } = useSession();
-  const currentYear = new Date().getFullYear();
+  const [currentYear, setCurrentYear] = useState(2026);
+  useEffect(() => { setCurrentYear(new Date().getFullYear()); }, []);
 
   // Pages where we HIDE the footer to maintain a distraction-free "app" feel
   const hideOn = ['/settings', '/bookmarks', '/history', '/notifications', '/search'];
