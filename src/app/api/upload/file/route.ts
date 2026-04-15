@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { auth } from '@/auth';
+import { uploadToAzure, isAzureConfigured } from '@/lib/azure-storage';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads');
-const MAX_SIZE = 100 * 1024 * 1024; // 100 MB
+const MAX_SIZE   = 100 * 1024 * 1024; // 100 MB
 
 const ALLOWED: Record<string, string> = {
   'application/zip':                                                        'zip',
@@ -24,7 +25,7 @@ const ALLOWED: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   const session = await auth();
-  const role = (session?.user as { role?: string })?.role;
+  const role    = (session?.user as { role?: string })?.role;
   if (role !== 'ADMIN') {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
@@ -37,16 +38,27 @@ export async function POST(req: NextRequest) {
   const ext = ALLOWED[file.type];
   if (!ext) return NextResponse.json({ error: 'Định dạng không được hỗ trợ' }, { status: 400 });
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
+  const filename = `files/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const buffer   = Buffer.from(await file.arrayBuffer());
 
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(UPLOAD_DIR, filename), buffer);
-
-  return NextResponse.json({
-    url:      `/uploads/${filename}`,
-    name:     file.name,
-    size:     file.size,
-    mimeType: file.type,
-  });
+  try {
+    if (isAzureConfigured()) {
+      const url = await uploadToAzure(buffer, filename, file.type);
+      return NextResponse.json({ url, name: file.name, size: file.size, mimeType: file.type });
+    } else {
+      const localDir  = path.join(UPLOAD_DIR, 'files');
+      const localName = path.basename(filename);
+      await mkdir(localDir, { recursive: true });
+      await writeFile(path.join(localDir, localName), buffer);
+      return NextResponse.json({
+        url:      `/uploads/files/${localName}`,
+        name:     file.name,
+        size:     file.size,
+        mimeType: file.type,
+      });
+    }
+  } catch (err) {
+    console.error('File upload error:', err);
+    return NextResponse.json({ error: 'Lỗi server khi lưu file' }, { status: 500 });
+  }
 }
