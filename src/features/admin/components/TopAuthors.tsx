@@ -40,6 +40,7 @@ export default function TopAuthors({ authors }: { authors: Author[] }) {
                     src={avatarUrl}
                     alt={author.name ?? ''}
                     fill
+                    unoptimized
                     sizes="36px"
                     className="rounded-xl object-cover border border-zinc-200 dark:border-white/10"
                   />

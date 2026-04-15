@@ -214,6 +214,7 @@ export default function NotificationsAdminClient({
                               src={avatarUrl}
                               alt=""
                               fill
+                              unoptimized
                               sizes="24px"
                               className="rounded-full object-cover"
                             />

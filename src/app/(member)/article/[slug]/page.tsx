@@ -1,10 +1,10 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { getReadHistoryAction } from '@/features/articles/actions/read-history';
-import { getArticleBySlugAction, getArticlePreviewAction, getArticlesAction, getArticleNavigationAction, getSeriesContextAction } from '@/features/articles/actions/article';
+import { auth } from '@/auth';
+import { getArticleBySlugStaticAction, getArticleUserInteractionAction, getArticlePreviewAction, getArticlesAction, getArticleNavigationAction, getSeriesContextAction, getPublishedArticleSlugsAction } from '@/features/articles/actions/article';
 import type { ArticleCard } from '@/features/articles/actions/article';
 import { getCommentsAction } from '@/features/articles/actions/comment';
-import { getAuthorInfoAction } from '@/features/member/actions/follow';
+import { getAuthorInfoStaticAction } from '@/features/member/actions/follow';
 import ArticleHero from '@/features/member/components/ArticleHero';
 import ArticleContent from '@/features/member/components/ArticleContent';
 import ArticleComments from '@/features/member/components/ArticleComments';
@@ -23,6 +23,12 @@ import NextArticleCard from '@/features/member/components/NextArticleCard';
 import FocusMode from '@/features/member/components/FocusMode';
 import MemberContainer from '@/components/layout/MemberContainer';
 import BackButton from '@/components/shared/BackButton';
+
+export const revalidate = 3600;
+
+export async function generateStaticParams() {
+  return getPublishedArticleSlugsAction();
+}
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -48,7 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: fullTitle,
       description,
       type: 'article',
-      ...(article.publishedAt && { publishedTime: article.publishedAt.toISOString() }),
+      ...(article.publishedAt && { publishedTime: new Date(article.publishedAt).toISOString() }),
       authors:  [article.author.name],
       tags:     article.tags.map(t => t.tag.name),
       images:   [{ url: ogImage, width: 1200, height: 630, alt: article.title }],
@@ -66,10 +72,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ArticleDetailPage({ params }: Props) {
   const { slug } = await params;
 
-  // Try full access first
-  const article = await getArticleBySlugAction(slug);
+  // Auth một lần duy nhất — lấy role để filter content và userId cho user-specific data
+  const session = await auth();
+  const role    = (session?.user as { role?: string })?.role;
+  const userId  = session?.user?.id;
 
-  // If no access, try preview (gated)
+  // Nội dung bài viết — cached theo (slug, role), không gọi auth() thêm
+  const article = await getArticleBySlugStaticAction(slug, role);
+
+  // Nếu không có quyền truy cập, thử lấy preview (gated)
   const preview = !article ? await getArticlePreviewAction(slug) : null;
   if (!article && !preview) notFound();
 
@@ -79,30 +90,29 @@ export default async function ArticleDetailPage({ params }: Props) {
 
   const seriesId = (article as { seriesId?: string | null })?.seriesId ?? null;
 
-  const [comments, { articles }, authorInfo, navigation, seriesCtx, history, ratingSummary] = await Promise.all([
+  const [comments, { articles }, authorInfo, navigation, seriesCtx, userInteraction, ratingSummary] = await Promise.all([
     !isGated ? getCommentsAction(data.id) : Promise.resolve([]),
     getArticlesAction({ limit: 20 }),
-    !isGated && authorId ? getAuthorInfoAction(authorId) : Promise.resolve(null),
+    !isGated && authorId ? getAuthorInfoStaticAction(authorId, userId) : Promise.resolve(null),
     !isGated ? getArticleNavigationAction(data.publishedAt) : Promise.resolve({ prev: null, next: null }),
     !isGated && seriesId ? getSeriesContextAction(seriesId, data.id) : Promise.resolve(null),
-    getReadHistoryAction(),
+    !isGated && userId && article ? getArticleUserInteractionAction(article.id, userId) : Promise.resolve({ isLiked: false, isBookmarked: false }),
     !isGated ? getArticleRatingSummaryAction(data.id) : Promise.resolve(null),
   ]);
 
-  const historyArticles = history
-    .filter(h => h.article.id !== data.id)
-    .slice(0, 5)
-    .map(h => ({
-      article: h.article as ArticleCard,
-      progress: h.progress
-    }));
+  // Gắn trạng thái tương tác của user vào article
+  const articleWithInteraction = article
+    ? { ...article, isLiked: userInteraction.isLiked, isBookmarked: userInteraction.isBookmarked }
+    : null;
+
+  const historyArticles: { article: ArticleCard; progress: number }[] = [];
 
   const related  = articles.filter(a => a.id !== data.id && a.topic.id === (data as { topic?: { id: string } }).topic?.id).slice(0, 7);
   const trending = [...articles].sort((a, b) => b.viewCount - a.viewCount).filter(a => a.id !== data.id).slice(0, 4);
   const headings = isGated ? [] : parseHeadings(data.content);
 
   // Build a minimal article-like object for ArticleHero when gated
-  const heroArticle = article ?? {
+  const heroArticle = articleWithInteraction ?? {
     ...preview!,
     authorId:    '',
     content:     preview!.content,
@@ -140,7 +150,7 @@ export default async function ArticleDetailPage({ params }: Props) {
     ...(image && { image }),
     author: { '@type': 'Person', name: data.author.name },
     publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL, logo: { '@type': 'ImageObject', url: `${SITE_URL}/logo.png` } },
-    ...(data.publishedAt && { datePublished: data.publishedAt.toISOString() }),
+    ...(data.publishedAt && { datePublished: new Date(data.publishedAt).toISOString() }),
     ...(updatedAt && { dateModified: new Date(updatedAt).toISOString() }),
     url: articleUrl,
     mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl },
@@ -181,7 +191,7 @@ export default async function ArticleDetailPage({ params }: Props) {
 
       <div data-focus-grid className="flex flex-col xl:grid xl:grid-cols-12 gap-10 items-start">
         {/* Main content */}
-        <main data-focus-main className="flex-1 xl:col-span-9">
+        <main data-focus-main className="flex-1 min-w-0 xl:col-span-9">
           <div data-focus-hide className="mb-6">
             <BackButton />
           </div>
@@ -193,12 +203,12 @@ export default async function ArticleDetailPage({ params }: Props) {
             <ArticleContent
               articleId={data.id}
               content={data.content}
-              overview={!isGated ? (article!.overview ?? undefined) : undefined}
-              objectives={!isGated ? (article!.objectives ?? undefined) : undefined}
-              likeCount={!isGated ? article!._count.likes : 0}
-              commentCount={!isGated ? article!._count.comments : 0}
-              isLiked={!isGated ? (article!.isLiked ?? false) : false}
-              isBookmarked={!isGated ? (article!.isBookmarked ?? false) : false}
+              overview={!isGated ? (articleWithInteraction!.overview ?? undefined) : undefined}
+              objectives={!isGated ? (articleWithInteraction!.objectives ?? undefined) : undefined}
+              likeCount={!isGated ? articleWithInteraction!._count.likes : 0}
+              commentCount={!isGated ? articleWithInteraction!._count.comments : 0}
+              isLiked={!isGated ? (articleWithInteraction!.isLiked ?? false) : false}
+              isBookmarked={!isGated ? (articleWithInteraction!.isBookmarked ?? false) : false}
               isGated={isGated}
               audience={data.audience}
             />
@@ -207,10 +217,10 @@ export default async function ArticleDetailPage({ params }: Props) {
           {!isGated && (
             <>
               <div>
-                <ArticleResources resources={article!.resources ?? []} />
+                <ArticleResources resources={articleWithInteraction!.resources ?? []} />
                 <ArticleNavigation prev={navigation.prev} next={navigation.next} />
-                {(article as any).nextArticle && (
-                  <NextArticleCard article={(article as any).nextArticle} />
+                {(articleWithInteraction as any).nextArticle && (
+                  <NextArticleCard article={(articleWithInteraction as any).nextArticle} />
                 )}
               </div>
               {ratingSummary && (

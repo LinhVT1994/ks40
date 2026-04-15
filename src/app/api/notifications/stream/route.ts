@@ -1,6 +1,9 @@
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { addSSEClient, removeSSEClient } from '@/lib/sse';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ module: 'api/notifications/stream' });
 
 export const dynamic = 'force-dynamic';
 
@@ -20,6 +23,7 @@ export async function GET() {
     async start(c) {
       ctrl = c;
       addSSEClient(userId, c);
+      log.info({ userId }, 'SSE connection opened');
 
       // Send initial unread count immediately
       const unreadCount = await db.notification.count({
@@ -33,6 +37,7 @@ export async function GET() {
         try {
           c.enqueue(encoder.encode(': heartbeat\n\n'));
         } catch {
+          log.debug({ userId }, 'SSE heartbeat thất bại, đóng kết nối');
           clearInterval(heartbeatTimer);
         }
       }, 25_000);
@@ -40,6 +45,7 @@ export async function GET() {
     cancel() {
       clearInterval(heartbeatTimer);
       removeSSEClient(userId, ctrl);
+      log.info({ userId }, 'SSE connection closed');
     },
   });
 

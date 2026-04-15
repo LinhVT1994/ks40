@@ -190,6 +190,7 @@ export default function ActivityLogClient({
                                     src={avatarUrl}
                                     alt=""
                                     fill
+                                    unoptimized
                                     sizes="16px"
                                     className="rounded-full object-cover"
                                   />

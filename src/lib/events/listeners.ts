@@ -2,6 +2,9 @@ import { eventBus, EVENTS } from './bus';
 import { db } from '@/lib/db';
 import { ActivityType, NotificationType } from '@prisma/client';
 import { pushToUser } from '@/lib/sse';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ module: 'events/listeners' });
 
 // Dùng globalThis để flag này sống sót qua HMR re-evaluation
 const g = global as typeof global & { _listenersRegistered?: boolean };
@@ -10,7 +13,7 @@ export function registerEventListeners() {
   if (g._listenersRegistered) return;
   g._listenersRegistered = true;
 
-  console.log('🔌 Khởi tạo Listener cho Event-Driven Activity Log...');
+  log.info('Khởi tạo Event Listener');
 
   // ── 1. User đăng ký → ghi Activity (idempotent) ────────────
   eventBus.on(EVENTS.USER_REGISTERED, async (payload: { userId: string; name: string }) => {
@@ -29,7 +32,7 @@ export function registerEventListeners() {
         },
       });
     } catch (error) {
-      console.error('❌ Lỗi khi ghi log USER_REGISTERED:', error);
+      log.error({ err: error, event: EVENTS.USER_REGISTERED, userId: payload.userId }, 'Lỗi xử lý event');
     }
   });
 
@@ -77,7 +80,7 @@ export function registerEventListeners() {
         pushToUser(notif.userId, 'notification', notif);
       }
     } catch (error) {
-      console.error('❌ Lỗi khi xử lý ARTICLE_PUBLISHED:', error);
+      log.error({ err: error, event: EVENTS.ARTICLE_PUBLISHED, actorId: payload.actorId, articleSlug: payload.slug }, 'Lỗi xử lý event');
     }
   });
 
@@ -95,7 +98,7 @@ export function registerEventListeners() {
         },
       });
     } catch (error) {
-      console.error('❌ Lỗi khi ghi log COMMENT_POSTED:', error);
+      log.error({ err: error, event: EVENTS.COMMENT_POSTED, actorId: payload.actorId, articleSlug: payload.articleSlug }, 'Lỗi xử lý event');
     }
   });
 }

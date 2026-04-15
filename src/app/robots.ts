@@ -3,11 +3,13 @@ import { SITE_URL } from '@/lib/seo';
 
 export default function robots(): MetadataRoute.Robots {
   return {
-    rules: {
-      userAgent: '*',
-      allow:     ['/', '/article/', '/profile/'],
-      disallow:  ['/admin/', '/api/', '/settings/', '/history/', '/bookmarks/', '/notifications/'],
-    },
+    rules: [
+      {
+        userAgent: '*',
+        allow:    ['/article/', '/profile/', '/topic/', '/explore/', '/topics/'],
+        disallow: ['/admin/', '/api/', '/settings/', '/history/', '/bookmarks/', '/notifications/', '/write/'],
+      },
+    ],
     sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

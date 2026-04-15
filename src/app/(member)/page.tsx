@@ -1,11 +1,11 @@
+import { Suspense } from 'react';
 import type { Metadata } from 'next';
 import { auth } from '@/auth';
 import WelcomeSection from '@/features/member/components/WelcomeSection';
-import FeatureCards from '@/features/member/components/FeatureCards';
-import { getArticlesAction, getPopularTagsAction, getForYouArticlesAction } from '@/features/articles/actions/article';
+import FeedLoader from '@/features/member/components/FeedLoader';
+import FeedSkeleton from '@/features/member/components/FeedSkeleton';
+import { getPopularTagsAction } from '@/features/articles/actions/article';
 import { getEnabledTopicsAction } from '@/features/admin/actions/topic';
-import { getPreferencesAction } from '@/features/onboarding/actions/onboarding';
-import { getReadHistoryAction } from '@/features/articles/actions/read-history';
 import MemberContainer from '@/components/layout/MemberContainer';
 import { db } from '@/lib/db';
 import LandingPage from '@/features/landing/components/LandingPage';
@@ -38,41 +38,40 @@ export default async function MemberDashboardPage() {
   const user    = session?.user as { role?: string; name?: string; id?: string } | undefined;
   const isLoggedIn = !!session?.user;
 
-  // Render Landing Page for guest users
+  // Render Landing Page for guest users — no data needed
   if (!isLoggedIn) {
     return <LandingPage />;
   }
 
-  // Source of truth: Fetch followed topic IDs from TopicFollow table
-  const followedIds = session.user?.id
-    ? (await (db as any).topicFollow.findMany({
-        where: { userId: session.user.id },
-        select: { topicId: true }
-      })).map((f: { topicId: string }) => f.topicId)
-    : [];
-
-  const [tags, allTopics, prefs, history] = await Promise.all([
+  // ── Lightweight fetches only (fast, don't block shell render) ─────────────────
+  // These 3 queries run in parallel and are typically fast (<50ms)
+  const [followedIds, tags, allTopics] = await Promise.all([
+    session.user?.id
+      ? (db as any).topicFollow.findMany({
+          where: { userId: session.user.id },
+          select: { topicId: true },
+        }).then((rows: { topicId: string }[]) => rows.map(r => r.topicId))
+      : Promise.resolve([] as string[]),
     getPopularTagsAction(15),
     getEnabledTopicsAction(),
-    getPreferencesAction().catch(() => null),
-    getReadHistoryAction().catch(() => []),
   ]);
-  
+
+  // ── Build curated topic list ──────────────────────────────────────────────────
   const explicitlyFollowed = allTopics.filter(t => followedIds.includes(t.id));
   const followedSet = new Set(followedIds);
-  
-  // 1. Add explicitly followed topics
+
+  // 1. Start with explicitly followed topics
   let curatedTopics = [...explicitlyFollowed];
 
-  // 2. Automatically include children of followed parent topics
+  // 2. Auto-include children of followed parent topics
   explicitlyFollowed.forEach(parent => {
-    if (!parent.parentId) { // If it's a parent
+    if (!parent.parentId) {
       const children = allTopics.filter(t => t.parentId === parent.id && !followedSet.has(t.id));
       curatedTopics.push(...children);
     }
   });
 
-  // 3. Fallback: If still sparse (< 6), add popular global topics
+  // 3. Fallback: fill with popular topics if < 6
   if (curatedTopics.length < 6) {
     const existingIds = new Set(curatedTopics.map(t => t.id));
     const popularFallbacks = [...allTopics]
@@ -81,35 +80,24 @@ export default async function MemberDashboardPage() {
       .slice(0, 6 - curatedTopics.length);
     curatedTopics.push(...popularFallbacks);
   }
-  
+
   curatedTopics = curatedTopics.slice(0, 20);
-
-  // Personalized/Followed Articles
-  const { articles: followedArticles, totalPages: followedTotalPages } = await getForYouArticlesAction({ 
-    limit: 20 
-  });
-
-  // Discovery Articles
-  const { articles: discoveryArticles, totalPages: discoveryTotalPages } = await getArticlesAction({ 
-    limit: 20 
-  });
 
   return (
     <MemberContainer>
+      {/* Shell renders immediately — user sees welcome section right away */}
       <WelcomeSection name={user?.name} />
-      <FeatureCards
-        initialFollowedArticles={followedArticles}
-        initialFollowedTotalPages={followedTotalPages}
-        initialDiscoveryArticles={discoveryArticles}
-        initialDiscoveryTotalPages={discoveryTotalPages}
-        isLoggedIn={isLoggedIn}
-        popularTags={tags}
-        topicIds={followedIds}
-        topics={curatedTopics}
-        currentUserId={user?.id}
-        initialHistory={history as any}
-        initialFeed="discovery"
-      />
+
+      {/* Heavy article fetches stream in via Suspense — TTFB is not blocked */}
+      <Suspense fallback={<FeedSkeleton />}>
+        <FeedLoader
+          isLoggedIn={isLoggedIn}
+          popularTags={tags}
+          topicIds={followedIds}
+          topics={curatedTopics}
+          currentUserId={user?.id}
+        />
+      </Suspense>
     </MemberContainer>
   );
 }

@@ -5,6 +5,9 @@ import { hashPassword } from '@/lib/auth-utils';
 import { signIn } from '@/auth';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { eventBus, EVENTS } from '@/lib/events/bus';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ module: 'auth/register' });
 
 export type RegisterResult =
   | { success: true }
@@ -16,6 +19,8 @@ export async function registerAction(formData: FormData): Promise<RegisterResult
   const username = (formData.get('username') as string)?.trim().toLowerCase();
   const password = (formData.get('password') as string);
   const confirm  = (formData.get('confirm')  as string);
+
+  log.info({ email, username }, 'Đăng ký tài khoản');
 
   if (!email || !name || !username || !password) {
     return { success: false, error: 'Vui lòng điền đầy đủ thông tin.' };
@@ -32,17 +37,21 @@ export async function registerAction(formData: FormData): Promise<RegisterResult
 
   const existingEmail = await db.user.findUnique({ where: { email } });
   if (existingEmail) {
+    log.warn({ email }, 'Đăng ký thất bại: email đã tồn tại');
     return { success: false, error: 'Email này đã được sử dụng.' };
   }
 
   const existingUsername = await db.user.findUnique({ where: { username } });
   if (existingUsername) {
+    log.warn({ username }, 'Đăng ký thất bại: username đã tồn tại');
     return { success: false, error: 'Username này đã được sử dụng.' };
   }
 
   const hashed = await hashPassword(password);
   const user = await db.user.create({ data: { email, name, username, password: hashed } });
   await db.userOnboarding.create({ data: { userId: user.id } });
+
+  log.info({ userId: user.id, email }, 'Đăng ký thành công');
 
   // Phát tín hiệu Event
   eventBus.emit(EVENTS.USER_REGISTERED, { userId: user.id, name: user.name });

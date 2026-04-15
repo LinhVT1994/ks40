@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { auth } from '@/auth';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
 
 export type TopicItem = {
   id: string;
@@ -84,26 +84,33 @@ export async function getEnabledTopicTreeAction(): Promise<TopicItem[]> {
   }));
 }
 
-/** Flat list of enabled topics - with AGGREGATED counts for parents */
-export async function getEnabledTopicsAction(): Promise<TopicItem[]> {
-  const all = await db.topic.findMany({ 
-    where: { enabled: true }, 
-    orderBy: { order: 'asc' },
-    include: { _count: { select: { articles: true } } }
-  });
+/** Flat list of enabled topics - with AGGREGATED counts for parents (cached 5 min) */
+const _getEnabledTopicsCached = unstable_cache(
+  async (): Promise<TopicItem[]> => {
+    const all = await db.topic.findMany({ 
+      where: { enabled: true }, 
+      orderBy: { order: 'asc' },
+      include: { _count: { select: { articles: true } } }
+    });
 
-  // Aggregation logic: update parents with their children's counts
-  const idToTopic = new Map(all.map(t => [t.id, { ...t, _count: { articles: t._count?.articles ?? 0 } }]));
-  for (const t of all) {
-    if (t.parentId) {
-      const parent = idToTopic.get(t.parentId);
-      if (parent) {
-        parent._count!.articles += (t._count?.articles ?? 0);
+    const idToTopic = new Map(all.map(t => [t.id, { ...t, _count: { articles: t._count?.articles ?? 0 } }]));
+    for (const t of all) {
+      if (t.parentId) {
+        const parent = idToTopic.get(t.parentId);
+        if (parent) {
+          parent._count!.articles += (t._count?.articles ?? 0);
+        }
       }
     }
-  }
 
-  return Array.from(idToTopic.values());
+    return Array.from(idToTopic.values());
+  },
+  ['enabled-topics'],
+  { revalidate: 300, tags: ['topics'] } // 5 minutes
+);
+
+export async function getEnabledTopicsAction(): Promise<TopicItem[]> {
+  return _getEnabledTopicsCached();
 }
 
 export async function saveTopicsAction(topics: TopicItem[]): Promise<void> {
@@ -161,6 +168,7 @@ export async function saveTopicsAction(topics: TopicItem[]): Promise<void> {
   revalidatePath('/');
   revalidatePath('/admin/settings');
   revalidatePath('/admin/topics');
+  revalidateTag('topics', 'everything'); // bust getEnabledTopicsAction cache
 }
 
 // ── Topic Follow ──────────────────────────────────────────────

@@ -25,47 +25,61 @@ const CodeBlock = ({ node, inline, className, children, ...props }: any) => {
 
   const isLight = theme === 'light';
 
-  if (!inline && match) {
+  // Fenced code block (both with and without language specifier)
+  if (!inline) {
     return (
-      <div 
-        className={`relative my-10 rounded-[1.5rem] overflow-hidden group not-prose border ${isLight ? 'border-zinc-200 bg-zinc-50' : 'border-white/5 bg-[#1e1e1e]'}`}
+      <div
+        className={`relative my-10 rounded-[1.5rem] overflow-hidden group not-prose border w-full max-w-full ${isLight ? 'border-zinc-200 bg-zinc-50' : 'border-white/5 bg-[#1e1e1e]'}`}
       >
-        {/* Subtle language badge */}
-        <div className={`absolute top-4 left-6 text-[9px] font-black uppercase tracking-[0.2em] transition-colors ${isLight ? 'text-zinc-400 group-hover:text-zinc-600' : 'text-white/10 group-hover:text-white/20'}`}>
-          {lang}
-        </div>
+        {/* Language badge */}
+        {match && (
+          <div className={`absolute top-4 left-6 text-[9px] font-black uppercase tracking-[0.2em] transition-colors ${isLight ? 'text-zinc-400 group-hover:text-zinc-600' : 'text-white/10 group-hover:text-white/20'}`}>
+            {lang}
+          </div>
+        )}
 
-        <button 
-          onClick={handleCopy} 
+        <button
+          onClick={handleCopy}
           className={`absolute top-4 right-4 p-2 rounded-xl transition-all active:scale-95 opacity-0 group-hover:opacity-100 ${isLight ? 'bg-zinc-200 hover:bg-zinc-300 text-zinc-500 hover:text-zinc-700' : 'bg-white/5 hover:bg-white/10 text-zinc-500 hover:text-white'}`}
           title="Copy code"
         >
           {copied ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
         </button>
 
-        <div className="overflow-x-auto text-[14px] font-mono leading-relaxed [&_code]:font-mono">
-          <SyntaxHighlighter
-            style={isLight ? oneLight : vscDarkPlus}
-            language={lang}
-            PreTag="div"
-            customStyle={{
-              margin: 0,
-              padding: '2.5rem 1.75rem 1.75rem',
-              background: 'transparent',
-              fontSize: 'inherit',
-              lineHeight: 'inherit',
-              fontFamily: 'inherit',
-            }}
-          >
-            {String(children).replace(/\n$/, '')}
-          </SyntaxHighlighter>
+        {/* overflow-x-auto: scroll long lines */}
+        <div className="overflow-x-auto text-[13px] sm:text-[14px] font-mono leading-relaxed [&_code]:font-mono">
+          {match ? (
+            <SyntaxHighlighter
+              style={isLight ? oneLight : vscDarkPlus}
+              language={lang}
+              PreTag="div"
+              wrapLongLines={false}
+              customStyle={{
+                margin: 0,
+                padding: '2.5rem 1.75rem 1.75rem',
+                background: 'transparent',
+                fontSize: 'inherit',
+                lineHeight: 'inherit',
+                fontFamily: 'inherit',
+              }}
+            >
+              {String(children).replace(/\n$/, '')}
+            </SyntaxHighlighter>
+          ) : (
+            // No language  → plain preformatted block
+            <pre
+              className={`px-6 py-10 text-sm leading-relaxed whitespace-pre ${isLight ? 'text-zinc-700' : 'text-slate-300'}`}
+            >
+              {children}
+            </pre>
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <code className="bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-slate-200 px-1.5 py-0.5 rounded-md text-[0.85em] font-mono before:content-none after:content-none border border-zinc-200 dark:border-transparent" {...props}>
+    <code className="bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-slate-200 px-1.5 py-0.5 rounded-md text-[0.85em] font-mono before:content-none after:content-none border border-zinc-200 dark:border-transparent break-words" {...props}>
       {children}
     </code>
   );
@@ -73,45 +87,54 @@ const CodeBlock = ({ node, inline, className, children, ...props }: any) => {
 
 export default function MarkdownViewer({ content }: { content: string }) {
   return (
-    <div className="prose prose-slate dark:prose-invert max-w-none
-      prose-headings:font-display prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-zinc-800 dark:prose-headings:text-white
-      prose-h1:text-3xl lg:prose-h1:text-4xl prose-h2:text-2xl lg:prose-h2:text-3xl prose-h3:text-xl lg:prose-h3:text-2xl
-      prose-p:text-zinc-700 dark:prose-p:text-slate-300 prose-p:leading-[1.9]
-      prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline prose-a:underline-offset-4
-      prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:py-3 prose-blockquote:px-6 prose-blockquote:rounded-r-2xl prose-blockquote:text-zinc-800 dark:prose-blockquote:text-slate-200 prose-blockquote:not-italic prose-blockquote:shadow-sm
-      prose-img:rounded-3xl prose-img:border prose-img:border-zinc-200 dark:prose-img:border-white/10 prose-img:w-full prose-img:object-cover
-      prose-hr:border-zinc-300 dark:prose-hr:border-white/10 prose-hr:my-12
-      prose-ul:list-disc prose-ul:pl-6 prose-li:text-zinc-700 dark:prose-li:text-slate-300 prose-li:marker:text-primary prose-li:leading-relaxed
-      prose-ol:list-decimal prose-ol:pl-6
-      prose-table:w-full prose-table:text-sm prose-table:border-collapse prose-table:rounded-xl prose-table:overflow-hidden prose-table:shadow-sm
-      prose-th:bg-zinc-50 dark:prose-th:bg-white/5 prose-th:p-4 prose-th:text-left prose-th:font-bold prose-th:text-zinc-800 dark:prose-th:text-white prose-th:border prose-th:border-zinc-300 dark:prose-th:border-white/10
-      prose-td:p-4 prose-td:border prose-td:border-zinc-300 dark:prose-td:border-white/10
-      prose-strong:text-zinc-800 dark:prose-strong:text-white prose-strong:font-bold
-    ">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw]}
-        components={{
-          code: CodeBlock as any,
-          pre: ({ children }: any) => <>{children}</>,
-          img: ({ src, alt, ...props }: any) => src ? (
-            <div className="relative aspect-video w-full my-8">
-               <Image
-                 src={src}
-                 alt={alt ?? ''}
-                 fill
-                 sizes="(max-width: 768px) 100vw, 800px"
-                 className="rounded-3xl border border-zinc-200 dark:border-white/10 object-cover"
-                 {...props}
-               />
-            </div>
-          ) : null,
-          h2: ({ children }: any) => { const id = slugify(String(children)); return <h2 id={id}>{children}</h2>; },
-          h3: ({ children }: any) => { const id = slugify(String(children)); return <h3 id={id}>{children}</h3>; },
-        }}
-      >
-        {content}
-      </ReactMarkdown>
+    <div className="w-full min-w-0 max-w-full break-words">
+      <div className="prose prose-slate dark:prose-invert max-w-none w-full min-w-0
+        prose-headings:font-display prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-zinc-800 dark:prose-headings:text-white
+        prose-h1:text-3xl lg:prose-h1:text-4xl prose-h2:text-2xl lg:prose-h2:text-3xl prose-h3:text-xl lg:prose-h3:text-2xl
+        prose-p:text-zinc-700 dark:prose-p:text-slate-300 prose-p:leading-[1.9]
+        prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline prose-a:underline-offset-4
+        prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:bg-primary/5 prose-blockquote:py-3 prose-blockquote:px-6 prose-blockquote:rounded-r-2xl prose-blockquote:text-zinc-800 dark:prose-blockquote:text-slate-200 prose-blockquote:not-italic prose-blockquote:shadow-sm
+        prose-img:rounded-3xl prose-img:border prose-img:border-zinc-200 dark:prose-img:border-white/10 prose-img:w-full prose-img:object-cover
+        prose-hr:border-zinc-300 dark:prose-hr:border-white/10 prose-hr:my-12
+        prose-ul:list-disc prose-ul:pl-6 prose-li:text-zinc-700 dark:prose-li:text-slate-300 prose-li:marker:text-primary prose-li:leading-relaxed
+        prose-ol:list-decimal prose-ol:pl-6
+        prose-table:w-full prose-table:text-sm prose-table:border-collapse prose-table:rounded-xl prose-table:shadow-sm
+        prose-th:bg-zinc-50 dark:prose-th:bg-white/5 prose-th:p-4 prose-th:text-left prose-th:font-bold prose-th:text-zinc-800 dark:prose-th:text-white prose-th:border prose-th:border-zinc-300 dark:prose-th:border-white/10
+        prose-td:p-4 prose-td:border prose-td:border-zinc-300 dark:prose-td:border-white/10
+        prose-strong:text-zinc-800 dark:prose-strong:text-white prose-strong:font-bold
+      ">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          rehypePlugins={[rehypeRaw]}
+          components={{
+            code: CodeBlock as any,
+            pre: ({ children }: any) => <>{children}</>,
+            // Wrap tables in scrollable container to prevent mobile overflow
+            table: ({ children }: any) => (
+              <div className="overflow-x-auto my-8 rounded-xl border border-zinc-200 dark:border-white/10 not-prose">
+                <table className="w-full text-sm border-collapse">{children}</table>
+              </div>
+            ),
+            img: ({ src, alt, ...props }: any) => src ? (
+              <div className="relative aspect-video w-full my-8">
+                 <Image
+                   src={src}
+                   alt={alt ?? ''}
+                   fill
+                   unoptimized
+                   sizes="(max-width: 768px) 100vw, 800px"
+                   className="rounded-3xl border border-zinc-200 dark:border-white/10 object-cover"
+                   {...props}
+                 />
+              </div>
+            ) : null,
+            h2: ({ children }: any) => { const id = slugify(String(children)); return <h2 id={id}>{children}</h2>; },
+            h3: ({ children }: any) => { const id = slugify(String(children)); return <h3 id={id}>{children}</h3>; },
+          }}
+        >
+          {content}
+        </ReactMarkdown>
+      </div>
     </div>
   );
 }

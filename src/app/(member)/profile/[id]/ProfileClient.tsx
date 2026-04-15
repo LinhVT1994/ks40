@@ -544,9 +544,10 @@ function FollowerList({ followers: initialFollowers, totalFollowers, totalPages:
             className="group flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors animate-in fade-in slide-in-from-left-2 fill-mode-both"
           >
             <div className="relative w-10 h-10 shrink-0">
-               <Image
+             <Image
                  src={f.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name ?? 'User')}&background=e2e8f0&color=0f172a`}
                  fill
+                 unoptimized
                  sizes="40px"
                  className="rounded-full object-cover border border-zinc-300 dark:border-white/10"
                  alt={f.name ?? ''}
@@ -649,7 +650,7 @@ function RatingsDashboard({ data: initialData }: { data: AuthorRatingStats | nul
               return (
                 <div key={`${r.userId}`} className="flex gap-3 p-4 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-white/[0.02]">
                   <div className="relative w-8 h-8 shrink-0">
-                     <Image src={avatarUrl} alt={r.user.name} fill sizes="32px" className="rounded-full" />
+                     <Image src={avatarUrl} alt={r.user.name} fill unoptimized sizes="32px" className="rounded-full" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
@@ -686,6 +687,7 @@ function RatingsDashboard({ data: initialData }: { data: AuthorRatingStats | nul
                      src={r.user.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(r.user.name)}&background=e2e8f0&color=0f172a&size=24`}
                      alt={r.user.name}
                      fill
+                     unoptimized
                      sizes="24px"
                      className="rounded-full"
                    />
@@ -804,6 +806,7 @@ export default function ProfileClient({
                src={user.avatarUrl} 
                alt={user.name ?? ''}
                fill
+               unoptimized
                sizes="96px"
                className="rounded-full object-cover border border-zinc-200 dark:border-white/10 shadow-sm"
              />

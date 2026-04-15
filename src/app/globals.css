@@ -519,6 +519,11 @@ pre {
   color: var(--code-text) !important;
   transition: background-color 0.4s ease, color 0.4s ease;
   border: 1px solid rgba(0, 0, 0, 0.05);
+  /* Prevent horizontal overflow on mobile */
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  word-break: normal !important;
+  white-space: pre !important;
 }
 
 .dark pre {
@@ -527,6 +532,15 @@ pre {
 
 pre code {
   color: inherit !important;
+  /* Inline code inside pre: don't break layout */
+  white-space: pre !important;
+  word-break: normal !important;
+}
+
+/* Inline code: break long words to prevent overflow */
+:not(pre) > code {
+  word-break: break-word !important;
+  white-space: normal !important;
 }
 
 /* Inline Annotations (Tooltip Triggers) */

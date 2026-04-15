@@ -27,7 +27,7 @@ function formatDate(date: Date | null) {
   const day = d.getDate().toString().padStart(2, '0');
   const month = (d.getMonth() + 1).toString().padStart(2, '0');
   const year = d.getFullYear();
-  return `${day} Th${month}, ${year}`;
+  return `${day}/${month}/${year}`;
 }
 
 const LIMIT = 20;
@@ -387,15 +387,17 @@ export default function FeatureCards({
               currentArticles.map((article, idx) => (
                 <React.Fragment key={article.id}>
                   <div className="block group">
-                    <div className="py-4 relative hover:bg-white dark:hover:bg-white/[0.03] hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-row gap-4 items-start rounded-2xl px-3 -mx-1 border border-transparent hover:border-zinc-200/50 dark:hover:border-white/5">
+                    <div className="py-3 sm:py-4 relative hover:bg-white dark:hover:bg-white/[0.03] hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col rounded-2xl px-2 sm:px-3 -mx-1 border border-transparent hover:border-zinc-200/50 dark:hover:border-white/5">
                       
                       {/* Focus Indicator Bar */}
                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 bg-primary rounded-full scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-center" />
 
+                      <div className="flex flex-row gap-3 sm:gap-4 items-start w-full">
+
                       {/* Thumbnail Link */}
                       <Link
                         href={`/article/${article.slug}`}
-                        className="w-28 sm:w-36 h-24 sm:h-28 shrink-0 bg-cover bg-center relative rounded-xl overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5"
+                        className="w-24 sm:w-36 h-20 sm:h-28 shrink-0 bg-cover bg-center relative rounded-xl overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5"
                         style={article.thumbnail ? { backgroundImage: `url('${article.thumbnail}')`, backgroundPosition: article.thumbnailPosition ?? '50% 50%' } : undefined}
                       >
                         {!article.thumbnail && (
@@ -426,7 +428,7 @@ export default function FeatureCards({
                       <div className="flex-1 min-w-0 flex flex-col pt-0.5 transition-transform duration-500 group-hover:translate-x-1">
                         <div className="flex items-start justify-between gap-3 mb-1">
                           <Link href={`/article/${article.slug}`} className="flex-1">
-                            <h4 className="text-base sm:text-lg font-bold text-zinc-800 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors font-display line-clamp-2 leading-tight">
+                            <h4 className="text-[15px] sm:text-lg font-bold text-zinc-800 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors font-display line-clamp-2 leading-tight">
                               {article.title}
                             </h4>
                           </Link>
@@ -453,14 +455,15 @@ export default function FeatureCards({
                           </div>
                         </div>
 
-                        <Link href={`/article/${article.slug}`} className="mb-3">
-                          <p className="text-sm text-zinc-500 dark:text-slate-400 line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-500">
+                        <Link href={`/article/${article.slug}`} className="mb-0 sm:mb-3">
+                          <p className="text-xs sm:text-sm text-zinc-500 dark:text-slate-400 sm:line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-500">
                             {article.summary}
                           </p>
                         </Link>
 
-                        <div className="mt-auto flex items-center justify-between">
-                          <div className="flex items-center gap-4 text-zinc-500 text-xs">
+                        {/* Desktop Stats */}
+                        <div className="hidden sm:flex mt-auto items-end justify-between pt-0 gap-2">
+                          <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-zinc-500 text-xs">
                             <span className="flex items-center gap-1 group/stat transition-colors hover:text-rose-500">
                               <Heart className="w-3.5 h-3.5 group-hover/stat:fill-rose-500/10" />
                               <span className="font-bold">{article._count.likes}</span>
@@ -469,7 +472,7 @@ export default function FeatureCards({
                               <MessageCircle className="w-3.5 h-3.5 group-hover/stat:fill-primary/10" />
                               <span className="font-bold">{article._count.comments}</span>
                             </span>
-                            <span className="hidden xs:flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                            <span className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                               <Eye className="w-3.5 h-3.5" />
                               <span className="font-medium text-[10px]">{formatViews(article.viewCount)}</span>
                             </span>
@@ -485,7 +488,7 @@ export default function FeatureCards({
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 shrink-0">
                              {article.publishedAt && (
                                 <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-500 dark:text-slate-400 mr-3 tracking-tight">
                                     <Calendar className="w-3 h-3 opacity-70" />
@@ -502,6 +505,49 @@ export default function FeatureCards({
                           </div>
                         </div>
                       </div>
+                    </div>
+
+                    {/* Mobile Stats (Full width footer) */}
+                    <div className="flex sm:hidden mt-3 items-center justify-between pt-2.5 border-t border-zinc-100/80 dark:border-white/5 gap-2 w-full">
+                        <div className="flex items-center flex-wrap gap-x-3 gap-y-2 text-zinc-500 dark:text-slate-400 text-[11px] font-medium">
+                            <span className="flex items-center gap-1 group/stat hover:text-rose-500">
+                              <Heart className="w-3.5 h-3.5" />
+                              <span className="font-bold">{article._count.likes}</span>
+                            </span>
+                            <span className="flex items-center gap-1 group/stat hover:text-primary">
+                              <MessageCircle className="w-3.5 h-3.5" />
+                              <span className="font-bold">{article._count.comments}</span>
+                            </span>
+                            <span className="flex items-center gap-1 opacity-60">
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>{formatViews(article.viewCount)}</span>
+                            </span>
+                            {(article.ratingCount ?? 0) > 0 && (
+                              <span className="flex items-center gap-1 text-yellow-500">
+                                <Star className="w-3.5 h-3.5 fill-yellow-400" />
+                                <span className="font-bold">{(article.avgRating ?? 0).toFixed(1)}</span>
+                              </span>
+                            )}
+                            <span className="flex items-center gap-1 border-l border-zinc-200 dark:border-white/10 pl-2 opacity-60">
+                              <Clock className="w-3 h-3" />
+                              <span>{article.readTime}p</span>
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0">
+                            {article.publishedAt && (
+                              <div className="flex items-center gap-1 text-[10px] text-zinc-400 font-medium">
+                                  <span>{formatDate(article.publishedAt)}</span>
+                              </div>
+                            )}
+                            <button
+                              onClick={(e) => handleBookmark(e, article.id)}
+                              className={`p-1 rounded-lg transition-all relative z-40 ${bookmarked.get(article.id) ? 'text-primary' : 'text-zinc-300 dark:text-white/20'}`}
+                            >
+                              <Bookmark className={`w-4 h-4 ${bookmarked.get(article.id) ? 'fill-current' : ''}`} />
+                            </button>
+                        </div>
+                    </div>
+
                     </div>
                   </div>
                   {idx < currentArticles.length - 1 && <div className="h-px bg-zinc-100 dark:bg-white/5 w-full my-1" />}

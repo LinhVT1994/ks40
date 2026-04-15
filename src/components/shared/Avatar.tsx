@@ -37,7 +37,7 @@ export default function Avatar({ src, name, size = 40, className = '' }: AvatarP
         onError={() => {
           if (!errored) setErrored(true);
         }}
-        unoptimized={imageSrc.startsWith('https://ui-avatars.com')}
+        unoptimized
       />
       {/* Icon fallback — strictly hidden unless both src and ui-avatars fail (extremely rare) */}
       {errored && !imageSrc.includes('ui-avatars.com') && (

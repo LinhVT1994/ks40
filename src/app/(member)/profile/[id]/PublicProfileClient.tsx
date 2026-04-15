@@ -104,6 +104,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
                  src={user.avatarUrl}
                  alt={user.name ?? ''}
                  fill
+                 unoptimized
                  priority
                  sizes="(max-width: 640px) 112px, 128px"
                  className="rounded-full object-cover border-4 border-white dark:border-slate-800"
@@ -294,6 +295,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
                 <Image
                   src={f.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name ?? 'User')}&background=e2e8f0&color=0f172a&size=80`}
                   fill
+                  unoptimized
                   sizes="44px"
                   className="rounded-full object-cover ring-[3px] ring-white dark:ring-slate-950 shadow-sm"
                   alt={f.name ?? ''}

@@ -6,6 +6,7 @@ import SessionProvider from "@/components/SessionProvider";
 import JsonLd from "@/components/shared/JsonLd";
 import MaterialIconsCss from "@/components/MaterialIconsCss";
 import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
+import { auth } from "@/auth";
 import "./globals.css";
 
 const inter = Inter({
@@ -66,11 +67,12 @@ import { Suspense } from "react";
 
 import { Toaster } from "sonner";
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
   return (
     <html lang="vi" suppressHydrationWarning>
       <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col relative bg-background-light dark:bg-background-dark text-zinc-800 dark:text-white transition-colors duration-300 overflow-x-hidden`}>
@@ -101,7 +103,7 @@ export default function RootLayout({
             email:         'support@lenote.dev',
           }
         }} />
-        <SessionProvider>
+        <SessionProvider session={session}>
           <ThemeProvider
             attribute="class"
             defaultTheme="dark"
