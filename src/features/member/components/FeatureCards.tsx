@@ -65,7 +65,10 @@ export default function FeatureCards({
     !isLoggedIn ? 'discovery' : initialFeed
   );
   const [activeTimeframe, setActiveTimeframe] = useState<'all' | 'today' | 'week' | 'month'>('all');
-  
+  const [isTimeframeOpen, setIsTimeframeOpen] = useState(false);
+  const [isExpandedTopics, setIsExpandedTopics] = useState(false);
+  const timeframeRef = useRef<HTMLDivElement>(null);
+
   const [followedArticles, setFollowedArticles] = useState(initialFollowedArticles);
   const [discoveryArticles, setDiscoveryArticles] = useState(initialDiscoveryArticles);
   const [savedArticles, setSavedArticles] = useState<ArticleCard[]>([]);
@@ -80,9 +83,6 @@ export default function FeatureCards({
   
   const [isPending, startTransition] = useTransition();
   const topRef = useRef<HTMLDivElement>(null);
-
-  const [isTimeframeOpen, setIsTimeframeOpen] = useState(false);
-  const timeframeRef = useRef<HTMLDivElement>(null);
 
   const currentArticles = useMemo(() => {
     if (activeFeed === 'followed') return followedArticles;
@@ -236,7 +236,7 @@ export default function FeatureCards({
             {/* Mobile: wrap chips — giống phần Thẻ phổ biến bên dưới */}
             <nav className="lg:hidden pb-4">
               <div className="flex flex-wrap gap-2 px-1">
-                {topics.length > 0 ? topics.map(t => (
+                {topics.length > 0 ? (isExpandedTopics ? topics : topics.slice(0, 10)).map(t => (
                   <Link
                     key={t.id}
                     href={`/topic/${t.slug}`}
@@ -254,6 +254,14 @@ export default function FeatureCards({
                     </span>
                   </Link>
                 )) : null}
+                {topics.length > 10 && (
+                  <button
+                    onClick={() => setIsExpandedTopics(!isExpandedTopics)}
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-zinc-100 dark:bg-white/5 border border-zinc-300 dark:border-white/10 text-zinc-600 dark:text-slate-400 hover:border-primary/30 hover:text-primary transition-all shadow-sm active:scale-95"
+                  >
+                    {isExpandedTopics ? 'Thu gọn' : `+ ${topics.length - 10} chủ đề khác`}
+                  </button>
+                )}
                 <Link
                   href="/topics"
                   className="px-3 py-1.5 rounded-xl text-xs font-medium border border-dashed border-zinc-300 dark:border-white/15 text-zinc-500 hover:text-primary hover:border-primary/40 transition-all"
@@ -266,7 +274,7 @@ export default function FeatureCards({
             {/* Desktop: vertical sidebar — unchanged */}
             <nav className="hidden lg:flex flex-col gap-1.5 pb-4 lg:pb-0 px-1">
               {topics.length > 0 ? (
-                topics.map(t => {
+                (isExpandedTopics ? topics : topics.slice(0, 10)).map(t => {
                   const isFollowed = topicIds.includes(t.id);
                   const isChild = !!t.parentId;
                   return (
@@ -279,11 +287,9 @@ export default function FeatureCards({
                           : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 border-transparent font-medium'
                       }`}
                     >
-                      <div className="flex items-center gap-2 overflow-hidden">
-                        <span className="truncate">{t.label}</span>
-                        {!isFollowed && !isChild && (
-                           <span className="text-[8px] font-bold px-1 py-0.5 rounded bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400 uppercase tracking-tighter">Đề xuất</span>
-                        )}
+                      <div className="flex items-center flex-wrap gap-1.5 flex-1 pr-2">
+                        <span className="break-words leading-snug">{t.label}</span>
+
                         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md transition-colors ${
                           activeTopicId === t.id
                             ? 'bg-primary/20 text-primary'
@@ -302,6 +308,14 @@ export default function FeatureCards({
                     Bạn chưa theo dõi chủ đề nào. 
                   </p>
                 </div>
+              )}
+              {topics.length > 10 && (
+                <button
+                  onClick={() => setIsExpandedTopics(!isExpandedTopics)}
+                  className="mt-1 px-3 py-2 rounded-lg text-xs font-bold text-primary hover:bg-primary/5 transition-all flex items-center gap-2 group w-fit"
+                >
+                  {isExpandedTopics ? 'Thu gọn danh sách' : `+ ${topics.length - 10} chủ đề khác`}
+                </button>
               )}
               <div className="pt-4 mt-2 border-t border-zinc-200 dark:border-white/5">
                 <Link

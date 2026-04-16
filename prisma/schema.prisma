@@ -72,7 +72,7 @@ model Follow {
 model UserOnboarding {
   id               String      @id @default(cuid())
   userId           String      @unique
-  occupation       Occupation?
+  occupation       String?
   interestedTopics String[]
   completedAt      DateTime?
   skippedAt        DateTime?
@@ -80,6 +80,16 @@ model UserOnboarding {
   updatedAt        DateTime    @updatedAt
   codeTheme        String?     @default("dracula")
   user             User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model OccupationOption {
+  id          String  @id @default(cuid())
+  value       String  @unique
+  label       String
+  emoji       String?
+  description String?
+  order       Int     @default(0)
+  enabled     Boolean @default(true)
 }
 
 model Account {
@@ -488,5 +498,12 @@ enum Occupation {
   DEVELOPER
   DEVOPS_ENGINEER
   DATA_SCIENTIST
+  DESIGNER
+  PRODUCT_MANAGER
+  BUSINESS_OWNER
+  FINANCE_PROFESSIONAL
+  HEALTHCARE_PROFESSIONAL
+  EDUCATOR
+  ENGINEER
   OTHER
 }

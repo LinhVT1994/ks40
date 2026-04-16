@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { getSiteConfigAction, setSiteConfigAction } from '@/features/admin/actions/config';
 import { TopicItem, getTopicTreeAction, getEnabledTopicTreeAction, saveTopicsAction } from '@/features/admin/actions/topic';
+import { OccupationOptionAdmin, getAllOccupationOptionsAction, createOccupationOptionAction, updateOccupationOptionAction, deleteOccupationOptionAction } from '@/features/admin/actions/occupation';
 import Link from 'next/link';
 import { getTagsWithCountAction, createTagAction, updateTagAction, deleteTagAction } from '@/features/admin/actions/taxonomy';
 import AdminHeader from '@/features/admin/components/AdminHeader';
@@ -373,34 +374,174 @@ function AppearanceTab() {
   );
 }
 
-const DEFAULT_OCCUPATIONS: ConfigItem[] = [
-  { value: 'STUDENT',   label: 'Sinh viên', emoji: '🎓', color: '#8b5cf6', enabled: true },
-  { value: 'DEVELOPER', label: 'Developer',  emoji: '💻', color: '#3b82f6', enabled: true },
-];
-function OnboardingTab({ initialOccupations }: { initialOccupations: OnboardingItem[] }) {
+/* ─── Occupation Row (DB-backed, no color) ───────────────────── */
+function OccupationRow({ item, onToggle, onDelete, onUpdate }: {
+  item: OccupationOptionAdmin;
+  onToggle: () => void;
+  onDelete: () => void;
+  onUpdate: (data: { label: string; emoji: string; description: string }) => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [draft, setDraft] = useState({ label: item.label, emoji: item.emoji ?? '', description: item.description ?? '' });
+  const commit = () => { onUpdate(draft); setExpanded(false); };
+
+  return (
+    <div className={`rounded-xl border overflow-hidden transition-all ${item.enabled ? 'bg-white dark:bg-white/5 border-zinc-300 dark:border-white/10' : 'bg-zinc-50 dark:bg-white/[0.02] border-zinc-200 dark:border-white/5'}`}>
+      <div className={`flex items-center gap-3 px-4 py-3 ${!item.enabled ? 'opacity-40' : ''}`}>
+        <GripVertical className="w-4 h-4 text-zinc-300 dark:text-slate-600 shrink-0" />
+        <span className="text-xl w-7 shrink-0 text-center">{item.emoji ?? '👤'}</span>
+        <div className="flex-1 min-w-0">
+          <span className="text-sm font-semibold text-zinc-800 dark:text-slate-200">{item.label}</span>
+          {item.description && <p className="text-xs text-zinc-400 truncate">{item.description}</p>}
+        </div>
+        <span className="text-[10px] font-mono text-zinc-400 dark:text-slate-500 bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded">{item.value}</span>
+        <button type="button" onClick={() => { setDraft({ label: item.label, emoji: item.emoji ?? '', description: item.description ?? '' }); setExpanded(v => !v); }}
+          className={`p-1.5 rounded-lg transition-colors ${expanded ? 'text-primary bg-primary/10' : 'text-zinc-500 hover:text-primary hover:bg-primary/5'}`}>
+          <Pencil className="w-3.5 h-3.5" />
+        </button>
+        <button type="button" onClick={onDelete} className="p-1.5 rounded-lg text-zinc-300 dark:text-white/20 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors">
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+        <button type="button" onClick={onToggle}
+          className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${item.enabled ? 'bg-primary' : 'bg-zinc-200 dark:bg-white/10'}`}>
+          <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${item.enabled ? 'translate-x-4' : ''}`} />
+        </button>
+      </div>
+      {expanded && (
+        <div className="px-4 pb-4 pt-1 border-t border-zinc-200 dark:border-white/5 space-y-3 bg-zinc-50/50 dark:bg-white/[0.01]">
+          <div className="grid grid-cols-4 gap-3">
+            <div className="col-span-1 space-y-1">
+              <p className="text-xs font-medium text-zinc-500">Emoji</p>
+              <input value={draft.emoji} onChange={e => setDraft(d => ({ ...d, emoji: e.target.value }))} placeholder="👤" className="w-full px-3 py-2 text-sm bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-lg outline-none" />
+            </div>
+            <div className="col-span-3 space-y-1">
+              <p className="text-xs font-medium text-zinc-500">Tên hiển thị</p>
+              <input autoFocus value={draft.label} onChange={e => setDraft(d => ({ ...d, label: e.target.value }))} onKeyDown={e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') setExpanded(false); }} className="w-full px-3 py-2 text-sm bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-lg outline-none" />
+            </div>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs font-medium text-zinc-500">Mô tả ngắn</p>
+            <input value={draft.description} onChange={e => setDraft(d => ({ ...d, description: e.target.value }))} placeholder="Ví dụ: Đang học tập tại các trường..." className="w-full px-3 py-2 text-sm bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-lg outline-none" />
+          </div>
+          <div className="flex items-center justify-end gap-2 pt-1">
+            <button type="button" onClick={() => setExpanded(false)} className="px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors">Huỷ</button>
+            <button type="button" onClick={commit} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary text-white text-sm font-bold"><Check className="w-3.5 h-3.5" /> OK</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function AddOccupationForm({ onAdd }: { onAdd: (data: { value: string; label: string; emoji: string; description: string }) => void }) {
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState('');
+  const [label, setLabel] = useState('');
+  const [emoji, setEmoji] = useState('');
+  const [description, setDescription] = useState('');
+
+  const handleAdd = () => {
+    if (!label.trim()) return;
+    onAdd({ value: value.trim() || label.trim().toUpperCase().replace(/\s+/g, '_'), label: label.trim(), emoji, description });
+    setValue(''); setLabel(''); setEmoji(''); setDescription('');
+    setOpen(false);
+  };
+
+  if (!open) return (
+    <button type="button" onClick={() => setOpen(true)}
+      className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border-2 border-dashed border-zinc-300 dark:border-white/10 text-sm font-semibold text-zinc-500 hover:border-primary/50 hover:text-primary hover:bg-primary/5 transition-all">
+      <Plus className="w-4 h-4" /> Thêm vai trò mới
+    </button>
+  );
+
+  return (
+    <div className="rounded-xl border-2 border-primary/30 bg-primary/5 dark:bg-primary/10 p-4 space-y-3 animate-in fade-in slide-in-from-top-2 duration-200">
+      <p className="text-xs font-bold text-primary uppercase tracking-wider">Thêm vai trò mới</p>
+      <div className="grid grid-cols-4 gap-3">
+        <div className="space-y-1">
+          <p className="text-xs font-medium text-zinc-500">Emoji</p>
+          <input value={emoji} onChange={e => setEmoji(e.target.value)} placeholder="👤" className="w-full px-3 py-2 text-sm bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 dark:text-white" />
+        </div>
+        <div className="col-span-3 space-y-1">
+          <p className="text-xs font-medium text-zinc-500">Tên hiển thị <span className="text-rose-400">*</span></p>
+          <input autoFocus value={label} onChange={e => setLabel(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') setOpen(false); }} placeholder="Ví dụ: Giảng viên, Kỹ sư..." className="w-full px-3 py-2 text-sm bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 dark:text-white" />
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="space-y-1">
+          <p className="text-xs font-medium text-zinc-500">Value (key) — tự động nếu bỏ trống</p>
+          <input value={value} onChange={e => setValue(e.target.value.toUpperCase().replace(/\s+/g, '_'))} placeholder="GIANG_VIEN" className="w-full px-3 py-2 text-sm font-mono bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 dark:text-white" />
+        </div>
+        <div className="space-y-1">
+          <p className="text-xs font-medium text-zinc-500">Mô tả ngắn</p>
+          <input value={description} onChange={e => setDescription(e.target.value)} placeholder="Mô tả vai trò..." className="w-full px-3 py-2 text-sm bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 dark:text-white" />
+        </div>
+      </div>
+      <div className="flex items-center gap-2 pt-1">
+        <button type="button" onClick={handleAdd} disabled={!label.trim()} className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:opacity-90 disabled:opacity-30">
+          <Plus className="w-3.5 h-3.5" /> Thêm
+        </button>
+        <button type="button" onClick={() => setOpen(false)} className="px-4 py-2 rounded-lg text-sm font-semibold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5">Huỷ</button>
+      </div>
+    </div>
+  );
+}
+
+function OnboardingTab() {
   const [isPending, startTransition] = React.useTransition();
-  const [saved, setSaved] = useState(false);
-  const [occupations, setOccupations] = useState<OnboardingItem[]>(initialOccupations);
+  const [occupations, setOccupations] = useState<OccupationOptionAdmin[] | null>(null);
   const [parentTopics, setParentTopics] = useState<TopicItem[] | null>(null);
 
   React.useEffect(() => {
+    getAllOccupationOptionsAction().then(setOccupations).catch(() => setOccupations([]));
     getEnabledTopicTreeAction().then(setParentTopics).catch(() => setParentTopics([]));
   }, []);
 
-  const save = () => {
-    startTransition(async () => {
-      await setSiteConfigAction('onboarding_occupations', occupations);
-      setSaved(true); setTimeout(() => setSaved(false), 2000);
-    });
+  const handleToggle = (id: string) => {
+    if (!occupations) return;
+    const item = occupations.find(o => o.id === id);
+    if (!item) return;
+    setOccupations(prev => prev!.map(o => o.id === id ? { ...o, enabled: !o.enabled } : o));
+    startTransition(async () => { await updateOccupationOptionAction(id, { enabled: !item.enabled }); });
+  };
+
+  const handleDelete = (id: string) => {
+    setOccupations(prev => prev!.filter(o => o.id !== id));
+    startTransition(async () => { await deleteOccupationOptionAction(id); });
+  };
+
+  const handleUpdate = (id: string, data: { label: string; emoji: string; description: string }) => {
+    setOccupations(prev => prev!.map(o => o.id === id ? { ...o, label: data.label, emoji: data.emoji || null, description: data.description || null } : o));
+    startTransition(async () => { await updateOccupationOptionAction(id, data); });
+  };
+
+  const handleAdd = async (data: { value: string; label: string; emoji: string; description: string }) => {
+    const result = await createOccupationOptionAction(data);
+    if (result.success) {
+      getAllOccupationOptionsAction().then(setOccupations);
+    }
   };
 
   return (
     <div className="space-y-6">
-      <Section title="Vai trò (Occupation)">
-        <div className="space-y-2">
-          {occupations.map(item => <ConfigItemRow key={item.value} item={item} onChange={next => setOccupations(prev => prev.map(i => i.value === next.value ? next : i))} onDelete={() => setOccupations(prev => prev.filter(i => i.value !== item.value))} />)}
-        </div>
-        <AddItemForm onAdd={item => setOccupations(prev => [...prev, item])} />
+      <Section title="Vai trò (Occupation)" description="Danh sách vai trò hiển thị trong bước Onboarding và trang Cài đặt → Sở thích.">
+        {occupations === null ? (
+          <div className="text-sm text-zinc-500 py-4 flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Đang tải...</div>
+        ) : (
+          <div className="space-y-2">
+            {occupations.map(item => (
+              <OccupationRow
+                key={item.id}
+                item={item}
+                onToggle={() => handleToggle(item.id)}
+                onDelete={() => handleDelete(item.id)}
+                onUpdate={(data) => handleUpdate(item.id, data)}
+              />
+            ))}
+            <AddOccupationForm onAdd={handleAdd} />
+          </div>
+        )}
+        {isPending && <p className="text-xs text-zinc-400 flex items-center gap-1"><Loader2 className="w-3 h-3 animate-spin" /> Đang lưu...</p>}
       </Section>
       <Section title="Chủ đề quan tâm (Onboarding Step 2)">
         <p className="text-xs text-zinc-500 dark:text-slate-500 mb-3">
@@ -423,11 +564,6 @@ function OnboardingTab({ initialOccupations }: { initialOccupations: OnboardingI
           </div>
         )}
       </Section>
-      <div className="flex justify-end pt-2">
-        <button onClick={save} disabled={isPending} className={`px-5 py-2.5 rounded-2xl text-sm font-bold transition-all ${saved ? 'bg-emerald-500 text-white' : 'bg-primary text-white'}`}>
-          {isPending ? 'Đang lưu...' : saved ? 'Đã lưu' : 'Lưu thay đổi'}
-        </button>
-      </div>
     </div>
   );
 }
@@ -710,14 +846,6 @@ function AdminSettingsPage() {
   const validTabs = tabs.map(t => t.key);
   const activeTab = validTabs.includes(tabFromUrl) ? tabFromUrl : 'topics';
 
-  const [onboardingData, setOnboardingData] = useState<{ occupations: OnboardingItem[] } | null>(null);
-
-  React.useEffect(() => {
-    getSiteConfigAction('onboarding_occupations')
-      .then((occ) => setOnboardingData({ occupations: (occ as any) ?? DEFAULT_OCCUPATIONS }))
-      .catch(() => setOnboardingData({ occupations: DEFAULT_OCCUPATIONS }));
-  }, []);
-
   const activeTabMeta = tabs.find(t => t.key === activeTab)!;
   const setActiveTab = (tab: TabKey) => router.replace(`/admin/settings?tab=${tab}`, { scroll: false });
 
@@ -728,7 +856,7 @@ function AdminSettingsPage() {
     members: <MembersTab />,
     notifications: <NotificationsTab />,
     appearance: <AppearanceTab />,
-    onboarding: onboardingData ? <OnboardingTab initialOccupations={onboardingData.occupations} /> : <div className="text-sm text-zinc-500 py-8">Đang tải...</div>,
+    onboarding: <OnboardingTab />,
     topics: <TopicsTab />,
     tags: <TagsTab />,
     badges: <BadgesTab />,

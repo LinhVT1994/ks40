@@ -10,6 +10,8 @@ import { getFollowersAction, getFollowingAction } from '@/features/member/action
 import { getAuthorInfoAction } from '@/features/member/actions/follow';
 import { getDashboardStatsAction, getContinueReadingAction } from '@/features/member/actions/dashboard';
 import { getArticleRatingsAction } from '@/features/articles/actions/rating';
+import { getEnabledTopicsAction } from '@/features/admin/actions/topic';
+import { db } from '@/lib/db';
 import ProfileClient from './ProfileClient';
 import PublicProfileClient from './PublicProfileClient';
 import JsonLd from '@/components/shared/JsonLd';
@@ -70,7 +72,11 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   // isOwner so sánh bằng user.id thực, không phải param id (phòng trường hợp param là username)
   const isOwner = currentUserId === user.id;
 
-  const [bookmarks, history, drafts, followersData, followingData, authorInfo, articlesData, dashboardStats, lastActivity, ratingsData] = await Promise.all([
+  const [
+    bookmarks, history, drafts, followersData, followingData,
+    authorInfo, articlesData, dashboardStats, lastActivity,
+    ratingsData, availableTopicsData, followedTopicsData
+  ] = await Promise.all([
     isOwner ? getBookmarksAction() : Promise.resolve(null),
     isOwner ? getReadHistoryAction() : Promise.resolve(null),
     isOwner && canWrite ? getMemberDraftsAction() : Promise.resolve(null),
@@ -81,7 +87,14 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     isOwner ? getDashboardStatsAction() : Promise.resolve(null),
     isOwner ? getContinueReadingAction() : Promise.resolve(null),
     isOwner && canWrite ? getArticleRatingsAction({ authorId: user.id, limit: 20, includeHidden: true }) : Promise.resolve(null),
+    isOwner ? getEnabledTopicsAction() : Promise.resolve([]),
+    isOwner ? (db as any).topicFollow.findMany({
+      where: { userId: currentUserId },
+      select: { topicId: true }
+    }) : Promise.resolve([]),
   ]);
+
+  const followedTopicIds = (followedTopicsData as { topicId: string }[]).map(f => f.topicId);
 
   const profileUrl = `${SITE_URL}/profile/${user.username ?? id}`;
   const personJsonLd = {
@@ -174,6 +187,8 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
           stats={dashboardStats}
           lastActivity={lastActivity}
           ratingsData={ratingsData}
+          availableTopics={availableTopicsData || []}
+          initialTopics={followedTopicIds}
         />
       </div>
     </div>

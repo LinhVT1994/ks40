@@ -2,8 +2,6 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getPreferencesAction } from '@/features/onboarding/actions/onboarding';
 import SettingsLayoutClient from '@/features/member/components/SettingsLayoutClient';
-import { Occupation } from '@prisma/client';
-import { getEnabledTopicsAction } from '@/features/admin/actions/topic';
 import { db } from '@/lib/db';
 import type { Metadata } from 'next';
 
@@ -16,17 +14,11 @@ export default async function SettingsPage() {
   const session = await auth();
   if (!session?.user) redirect('/login');
 
-  const [prefs, dbUser, topics, followedTopics] = await Promise.all([
+  const [prefs, dbUser] = await Promise.all([
     getPreferencesAction(),
     db.user.findUnique({ where: { id: session.user.id }, select: { bio: true, username: true, websiteUrl: true, facebookUrl: true, instagramUrl: true, twitterUrl: true, linkedinUrl: true, githubUrl: true, youtubeUrl: true } }),
-    getEnabledTopicsAction(),
-    (db as any).topicFollow.findMany({
-      where: { userId: session.user.id },
-      select: { topicId: true }
-    }),
   ]);
 
-  const followedTopicIds = (followedTopics as { topicId: string }[]).map(f => f.topicId);
   const user = {
     ...session.user,
     bio: dbUser?.bio ?? null,
@@ -49,9 +41,7 @@ export default async function SettingsPage() {
 
       <SettingsLayoutClient
         user={user}
-        initialOccupation={(prefs?.occupation ?? null) as Occupation | null}
-        initialTopics={followedTopicIds}
-        availableTopics={topics}
+        initialOccupation={prefs?.occupation ?? null}
         initialCodeTheme={(prefs as any)?.codeTheme ?? 'dracula'}
       />
     </div>

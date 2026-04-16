@@ -2,7 +2,32 @@
 
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
-import { Occupation } from '@prisma/client';
+import { unstable_cache, revalidatePath, revalidateTag } from 'next/cache';
+
+export type OccupationOption = {
+  id: string;
+  value: string;
+  label: string;
+  emoji: string | null;
+  description: string | null;
+  order: number;
+  enabled: boolean;
+};
+
+const _getOccupationOptionsCached = unstable_cache(
+  async (): Promise<OccupationOption[]> => {
+    return db.occupationOption.findMany({
+      where:   { enabled: true },
+      orderBy: { order: 'asc' },
+    });
+  },
+  ['occupation-options'],
+  { revalidate: 3600, tags: ['occupation-options'] },
+);
+
+export async function getOccupationOptionsAction(): Promise<OccupationOption[]> {
+  return _getOccupationOptionsCached();
+}
 
 async function requireUser() {
   const session = await auth();
@@ -11,51 +36,57 @@ async function requireUser() {
 }
 
 export async function saveOnboardingAction(data: {
-  occupation: Occupation;
+  occupation: string;
   interestedTopics: string[];
 }) {
   const userId = await requireUser();
+
+  const validTopics = await db.topic.findMany({
+    where: { id: { in: data.interestedTopics } },
+    select: { id: true },
+  });
+  const validIds = validTopics.map(t => t.id);
+
   await db.userOnboarding.upsert({
     where:  { userId },
-    update: { occupation: data.occupation, interestedTopics: data.interestedTopics },
-    create: { userId, occupation: data.occupation, interestedTopics: data.interestedTopics },
+    update: { occupation: data.occupation, interestedTopics: validIds },
+    create: { userId, occupation: data.occupation, interestedTopics: validIds },
   });
 
-  // Sync TopicFollow
   await (db as any).topicFollow.deleteMany({ where: { userId } });
-  if (data.interestedTopics.length > 0) {
+  if (validIds.length > 0) {
     await (db as any).topicFollow.createMany({
-      data: data.interestedTopics.map(topicId => ({ userId, topicId })),
+      data: validIds.map((topicId: string) => ({ userId, topicId })),
       skipDuplicates: true,
     });
   }
 }
 
 export async function completeOnboardingAction(data: {
-  occupation: Occupation;
+  occupation: string;
   interestedTopics: string[];
 }) {
   const userId = await requireUser();
-  const { revalidatePath } = await import('next/cache');
+
+  const validTopics = await db.topic.findMany({
+    where: { id: { in: data.interestedTopics } },
+    select: { id: true },
+  });
+  const validIds = validTopics.map(t => t.id);
 
   await db.$transaction(async (tx) => {
-    // 1. Mark onboarding as completed
     await tx.userOnboarding.upsert({
       where:  { userId },
-      update: { occupation: data.occupation, interestedTopics: data.interestedTopics, completedAt: new Date(), skippedAt: null },
-      create: { userId, occupation: data.occupation, interestedTopics: data.interestedTopics, completedAt: new Date() },
+      update: { occupation: data.occupation, interestedTopics: validIds, completedAt: new Date(), skippedAt: null },
+      create: { userId, occupation: data.occupation, interestedTopics: validIds, completedAt: new Date() },
     });
 
-    // 2. Synchronize TopicFollow table
     await (tx as any).topicFollow.deleteMany({ where: { userId } });
-    if (data.interestedTopics.length > 0) {
-      for (const topicId of data.interestedTopics) {
-        await (tx as any).topicFollow.upsert({
-          where: { userId_topicId: { userId, topicId } },
-          update: {},
-          create: { userId, topicId }
-        });
-      }
+    if (validIds.length > 0) {
+      await (tx as any).topicFollow.createMany({
+        data: validIds.map((topicId: string) => ({ userId, topicId })),
+        skipDuplicates: true,
+      });
     }
   });
 
@@ -70,41 +101,42 @@ export async function getPreferencesAction() {
   });
 }
 
-import { revalidatePath } from 'next/cache';
-
 export async function updatePreferencesAction(data: {
-  occupation: Occupation;
-  interestedTopics: string[];
-  codeTheme: string;
+  occupation?: string;
+  interestedTopics?: string[];
+  codeTheme?: string;
 }) {
   const userId = await requireUser();
   
+  // Get current preferences to handle partial updates
+  const current = await db.userOnboarding.findUnique({
+    where: { userId },
+    select: { occupation: true, interestedTopics: true, codeTheme: true }
+  });
+
+  const occupation = data.occupation ?? current?.occupation ?? '';
+  const interestedTopics = data.interestedTopics ?? current?.interestedTopics ?? [];
+  const codeTheme = data.codeTheme ?? current?.codeTheme ?? 'dracula';
+
+  const validTopics = await db.topic.findMany({
+    where: { id: { in: interestedTopics } },
+    select: { id: true },
+  });
+  const validIds = validTopics.map(t => t.id);
+
   await db.$transaction(async (tx) => {
-    // 1. Update legacy UserOnboarding record
     await tx.userOnboarding.upsert({
       where:  { userId },
-      update: {
-        occupation: data.occupation,
-        interestedTopics: data.interestedTopics,
-        codeTheme: data.codeTheme
-      },
-      create: {
-        userId,
-        occupation: data.occupation,
-        interestedTopics: data.interestedTopics,
-        codeTheme: data.codeTheme,
-        completedAt: new Date()
-      },
+      update: { occupation, interestedTopics: validIds, codeTheme },
+      create: { userId, occupation, interestedTopics: validIds, codeTheme, completedAt: new Date() },
     });
 
-    // 2. Synchronize TopicFollow table (The new Source of Truth)
-    await (tx as any).topicFollow.deleteMany({ where: { userId } });
-    if (data.interestedTopics.length > 0) {
-      for (const topicId of data.interestedTopics) {
-        await (tx as any).topicFollow.upsert({
-          where: { userId_topicId: { userId, topicId } },
-          update: {}, // No update needed if exists
-          create: { userId, topicId }
+    if (data.interestedTopics) {
+      await (tx as any).topicFollow.deleteMany({ where: { userId } });
+      if (validIds.length > 0) {
+        await (tx as any).topicFollow.createMany({
+          data: validIds.map((topicId: string) => ({ userId, topicId })),
+          skipDuplicates: true,
         });
       }
     }

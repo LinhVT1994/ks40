@@ -3,15 +3,19 @@
 import { useState, useTransition, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { Occupation } from '@prisma/client';
-import { completeOnboardingAction, skipOnboardingAction } from '@/features/onboarding/actions/onboarding';
+import {
+  completeOnboardingAction,
+  skipOnboardingAction,
+  getOccupationOptionsAction,
+} from '@/features/onboarding/actions/onboarding';
+import type { OccupationOption } from '@/features/onboarding/actions/onboarding';
 import { getEnabledTopicsAction } from '@/features/admin/actions/topic';
 import type { TopicItem } from '@/features/admin/actions/topic';
 import StepOccupation from './StepOccupation';
 import StepCategories from './StepCategories';
 
 export type OnboardingData = {
-  occupation: Occupation | null;
+  occupation: string | null;
   interestedTopics: string[];
 };
 
@@ -21,12 +25,16 @@ export default function OnboardingWizard({ userName }: { userName?: string }) {
   const [isPending, startTransition] = useTransition();
   const [step, setStep] = useState<1 | 2>(1);
   const [topics, setTopics] = useState<TopicItem[]>([]);
+  const [occupationOptions, setOccupationOptions] = useState<OccupationOption[]>([]);
   const [data, setData] = useState<OnboardingData>({
     occupation: null,
     interestedTopics: [],
   });
 
-  useEffect(() => { getEnabledTopicsAction().then(setTopics); }, []);
+  useEffect(() => {
+    getEnabledTopicsAction().then(setTopics);
+    getOccupationOptionsAction().then(setOccupationOptions);
+  }, []);
 
   const handleSkip = () => {
     startTransition(async () => {
@@ -44,7 +52,7 @@ export default function OnboardingWizard({ userName }: { userName?: string }) {
     startTransition(async () => {
       try {
         await completeOnboardingAction({
-          occupation: data.occupation ?? Occupation.OTHER,
+          occupation: data.occupation ?? 'OTHER',
           interestedTopics: data.interestedTopics,
         });
         await update({ onboardingDone: true });
@@ -94,6 +102,7 @@ export default function OnboardingWizard({ userName }: { userName?: string }) {
           onNext={() => setStep(2)}
           onSkip={handleSkip}
           isPending={isPending}
+          options={occupationOptions}
         />
       )}
 
@@ -105,7 +114,7 @@ export default function OnboardingWizard({ userName }: { userName?: string }) {
           onComplete={handleComplete}
           onSkip={handleSkip}
           isPending={isPending}
-          topics={topics.filter(t => !t.parentId)}
+          topics={topics}
         />
       )}
     </div>

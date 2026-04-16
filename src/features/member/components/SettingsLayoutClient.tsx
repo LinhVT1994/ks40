@@ -8,20 +8,14 @@ import SettingsProfile from './SettingsProfile';
 import SettingsPreferences from './SettingsPreferences';
 import SettingsSecurity from './SettingsSecurity';
 import SettingsNotifications from './SettingsNotifications';
-import { Occupation } from '@prisma/client';
-import type { TopicItem } from '@/features/admin/actions/topic';
 
 function SettingsLayoutContent({
   user,
   initialOccupation,
-  initialTopics,
-  availableTopics,
   initialCodeTheme
 }: {
   user: User;
-  initialOccupation: Occupation | null;
-  initialTopics: string[];
-  availableTopics: TopicItem[];
+  initialOccupation: string | null;
   initialCodeTheme: string;
 }) {
   const router = useRouter();
@@ -88,10 +82,8 @@ function SettingsLayoutContent({
               <p className="text-sm text-zinc-500 mt-2 max-w-lg leading-relaxed">Bạn cung cấp càng chi tiết, thuật toán của chúng tôi càng dễ dàng đề xuất các bài báo học thuật tốt nhất dành riêng cho cá nhân bạn.</p>
             </div>
             <SettingsPreferences
-              key={`${initialOccupation}-${initialTopics.join(',')}-${initialCodeTheme}`}
+              key={`${initialOccupation}-${initialCodeTheme}`}
               initialOccupation={initialOccupation}
-              initialTopics={initialTopics}
-              availableTopics={availableTopics}
               initialCodeTheme={initialCodeTheme}
             />
           </div>

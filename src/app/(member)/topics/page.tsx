@@ -10,7 +10,7 @@ export default async function TopicsExplorerPage() {
 
   return (
     <MemberContainer>
-      <div className="mt-12 sm:mt-16 mb-32 px-4 sm:px-6 max-w-7xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000">
+      <div className="mt-12 sm:mt-16 mb-32 px-4 md:px-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000">
         
         {/* Breadcrumb / Back Navigation */}
         <div className="mb-12">
@@ -36,7 +36,7 @@ export default async function TopicsExplorerPage() {
         </div>
 
         {/* Masonry Matrix Layout */}
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-12 space-y-20">
+        <div className="columns-1 md:columns-2 lg:columns-4 gap-12 space-y-20">
           {activeTree.map((parent) => {
             const children = (parent.children ?? []).filter(c => c.enabled);
             const color = parent.color || '#64748b';
