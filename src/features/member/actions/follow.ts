@@ -10,7 +10,7 @@ const _getAuthorInfoCached = unstable_cache(
     const [author, followerCount, articleCount] = await Promise.all([
       db.user.findUnique({
         where:  { id: authorId },
-        select: { id: true, name: true, image: true, bio: true, websiteUrl: true, facebookUrl: true, instagramUrl: true, twitterUrl: true, linkedinUrl: true, githubUrl: true, youtubeUrl: true },
+        select: { id: true, name: true, image: true, bio: true, username: true, websiteUrl: true, facebookUrl: true, instagramUrl: true, twitterUrl: true, linkedinUrl: true, githubUrl: true, youtubeUrl: true },
       }),
       db.follow.count({ where: { followingId: authorId } }),
       db.article.count({ where: { authorId, status: 'PUBLISHED' } }),

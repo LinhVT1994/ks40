@@ -7,12 +7,11 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import {
   Heart, MessageCircle, Eye, Clock, Calendar, FileText, Star,
   Bookmark, History, BookOpen, PenLine, Trash2, Settings,
-  AlertCircle, Send as SendIcon, CheckCircle2, ChevronDown
+  AlertCircle, Send as SendIcon, CheckCircle2, ChevronDown,
+  UserCheck, UserMinus
 } from 'lucide-react';
 import { deleteMemberArticleAction } from '@/features/member/actions/write';
-import DashboardStats from '@/features/member/components/Dashboard/DashboardStats';
-import ContinueReading from '@/features/member/components/Dashboard/ContinueReading';
-import DailyMotivation from '@/features/member/components/Dashboard/DailyMotivation';
+// import DailyMotivation from '@/features/member/components/Dashboard/DailyMotivation';
 
 /* ── Shared helpers ─────────────────────────────────────────── */
 type TopicBadge = { label: string; color: string | null };
@@ -72,7 +71,7 @@ type Draft = {
   rejectionReason?: string;
 };
 
-type Tab = 'articles' | 'drafts' | 'bookmarks' | 'history' | 'followers' | 'ratings';
+type Tab = 'articles' | 'drafts' | 'bookmarks' | 'history' | 'followers' | 'following' | 'ratings';
 
 type AuthorRatingStats = {
   ratings: Array<{
@@ -499,7 +498,7 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
 }
 
 function FollowerList({ followers: initialFollowers, totalFollowers, totalPages: initialTotalPages, userId }: {
-  followers: { id: string; name: string | null; image: string | null; bio: string | null; articleCount: number }[];
+  followers: { id: string; name: string | null; image: string | null; bio: string | null; articleCount: number; username?: string | null }[];
   totalFollowers: number;
   totalPages: number;
   userId: string;
@@ -539,7 +538,7 @@ function FollowerList({ followers: initialFollowers, totalFollowers, totalPages:
         {followers.map((f, i) => (
           <Link
             key={f.id}
-            href={`/profile/${f.id}`}
+            href={`/profile/${f.username ?? f.id}`}
             style={{ animationDelay: `${i * 50}ms` }}
             className="group flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors animate-in fade-in slide-in-from-left-2 fill-mode-both"
           >
@@ -558,6 +557,139 @@ function FollowerList({ followers: initialFollowers, totalFollowers, totalPages:
               {f.bio && <p className="text-xs text-zinc-500 truncate mt-0.5">{f.bio}</p>}
             </div>
             <span className="text-[11px] font-bold text-zinc-500 tabular-nums shrink-0">{f.articleCount} bài viết</span>
+          </Link>
+        ))}
+      </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-1 mt-6 pt-4 border-t border-zinc-200 dark:border-white/5">
+          <button
+            onClick={() => goToPage(page - 1)}
+            disabled={page === 1 || loading}
+            className="px-3 py-1.5 text-xs font-bold text-zinc-500 hover:text-primary disabled:opacity-30 disabled:hover:text-zinc-500 transition-colors"
+          >
+            ‹ Trước
+          </button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+            <button
+              key={p}
+              onClick={() => goToPage(p)}
+              disabled={loading}
+              className={`w-8 h-8 rounded-lg text-xs font-bold transition-colors ${
+                p === page
+                  ? 'bg-primary text-white'
+                  : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5'
+              }`}
+            >
+              {p}
+            </button>
+          ))}
+          <button
+            onClick={() => goToPage(page + 1)}
+            disabled={page === totalPages || loading}
+            className="px-3 py-1.5 text-xs font-bold text-zinc-500 hover:text-primary disabled:opacity-30 disabled:hover:text-zinc-500 transition-colors"
+          >
+            Sau ›
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FollowingList({ following: initialFollowing, totalFollowing, totalPages: initialTotalPages, userId, isOwner }: {
+  following: { id: string; name: string | null; image: string | null; bio: string | null; articleCount: number; username?: string | null }[];
+  totalFollowing: number;
+  totalPages: number;
+  userId: string;
+  isOwner: boolean;
+}) {
+  const [page, setPage] = useState(1);
+  const [following, setFollowing] = useState(initialFollowing);
+  const [totalPages, setTotalPages] = useState(initialTotalPages);
+  const [loading, setLoading] = useState(false);
+  const [unfollowingId, setUnfollowingId] = useState<string | null>(null);
+
+  const goToPage = async (newPage: number) => {
+    if (newPage === page || newPage < 1 || newPage > totalPages) return;
+    setLoading(true);
+    try {
+      const { getFollowingAction } = await import('@/features/member/actions/profile-follow');
+      const result = await getFollowingAction(userId, newPage);
+      if (result.success && result.data) {
+        setFollowing(result.data);
+        setPage(newPage);
+        setTotalPages(result.totalPages ?? initialTotalPages);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUnfollow = async (e: React.MouseEvent, targetId: string) => {
+    e.preventDefault();
+    if (!isOwner) return;
+    setUnfollowingId(targetId);
+    try {
+      const { toggleFollowAction } = await import('@/features/member/actions/follow');
+      const res = await toggleFollowAction(targetId);
+      if (res.success && !res.isFollowing) {
+        setFollowing(prev => prev.filter(f => f.id !== targetId));
+      }
+    } finally {
+      setUnfollowingId(null);
+    }
+  };
+
+  if (totalFollowing === 0)
+    return (
+      <div className="py-20 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
+        <UserCheck className="w-10 h-10 text-zinc-200 dark:text-white/10 mx-auto mb-4" />
+        <p className="text-zinc-500 font-medium">{isOwner ? 'Bạn chưa theo dõi tác giả nào.' : 'Người dùng này chưa theo dõi ai.'}</p>
+      </div>
+    );
+
+  return (
+    <div>
+      <div className={`space-y-2 transition-opacity ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
+        {following.map((f, i) => (
+          <Link
+            key={f.id}
+            href={`/profile/${f.username ?? f.id}`}
+            style={{ animationDelay: `${i * 50}ms` }}
+            className="group flex items-center justify-between gap-4 px-4 py-3 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors animate-in fade-in slide-in-from-left-2 fill-mode-both"
+          >
+            <div className="flex items-center gap-4 min-w-0 flex-1">
+              <div className="relative w-10 h-10 shrink-0">
+               <Image
+                   src={f.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name ?? 'User')}&background=e2e8f0&color=0f172a`}
+                   fill
+                   unoptimized
+                   sizes="40px"
+                   className="rounded-full object-cover border border-zinc-300 dark:border-white/10"
+                   alt={f.name ?? ''}
+                 />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors truncate">{f.name}</h3>
+                {f.bio && <p className="text-xs text-zinc-500 truncate mt-0.5">{f.bio}</p>}
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-4 shrink-0">
+              <span className="text-[11px] font-bold text-zinc-500 tabular-nums hidden sm:inline-block">{f.articleCount} bài viết</span>
+              {isOwner && (
+                <button
+                  onClick={(e) => handleUnfollow(e, f.id)}
+                  disabled={unfollowingId === f.id}
+                  className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors flex items-center gap-1 group/btn"
+                  title="Bỏ theo dõi"
+                >
+                  <UserMinus className={`w-4 h-4 ${unfollowingId === f.id ? 'animate-pulse' : ''}`} />
+                  <span className="text-xs font-semibold sm:hidden group-hover/btn:inline-block hidden">Bỏ theo dõi</span>
+                </button>
+              )}
+            </div>
           </Link>
         ))}
       </div>
@@ -724,6 +856,9 @@ export default function ProfileClient({
   followers,
   totalFollowers,
   totalFollowerPages,
+  following,
+  totalFollowing,
+  totalFollowingPages,
   isOwner,
   canWrite,
   stats,
@@ -739,6 +874,7 @@ export default function ProfileClient({
     avatarUrl: string;
     totalViews: number;
     totalLikes: number;
+    username?: string | null;
     _count: { articles: number };
   };
   articles: Article[];
@@ -753,9 +889,20 @@ export default function ProfileClient({
     image: string | null;
     bio: string | null;
     articleCount: number;
+    username?: string | null;
   }[];
   totalFollowers: number;
   totalFollowerPages: number;
+  following: {
+    id: string;
+    name: string | null;
+    image: string | null;
+    bio: string | null;
+    articleCount: number;
+    username?: string | null;
+  }[];
+  totalFollowing: number;
+  totalFollowingPages: number;
   isOwner: boolean;
   canWrite: boolean;
   stats: {
@@ -774,7 +921,7 @@ export default function ProfileClient({
 
   useEffect(() => {
     const t = searchParams.get('tab') as Tab;
-    if (t && ['articles', 'drafts', 'bookmarks', 'history', 'followers', 'ratings'].includes(t)) {
+    if (t && ['articles', 'drafts', 'bookmarks', 'history', 'followers', 'following', 'ratings'].includes(t)) {
       setTab(t);
     }
   }, [searchParams]);
@@ -792,6 +939,7 @@ export default function ProfileClient({
     { key: 'bookmarks' as Tab, icon: Bookmark,  label: 'Đã lưu',      count: bookmarks?.total ?? 0,    show: isOwner },
     { key: 'history'   as Tab, icon: History,   label: 'Lịch sử đọc', count: history?.length ?? 0,      show: isOwner },
     { key: 'followers' as Tab, icon: Heart,     label: 'Người theo dõi', count: totalFollowers,   show: true },
+    { key: 'following' as Tab, icon: UserCheck, label: 'Đang theo dõi',  count: totalFollowing,   show: true },
     { key: 'ratings'   as Tab, icon: Star,      label: 'Đánh giá',      count: ratingsData?.totalCount ?? 0, show: isOwner && canWrite },
   ] as const).filter(t => t.show);
 
@@ -822,7 +970,10 @@ export default function ProfileClient({
               </Link>
             )}
           </div>
-          
+          {user.username && (
+            <p className="text-xs text-zinc-400 dark:text-slate-500 mt-1">@{user.username}</p>
+          )}
+
           {user.bio && (
             <p className="mt-2 text-sm text-zinc-500 dark:text-slate-400 leading-relaxed font-semibold italic">
               "{user.bio}"
@@ -890,20 +1041,15 @@ export default function ProfileClient({
             <div className="h-[2px] flex-1 mx-6 bg-gradient-to-r from-zinc-100 via-zinc-100/50 to-transparent dark:from-white/10 dark:via-white/5 dark:to-transparent" />
         </div>
 
-        {isOwner && tab === 'articles' && (
-          <div className="mb-12 space-y-2">
-            <DashboardStats stats={stats} />
-            <ContinueReading lastActivity={lastActivity} />
-            <DailyMotivation />
-          </div>
-        )}
+
         
         {tab === 'articles'  && <ArticleList  articles={articles} totalArticles={totalArticles} totalPages={totalArticlePages} userId={user.id} />}
         {tab === 'drafts'    && <DraftList    drafts={drafts ?? []} />}
         {tab === 'bookmarks' && <BookmarkList bookmarks={bookmarks?.articles ?? []} />}
         {tab === 'history'   && <HistoryList  history={history ?? []} />}
         {tab === 'followers' && <FollowerList followers={followers} totalFollowers={totalFollowers} totalPages={totalFollowerPages} userId={user.id} />}
-        {tab === 'ratings'   && <RatingsDashboard data={ratingsData} />}
+        {tab === 'following' && <FollowingList following={following} totalFollowing={totalFollowing} totalPages={totalFollowingPages} userId={user.id} isOwner={isOwner} />}
+        {tab === 'ratings'   && isOwner && canWrite && <RatingsDashboard data={ratingsData} />}
       </div>
     </div>
   );

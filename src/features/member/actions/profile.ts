@@ -117,6 +117,7 @@ export async function getProfileArticlesAction(userId: string, page: number = 1,
 export async function updateProfileAction(data: {
   name?: string;
   bio?: string;
+  username?: string;
   websiteUrl?: string;
   facebookUrl?: string;
   instagramUrl?: string;
@@ -124,10 +125,29 @@ export async function updateProfileAction(data: {
   linkedinUrl?: string;
   githubUrl?: string;
   youtubeUrl?: string;
+  image?: string;
 }) {
   const session = await auth();
   const userId = session?.user?.id;
   if (!userId) return { success: false, error: 'Unauthorized' };
+
+  // Validate + normalize username nếu có
+  if (data.username !== undefined) {
+    const raw = data.username.trim().toLowerCase();
+    if (raw === '') {
+      data.username = undefined; // bỏ qua, không xóa username
+    } else {
+      if (!/^[a-z0-9_-]{3,30}$/.test(raw)) {
+        return { success: false, error: 'Username chỉ gồm chữ thường, số, dấu _ hoặc -, từ 3–30 ký tự' };
+      }
+      // Kiểm tra unique (loại trừ chính user)
+      const existing = await db.user.findUnique({ where: { username: raw }, select: { id: true } });
+      if (existing && existing.id !== userId) {
+        return { success: false, error: 'Username này đã được sử dụng' };
+      }
+      data.username = raw;
+    }
+  }
 
   try {
     const user = await db.user.update({
@@ -135,7 +155,7 @@ export async function updateProfileAction(data: {
       data,
     });
     return { success: true, user };
-  } catch (error) {
+  } catch {
     return { success: false, error: 'Lỗi cập nhật hồ sơ' };
   }
 }

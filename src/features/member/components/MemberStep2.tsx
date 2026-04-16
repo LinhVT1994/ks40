@@ -190,7 +190,8 @@ export default function MemberStep2({
     authorId: 'preview-author',
     author: {
       name: author?.name || 'Tác giả',
-      image: author?.image || null
+      image: author?.image || null,
+      username: null,
     },
     tags: tags.map(t => ({ tag: { name: t, slug: t } })),
     resources: [],

@@ -68,7 +68,8 @@ export default function MemberStep3({ data, onBack, onPublish, isPending }: Step
     authorId: 'preview-author',
     author: {
       name: data.author?.name || 'Tác giả',
-      image: data.author?.image || null
+      image: data.author?.image || null,
+      username: null,
     },
     tags: data.tags.map(t => ({ tag: { name: t, slug: t } })),
     resources: [],

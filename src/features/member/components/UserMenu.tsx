@@ -97,7 +97,7 @@ export default function UserMenu() {
             )}
             {user?.id && (
               <a
-                href={`/profile/${user.id}`}
+                href={`/profile/${(user as { username?: string | null }).username ?? user.id}`}
                 className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-700 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-colors"
                 onClick={() => setIsOpen(false)}
               >

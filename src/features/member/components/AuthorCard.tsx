@@ -15,6 +15,7 @@ type AuthorInfo = {
   followerCount: number;
   articleCount: number;
   isFollowing: boolean;
+  username?: string | null;
   websiteUrl?: string | null;
   facebookUrl?: string | null;
   instagramUrl?: string | null;
@@ -66,7 +67,7 @@ export default function AuthorCard({ author }: { author: AuthorInfo }) {
       {/* Top: Avatar bên trái + Tên + Chỉ số */}
       <div className="relative z-10 flex items-center gap-3.5">
         {/* Avatar */}
-        <Link href={`/profile/${author.id}`} className="relative shrink-0 block group/avatar">
+        <Link href={`/profile/${author.username ?? author.id}`} className="relative shrink-0 block group/avatar">
           <div className="absolute inset-0 rounded-full bg-primary/20 blur-md opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-300" />
           <div className="relative rounded-full p-[2px] bg-white dark:bg-slate-800 shadow-sm ring-1 ring-zinc-300 dark:ring-white/10 group-hover/avatar:ring-primary/40 transition-all duration-300">
             <div className="rounded-full overflow-hidden bg-zinc-100 dark:bg-slate-900">
@@ -78,7 +79,7 @@ export default function AuthorCard({ author }: { author: AuthorInfo }) {
         {/* Name + Stats */}
         <div className="flex-1 min-w-0 pt-0.5">
           <Link
-            href={`/profile/${author.id}`}
+            href={`/profile/${author.username ?? author.id}`}
             className="block text-[16px] font-bold text-zinc-800 dark:text-white hover:text-primary transition-colors leading-tight truncate"
           >
             {author.name}

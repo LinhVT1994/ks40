@@ -22,7 +22,7 @@ export type ArticleCard = {
   readTime: number;
   viewCount: number;
   publishedAt: Date | null;
-  author: { name: string; image: string | null };
+  author: { name: string; image: string | null; username: string | null };
   _count: { likes: number; comments: number; bookmarks: number };
   isLiked?: boolean;
   isBookmarked?: boolean;
@@ -145,7 +145,7 @@ export async function getArticlesAction(options: GetArticlesOptions = {}) {
         topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } },
         audience: true, badges: true,
         readTime: true, viewCount: true, publishedAt: true,
-        author:  { select: { name: true, image: true } },
+        author:  { select: { name: true, image: true, username: true } },
         _count:  { select: { likes: true, comments: true, bookmarks: true } },
         ratings: { where: { hidden: false }, select: { score: true } },
         ...(userId && {
@@ -224,7 +224,7 @@ export async function getForYouArticlesAction(options: {
     thumbnail: true, thumbnailPosition: true, cover: true, coverPosition: true,
     topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } },
     audience: true, badges: true, readTime: true, viewCount: true, publishedAt: true,
-    author:  { select: { name: true, image: true } },
+    author:  { select: { name: true, image: true, username: true } },
     _count:  { select: { likes: true, comments: true, bookmarks: true } },
     ratings: { where: { hidden: false }, select: { score: true } },
     ...(userId && {
@@ -353,12 +353,12 @@ const _getArticleContentCached = unstable_cache(
     const article = await db.article.findFirst({
       where: { slug, status: ArticleStatus.PUBLISHED, audience: { in: audienceFilter } },
       include: {
-        author:      { select: { name: true, image: true } },
+        author:      { select: { name: true, image: true, username: true } },
         tags:        { include: { tag: { select: { name: true, slug: true } } } },
         resources:   { select: { id: true, name: true, size: true, mimeType: true }, orderBy: { createdAt: 'asc' } },
         _count:      { select: { likes: true, comments: true, bookmarks: true } },
         topic:       { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } },
-        nextArticle: { select: { id: true, title: true, slug: true, summary: true, thumbnail: true, cover: true, topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } }, readTime: true, author: { select: { name: true, image: true } }, _count: { select: { likes: true } } } },
+        nextArticle: { select: { id: true, title: true, slug: true, summary: true, thumbnail: true, cover: true, topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } }, readTime: true, author: { select: { name: true, image: true, username: true } }, _count: { select: { likes: true } } } },
       },
     });
 
@@ -408,12 +408,12 @@ export async function getArticleBySlugAction(slug: string) {
   const article = await db.article.findFirst({
     where: { slug, status: ArticleStatus.PUBLISHED, audience: { in: audienceFilter } },
     include: {
-      author:      { select: { name: true, image: true } },
+      author:      { select: { name: true, image: true, username: true } },
       tags:        { include: { tag: { select: { name: true, slug: true } } } },
       resources:   { select: { id: true, name: true, size: true, mimeType: true }, orderBy: { createdAt: 'asc' } },
       _count:      { select: { likes: true, comments: true, bookmarks: true } },
       topic:       { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } },
-      nextArticle: { select: { id: true, title: true, slug: true, summary: true, thumbnail: true, cover: true, topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } }, readTime: true, author: { select: { name: true, image: true } }, _count: { select: { likes: true } } } },
+      nextArticle: { select: { id: true, title: true, slug: true, summary: true, thumbnail: true, cover: true, topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } }, readTime: true, author: { select: { name: true, image: true, username: true } }, _count: { select: { likes: true } } } },
       ...(userId && {
         likes:     { where: { userId } },
         bookmarks: { where: { userId } },
@@ -515,7 +515,7 @@ export async function getArticleNavigationAction(publishedAt: Date | null) {
       orderBy: { publishedAt: 'desc' },
       select: { 
         id: true, title: true, slug: true, thumbnail: true, summary: true,
-        author: { select: { name: true } }
+        author: { select: { name: true, username: true } }
       },
     }),
     db.article.findFirst({
@@ -527,7 +527,7 @@ export async function getArticleNavigationAction(publishedAt: Date | null) {
       orderBy: { publishedAt: 'asc' },
       select: { 
         id: true, title: true, slug: true, thumbnail: true, summary: true,
-        author: { select: { name: true } }
+        author: { select: { name: true, username: true } }
       },
     }),
   ]);

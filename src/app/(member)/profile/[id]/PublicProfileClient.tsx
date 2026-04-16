@@ -31,7 +31,7 @@ type Article = {
 
 type Follower = {
   id: string; name: string | null; image: string | null;
-  bio: string | null; articleCount: number;
+  bio: string | null; articleCount: number; username?: string | null;
 };
 
 /* ── Props ─────────────────────────────────────────────── */
@@ -55,6 +55,7 @@ type Props = {
     avatarUrl: string;
     totalViews: number;
     totalLikes: number;
+    username?: string | null;
     _count: { articles: number };
     websiteUrl?: string | null;
     facebookUrl?: string | null;
@@ -117,6 +118,9 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
             <h1 className="text-2xl sm:text-3xl font-black text-zinc-800 dark:text-white tracking-tight">
               {user.name}
             </h1>
+            {user.username && (
+              <p className="text-sm text-zinc-400 dark:text-slate-500 mt-0.5">@{user.username}</p>
+            )}
 
             {user.bio && (
               <p className="mt-2 text-sm text-zinc-500 dark:text-slate-400 leading-relaxed font-medium italic max-w-xl">
@@ -288,7 +292,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
             {followers.slice(0, 8).map((f) => (
               <Link
                  key={f.id}
-                 href={`/profile/${f.id}`}
+                 href={`/profile/${f.username ?? f.id}`}
                  title={f.name ?? ''}
                  className="relative w-11 h-11 hover:z-10 hover:scale-110 transition-transform duration-200"
               >

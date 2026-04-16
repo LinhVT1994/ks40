@@ -26,7 +26,7 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
         </h1>
 
         <div className="flex flex-wrap items-center gap-6 text-zinc-500 dark:text-slate-400 text-sm border-y border-zinc-200 dark:border-white/5 py-4">
-          <Link href={`/profile/${article.authorId}`} className="flex items-center gap-2 hover:text-primary transition-colors group/author">
+          <Link href={`/profile/${article.author.username ?? article.authorId}`} className="flex items-center gap-2 hover:text-primary transition-colors group/author">
             <Avatar src={article.author.image} name={article.author.name} size={32} />
             <span className="font-semibold text-zinc-800 dark:text-white group-hover/author:text-primary transition-colors">{article.author.name}</span>
           </Link>

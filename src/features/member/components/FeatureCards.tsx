@@ -43,6 +43,7 @@ export default function FeatureCards({
   topics,
   activeTopicId,
   currentUserId,
+  currentUsername,
   initialHistory,
   initialFeed = 'followed',
 }: {
@@ -56,6 +57,7 @@ export default function FeatureCards({
   topics: TopicItem[];
   activeTopicId?: string;
   currentUserId?: string;
+  currentUsername?: string;
   initialHistory?: any[];
   initialFeed?: 'followed' | 'discovery' | 'saved';
 }) {
@@ -606,7 +608,7 @@ export default function FeatureCards({
               <TagList tags={popularTags} />
               <TrendingHorizontal articles={followedArticles} discoveryArticles={discoveryArticles} topicIds={topicIds} />
               {isLoggedIn && initialHistory && initialHistory.length > 0 && (
-                <RecentHistory history={initialHistory} currentUserId={currentUserId} />
+                <RecentHistory history={initialHistory} currentUserId={currentUsername ?? currentUserId} />
               )}
             </div>
           </div>
@@ -617,7 +619,7 @@ export default function FeatureCards({
             <TagList tags={popularTags} />
             <TrendingSidebar articles={followedArticles} discoveryArticles={discoveryArticles} topicIds={topicIds} />
             {isLoggedIn && initialHistory && initialHistory.length > 0 && (
-              <RecentHistory history={initialHistory} currentUserId={currentUserId} />
+              <RecentHistory history={initialHistory} currentUserId={currentUsername ?? currentUserId} />
             )}
           </div>
         </aside>

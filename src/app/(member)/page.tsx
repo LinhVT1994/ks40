@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 
 export default async function MemberDashboardPage() {
   const session = await auth();
-  const user    = session?.user as { role?: string; name?: string; id?: string } | undefined;
+  const user    = session?.user as { role?: string; name?: string; id?: string; username?: string | null } | undefined;
   const isLoggedIn = !!session?.user;
 
   // Render Landing Page for guest users — no data needed
@@ -96,6 +96,7 @@ export default async function MemberDashboardPage() {
           topicIds={followedIds}
           topics={curatedTopics}
           currentUserId={user?.id}
+          currentUsername={user?.username ?? undefined}
         />
       </Suspense>
     </MemberContainer>

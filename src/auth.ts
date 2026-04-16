@@ -83,7 +83,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (!email) return token;
           const dbUser = await db.user.findUnique({
             where:   { email },
-            select:  { id: true, role: true, status: true, canWrite: true, username: true, onboarding: { select: { completedAt: true, skippedAt: true } } },
+            select:  { id: true, role: true, status: true, canWrite: true, username: true, image: true, onboarding: { select: { completedAt: true, skippedAt: true } } },
           });
           if (dbUser) {
             token.id       = dbUser.id;
@@ -91,6 +91,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             token.status   = dbUser.status;
             token.canWrite = dbUser.canWrite;
             token.username = dbUser.username;
+            token.picture  = dbUser.image;
           } else {
             token.id       = user?.id ?? token.id ?? '';
             token.role     = token.role ?? 'MEMBER';
@@ -115,6 +116,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       (session.user as { role?: string }).role               = token.role as string;
       (session.user as { status?: string }).status           = token.status as string;
       (session.user as { username?: string | null }).username = token.username as string | null;
+      session.user.image = (token.picture as string) || session.user.image;
       (session.user as { onboardingDone?: boolean }).onboardingDone = token.onboardingDone as boolean;
       (session.user as { canWrite?: boolean }).canWrite      = (token.canWrite as boolean) ?? false;
       return session;

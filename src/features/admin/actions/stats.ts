@@ -57,7 +57,7 @@ export async function getTopAuthorsAction(limit = 5) {
   const users = await db.user.findMany({
     where:  { articles: { some: { status: ArticleStatus.PUBLISHED } } },
     select: {
-      id: true, name: true, image: true,
+      id: true, name: true, image: true, username: true,
       _count: { select: { articles: { where: { status: ArticleStatus.PUBLISHED } } } },
       articles: { where: { status: ArticleStatus.PUBLISHED }, select: { viewCount: true } },
     },
@@ -66,6 +66,7 @@ export async function getTopAuthorsAction(limit = 5) {
     .map(u => ({
       id:           u.id,
       name:         u.name,
+      username:     u.username,
       image:        u.image,
       articleCount: u._count.articles,
       totalViews:   u.articles.reduce((s, a) => s + a.viewCount, 0),

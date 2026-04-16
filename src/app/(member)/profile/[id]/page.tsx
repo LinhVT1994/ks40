@@ -1,12 +1,12 @@
 import { auth } from '@/auth';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import type { Metadata } from 'next';
 import { Calendar, FileText, Eye, Heart } from 'lucide-react';
 import { getPublicProfileAction, getProfileArticlesAction } from '@/features/member/actions/profile';
 import { getBookmarksAction } from '@/features/articles/actions/bookmark';
 import { getReadHistoryAction } from '@/features/articles/actions/read-history';
 import { getMemberDraftsAction } from '@/features/member/actions/write';
-import { getFollowersAction } from '@/features/member/actions/profile-follow';
+import { getFollowersAction, getFollowingAction } from '@/features/member/actions/profile-follow';
 import { getAuthorInfoAction } from '@/features/member/actions/follow';
 import { getDashboardStatsAction, getContinueReadingAction } from '@/features/member/actions/dashboard';
 import { getArticleRatingsAction } from '@/features/articles/actions/rating';
@@ -46,7 +46,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       ...(image && { images: [image] }),
     },
-    alternates: { canonical: `/profile/${id}` },
+    alternates: { canonical: `/profile/${user.username ?? id}` },
   };
 }
 
@@ -54,27 +54,36 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const { id } = await params;
   const session = await auth();
   const currentUserId = session?.user?.id;
-  const isOwner = currentUserId === id;
   const userRole = (session?.user as { role?: string })?.role;
   const canWrite = (session?.user as { canWrite?: boolean })?.canWrite || userRole === 'ADMIN';
 
-  const [data, bookmarks, history, drafts, followersData, authorInfo, articlesData, dashboardStats, lastActivity, ratingsData] = await Promise.all([
-    getPublicProfileAction(id),
-    isOwner ? getBookmarksAction() : Promise.resolve(null),
-    isOwner ? getReadHistoryAction() : Promise.resolve(null),
-    isOwner && canWrite ? getMemberDraftsAction() : Promise.resolve(null),
-    getFollowersAction(id),
-    !isOwner ? getAuthorInfoAction(id) : Promise.resolve(null),
-    getProfileArticlesAction(id),
-    isOwner ? getDashboardStatsAction() : Promise.resolve(null),
-    isOwner ? getContinueReadingAction() : Promise.resolve(null),
-    isOwner && canWrite ? getArticleRatingsAction({ authorId: id, limit: 20, includeHidden: true }) : Promise.resolve(null),
-  ]);
-
+  // Fetch profile data trước để lấy user.id thực sự (id param có thể là username hoặc ID)
+  const data = await getPublicProfileAction(id);
   if (!data) notFound();
   const { user, totalViews, totalLikes } = data;
 
-  const profileUrl = `${SITE_URL}/profile/${id}`;
+  // Canonical redirect: nếu truy cập bằng ID mà user có username → redirect sang /profile/[username]
+  if (user.username && id !== user.username) {
+    redirect(`/profile/${user.username}`);
+  }
+
+  // isOwner so sánh bằng user.id thực, không phải param id (phòng trường hợp param là username)
+  const isOwner = currentUserId === user.id;
+
+  const [bookmarks, history, drafts, followersData, followingData, authorInfo, articlesData, dashboardStats, lastActivity, ratingsData] = await Promise.all([
+    isOwner ? getBookmarksAction() : Promise.resolve(null),
+    isOwner ? getReadHistoryAction() : Promise.resolve(null),
+    isOwner && canWrite ? getMemberDraftsAction() : Promise.resolve(null),
+    getFollowersAction(user.id),
+    getFollowingAction(user.id),
+    !isOwner ? getAuthorInfoAction(user.id) : Promise.resolve(null),
+    getProfileArticlesAction(user.id),
+    isOwner ? getDashboardStatsAction() : Promise.resolve(null),
+    isOwner ? getContinueReadingAction() : Promise.resolve(null),
+    isOwner && canWrite ? getArticleRatingsAction({ authorId: user.id, limit: 20, includeHidden: true }) : Promise.resolve(null),
+  ]);
+
+  const profileUrl = `${SITE_URL}/profile/${user.username ?? id}`;
   const personJsonLd = {
     '@context': 'https://schema.org',
     '@type':    'Person',
@@ -108,6 +117,10 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   const totalFollowers = followersData.total ?? 0;
   const totalFollowerPages = followersData.totalPages ?? 0;
 
+  const followingArr = followingData.success && followingData.data ? followingData.data : [];
+  const totalFollowing = followingData.total ?? 0;
+  const totalFollowingPages = followingData.totalPages ?? 0;
+
   // Public profile view for non-owners
   if (!isOwner) {
     return (
@@ -116,7 +129,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-b from-primary/10 via-accent-purple/5 to-transparent -z-10" />
         <div className="absolute top-0 left-0 right-0 h-[400px] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] -z-10" />
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-40">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-40">
           <PublicProfileClient
             user={{ ...user, avatarUrl, totalViews, totalLikes }}
             articles={articles as any}
@@ -136,7 +149,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
       <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-b from-primary/10 via-accent-purple/5 to-transparent -z-10" />
       <div className="absolute top-0 left-0 right-0 h-[400px] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] -z-10" />
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-40">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-40">
         <ProfileClient
           user={{
             ...user,
@@ -153,6 +166,9 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
           followers={followersArr}
           totalFollowers={totalFollowers}
           totalFollowerPages={totalFollowerPages}
+          following={followingArr}
+          totalFollowing={totalFollowing}
+          totalFollowingPages={totalFollowingPages}
           isOwner={isOwner}
           canWrite={isOwner && canWrite}
           stats={dashboardStats}

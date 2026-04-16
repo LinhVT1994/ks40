@@ -10,6 +10,7 @@ interface FeedLoaderProps {
   topicIds: string[];
   topics: TopicItem[];
   currentUserId?: string;
+  currentUsername?: string;
 }
 
 export default async function FeedLoader({
@@ -18,6 +19,7 @@ export default async function FeedLoader({
   topicIds,
   topics,
   currentUserId,
+  currentUsername,
 }: FeedLoaderProps) {
   // Re-use session from Next.js request cache — no extra DB round-trip
   const session = await auth();
@@ -47,6 +49,7 @@ export default async function FeedLoader({
       topicIds={topicIds}
       topics={topics}
       currentUserId={currentUserId}
+      currentUsername={currentUsername}
       initialHistory={history as any}
       initialFeed="discovery"
     />

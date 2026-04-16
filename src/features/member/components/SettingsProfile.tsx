@@ -8,6 +8,7 @@ import { updateProfileAction } from '@/features/member/actions/profile';
 
 type SocialUser = User & {
   bio?: string | null;
+  username?: string | null;
   websiteUrl?: string | null;
   facebookUrl?: string | null;
   instagramUrl?: string | null;
@@ -28,19 +29,24 @@ const SOCIAL_FIELDS = [
 ] as const;
 
 export default function SettingsProfile({ user }: { user: SocialUser }) {
-  const [name, setName] = useState(user.name ?? '');
-  const [bio,  setBio]  = useState(user.bio ?? '');
+  const [name,     setName]     = useState(user.name ?? '');
+  const [username, setUsername] = useState(user.username ?? '');
+  const [bio,      setBio]      = useState(user.bio ?? '');
   const [socials, setSocials] = useState<Record<string, string>>(() => {
     const init: Record<string, string> = {};
     for (const f of SOCIAL_FIELDS) init[f.key] = (user as any)[f.key] ?? '';
     return init;
   });
   const [isPending, startTransition] = useTransition();
+  const [isUploading, setIsUploading] = useState(false);
   const [saved, setSaved] = useState(false);
   const { update } = useSession();
 
+  // Local state for avatar preview
+  const [avatarPreview, setAvatarPreview] = useState<string>(user.image || '');
+
   // Fallback to ui-avatars if no image provided
-  const avatarUrl = user.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=3b82f6&color=fff`;
+  const avatarUrl = avatarPreview || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&background=3b82f6&color=fff`;
 
   const handleSave = () => {
     if (!name.trim()) return;
@@ -49,9 +55,14 @@ export default function SettingsProfile({ user }: { user: SocialUser }) {
       socialData[f.key] = socials[f.key]?.trim() || '';
     }
     startTransition(async () => {
-      const res = await updateProfileAction({ name: name.trim(), bio: bio.trim(), ...socialData });
+      const res = await updateProfileAction({
+        name: name.trim(),
+        bio: bio.trim(),
+        username: username.trim() || undefined,
+        ...socialData,
+      });
       if (res.success) {
-        await update({ name: name.trim() });
+        await update({ name: name.trim(), username: username.trim() || undefined });
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
       } else {
@@ -60,21 +71,59 @@ export default function SettingsProfile({ user }: { user: SocialUser }) {
     });
   };
 
+  const handleAvatarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Kích thước ảnh tối đa là 2MB');
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const res = await fetch('/api/upload/avatar', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      
+      if (!res.ok) throw new Error(data.error || 'Upload failed');
+      
+      // Update local preview & next-auth session
+      setAvatarPreview(data.url);
+      await update({ image: data.url });
+      
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    } catch (err: any) {
+      alert(err.message || 'Lỗi server khi upload ảnh');
+    } finally {
+      setIsUploading(false);
+      // Reset input
+      e.target.value = '';
+    }
+  };
+
   const socialsDirty = SOCIAL_FIELDS.some(f => (socials[f.key]?.trim() ?? '') !== ((user as any)[f.key] ?? ''));
-  const isDirty = name.trim() !== (user.name ?? '') || bio.trim() !== (user.bio ?? '') || socialsDirty;
+  const isDirty = name.trim() !== (user.name ?? '') || username.trim() !== (user.username ?? '') || bio.trim() !== (user.bio ?? '') || socialsDirty;
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-6">
-        <div className="relative group cursor-pointer">
+        <label className={`relative group cursor-pointer ${isUploading ? 'opacity-50 pointer-events-none' : ''}`}>
           <div 
             className="w-20 h-20 rounded-full bg-cover bg-center border-2 border-zinc-300 dark:border-white/10 overflow-hidden shadow-sm"
             style={{ backgroundImage: `url('${avatarUrl}')` }}
           />
-          <button className="absolute inset-0 bg-black/50 text-white flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
-            <Camera className="w-6 h-6" />
-          </button>
-        </div>
+          <div className="absolute inset-0 bg-black/50 text-white flex items-center justify-center rounded-full opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm">
+            {isUploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <Camera className="w-6 h-6" />}
+          </div>
+          <input type="file" hidden accept="image/jpeg,image/png,image/webp,image/gif" onChange={handleAvatarSelect} />
+        </label>
         <div>
           <h3 className="text-sm font-bold text-zinc-800 dark:text-white">Ảnh đại diện</h3>
           <p className="text-xs text-zinc-500 mt-1 max-w-xs leading-relaxed">Định dạng JPG, GIF hoặc PNG.<br/>Dung lượng tối đa 2MB.</p>
@@ -91,6 +140,26 @@ export default function SettingsProfile({ user }: { user: SocialUser }) {
             className="w-full bg-zinc-50 dark:bg-black/20 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all text-zinc-800 dark:text-white"
           />
         </div>
+        <div className="space-y-2">
+          <label className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 block">
+            Username <span className="text-zinc-400 font-medium normal-case tracking-normal">(dùng làm URL profile)</span>
+          </label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-sm font-medium select-none">@</span>
+            <input
+              type="text"
+              value={username}
+              onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
+              placeholder="vd: linhvu"
+              maxLength={30}
+              className="w-full bg-zinc-50 dark:bg-black/20 border border-zinc-300 dark:border-white/10 rounded-xl pl-7 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/50 transition-all text-zinc-800 dark:text-white placeholder:text-zinc-400"
+            />
+          </div>
+          <p className="text-[11px] text-zinc-400">Chỉ chữ thường, số, _ hoặc -. Từ 3–30 ký tự.</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <label className="text-sm font-semibold text-zinc-700 dark:text-slate-300">Email liên kết</label>
           <input

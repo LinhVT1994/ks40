@@ -12,6 +12,7 @@ type Author = {
   id: string;
   name: string;
   image: string | null;
+  username?: string | null;
   articleCount: number;
   totalViews: number;
 };
@@ -34,7 +35,7 @@ export default function TopAuthors({ authors }: { authors: Author[] }) {
           return (
             <div key={author.id} className="flex items-center gap-3 px-6 py-3.5 hover:bg-zinc-50 dark:hover:bg-white/[0.02] transition-colors group">
               <span className="text-sm font-bold text-zinc-200 dark:text-white/10 w-4 shrink-0 text-center">{idx + 1}</span>
-              <Link href={`/profile/${author.id}`} className="shrink-0">
+              <Link href={`/profile/${author.username ?? author.id}`} className="shrink-0">
                 <div className="relative w-9 h-9 shrink-0">
                   <Image
                     src={avatarUrl}
@@ -47,7 +48,7 @@ export default function TopAuthors({ authors }: { authors: Author[] }) {
                 </div>
               </Link>
               <div className="flex-1 min-w-0">
-                <Link href={`/profile/${author.id}`} className="text-sm font-semibold text-zinc-800 dark:text-white group-hover:text-primary transition-colors block truncate">
+                <Link href={`/profile/${author.username ?? author.id}`} className="text-sm font-semibold text-zinc-800 dark:text-white group-hover:text-primary transition-colors block truncate">
                   {author.name}
                 </Link>
                 {/* Progress bar */}
