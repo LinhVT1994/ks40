@@ -5,7 +5,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import SessionProvider from "@/components/SessionProvider";
 import JsonLd from "@/components/shared/JsonLd";
 import MaterialIconsCss from "@/components/MaterialIconsCss";
-import { SITE_URL, SITE_NAME, SITE_DESCRIPTION } from "@/lib/seo";
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from "@/lib/seo";
 import { auth } from "@/auth";
 import "./globals.css";
 
@@ -21,7 +21,7 @@ export const metadata: Metadata = {
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
-  keywords:    ['Lenote', 'lập trình', 'system design', 'AI', 'devops', 'blockchain', 'frontend', 'backend'],
+  keywords:    SITE_KEYWORDS,
   authors:     [{ name: SITE_NAME }],
   creator:     SITE_NAME,
   openGraph: {
@@ -89,20 +89,33 @@ export default async function RootLayout({
         </Script>
 
         <MaterialIconsCss />
-        <JsonLd data={{
-          '@context': 'https://schema.org',
-          '@type':    'Organization',
-          name:       SITE_NAME,
-          url:        SITE_URL,
-          logo:       `${SITE_URL}/logo.png`,
-          description: SITE_DESCRIPTION,
-          sameAs:     ['https://github.com/lenote.dev', 'https://facebook.com/lenote.dev', 'https://youtube.com/@lenote.dev'],
-          contactPoint: {
-            '@type':       'ContactPoint',
-            contactType:   'customer support',
-            email:         'support@lenote.dev',
+        <JsonLd data={[
+          {
+            '@context': 'https://schema.org',
+            '@type':    'Organization',
+            name:       SITE_NAME,
+            url:        SITE_URL,
+            logo:       `${SITE_URL}/logo.png`,
+            description: SITE_DESCRIPTION,
+            sameAs:     ['https://github.com/lenote.dev', 'https://facebook.com/lenote.dev', 'https://youtube.com/@lenote.dev'],
+            contactPoint: {
+              '@type':       'ContactPoint',
+              contactType:   'customer support',
+              email:         'support@lenote.dev',
+            }
+          },
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            'url': SITE_URL,
+            'name': SITE_NAME,
+            'potentialAction': {
+              '@type': 'SearchAction',
+              'target': `${SITE_URL}/search?q={search_term_string}`,
+              'query-input': 'required name=search_term_string'
+            }
           }
-        }} />
+        ]} />
         <SessionProvider session={session}>
           <ThemeProvider
             attribute="class"

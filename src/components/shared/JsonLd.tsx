@@ -1,4 +1,4 @@
-export default function JsonLd({ data }: { data: Record<string, unknown> }) {
+export default function JsonLd({ data }: { data: any }) {
   return (
     <script
       type="application/ld+json"

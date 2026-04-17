@@ -48,7 +48,7 @@ export default function LandingHero() {
           transition={{ duration: 1, ease: "easeOut" }}
           className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tighter text-zinc-800 dark:text-white leading-[1.1] mb-8 font-display"
         >
-          <span className="sr-only">Lenote — Nâng tầm tri thức công nghệ trong tĩnh lặng. </span>
+          <span className="sr-only">Lenote — Nền tảng chia sẻ tri thức và kinh nghiệm đa góc nhìn. </span>
           <motion.span 
             className="inline-block"
             whileHover={{ scale: 1.02, textShadow: "0 0 20px rgba(59,130,246,0.3)" }}
@@ -78,8 +78,8 @@ export default function LandingHero() {
           transition={{ duration: 1, delay: 0.5 }}
           className="text-lg sm:text-xl text-zinc-500 dark:text-slate-400 max-w-2xl mx-auto mb-12 font-medium leading-relaxed"
         >
-          Trải nghiệm nền tảng quản lý tri thức không xao nhãng. <br className="hidden sm:block" />
-          Nơi tập trung sâu, kết nối mạnh và phát triển bền vững.
+          Nền tảng chia sẻ tri thức và kinh nghiệm đa góc nhìn. <br className="hidden sm:block" />
+          Từ những bài học chuyên sâu đến những câu chuyện đời sống đầy giá trị.
         </motion.p>
 
         {/* Action Buttons */}

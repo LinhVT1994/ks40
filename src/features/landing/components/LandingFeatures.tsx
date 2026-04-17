@@ -7,22 +7,22 @@ import { Shield, Share2, Award, Coffee, BookOpen, Fingerprint } from 'lucide-rea
 const FEATURES = [
   {
     icon: Coffee,
-    title: 'Sự tĩnh lặng tuyệt đối',
-    description: 'Thiết kế tối giản, loại bỏ mọi yếu tố gây xao nhãng để bạn tập trung hoàn toàn vào việc tiếp nhận và sáng tạo nội dung.',
+    title: 'Vườn tri thức (Digital Garden)',
+    description: 'Nơi tri thức được vun trồng trong tĩnh lặng. Thiết kế tối giản giúp bạn tập trung hoàn toàn vào việc tiếp nhận và kiến tạo giá trị.',
     color: 'text-orange-500',
     bg: 'bg-orange-500/10',
   },
   {
     icon: BookOpen,
-    title: 'Mạng lưới tri thức mạnh mẽ',
-    description: 'Kết nối các chủ đề theo cách thông minh, giúp bạn nhìn thấy bức tranh toàn cảnh của mọi vấn đề thông qua hệ thống Topics.',
+    title: 'Mạng lưới tri thức đa chiều',
+    description: 'Kết nối các chủ đề thông minh, giúp bạn xây dựng bộ não thứ hai (Second Brain) và nhìn thấy bức tranh toàn cảnh của mọi vấn đề.',
     color: 'text-primary',
     bg: 'bg-primary/10',
   },
   {
     icon: Fingerprint,
-    title: 'Độc bản & Cá nhân hóa',
-    description: 'Trải nghiệm được tùy biến theo nhu cầu của riêng bạn, từ thư viện cá nhân đến luồng tin được đề xuất chính xác.',
+    title: 'Nâng tầm sự nghiệp',
+    description: 'Lan tỏa kinh nghiệm đa góc nhìn, từ bài học chuyên môn sâu sắc đến câu chuyện đời sống, khẳng định dấu ấn cá nhân của bạn.',
     color: 'text-emerald-500',
     bg: 'bg-emerald-500/10',
   }

@@ -98,7 +98,7 @@ export default function MemberFooter() {
         {/* Bottom bar */}
         <div className="mt-20 pt-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-zinc-500 text-[11px] font-medium">
-            © {currentYear} Lenote<span className="text-primary">.dev</span>
+            © {currentYear} Lenote
           </p>
           <div className="flex items-center gap-8">
             <Link href="/terms" className="text-zinc-500/80 hover:text-primary text-[11px] transition-colors">Điều khoản</Link>

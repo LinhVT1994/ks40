@@ -9,26 +9,27 @@ import { getEnabledTopicsAction } from '@/features/admin/actions/topic';
 import MemberContainer from '@/components/layout/MemberContainer';
 import { db } from '@/lib/db';
 import LandingPage from '@/features/landing/components/LandingPage';
-import { SITE_URL, SITE_NAME } from '@/lib/seo';
+import { SITE_URL, SITE_NAME, SITE_DESCRIPTION, SITE_KEYWORDS } from '@/lib/seo';
 
 export const metadata: Metadata = {
   title:       { 
-    absolute: `${SITE_NAME} — Học công nghệ đỉnh cao: System Design, AI/ML, DevOps` 
+    absolute: `${SITE_NAME} — Chia sẻ tri thức và kinh nghiệm đa góc nhìn` 
   },
-  description: `${SITE_NAME} là nền tảng học tập công nghệ tinh gọn dành cho kỹ sư. Chuyên sâu về System Design, AI/ML, DevOps, Frontend và Backend với bài viết chất lượng cao từ chuyên gia thực chiến.`,
+  description: SITE_DESCRIPTION,
+  keywords:    SITE_KEYWORDS,
   alternates:  { canonical: '/' },
   openGraph: {
     type:        'website',
     url:         SITE_URL,
     siteName:    SITE_NAME,
-    title:       `${SITE_NAME} — Nền tảng học công nghệ đỉnh cao`,
-    description: `Khám phá lộ trình học System Design, AI/ML, DevOps và kiến trúc hệ thống chuyên sâu trên ${SITE_NAME}.`,
+    title:       `${SITE_NAME} — Lan tỏa tri thức và giá trị mỗi ngày`,
+    description: SITE_DESCRIPTION,
     images:      [{ url: '/logo.png', width: 1200, height: 1200, alt: SITE_NAME }],
   },
   twitter: {
     card:        'summary_large_image',
-    title:       `${SITE_NAME} — Nền tảng học công nghệ đỉnh cao`,
-    description: `Khám phá lộ trình học System Design, AI/ML, DevOps và kiến trúc hệ thống chuyên sâu trên ${SITE_NAME}.`,
+    title:       `${SITE_NAME} — Lan tỏa tri thức và giá trị mỗi ngày`,
+    description: SITE_DESCRIPTION,
     images:      ['/logo.png'],
   },
 };
