@@ -7,7 +7,6 @@ export default function OnboardingLayout({ children }: { children: React.ReactNo
         <BrandLogo size={48} />
         <div className="flex items-center gap-1">
           <span className="text-2xl font-bold text-zinc-800 dark:text-white">Lenote</span>
-          <span className="text-2xl font-bold text-primary">.dev</span>
         </div>
       </div>
       {children}

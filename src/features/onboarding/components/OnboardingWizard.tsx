@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   completeOnboardingAction,
   skipOnboardingAction,
@@ -64,59 +65,88 @@ export default function OnboardingWizard({ userName }: { userName?: string }) {
   };
 
   return (
-    <div className="w-full max-w-xl mx-auto px-4 relative">
-      {isPending && (
-        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-background-light/60 dark:bg-background-dark/60 backdrop-blur-sm rounded-3xl animate-in fade-in duration-300">
-          <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4" />
-          <p className="text-sm font-bold text-zinc-800 dark:text-white animate-pulse">
-            Đang lưu cấu hình của bạn...
-          </p>
-        </div>
-      )}
-
-      {/* Progress */}
-      <div className={`flex items-center gap-3 mb-10 transition-opacity duration-300 ${isPending ? 'opacity-20' : 'opacity-100'}`}>
-        {[1, 2].map(s => (
-          <div key={s} className="flex items-center gap-3 flex-1">
-            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-all ${
-              step > s  ? 'bg-primary text-white' :
-              step === s ? 'bg-primary text-white ring-4 ring-primary/20' :
-              'bg-zinc-100 dark:bg-white/10 text-zinc-500'
-            }`}>
-              {step > s ? '✓' : s}
+    <div className="w-full max-w-xl mx-auto px-4 relative min-h-[600px]">
+      <AnimatePresence mode="wait">
+        {isPending && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md rounded-[2.5rem] shadow-2xl shadow-primary/5"
+          >
+            <div className="relative">
+              <div className="w-16 h-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin" />
+              <div className="absolute inset-0 blur-xl bg-primary/20 animate-pulse rounded-full" />
             </div>
-            {s < 2 && (
-              <div className="flex-1 h-0.5 rounded-full bg-zinc-100 dark:bg-white/10 overflow-hidden">
-                <div className={`h-full bg-primary transition-all duration-500 ${step > s ? 'w-full' : 'w-0'}`} />
-              </div>
-            )}
+            <motion.p 
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              className="mt-6 text-sm font-black uppercase tracking-[0.2em] text-zinc-800 dark:text-white"
+            >
+              Đang kiến tạo tri thức...
+            </motion.p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Left-Aligned Compact Segmented Progress Line */}
+      <div className="flex gap-1 mb-6 px-2">
+        {[1, 2].map((s) => (
+          <div 
+            key={s} 
+            className="w-8 h-[2px] bg-zinc-100 dark:bg-white/5 overflow-hidden rounded-full"
+          >
+            <motion.div 
+              initial={false}
+              animate={{ width: step >= s ? '100%' : '0%' }}
+              transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+              className="h-full bg-zinc-900 dark:bg-white"
+            />
           </div>
         ))}
       </div>
 
-      {/* Steps */}
-      {step === 1 && (
-        <StepOccupation
-          value={data.occupation}
-          onChange={v => setData(d => ({ ...d, occupation: v }))}
-          onNext={() => setStep(2)}
-          onSkip={handleSkip}
-          isPending={isPending}
-          options={occupationOptions}
-        />
-      )}
-
-      {step === 2 && (
-        <StepCategories
-          value={data.interestedTopics}
-          onChange={v => setData(d => ({ ...d, interestedTopics: v }))}
-          onBack={() => setStep(1)}
-          onComplete={handleComplete}
-          onSkip={handleSkip}
-          isPending={isPending}
-          topics={topics}
-        />
-      )}
+      {/* Step Transition Animation */}
+      <div className="relative">
+        <AnimatePresence mode="wait" initial={false}>
+          {step === 1 ? (
+            <motion.div
+              key="step1"
+              initial={{ opacity: 0, x: -20, filter: 'blur(10px)' }}
+              animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, x: 20, filter: 'blur(10px)' }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+              <StepOccupation
+                value={data.occupation}
+                onChange={v => setData(d => ({ ...d, occupation: v }))}
+                onNext={() => setStep(2)}
+                onSkip={handleSkip}
+                isPending={isPending}
+                options={occupationOptions}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="step2"
+              initial={{ opacity: 0, x: -20, filter: 'blur(10px)' }}
+              animate={{ opacity: 1, x: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, x: 20, filter: 'blur(10px)' }}
+              transition={{ duration: 0.4, ease: "easeOut" }}
+            >
+              <StepCategories
+                value={data.interestedTopics}
+                onChange={v => setData(d => ({ ...d, interestedTopics: v }))}
+                onBack={() => setStep(1)}
+                onComplete={handleComplete}
+                onSkip={handleSkip}
+                isPending={isPending}
+                topics={topics}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

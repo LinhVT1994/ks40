@@ -1,6 +1,8 @@
 'use client';
 
-import { ArrowRight, Loader2 } from 'lucide-react';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { ArrowLeft, ArrowRight, Loader2, Check } from 'lucide-react';
 import type { OccupationOption } from '@/features/onboarding/actions/onboarding';
 
 interface Props {
@@ -12,57 +14,99 @@ interface Props {
   options: OccupationOption[];
 }
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.03 }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } }
+};
+
 export default function StepOccupation({ value, onChange, onNext, onSkip, isPending, options }: Props) {
   return (
-    <div className="space-y-8">
-      <div className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary/70">Bước 1 / 2</p>
-        <h1 className="text-xl font-bold text-zinc-800 dark:text-white">Bạn đang làm gì? 👋</h1>
-        <p className="text-zinc-500 dark:text-slate-400 text-sm">Chọn vai trò phù hợp nhất để chúng tôi gợi ý nội dung cho bạn.</p>
+    <div className="max-w-2xl mx-auto space-y-8">
+      {/* Header section - Left aligned */}
+      <div className="text-left space-y-4 px-2">
+        <motion.h1 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl font-semibold text-zinc-900 dark:text-white tracking-tight"
+        >
+          Bạn là ai?
+        </motion.h1>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+      {/* Grid layout to save vertical space */}
+      <motion.div 
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-3"
+      >
         {options.map(({ value: v, label, emoji, description }) => {
           const isActive = value === v;
           return (
-            <button
+            <motion.button
               key={v}
+              variants={item}
               type="button"
               onClick={() => onChange(v)}
-              className={`flex flex-col items-start gap-1 px-4 py-3 rounded-2xl border-2 text-left transition-all duration-200 ${
+              className={`group relative flex items-center gap-3 p-4 rounded-xl border transition-all duration-300 ${
                 isActive
-                  ? 'border-primary bg-primary/5 dark:bg-primary/10 shadow-sm shadow-primary/10 scale-[1.02]'
-                  : 'border-zinc-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-primary/40 hover:bg-zinc-50 dark:hover:bg-white/[0.07]'
+                  ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white'
+                  : 'bg-transparent border-zinc-100 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/20'
               }`}
             >
-              {emoji && <span className="text-xl leading-none">{emoji}</span>}
-              <span className={`text-sm font-bold leading-snug ${isActive ? 'text-primary' : 'text-zinc-800 dark:text-white'}`}>
-                {label}
-              </span>
-              {description && (
-                <span className="text-[11px] text-zinc-400 dark:text-slate-500 leading-tight">{description}</span>
+              <span className="text-xl shrink-0">{emoji ?? '👤'}</span>
+              
+              <div className="flex-1 text-left min-w-0">
+                <span className={`block text-xs font-semibold truncate ${
+                  isActive ? 'text-white dark:text-zinc-900' : 'text-zinc-800 dark:text-white'
+                }`}>
+                  {label}
+                </span>
+                {description && (
+                  <span className={`block text-[10px] font-medium leading-normal ${
+                    isActive ? 'text-white/50 dark:text-zinc-400' : 'text-zinc-400 dark:text-slate-500'
+                  }`}>
+                    {description}
+                  </span>
+                )}
+              </div>
+
+              {isActive && (
+                <Check className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white dark:text-zinc-900' : ''}`} />
               )}
-            </button>
+            </motion.button>
           );
         })}
-      </div>
+      </motion.div>
 
-      <div className="flex items-center justify-between pt-2">
+      {/* Compact Navigation */}
+      <div className="flex flex-col items-center gap-4 pt-4 border-t border-zinc-50 dark:border-white/5">
+        <motion.button
+          whileHover={{ y: -1 }}
+          whileTap={{ scale: 0.99 }}
+          type="button"
+          onClick={onNext}
+          disabled={!value || isPending}
+          className="w-full h-12 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-bold transition-all disabled:opacity-20 flex items-center justify-center gap-2"
+        >
+          {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Tiếp tục <ArrowRight className="w-4 h-4" /></>}
+        </motion.button>
+        
         <button
           type="button"
           onClick={onSkip}
           disabled={isPending}
-          className="text-sm text-zinc-500 hover:text-zinc-600 dark:hover:text-slate-300 transition-colors disabled:opacity-50"
+          className="text-[10px] font-bold text-zinc-400 hover:text-zinc-600 dark:hover:text-slate-300 transition-colors uppercase tracking-widest"
         >
-          Bỏ qua tất cả
-        </button>
-        <button
-          type="button"
-          onClick={onNext}
-          disabled={!value || isPending}
-          className="flex items-center gap-2 px-7 py-3 rounded-xl bg-primary text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-primary/20 active:scale-95"
-        >
-          {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Tiếp theo <ArrowRight className="w-4 h-4" /></>}
+          Thiết lập sau
         </button>
       </div>
     </div>

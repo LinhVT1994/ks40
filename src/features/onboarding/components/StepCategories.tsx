@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { ArrowLeft, Loader2, ChevronRight, Check, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowLeft, Loader2, ChevronRight, Check } from 'lucide-react';
 import type { TopicItem } from '@/features/admin/actions/topic';
 
 interface Props {
@@ -14,10 +15,22 @@ interface Props {
   topics: TopicItem[];
 }
 
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.03 }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const } }
+};
+
 export default function StepCategories({ value, onChange, onBack, onComplete, onSkip, isPending, topics }: Props) {
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  // Group topics by parent
   const grouped = useMemo(() => {
     const parents = topics.filter(t => !t.parentId);
     const children = topics.filter(t => !!t.parentId);
@@ -35,7 +48,6 @@ export default function StepCategories({ value, onChange, onBack, onComplete, on
     e.stopPropagation();
     const childIds = category.children.map(c => c.id);
     const allSelected = childIds.every(id => value.includes(id));
-    
     if (allSelected) {
       onChange(value.filter(id => !childIds.includes(id)));
     } else {
@@ -45,14 +57,25 @@ export default function StepCategories({ value, onChange, onBack, onComplete, on
   };
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-widest text-primary/70">Bước 2 / 2</p>
-        <h1 className="text-xl font-bold text-zinc-800 dark:text-white">Bạn quan tâm gì? ✨</h1>
-        <p className="text-zinc-500 dark:text-slate-400 text-sm">Chọn các lĩnh vực và chủ đề cụ thể để cá nhân hóa feed.</p>
+    <div className="max-w-2xl mx-auto space-y-8">
+      {/* Compact Header - Left aligned */}
+      <div className="text-left space-y-4 px-2">
+        <motion.h1 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-3xl font-semibold text-zinc-900 dark:text-white tracking-tight"
+        >
+          Bạn quan tâm gì?
+        </motion.h1>
       </div>
 
-      <div className="space-y-3 max-h-[50vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-200">
+      {/* Grid for Categories */}
+      <motion.div 
+        variants={container}
+        initial="hidden"
+        animate="show"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[40vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-100 dark:scrollbar-thumb-white/5"
+      >
         {grouped.map(category => {
           const isExpanded = expandedId === category.id;
           const childIds = category.children.map(c => c.id);
@@ -60,103 +83,113 @@ export default function StepCategories({ value, onChange, onBack, onComplete, on
           const allSelected = selectedInCat === childIds.length && childIds.length > 0;
 
           return (
-            <div 
+            <motion.div 
               key={category.id} 
-              className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
-                isExpanded ? 'border-primary/30 ring-1 ring-primary/10' : 'border-zinc-200 dark:border-white/5'
-              }`}
+              variants={item}
+              className={`rounded-xl transition-all duration-300 border ${
+                isExpanded ? 'bg-zinc-50 dark:bg-white/[0.03] border-zinc-200 dark:border-white/10' : 'border-zinc-100 dark:border-white/5'
+              } ${isExpanded ? 'col-span-full' : ''}`}
             >
               <button
                 type="button"
                 onClick={() => setExpandedId(isExpanded ? null : category.id)}
-                className={`w-full flex items-center justify-between p-4 text-left transition-colors ${
-                  isExpanded ? 'bg-primary/5' : 'hover:bg-zinc-50 dark:hover:bg-white/5'
-                }`}
+                className="w-full flex items-center justify-between p-3.5 text-left"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-xl shrink-0">{category.emoji}</span>
-                  <div>
-                    <h3 className="text-sm font-bold text-zinc-800 dark:text-white uppercase tracking-wider">{category.label}</h3>
+                  <span className="text-lg opacity-80">{category.emoji}</span>
+                  <div className="min-w-0">
+                    <h3 className="text-xs font-semibold text-zinc-800 dark:text-white truncate">{category.label}</h3>
                     {selectedInCat > 0 && (
-                      <p className="text-[10px] font-bold text-primary mt-0.5">
-                        Đã chọn {selectedInCat}/{childIds.length} chủ đề
+                      <p className="text-[9px] font-bold text-zinc-400 mt-0.5">
+                        Selected {selectedInCat}
                       </p>
                     )}
                   </div>
                 </div>
                 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={(e) => toggleAllInCategory(category, e)}
-                    className={`p-1.5 rounded-lg transition-all ${
+                    className={`p-1 rounded-md transition-all ${
                       allSelected 
-                        ? 'bg-primary text-white' 
-                        : 'bg-zinc-100 dark:bg-white/10 text-zinc-400 hover:text-primary hover:bg-primary/10'
+                        ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' 
+                        : 'text-zinc-200 hover:text-zinc-400'
                     }`}
-                    title={allSelected ? "Bỏ chọn tất cả" : "Chọn tất cả"}
                   >
-                    {allSelected ? <Check className="w-3.5 h-3.5" /> : <div className="w-3.5 h-3.5 border-2 border-current rounded-sm" />}
+                    <Check className="w-3 h-3" />
                   </button>
-                  <ChevronRight className={`w-4 h-4 text-zinc-400 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                  <ChevronRight className={`w-3.5 h-3.5 text-zinc-300 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                 </div>
               </button>
 
-              {isExpanded && (
-                <div className="p-4 pt-0 bg-white dark:bg-zinc-900/50">
-                  <div className="h-px bg-zinc-100 dark:bg-white/5 mb-4" />
-                  <div className="flex flex-wrap gap-2">
-                    {category.children.map(child => {
-                      const isActive = value.includes(child.id);
-                      return (
-                        <button
-                          key={child.id}
-                          type="button"
-                          onClick={() => toggleTopic(child.id)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${
-                            isActive
-                              ? 'bg-primary/10 border-primary/30 text-primary'
-                              : 'border-zinc-200 dark:border-white/10 text-zinc-500 hover:border-zinc-300'
-                          }`}
-                        >
-                          {child.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-            </div>
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  >
+                    <div className="px-4 pb-4 flex flex-wrap gap-2">
+                      {category.children.map(child => {
+                        const isActive = value.includes(child.id);
+                        return (
+                          <motion.button
+                            key={child.id}
+                            whileTap={{ scale: 0.97 }}
+                            type="button"
+                            onClick={() => toggleTopic(child.id)}
+                            className={`px-3 py-1.5 rounded-full text-[10px] font-semibold border transition-all ${
+                              isActive
+                                ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white text-white dark:text-zinc-900'
+                                : 'border-zinc-200 dark:border-white/10 text-zinc-500 hover:border-zinc-300'
+                            }`}
+                          >
+                            {child.label}
+                          </motion.button>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
 
-      <div className="flex items-center justify-between pt-4 border-t border-zinc-100 dark:border-white/5">
-        <button
-          type="button"
-          onClick={onBack}
-          disabled={isPending}
-          className="flex items-center gap-1.5 text-sm font-bold text-zinc-500 hover:text-zinc-600 dark:hover:text-slate-300 transition-colors disabled:opacity-50"
-        >
-          <ArrowLeft className="w-4 h-4" /> Quay lại
-        </button>
+      {/* Compact Navigation */}
+      <div className="space-y-4 pt-4 border-t border-zinc-50 dark:border-white/5">
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            type="button"
+            onClick={onBack}
+            disabled={isPending}
+            className="h-12 rounded-xl border border-zinc-200 dark:border-white/10 text-xs font-bold text-zinc-500 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all flex items-center justify-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" /> Quay lại
+          </button>
+          <motion.button
+            whileHover={{ y: -1 }}
+            whileTap={{ scale: 0.99 }}
+            type="button"
+            onClick={onComplete}
+            disabled={value.length === 0 || isPending}
+            className="h-12 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 text-xs font-bold transition-all disabled:opacity-20 shadow-lg shadow-zinc-900/5 dark:shadow-none"
+          >
+            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Hoàn tất'}
+          </motion.button>
+        </div>
 
-        <div className="flex items-center gap-3">
+        <div className="text-center">
           <button
             type="button"
             onClick={onSkip}
             disabled={isPending}
-            className="text-sm font-bold text-zinc-400 hover:text-zinc-600 dark:hover:text-slate-300 transition-colors disabled:opacity-50"
+            className="text-[10px] font-bold text-zinc-400 hover:text-zinc-600 dark:hover:text-slate-300 transition-colors uppercase tracking-widest"
           >
-            Bỏ qua
-          </button>
-          <button
-            type="button"
-            onClick={onComplete}
-            disabled={value.length === 0 || isPending}
-            className="flex items-center gap-2 px-7 py-3 rounded-xl bg-primary text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-lg shadow-primary/20 active:scale-95"
-          >
-            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Bắt đầu khám phá 🚀'}
+            Tôi sẽ chọn sau
           </button>
         </div>
       </div>
