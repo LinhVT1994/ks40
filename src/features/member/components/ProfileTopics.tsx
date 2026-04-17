@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useState, useTransition, useEffect, useMemo } from 'react';
 import { updatePreferencesAction } from '@/features/onboarding/actions/onboarding';
-import { Search, X, Plus, Compass, ChevronRight, Loader2, CheckCircle2 } from 'lucide-react';
+import { Search, X, Plus, Compass, ChevronRight, Loader2, CheckCircle2, ArrowUpRight } from 'lucide-react';
+import Link from 'next/link';
 import type { TopicItem } from '@/features/admin/actions/topic';
 
 interface Props {
@@ -42,15 +43,35 @@ export default function ProfileTopics({ initialTopics, availableTopics }: Props)
     return availableTopics.filter(t => topics.includes(t.id));
   }, [availableTopics, topics]);
 
-  const availableGroupsForDialog = useMemo(() => {
-    const unselectedTopics = availableTopics.filter(t => !topics.includes(t.id));
+  const groupedFollowedTopics = useMemo(() => {
     const parents = availableTopics.filter(t => !t.parentId);
-    const children = unselectedTopics.filter(t => !!t.parentId);
-    
+    const results = parents.map(parent => ({
+      ...parent,
+      children: followedTopicsList.filter(c => c.parentId === parent.id)
+    })).filter(p => p.children.length > 0);
+
+    // Any topics without a valid parent in the list (if any)
+    const orphans = followedTopicsList.filter(t => !t.parentId || !parents.find(p => p.id === t.parentId));
+    if (orphans.length > 0) {
+      results.push({
+        id: 'other',
+        label: 'Khác',
+        emoji: '📌',
+        children: orphans
+      } as any);
+    }
+    return results;
+  }, [followedTopicsList, availableTopics]);
+
+  const availableGroupsForDialog = useMemo(() => {
+    const parents = availableTopics.filter(t => !t.parentId);
     return parents.map(parent => ({
       ...parent,
-      children: children.filter(c => c.parentId === parent.id)
-    })).filter(p => p.children.length > 0);
+      children: availableTopics.filter(c => c.parentId === parent.id).map(c => ({
+        ...c,
+        isFollowed: topics.includes(c.id)
+      }))
+    })).filter(g => g.children.length > 0);
   }, [availableTopics, topics]);
 
   const filteredGroupsForDialog = useMemo(() => {
@@ -76,78 +97,57 @@ export default function ProfileTopics({ initialTopics, availableTopics }: Props)
     return availableGroupsForDialog.find(g => g.id === activeCategoryId);
   }, [availableGroupsForDialog, activeCategoryId]);
 
+  const categoryMap = useMemo(() => {
+    const map: Record<string, string> = {};
+    availableTopics.filter(t => !t.parentId).forEach(p => {
+      map[p.id] = p.label;
+    });
+    return map;
+  }, [availableTopics]);
+
   return (
     <div className="space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Header section */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-zinc-100 dark:border-white/5">
-        <div className="space-y-1">
-          <h2 className="text-xl font-black text-zinc-800 dark:text-white tracking-tight flex items-center gap-2">
-            <Compass className="w-5 h-5 text-primary" /> Chủ đề đang theo dõi
-          </h2>
-          <p className="text-xs text-zinc-500 font-medium">Hệ thống sẽ ưu tiên các bài viết thuộc những lĩnh vực này trên Feed của bạn.</p>
+      {isPending && (
+        <div className="flex justify-end mb-4">
+          <span className="flex items-center gap-1.5 text-[10px] font-bold text-primary animate-pulse uppercase tracking-wider">
+            <Loader2 className="w-3 h-3 animate-spin" /> Đang cập nhật...
+          </span>
         </div>
+      )}
 
-        <div className="flex items-center gap-4">
-           {isPending && (
-             <span className="flex items-center gap-1.5 text-[10px] font-bold text-primary animate-pulse uppercase tracking-wider">
-               <Loader2 className="w-3 h-3 animate-spin" /> Đang cập nhật...
-             </span>
-           )}
-           <button
-            onClick={() => setIsManagingTopics(true)}
-            className="px-5 py-2.5 rounded-2xl bg-primary text-white text-[11px] font-black hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" /> Khám phá thêm
-          </button>
-        </div>
-      </div>
-
-      {/* Topics Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {/* Topics Wrapped List */}
+      <div className="flex flex-wrap gap-2">
         {followedTopicsList.length > 0 ? followedTopicsList.map(topic => (
           <div 
             key={topic.id}
-            className="group flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-white/[0.02] border border-zinc-100 dark:border-white/5 hover:border-primary/30 transition-all shadow-sm"
+            className="group flex items-center p-2.5 px-4 rounded-xl bg-white dark:bg-white/[0.03] border border-zinc-200/60 dark:border-white/10 hover:border-primary/40 dark:shadow-md dark:shadow-primary/5 transition-all duration-300 relative overflow-hidden w-fit"
           >
-            <div className="flex items-center gap-3 min-w-0">
-               <span className="text-xl grayscale group-hover:grayscale-0 transition-all">{topic.emoji}</span>
-               <div className="min-w-0">
-                  <div className="text-xs font-bold text-zinc-800 dark:text-slate-200 truncate">{topic.label}</div>
-                  <div className="text-[9px] text-zinc-400 font-medium uppercase tracking-wider">Đang quan tâm</div>
-               </div>
+            <div className="min-w-0 flex-1">
+              <div className="text-[11px] font-bold text-zinc-900 dark:text-slate-200 leading-tight whitespace-nowrap">{topic.label}</div>
             </div>
-            <button
-              onClick={() => toggleTopic(topic.id)}
-              className="p-1.5 rounded-lg text-zinc-300 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-all"
-              title="Bỏ quan tâm"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-        )) : (
-          <div className="col-span-full py-20 text-center rounded-[2.5rem] border-2 border-dashed border-zinc-100 dark:border-white/5 bg-zinc-50/30 dark:bg-transparent">
-            <div className="w-16 h-16 rounded-3xl bg-zinc-100 dark:bg-white/5 flex items-center justify-center mx-auto mb-4">
-               <Compass className="w-8 h-8 text-zinc-300" />
+            <div className="absolute inset-y-0 right-0 flex items-center pr-2 bg-gradient-to-l from-white via-white/80 to-transparent dark:from-slate-900 dark:via-slate-900/80 dark:to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <button
+                onClick={() => toggleTopic(topic.id)}
+                className="p-1 text-rose-500 hover:text-rose-600 dark:text-rose-400 dark:hover:text-rose-300 transition-colors"
+                title="Bỏ theo dõi"
+              >
+                <X className="w-4 h-4" strokeWidth={2.5} />
+              </button>
             </div>
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-white mb-1">Chưa có chủ đề nào</h3>
-            <p className="text-xs text-zinc-500 max-w-[240px] mx-auto leading-relaxed">Hãy thêm các chủ đề bạn yêu thích để nhận được những gợi ý bài viết chất lượng hơn.</p>
           </div>
-        )}
+        )) : null}
       </div>
 
       {/* Dialog reuse logic */}
       {isManagingTopics && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
-           <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" onClick={() => setIsManagingTopics(false)} />
+           <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm" onClick={() => setIsManagingTopics(false)} />
            <div className="relative w-full max-w-3xl bg-white dark:bg-zinc-900 rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col h-[75vh] max-h-[700px] border border-zinc-200 dark:border-white/10">
-              <div className="p-5 pb-3 border-b border-zinc-100 dark:border-white/5 flex items-center justify-between shrink-0">
+              <div className="p-5 pb-3 border-b border-zinc-200/60 dark:border-white/5 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center">
-                    <Search className="w-5 h-5 text-primary" />
-                  </div>
                   <div>
-                    <h2 className="text-base font-bold text-zinc-800 dark:text-white leading-tight">Khám phá chủ đề</h2>
-                    <p className="text-[10px] text-zinc-500 font-medium">Tìm và chọn các lĩnh vực bạn quan tâm.</p>
+                    <h2 className="text-base font-bold text-zinc-900 dark:text-white leading-tight">Khám phá chủ đề</h2>
+                    <p className="text-[10px] text-zinc-500 font-medium">Chọn các lĩnh vực bạn quan tâm.</p>
                   </div>
                 </div>
                 <button onClick={() => setIsManagingTopics(false)} className="p-2 rounded-xl hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors group">
@@ -155,100 +155,55 @@ export default function ProfileTopics({ initialTopics, availableTopics }: Props)
                 </button>
               </div>
 
-              <div className="px-5 py-3 border-b border-zinc-100 dark:border-white/5 shrink-0 bg-zinc-50/30 dark:bg-white/5">
+              <div className="px-5 py-3 border-b border-zinc-200/60 dark:border-white/5 shrink-0 bg-zinc-50/40 dark:bg-white/5">
                 <div className="relative group w-full">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400 group-focus-within:text-primary transition-colors" />
                   <input 
                     type="text"
-                    placeholder="Bạn muốn thêm chủ đề gì?"
+                    placeholder="Tìm kiếm chủ đề..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 text-xs bg-white dark:bg-zinc-800 border-2 border-transparent focus:border-primary/20 rounded-xl outline-none transition-all placeholder:text-zinc-400"
+                    className="w-full pl-10 pr-4 py-2 text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-transparent focus:border-primary/30 rounded-xl outline-none transition-all placeholder:text-zinc-400"
                   />
                 </div>
               </div>
 
-              <div className="flex-1 overflow-hidden flex flex-row">
-                {searchQuery.trim() ? (
-                  <div className="flex-1 overflow-y-auto p-5 custom-scrollbar animate-in fade-in slide-in-from-bottom-2 duration-300">
-                    {filteredGroupsForDialog.length > 0 ? (
-                      <div className="space-y-6">
-                        {filteredGroupsForDialog.map(group => (
-                          <div key={group.id} className="space-y-2">
-                            <h4 className="flex items-center gap-2 text-[9px] font-black uppercase tracking-[0.15em] text-zinc-400">
-                              <span>{group.emoji}</span> {group.label}
-                            </h4>
-                            <div className="flex flex-wrap gap-1.5">
-                              {group.children.map(topic => (
-                                <button
-                                  key={topic.id}
-                                  type="button"
-                                  onClick={() => toggleTopic(topic.id)}
-                                  className="px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-800 text-[11px] font-bold text-zinc-500 hover:border-primary hover:text-primary transition-all active:scale-95"
-                                >
-                                  {topic.label}
-                                </button>
-                              ))}
+              <div className="flex-1 overflow-y-auto p-5 sm:p-7 custom-scrollbar bg-white dark:bg-zinc-900 space-y-8">
+                {filteredGroupsForDialog.length > 0 ? (
+                  filteredGroupsForDialog.map(group => (
+                    <div key={group.id} className="space-y-3">
+                      <div className="sticky top-[-2px] bg-white dark:bg-zinc-900 z-10 flex items-center justify-between border-b border-zinc-100 dark:border-white/5 py-2.5 -mx-2 px-2">
+                        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-white/40">{group.label}</h3>
+                        <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-400">{group.children.length} topics</span>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2">
+                        {group.children.map(topic => (
+                          <button
+                            key={topic.id}
+                            type="button"
+                            onClick={() => toggleTopic(topic.id)}
+                            className={`group flex items-center justify-between p-3 px-4 rounded-xl border transition-all text-left active:scale-[0.98] ${
+                              topic.isFollowed
+                                ? 'bg-primary/5 dark:bg-primary/10 border-primary/30 dark:shadow-md dark:shadow-primary/5'
+                                : 'border-zinc-200/60 dark:border-white/5 bg-zinc-50/50 dark:bg-zinc-800/20 hover:border-primary/30 hover:bg-white dark:hover:bg-white/[0.02]'
+                            }`}
+                          >
+                            <div className="flex-1 min-w-0 pr-3">
+                              <div className={`text-[11px] font-bold transition-colors leading-tight ${topic.isFollowed ? 'text-primary' : 'text-zinc-800 dark:text-slate-200'}`}>
+                                {topic.label}
+                              </div>
                             </div>
-                          </div>
+                          </button>
                         ))}
                       </div>
-                    ) : (
-                      <div className="h-full flex flex-col items-center justify-center text-center py-10 opacity-60">
-                        <p className="text-xs text-zinc-500 font-medium">Không tìm thấy chủ đề nào khớp với "{searchQuery}"</p>
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  ))
                 ) : (
-                  <>
-                    <aside className="w-[160px] sm:w-[180px] border-r border-zinc-100 dark:border-white/5 overflow-y-auto p-2 space-y-1 bg-zinc-50/30 dark:bg-zinc-900/50 custom-scrollbar shrink-0">
-                      {availableGroupsForDialog.map(category => (
-                        <button
-                          key={category.id}
-                          onClick={() => setActiveCategoryId(category.id)}
-                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-left transition-all ${
-                            activeCategoryId === category.id 
-                              ? 'bg-white dark:bg-white/10 text-primary shadow-sm ring-1 ring-zinc-200 dark:ring-white/10 animate-in fade-in duration-200' 
-                              : 'text-zinc-500 hover:bg-zinc-100/50 dark:hover:bg-white/5'
-                          }`}
-                        >
-                          <span className="text-base shrink-0">{category.emoji}</span>
-                          <span className="text-[11px] font-bold truncate tracking-tight">{category.label}</span>
-                        </button>
-                      ))}
-                    </aside>
-                    <main className="flex-1 overflow-y-auto p-5 sm:p-7 custom-scrollbar bg-white dark:bg-zinc-900">
-                      {activeCategory ? (
-                        <div key={activeCategory.id} className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2.5">
-                              <span className="text-2xl">{activeCategory.emoji}</span>
-                              <h3 className="text-xs font-black uppercase tracking-widest text-zinc-800 dark:text-white">{activeCategory.label}</h3>
-                            </div>
-                            <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-400">{activeCategory.children.length} topics</span>
-                          </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                            {activeCategory.children.map(topic => (
-                              <button
-                                key={topic.id}
-                                type="button"
-                                onClick={() => toggleTopic(topic.id)}
-                                className="group flex items-center justify-between p-3.5 rounded-2xl border border-zinc-100 dark:border-white/5 bg-zinc-50/50 dark:bg-zinc-800/20 hover:border-primary/30 hover:bg-primary/[0.02] transition-all text-left active:scale-[0.98]"
-                              >
-                                <div className="min-w-0 pr-4">
-                                  <div className="text-[11px] font-bold text-zinc-700 dark:text-slate-200 group-hover:text-primary transition-colors truncate">{topic.label}</div>
-                                  <div className="text-[9px] text-zinc-400 font-medium mt-0.5 truncate">{topic._count?.articles ?? 0} articles</div>
-                                </div>
-                                <div className="shrink-0 w-6 h-6 rounded-lg bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 flex items-center justify-center group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all">
-                                  <Plus className="w-3.5 h-3.5" />
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      ) : null}
-                    </main>
-                  </>
+                  <div className="h-full flex flex-col items-center justify-center text-center py-20 opacity-60">
+                    <p className="text-sm text-zinc-500 font-medium">Không tìm thấy chủ đề nào khớp với "{searchQuery}"</p>
+                    <button onClick={() => setSearchQuery('')} className="mt-4 text-[10px] font-black text-primary uppercase tracking-widest hover:underline">Xoá tìm kiếm</button>
+                  </div>
                 )}
               </div>
 

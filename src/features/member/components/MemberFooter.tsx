@@ -40,9 +40,7 @@ export default function MemberFooter() {
               </span>
             </Link>
             <p className="text-zinc-500 dark:text-slate-400 text-sm leading-relaxed max-w-sm">
-              Nền tảng học hỏi và phát triển dành cho kỹ sư công nghệ tương lai.
-              Chúng tôi cung cấp kiến thức thực chiến, chuyên sâu về System Design,
-              Backend, DevOps và AI.
+              Nền tảng chia sẻ tri thức và kinh nghiệm đa góc nhìn. Từ những bài học chuyên môn sâu sắc đến những câu chuyện đời sống, cùng nhau lưu giữ và lan tỏa giá trị mỗi ngày.
             </p>
             <div className="flex items-center gap-3">
               <SocialLink href="https://facebook.com/lenote.dev" icon={<Facebook className="w-5 h-5" />} label="Facebook" />

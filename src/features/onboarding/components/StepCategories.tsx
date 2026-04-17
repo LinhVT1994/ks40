@@ -90,10 +90,9 @@ export default function StepCategories({ value, onChange, onBack, onComplete, on
                 isExpanded ? 'bg-zinc-50 dark:bg-white/[0.03] border-zinc-200 dark:border-white/10' : 'border-zinc-100 dark:border-white/5'
               } ${isExpanded ? 'col-span-full' : ''}`}
             >
-              <button
-                type="button"
+              <div
                 onClick={() => setExpandedId(isExpanded ? null : category.id)}
-                className="w-full flex items-center justify-between p-3.5 text-left"
+                className="w-full flex items-center justify-between p-3.5 text-left cursor-pointer"
               >
                 <div className="flex items-center gap-3">
                   <span className="text-lg opacity-80">{category.emoji}</span>
@@ -121,7 +120,7 @@ export default function StepCategories({ value, onChange, onBack, onComplete, on
                   </button>
                   <ChevronRight className={`w-3.5 h-3.5 text-zinc-300 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                 </div>
-              </button>
+              </div>
 
               <AnimatePresence>
                 {isExpanded && (

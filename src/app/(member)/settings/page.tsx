@@ -2,6 +2,7 @@ import { auth } from '@/auth';
 import { redirect } from 'next/navigation';
 import { getPreferencesAction } from '@/features/onboarding/actions/onboarding';
 import SettingsLayoutClient from '@/features/member/components/SettingsLayoutClient';
+import { getEnabledTopicsAction } from '@/features/admin/actions/topic';
 import { db } from '@/lib/db';
 import type { Metadata } from 'next';
 
@@ -14,13 +15,16 @@ export default async function SettingsPage() {
   const session = await auth();
   if (!session?.user) redirect('/login');
 
-  const [prefs, dbUser] = await Promise.all([
+  const [prefs, dbUser, availableTopics, followedTopics] = await Promise.all([
     getPreferencesAction(),
-    db.user.findUnique({ where: { id: session.user.id }, select: { bio: true, username: true, websiteUrl: true, facebookUrl: true, instagramUrl: true, twitterUrl: true, linkedinUrl: true, githubUrl: true, youtubeUrl: true } }),
+    db.user.findUnique({ where: { id: session.user.id }, select: { name: true, bio: true, username: true, websiteUrl: true, facebookUrl: true, instagramUrl: true, twitterUrl: true, linkedinUrl: true, githubUrl: true, youtubeUrl: true } }),
+    getEnabledTopicsAction(),
+    db.topicFollow.findMany({ where: { userId: session.user.id }, select: { topicId: true } }),
   ]);
 
   const user = {
     ...session.user,
+    name: dbUser?.name ?? session.user.name,
     bio: dbUser?.bio ?? null,
     username: dbUser?.username ?? null,
     websiteUrl: dbUser?.websiteUrl ?? null,
@@ -31,6 +35,8 @@ export default async function SettingsPage() {
     githubUrl: dbUser?.githubUrl ?? null,
     youtubeUrl: dbUser?.youtubeUrl ?? null,
   };
+
+  const initialTopics = followedTopics.map(f => f.topicId);
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-10 w-full animate-in fade-in duration-500">
@@ -43,6 +49,8 @@ export default async function SettingsPage() {
         user={user}
         initialOccupation={prefs?.occupation ?? null}
         initialCodeTheme={(prefs as any)?.codeTheme ?? 'dracula'}
+        initialTopics={initialTopics}
+        availableTopics={availableTopics}
       />
     </div>
   );

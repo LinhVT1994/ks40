@@ -11,7 +11,6 @@ import {
   UserCheck, UserMinus, Compass
 } from 'lucide-react';
 import { deleteMemberArticleAction } from '@/features/member/actions/write';
-import ProfileTopics from '@/features/member/components/ProfileTopics';
 import type { TopicItem } from '@/features/admin/actions/topic';
 // import DailyMotivation from '@/features/member/components/Dashboard/DailyMotivation';
 
@@ -73,7 +72,7 @@ type Draft = {
   rejectionReason?: string;
 };
 
-type Tab = 'articles' | 'drafts' | 'bookmarks' | 'history' | 'followers' | 'following' | 'ratings' | 'interested-topics';
+type Tab = 'articles' | 'drafts' | 'bookmarks' | 'history' | 'followers' | 'following' | 'ratings';
 
 type AuthorRatingStats = {
   ratings: Array<{
@@ -927,7 +926,7 @@ export default function ProfileClient({
 
   useEffect(() => {
     const t = searchParams.get('tab') as Tab;
-    if (t && ['articles', 'drafts', 'bookmarks', 'history', 'followers', 'following', 'ratings', 'interested-topics'].includes(t)) {
+    if (t && ['articles', 'drafts', 'bookmarks', 'history', 'followers', 'following', 'ratings'].includes(t)) {
       setTab(t);
     }
   }, [searchParams]);
@@ -947,7 +946,6 @@ export default function ProfileClient({
     { key: 'followers' as Tab, icon: Heart,     label: 'Người theo dõi', count: totalFollowers,   show: true },
     { key: 'following' as Tab, icon: UserCheck, label: 'Đang theo dõi',  count: totalFollowing,   show: true },
     { key: 'ratings'   as Tab, icon: Star,      label: 'Đánh giá',      count: ratingsData?.totalCount ?? 0, show: isOwner && canWrite },
-    { key: 'interested-topics' as Tab, icon: Compass, label: 'Chủ đề quan tâm', count: initialTopics.length, show: isOwner },
   ] as const).filter(t => t.show);
 
   return (
@@ -1057,7 +1055,6 @@ export default function ProfileClient({
         {tab === 'followers' && <FollowerList followers={followers} totalFollowers={totalFollowers} totalPages={totalFollowerPages} userId={user.id} />}
         {tab === 'following' && <FollowingList following={following} totalFollowing={totalFollowing} totalPages={totalFollowingPages} userId={user.id} isOwner={isOwner} />}
         {tab === 'ratings'   && isOwner && canWrite && <RatingsDashboard data={ratingsData} />}
-        {tab === 'interested-topics' && isOwner && <ProfileTopics initialTopics={initialTopics} availableTopics={availableTopics} />}
       </div>
     </div>
   );

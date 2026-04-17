@@ -83,10 +83,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (!email) return token;
           const dbUser = await db.user.findUnique({
             where:   { email },
-            select:  { id: true, role: true, status: true, canWrite: true, username: true, image: true, onboarding: { select: { completedAt: true, skippedAt: true } } },
+            select:  { id: true, name: true, role: true, status: true, canWrite: true, username: true, image: true, onboarding: { select: { completedAt: true, skippedAt: true } } },
           });
           if (dbUser) {
             token.id       = dbUser.id;
+            token.name     = dbUser.name;
             token.role     = dbUser.role;
             token.status   = dbUser.status;
             token.canWrite = dbUser.canWrite;
@@ -113,6 +114,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
     session({ session, token }) {
       session.user.id = token.id as string;
+      if (token.name) session.user.name = token.name as string;
       (session.user as { role?: string }).role               = token.role as string;
       (session.user as { status?: string }).status           = token.status as string;
       (session.user as { username?: string | null }).username = token.username as string | null;

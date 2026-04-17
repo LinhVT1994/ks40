@@ -133,7 +133,6 @@ export default function FeatureCards({
       else if (feed === 'saved') action = getBookmarksAction;
 
       const { articles, totalPages } = await action({
-        topicIds: feed === 'followed' && topicIds.length > 0 ? topicIds : undefined,
         limit: LIMIT,
         page: 1,
         timeframe: timeframe,
@@ -201,7 +200,6 @@ export default function FeatureCards({
       else if (activeFeed === 'saved') action = getBookmarksAction;
       
       const { articles: more } = await action({
-        topicIds: activeFeed === 'followed' && topicIds.length > 0 ? topicIds : undefined,
         limit: LIMIT,
         page: nextPage,
         timeframe: activeTimeframe,
@@ -247,11 +245,6 @@ export default function FeatureCards({
                     }`}
                   >
                     <span>{t.label}</span>
-                    <span className={`text-[10px] font-bold ml-0.5 ${
-                      activeTopicId === t.id ? 'text-primary' : 'text-zinc-500 opacity-50'
-                    }`}>
-                      {t._count?.articles ?? 0}
-                    </span>
                   </Link>
                 )) : null}
                 {topics.length > 10 && (
@@ -289,14 +282,6 @@ export default function FeatureCards({
                     >
                       <div className="flex items-center flex-wrap gap-1.5 flex-1 pr-2">
                         <span className="break-words leading-snug">{t.label}</span>
-
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md transition-colors ${
-                          activeTopicId === t.id
-                            ? 'bg-primary/20 text-primary'
-                            : 'bg-zinc-200/50 dark:bg-white/10 text-zinc-500 group-hover/item:text-primary group-hover/item:bg-primary/10'
-                        }`}>
-                          {t._count?.articles ?? 0}
-                        </span>
                       </div>
                       {activeTopicId === t.id && <ChevronRight className="w-4 h-4" />}
                     </Link>
@@ -472,7 +457,7 @@ export default function FeatureCards({
                         </div>
 
                         <Link href={`/article/${article.slug}`} className="mb-0 sm:mb-3">
-                          <p className="text-xs sm:text-sm text-zinc-500 dark:text-slate-400 sm:line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-500">
+                          <p className="text-xs sm:text-sm text-zinc-500 dark:text-slate-400 line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-500">
                             {article.summary}
                           </p>
                         </Link>
@@ -480,6 +465,11 @@ export default function FeatureCards({
                         {/* Desktop Stats */}
                         <div className="hidden sm:flex mt-auto items-end justify-between pt-0 gap-2">
                           <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-zinc-500 text-xs">
+                            {/* Author Info Integrated into Stats */}
+                            <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-4">
+                              <span className="font-semibold text-zinc-600 dark:text-slate-300 text-[11px]"><span className="font-normal opacity-70">bởi</span> {article.author.name}</span>
+                            </div>
+
                             <span className="flex items-center gap-1 group/stat transition-colors hover:text-rose-500">
                               <Heart className="w-3.5 h-3.5 group-hover/stat:fill-rose-500/10" />
                               <span className="font-bold">{article._count.likes}</span>
@@ -526,6 +516,9 @@ export default function FeatureCards({
                     {/* Mobile Stats (Full width footer) */}
                     <div className="flex sm:hidden mt-3 items-center justify-between pt-2.5 border-t border-zinc-100/80 dark:border-white/5 gap-2 w-full">
                         <div className="flex items-center flex-wrap gap-x-3 gap-y-2 text-zinc-500 dark:text-slate-400 text-[11px] font-medium">
+                            <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-3">
+                              <span className="font-semibold text-zinc-600 dark:text-slate-300 text-[10px]"><span className="font-normal opacity-70">bởi</span> {article.author.name}</span>
+                            </div>
                             <span className="flex items-center gap-1 group/stat hover:text-rose-500">
                               <Heart className="w-3.5 h-3.5" />
                               <span className="font-bold">{article._count.likes}</span>
@@ -678,18 +671,31 @@ function TrendingHorizontal({ articles, discoveryArticles, topicIds }: { article
         {trending.map((article, idx) => (
           <React.Fragment key={article.id}>
             <Link href={`/article/${article.slug}`} className="block group">
-              <div className="cursor-pointer py-3 hover:bg-zinc-50/50 dark:hover:bg-white/[0.02] transition-all duration-300 flex flex-row items-stretch min-h-[120px] px-3 -mx-3 rounded-xl">
+              <div className="cursor-pointer py-3 hover:bg-zinc-100/80 dark:hover:bg-white/[0.02] transition-all duration-300 flex flex-row items-stretch min-h-[120px] px-3 -mx-3 rounded-xl">
                 <div
                   className="w-24 sm:w-36 shrink-0 bg-cover bg-center relative rounded-lg overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-300 dark:text-white/10 text-3xl font-bold"
                   style={article.thumbnail ? { backgroundImage: `url('${article.thumbnail}')`, backgroundPosition: article.thumbnailPosition ?? '50% 50%' } : undefined}
                 >
                   {!article.thumbnail && article.title[0]}
                 </div>
-                <div className="pl-3 sm:pl-5 pr-1 flex-1 flex flex-col min-w-0">
-                  <h4 className="text-sm sm:text-base font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors font-display line-clamp-2 flex-1">
+                <div className="pl-3 sm:pl-5 pr-1 flex-1 flex flex-col min-w-0 py-1">
+                  <h4 className="text-sm sm:text-base font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors font-display line-clamp-2 flex-1 mb-1.5">
                     {article.title}
                   </h4>
                   <div className="flex items-center gap-3 mt-auto text-zinc-500">
+                    <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-3">
+                      <span className="text-[10px] font-semibold text-zinc-600 dark:text-slate-400">
+                        <span className="font-normal opacity-70">bởi</span> {article.author.name}
+                      </span>
+                    </div>
+                    <span className="flex items-center gap-1">
+                      <Heart className="w-3.5 h-3.5" />
+                      <span className="text-[11px] font-medium">{article._count.likes}</span>
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <MessageCircle className="w-3.5 h-3.5" />
+                      <span className="text-[11px] font-medium">{article._count.comments}</span>
+                    </span>
                     <span className="flex items-center gap-1">
                       <Eye className="w-3.5 h-3.5" />
                       <span className="text-[11px] font-medium">{formatViews(article.viewCount)}</span>
@@ -730,20 +736,36 @@ function TrendingSidebar({ articles, discoveryArticles, topicIds }: { articles: 
       <div className="flex flex-col gap-1">
         {trending.map(article => (
           <Link href={`/article/${article.slug}`} key={article.id} className="block group">
-            <div className="flex gap-3 p-2 hover:bg-zinc-50/50 dark:hover:bg-white/[0.02] transition-all duration-300 rounded-xl">
+            <div className="flex gap-3 p-2 hover:bg-zinc-100/80 dark:hover:bg-white/[0.02] transition-all duration-300 rounded-xl">
               <div
                 className="w-14 h-14 rounded-lg bg-cover bg-center shrink-0 border border-zinc-200 dark:border-white/5 overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-300 dark:text-white/20 font-bold text-lg"
                 style={article.thumbnail ? { backgroundImage: `url('${article.thumbnail}')`, backgroundPosition: article.thumbnailPosition ?? '50% 50%' } : undefined}
               >
                 {!article.thumbnail && article.title[0]}
               </div>
-              <div className="flex-1 min-w-0 pt-1">
+              <div className="flex-1 min-w-0 pt-0.5">
                 <h4 className="text-sm font-bold text-zinc-800 dark:text-white line-clamp-2 group-hover:text-primary transition-colors leading-tight mb-1.5">
                   {article.title}
                 </h4>
-                <div className="flex items-center gap-1 text-zinc-500">
-                  <Eye className="w-3.5 h-3.5" />
-                  <span className="text-[11px] font-semibold">{formatViews(article.viewCount)}</span>
+                <div className="flex items-center gap-2 text-zinc-500">
+                  <div className="flex items-center">
+                    <span className="text-[10px] font-semibold text-zinc-600 dark:text-slate-400 truncate max-w-[90px]">
+                      <span className="font-normal opacity-70">bởi</span> {article.author.name}
+                    </span>
+                  </div>
+                  <span className="text-[10px] opacity-40">•</span>
+                  <span className="flex items-center gap-1">
+                    <Heart className="w-3 h-3" />
+                    <span className="text-[10px] font-semibold">{article._count.likes}</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <MessageCircle className="w-3 h-3" />
+                    <span className="text-[10px] font-semibold">{article._count.comments}</span>
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Eye className="w-3 h-3" />
+                    <span className="text-[10px] font-semibold">{formatViews(article.viewCount)}</span>
+                  </span>
                 </div>
               </div>
             </div>

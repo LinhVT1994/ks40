@@ -8,15 +8,20 @@ import SettingsProfile from './SettingsProfile';
 import SettingsPreferences from './SettingsPreferences';
 import SettingsSecurity from './SettingsSecurity';
 import SettingsNotifications from './SettingsNotifications';
+import type { TopicItem } from '@/features/admin/actions/topic';
 
 function SettingsLayoutContent({
   user,
   initialOccupation,
-  initialCodeTheme
+  initialCodeTheme,
+  initialTopics,
+  availableTopics
 }: {
   user: User;
   initialOccupation: string | null;
   initialCodeTheme: string;
+  initialTopics: string[];
+  availableTopics: TopicItem[];
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -64,7 +69,7 @@ function SettingsLayoutContent({
       </aside>
 
       {/* Main Form Content */}
-      <div className="flex-1 w-full min-w-0">
+      <div className="flex-1 w-full min-w-0 lg:max-w-4xl">
         {activeTab === 'profile' && (
           <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md border border-zinc-300 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-sm lg:shadow-xl lg:shadow-zinc-200/20 dark:lg:shadow-none animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="mb-10 pb-6 border-b border-zinc-200 dark:border-white/5">
@@ -85,6 +90,8 @@ function SettingsLayoutContent({
               key={`${initialOccupation}-${initialCodeTheme}`}
               initialOccupation={initialOccupation}
               initialCodeTheme={initialCodeTheme}
+              initialTopics={initialTopics}
+              availableTopics={availableTopics}
             />
           </div>
         )}

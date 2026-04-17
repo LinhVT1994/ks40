@@ -58,6 +58,13 @@ export default async function BookmarksPage() {
               {/* Content */}
               <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
                 <div>
+                  {/* Author Info */}
+                  <div className="flex items-center mb-1.5 opacity-80 group-hover:opacity-100 transition-opacity">
+                    <span className="text-[10px] font-semibold text-zinc-500 dark:text-slate-400">
+                      <span className="font-normal opacity-70">bởi</span> {article.author?.name}
+                    </span>
+                  </div>
+
                   <div className="flex items-start gap-2 mb-1">
                     <h3 className="text-sm font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors line-clamp-1 flex-1">
                       {article.title}

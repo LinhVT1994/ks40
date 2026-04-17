@@ -59,6 +59,44 @@ function getAudienceFilter(role?: string): ArticleAudience[] {
   return ['PUBLIC'];
 }
 
+// ── Discovery ranking cache ────────────────────────────────────
+// Tính decay score một lần, cache 5 phút — mọi user dùng chung
+// Chỉ lưu ID list, không lưu data user-specific (isLiked/isBookmarked)
+const _getRankedDiscoveryIds = unstable_cache(
+  async (
+    _cacheKey: string,
+    audienceFilter: ArticleAudience[],
+    poolDate: Date | undefined,
+    topicFilter: Prisma.ArticleWhereInput | undefined,
+  ): Promise<string[]> => {
+    const BADGE_BONUS: Record<string, number> = { HOT: 1, TRENDING: 1.5, FEATURED: 1 };
+    const now = Date.now();
+
+    const rows = await db.article.findMany({
+      where: {
+        status:   ArticleStatus.PUBLISHED,
+        audience: { in: audienceFilter },
+        ...topicFilter,
+        ...(poolDate && { publishedAt: { gte: poolDate } }),
+      },
+      // Chỉ fetch fields cần cho scoring — nhẹ hơn nhiều
+      select: { id: true, publishedAt: true, viewCount: true, badges: true, _count: { select: { likes: true } } },
+    });
+
+    return rows
+      .map(a => {
+        const ageHours   = (now - new Date(a.publishedAt ?? now).getTime()) / 3_600_000;
+        const engagement = a._count.likes + a.viewCount / 100;
+        const badge      = (a.badges as string[]).reduce((s, b) => s + (BADGE_BONUS[b] ?? 0), 0);
+        return { id: a.id, score: (engagement + badge) / Math.pow(ageHours + 2, 1.5) };
+      })
+      .sort((a, b) => b.score - a.score)
+      .map(a => a.id);
+  },
+  ['discovery-ranked'],
+  { revalidate: 300 }, // 5 phút
+);
+
 // ── Actions ────────────────────────────────────────────────────
 
 export async function getArticlesAction(options: GetArticlesOptions = {}) {
@@ -86,12 +124,13 @@ export async function getArticlesAction(options: GetArticlesOptions = {}) {
     dateFilter = { publishedAt: { gte: gteDate } };
   }
 
-  // Browsing & searching: always show PUBLIC/MEMBERS/PREMIUM (not PRIVATE)
-  // PREMIUM shown to all so users can discover and be upsold at read-time
-  const accessFilter  = getAudienceFilter(role).filter(a => a !== 'PRIVATE') as ArticleAudience[];
-  const browseFilter: ArticleAudience[] = accessFilter.includes('PREMIUM') ? accessFilter : [...accessFilter, 'PREMIUM'];
-  const searchFilter: ArticleAudience[] = ['PUBLIC', 'MEMBERS', 'PREMIUM'];
-  const audienceFilter = (activeSearch || activeTag) ? searchFilter : browseFilter;
+  // List/search luôn hiển thị PUBLIC + MEMBERS + PREMIUM (không PRIVATE)
+  // PRIVATE chỉ ADMIN mới truy cập được — bị loại ở mọi listing
+  // Nội dung thực sự bị gate tại trang chi tiết bài viết
+  const listFilter: ArticleAudience[] = role === 'ADMIN'
+    ? ['PUBLIC', 'MEMBERS', 'PREMIUM', 'PRIVATE']
+    : ['PUBLIC', 'MEMBERS', 'PREMIUM'];
+  const audienceFilter = listFilter;
 
   // topicId or topicIds filter — include all children if parentId is provided
   let topicFilter: Prisma.ArticleWhereInput | undefined;
@@ -112,18 +151,27 @@ export async function getArticlesAction(options: GetArticlesOptions = {}) {
     }
   }
 
+  const select = {
+    id: true, title: true, slug: true, summary: true,
+    thumbnail: true, thumbnailPosition: true, cover: true, coverPosition: true,
+    topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } },
+    audience: true, badges: true,
+    readTime: true, viewCount: true, publishedAt: true,
+    author:  { select: { name: true, image: true, username: true } },
+    _count:  { select: { likes: true, comments: true, bookmarks: true } },
+    ratings: { where: { hidden: false }, select: { score: true } },
+    ...(userId && {
+      likes:     { where: { userId }, select: { userId: true } },
+      bookmarks: { where: { userId }, select: { userId: true } },
+    }),
+  };
+
   const where: Prisma.ArticleWhereInput = {
-    status:      ArticleStatus.PUBLISHED,
-    audience:    { in: audienceFilter },
+    status:   ArticleStatus.PUBLISHED,
+    audience: { in: audienceFilter },
     ...topicFilter,
     ...dateFilter,
-    ...(activeTag && {
-      tags: {
-        some: {
-          tag: { slug: activeTag }
-        }
-      }
-    }),
+    ...(activeTag && { tags: { some: { tag: { slug: activeTag } } } }),
     ...(activeSearch && {
       OR: [
         { title:   { contains: activeSearch, mode: 'insensitive' } },
@@ -133,58 +181,69 @@ export async function getArticlesAction(options: GetArticlesOptions = {}) {
     }),
   };
 
-  const [articles, total] = await Promise.all([
-    db.article.findMany({
-      where,
-      orderBy: { publishedAt: 'desc' },
-      skip:    (page - 1) * limit,
-      take:    limit,
-      select: {
-        id: true, title: true, slug: true, summary: true,
-        thumbnail: true, thumbnailPosition: true, cover: true, coverPosition: true,
-        topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } },
-        audience: true, badges: true,
-        readTime: true, viewCount: true, publishedAt: true,
-        author:  { select: { name: true, image: true, username: true } },
-        _count:  { select: { likes: true, comments: true, bookmarks: true } },
-        ratings: { where: { hidden: false }, select: { score: true } },
-        ...(userId && {
-          likes:     { where: { userId }, select: { userId: true } },
-          bookmarks: { where: { userId }, select: { userId: true } },
-        }),
-      },
-    }),
-    db.article.count({ where }),
-  ]);
-
-  return {
-    articles: articles.map(a => {
-      const rScores = (a as { ratings?: { score: number }[] }).ratings ?? [];
-      const ratingCount = rScores.length;
-      const avgRating = ratingCount > 0
-        ? Math.round((rScores.reduce((s, r) => s + r.score, 0) / ratingCount) * 100) / 100
-        : 0;
-      return {
-        ...a,
-        isLiked:      userId ? ((a as { likes?: { userId: string }[] }).likes?.length ?? 0) > 0 : false,
-        isBookmarked: userId ? ((a as { bookmarks?: { userId: string }[] }).bookmarks?.length ?? 0) > 0 : false,
-        avgRating,
-        ratingCount,
-      };
-    }) as ArticleCard[],
-    total,
-    totalPages: Math.ceil(total / limit),
-    page,
+  const toCard = (a: any): ArticleCard => {
+    const rScores = a.ratings ?? [];
+    const ratingCount = rScores.length;
+    const avgRating = ratingCount > 0
+      ? Math.round((rScores.reduce((s: number, r: { score: number }) => s + r.score, 0) / ratingCount) * 100) / 100
+      : 0;
+    return {
+      ...a,
+      isLiked:      userId ? (a.likes?.length ?? 0) > 0 : false,
+      isBookmarked: userId ? (a.bookmarks?.length ?? 0) > 0 : false,
+      avgRating,
+      ratingCount,
+    };
   };
+
+  // Search/tag/topic filter → sort mới nhất, không cần scoring
+  if (activeSearch || activeTag) {
+    const [rows, total] = await Promise.all([
+      db.article.findMany({ where, orderBy: { publishedAt: 'desc' }, skip: (page - 1) * limit, take: limit, select }),
+      db.article.count({ where }),
+    ]);
+    return { articles: rows.map(toCard), total, totalPages: Math.ceil(total / limit), page };
+  }
+
+  // Browse thuần → decay score với cached ranking
+  const poolDate = new Date();
+  poolDate.setDate(poolDate.getDate() - 30);
+  const effectiveDate = timeframe !== 'all' ? (where.publishedAt as any)?.gte : poolDate;
+
+  // Cache key theo audience + timeframe + topic filter
+  const cacheKey = `${audienceFilter.join(',')}_${effectiveDate?.toISOString() ?? 'all'}_${topicId ?? ''}_${(options.topicIds ?? []).join(',')}`;
+  const rankedIds = await _getRankedDiscoveryIds(cacheKey, audienceFilter, effectiveDate, topicFilter);
+
+  const total = rankedIds.length;
+  const skip  = (page - 1) * limit;
+  const pageIds = rankedIds.slice(skip, skip + limit);
+
+  if (pageIds.length === 0) return { articles: [], total, totalPages: Math.ceil(total / limit), page };
+
+  // Chỉ fetch full data cho page slice — không load toàn bộ
+  const rows = await db.article.findMany({
+    where:  { id: { in: pageIds } },
+    select,
+  });
+
+  // Giữ đúng thứ tự ranked
+  const articleMap = new Map(rows.map(a => [a.id, a]));
+  const articles = pageIds
+    .map(id => articleMap.get(id))
+    .filter((a): a is NonNullable<typeof a> => !!a)
+    .map(toCard);
+
+  return { articles, total, totalPages: Math.ceil(total / limit), page };
 }
 
 export async function getForYouArticlesAction(options: {
   limit?: number;
+  page?: number;
   timeframe?: 'today' | 'week' | 'month' | 'year' | 'all';
   userId?: string;
   role?: string;
 } = {}): Promise<{ articles: ArticleCard[]; total: number; totalPages: number; page: number }> {
-  const { limit = 20, timeframe = 'all' } = options;
+  const { limit = 20, page = 1, timeframe = 'all' } = options;
   // Use passed-in userId/role if available — avoids duplicate auth() call from page
   let userId  = options.userId;
   let role    = options.role;
@@ -260,89 +319,79 @@ export async function getForYouArticlesAction(options: {
     };
   }
 
-  // Lấy lịch sử đọc (30 ngày), lịch sử like, và các chủ đề đang theo dõi (TopicFollow)
-  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-  const [readHistory, likedArticles, followedTopics] = await Promise.all([
-    db.readHistory.findMany({
-      where:   { userId, readAt: { gte: since } },
-      select:  { article: { select: { topic: { select: { id: true } } } } },
-    }),
-    db.like.findMany({
-      where:  { userId },
-      select: { article: { select: { topic: { select: { id: true } } } } },
-    }),
-    (db as any).topicFollow.findMany({
-      where: { userId },
-      select: { topicId: true },
-    }),
+  // Lấy topics đang theo dõi và users đang follow song song
+  const [followedTopics, followedUsers] = await Promise.all([
+    (db as any).topicFollow.findMany({ where: { userId }, select: { topicId: true } }),
+    db.follow.findMany({ where: { followerId: userId }, select: { followingId: true } }),
   ]);
 
-  // Tính điểm ưu tiên theo topic - STRICTLY followed only as per user request
-  const topicScore: Record<string, number> = {};
+  const followedTopicIds: string[] = followedTopics.map((f: { topicId: string }) => f.topicId);
+  const followedUserIds: string[]  = followedUsers.map((f: { followingId: string }) => f.followingId);
 
-  const onboardingTopicIds = followedTopics.map((f: { topicId: string }) => f.topicId);
-  if (onboardingTopicIds.length > 0) {
+  // Mở rộng topic: thêm child topics của các parent đang theo dõi
+  if (followedTopicIds.length > 0) {
     const childTopics = await db.topic.findMany({
-      where: { parentId: { in: onboardingTopicIds } },
+      where:  { parentId: { in: followedTopicIds } },
       select: { id: true },
     });
-    // Boost cả parent lẫn children
-    for (const t of onboardingTopicIds) {
-      topicScore[t] = (topicScore[t] ?? 0) + 1;
-    }
-    for (const c of childTopics) {
-      topicScore[c.id] = (topicScore[c.id] ?? 0) + 1;
-    }
+    followedTopicIds.push(...childTopics.map(c => c.id));
   }
 
-  // Check if user has any interests (Strictly followed topics)
-  if (onboardingTopicIds.length === 0) {
+  if (followedTopicIds.length === 0 && followedUserIds.length === 0) {
     return { articles: [], total: 0, totalPages: 0, page: 1 };
   }
 
-  // Fetch pool bài viết (nhiều hơn để có đủ để rank)
+  // Fetch toàn bộ bài từ followed topics/users rồi rank in-memory
+  const followWhere: Prisma.ArticleWhereInput = {
+    ...baseWhere,
+    OR: [
+      ...(followedTopicIds.length > 0 ? [{ topicId: { in: followedTopicIds } }] : []),
+      ...(followedUserIds.length > 0  ? [{ authorId: { in: followedUserIds } }] : []),
+    ],
+  };
+
   const rows = await db.article.findMany({
-    where:   baseWhere,
-    take:    limit * 4,
+    where:   followWhere,
     orderBy: { publishedAt: 'desc' },
     select:  selectFields,
   });
 
   const BADGE_BONUS: Record<string, number> = { HOT: 1, TRENDING: 1.5, FEATURED: 1 };
 
-  const scored = rows.map(a => {
-    const pref       = topicScore[a.topic.id] ?? 0;
-    const engagement = Math.log1p((a as { _count: { likes: number } })._count.likes) +
-                       Math.log1p(a.viewCount / 100);
-    const badge      = (a.badges as string[]).reduce((sum, b) => sum + (BADGE_BONUS[b] ?? 0), 0);
-    // Return articles ONLY from followed topics
-    return { ...a, _score: pref * 2 + engagement + badge, _pref: pref };
-  });
+  // Sort: mới nhất trước, cùng ngày dùng score làm tiebreaker
+  const ranked = rows
+    .map(a => {
+      const engagement = Math.log1p((a as { _count: { likes: number } })._count.likes) +
+                         Math.log1p(a.viewCount / 100);
+      const badge      = (a.badges as string[]).reduce((sum, b) => sum + (BADGE_BONUS[b] ?? 0), 0);
+      return { ...a, _score: engagement + badge };
+    })
+    .sort((a, b) => {
+      const aDay = a.publishedAt ? new Date(a.publishedAt).toDateString() : '';
+      const bDay = b.publishedAt ? new Date(b.publishedAt).toDateString() : '';
+      if (aDay !== bDay) return (b.publishedAt?.getTime() ?? 0) - (a.publishedAt?.getTime() ?? 0);
+      return b._score - a._score;
+    });
 
-  // Filter to only show articles from followed topics
-  const filtered = scored.filter(s => s._pref > 0);
+  const total  = ranked.length;
+  const skip   = (page - 1) * limit;
 
-  filtered.sort((a, b) => (b.publishedAt?.getTime() ?? 0) - (a.publishedAt?.getTime() ?? 0));
-  
-  const articles = filtered.slice(0, limit).map(({ _score: _s, _pref: _p, ...a }) => {
+  const articles = ranked.slice(skip, skip + limit).map(({ _score: _s, ...a }) => {
     const rScores = (a as { ratings?: { score: number }[] }).ratings ?? [];
     const ratingCount = rScores.length;
-    const avgRating = ratingCount > 0 ? Math.round((rScores.reduce((s, r) => s + r.score, 0) / ratingCount) * 100) / 100 : 0;
+    const avgRating = ratingCount > 0
+      ? Math.round((rScores.reduce((s, r) => s + r.score, 0) / ratingCount) * 100) / 100
+      : 0;
     return {
       ...a,
-      isLiked:      (a as { likes?: { userId: string }[] }).likes?.length ? true : false,
-      isBookmarked: (a as { bookmarks?: { userId: string }[] }).bookmarks?.length ? true : false,
+      isLiked:      userId ? ((a as { likes?: { userId: string }[] }).likes?.length ?? 0) > 0 : false,
+      isBookmarked: userId ? ((a as { bookmarks?: { userId: string }[] }).bookmarks?.length ?? 0) > 0 : false,
       avgRating,
       ratingCount,
     };
   }) as ArticleCard[];
 
-  return {
-    articles,
-    total: filtered.length,
-    totalPages: Math.ceil(filtered.length / limit),
-    page: 1, // Recommendation pool is currently single-page focus, but metadata keeps it consistent
-  };
+  return { articles, total, totalPages: Math.ceil(total / limit), page };
 }
 
 // ── Cached article content (no auth — per slug+role) ──────────
@@ -389,10 +438,11 @@ export async function getArticleUserInteractionAction(articleId: string, userId:
   };
 }
 
-// Lấy toàn bộ slug bài viết PUBLIC đã publish — dùng cho generateStaticParams
+// Lấy slug tất cả bài PUBLIC/MEMBERS/PREMIUM đã publish — dùng cho generateStaticParams
+// PRIVATE bị loại vì noindex, không cần pre-render
 export async function getPublishedArticleSlugsAction() {
   const articles = await db.article.findMany({
-    where:  { status: ArticleStatus.PUBLISHED, audience: ArticleAudience.PUBLIC },
+    where:  { status: ArticleStatus.PUBLISHED, audience: { in: [ArticleAudience.PUBLIC, ArticleAudience.MEMBERS, ArticleAudience.PREMIUM] } },
     select: { slug: true },
   });
   return articles.map(a => ({ slug: a.slug }));

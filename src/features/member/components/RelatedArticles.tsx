@@ -37,6 +37,13 @@ function ArticleGridCard({ article, isLarge }: { article: ArticleCard; isLarge?:
         </div>
         
         <div className="p-4 flex flex-col flex-1">
+          {/* Author Info */}
+          <div className="flex items-center mb-2 opacity-80 group-hover:opacity-100 transition-opacity">
+            <span className="text-[10px] font-semibold text-zinc-500 dark:text-slate-400">
+              <span className="font-normal opacity-70">bởi</span> {article.author?.name}
+            </span>
+          </div>
+
           <h4 className="font-display font-bold text-sm sm:text-base text-zinc-800 dark:text-white group-hover:text-primary transition-colors duration-300 mb-2 line-clamp-2 leading-snug">
             {article.title}
           </h4>

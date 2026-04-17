@@ -87,7 +87,7 @@ export default function SearchResults({ articles, query, tag }: { articles: Arti
               </h2>
 
               {/* Audience + Topic badges */}
-              <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
+              <div className="flex flex-wrap items-center gap-1.5 mb-2">
                 {article.audience === 'PREMIUM' && (
                   <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold uppercase tracking-wider border border-amber-200 dark:border-amber-500/20">
                     <Star className="w-2.5 h-2.5 fill-current" /> Premium
@@ -105,6 +105,13 @@ export default function SearchResults({ articles, query, tag }: { articles: Arti
               </div>
 
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-zinc-500 text-[11px] sm:text-xs">
+                {/* Author Info */}
+                <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-3 mr-1">
+                  <span className="font-semibold text-zinc-600 dark:text-slate-400 text-[10px] sm:text-[11px]">
+                    <span className="font-normal opacity-70">bởi</span> {article.author.name}
+                  </span>
+                </div>
+
                 <span className="flex items-center gap-1">
                   <Heart className="w-3 h-3 sm:w-3.5 sm:h-3.5" />{article._count.likes}
                 </span>

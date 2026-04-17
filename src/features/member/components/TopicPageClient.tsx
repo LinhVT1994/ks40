@@ -195,7 +195,7 @@ export default function TopicPageClient({
 
         {/* Sub-topic Navigation Tabs */}
         {isParent && children.length > 0 && (
-          <div className="mt-14 w-full flex items-center justify-center gap-3 overflow-x-auto pb-4 scrollbar-hide">
+          <div className="mt-14 w-full flex flex-wrap items-center justify-center gap-3 pb-4">
             <Link
               href={`/topic/${parentTopic?.slug ?? topic.slug}`}
               className={`shrink-0 px-6 py-2.5 rounded-full text-[13px] font-bold transition-all border ${
@@ -303,7 +303,7 @@ export default function TopicPageClient({
                         </div>
 
                         <Link href={`/article/${article.slug}`} className="mb-0 sm:mb-4">
-                          <p className="text-xs sm:text-sm text-zinc-500 dark:text-slate-300 sm:line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-500">
+                          <p className="text-xs sm:text-sm text-zinc-500 dark:text-slate-300 line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-500">
                             {article.summary}
                           </p>
                         </Link>
@@ -311,6 +311,13 @@ export default function TopicPageClient({
                         {/* Desktop Stats */}
                         <div className="hidden sm:flex mt-auto items-end justify-between pt-0 gap-2">
                           <div className="flex items-center flex-wrap gap-x-5 text-zinc-500 dark:text-slate-300 text-xs">
+                            {/* Author Info */}
+                            <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-5">
+                              <span className="font-semibold text-zinc-600 dark:text-slate-300 text-[11px]">
+                                <span className="font-normal opacity-70">bởi</span> {article.author.name}
+                              </span>
+                            </div>
+
                             <span className="flex items-center gap-1.5 group/stat transition-colors hover:text-rose-500 font-bold">
                               <Heart className="w-4 h-4 group-hover/stat:fill-rose-500/10" />
                               {formatCount(article._count.likes)}
@@ -352,6 +359,11 @@ export default function TopicPageClient({
                     {/* Mobile Stats (Full width footer) */}
                     <div className="flex sm:hidden mt-3 items-center justify-between pt-3 border-t border-zinc-100/80 dark:border-white/5 gap-2 w-full">
                         <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-zinc-500 dark:text-slate-400 text-[11px] font-medium">
+                            <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-3.5">
+                              <span className="font-semibold text-zinc-600 dark:text-slate-300 text-[10px]">
+                                <span className="font-normal opacity-70">bởi</span> {article.author.name}
+                              </span>
+                            </div>
                             <span className="flex items-center gap-1.5 group/stat hover:text-rose-500">
                               <Heart className="w-3.5 h-3.5" />
                               {formatCount(article._count.likes)}

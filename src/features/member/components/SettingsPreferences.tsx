@@ -4,7 +4,10 @@ import { useRouter } from 'next/navigation';
 import { useState, useTransition, useEffect } from 'react';
 import { updatePreferencesAction, getOccupationOptionsAction } from '@/features/onboarding/actions/onboarding';
 import type { OccupationOption } from '@/features/onboarding/actions/onboarding';
-import { Loader2, CheckCircle2 } from 'lucide-react';
+import { Loader2, CheckCircle2, ArrowUpRight } from 'lucide-react';
+import Link from 'next/link';
+import ProfileTopics from './ProfileTopics';
+import type { TopicItem } from '@/features/admin/actions/topic';
 
 const CODE_THEMES = [
   { id: 'classic',   name: 'Classic Dark',   colors: ['#1E1E1E', '#D4D4D4'] },
@@ -17,9 +20,16 @@ const CODE_THEMES = [
 interface Props {
   initialOccupation: string | null;
   initialCodeTheme: string;
+  initialTopics: string[];
+  availableTopics: TopicItem[];
 }
 
-export default function SettingsPreferences({ initialOccupation, initialCodeTheme }: Props) {
+export default function SettingsPreferences({ 
+  initialOccupation, 
+  initialCodeTheme,
+  initialTopics,
+  availableTopics
+}: Props) {
   const router = useRouter();
   const [occupation, setOccupation] = useState<string | null>(initialOccupation);
   const [codeTheme,  setCodeTheme]  = useState(initialCodeTheme);
@@ -139,6 +149,29 @@ export default function SettingsPreferences({ initialOccupation, initialCodeThem
       </div>
 
       <div className="border-t border-zinc-200 dark:border-white/5" />
+
+      {/* Topics Management */}
+      <div className="space-y-5">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-sm font-semibold text-zinc-800 dark:text-white">Chủ đề bài viết</h3>
+            <p className="text-xs text-zinc-500 mt-0.5">Tinh chỉnh thuật toán gợi ý bằng các chủ đề bạn quan tâm.</p>
+          </div>
+          <Link 
+            href="/topics"
+            className="group flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/[0.02] hover:border-primary/40 hover:bg-white dark:hover:bg-white/[0.05] transition-all duration-300"
+          >
+            <span className="text-[10px] font-black text-zinc-500 group-hover:text-primary uppercase tracking-widest transition-colors">Khám phá thêm</span>
+            <ArrowUpRight className="w-3 h-3 text-zinc-400 group-hover:text-primary transition-all group-hover:rotate-12" />
+          </Link>
+        </div>
+        <div className="-mx-1">
+          <ProfileTopics 
+            initialTopics={initialTopics} 
+            availableTopics={availableTopics} 
+          />
+        </div>
+      </div>
     </div>
   );
 }
