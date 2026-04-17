@@ -59,7 +59,7 @@ export default function StepOccupation({ value, onChange, onNext, onSkip, isPend
               className={`group relative flex items-center gap-3 p-4 rounded-xl border transition-all duration-300 ${
                 isActive
                   ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white'
-                  : 'bg-transparent border-zinc-100 dark:border-white/5 hover:border-zinc-300 dark:hover:border-white/20'
+                  : 'bg-zinc-50/50 dark:bg-transparent border-zinc-200 dark:border-white/5 hover:border-zinc-300 hover:bg-zinc-100 dark:hover:border-white/20 border-solid'
               }`}
             >
               <span className="text-xl shrink-0">{emoji ?? '👤'}</span>
@@ -72,7 +72,7 @@ export default function StepOccupation({ value, onChange, onNext, onSkip, isPend
                 </span>
                 {description && (
                   <span className={`block text-[10px] font-medium leading-normal ${
-                    isActive ? 'text-white/50 dark:text-zinc-400' : 'text-zinc-400 dark:text-slate-500'
+                    isActive ? 'text-white/50 dark:text-zinc-400' : 'text-zinc-500 dark:text-slate-500'
                   }`}>
                     {description}
                   </span>

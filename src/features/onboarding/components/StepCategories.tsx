@@ -87,7 +87,7 @@ export default function StepCategories({ value, onChange, onBack, onComplete, on
               key={category.id} 
               variants={item}
               className={`rounded-xl transition-all duration-300 border ${
-                isExpanded ? 'bg-zinc-50 dark:bg-white/[0.03] border-zinc-200 dark:border-white/10' : 'border-zinc-100 dark:border-white/5'
+                isExpanded ? 'bg-zinc-50 dark:bg-white/[0.03] border-zinc-300 dark:border-white/10' : 'border-zinc-200 dark:border-white/5 hover:border-zinc-300'
               } ${isExpanded ? 'col-span-full' : ''}`}
             >
               <div
@@ -113,12 +113,12 @@ export default function StepCategories({ value, onChange, onBack, onComplete, on
                     className={`p-1 rounded-md transition-all ${
                       allSelected 
                         ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' 
-                        : 'text-zinc-200 hover:text-zinc-400'
+                        : 'text-zinc-300 dark:text-zinc-600 hover:text-zinc-500 dark:hover:text-zinc-400'
                     }`}
                   >
                     <Check className="w-3 h-3" />
                   </button>
-                  <ChevronRight className={`w-3.5 h-3.5 text-zinc-300 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                  <ChevronRight className={`w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                 </div>
               </div>
 
