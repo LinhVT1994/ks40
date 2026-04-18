@@ -35,29 +35,19 @@ const SOCIAL_LINKS = [
   { key: 'youtubeUrl',   icon: Youtube,   hoverColor: 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10' },
 ] as const;
 
+import { useInteraction } from '@/features/articles/context/ArticleInteractionContext';
+
 function formatCount(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
 }
 
-export default function AuthorCard({ author }: { author: AuthorInfo }) {
+export default function AuthorCard({ author: initialAuthor }: { author: AuthorInfo }) {
   const { data: session } = useSession();
   const userId = session?.user?.id;
 
-  const [isFollowing,   setIsFollowing]   = useState(author.isFollowing);
-  const [followerCount, setFollowerCount] = useState(author.followerCount);
-  const [isPending,     startTransition]  = useTransition();
+  const { isFollowing, followerCount, handleFollow, followPending } = useInteraction();
 
-  const handleFollow = () => {
-    startTransition(async () => {
-      const result = await toggleFollowAction(author.id);
-      if (result.success) {
-        setIsFollowing(result.isFollowing);
-        setFollowerCount(result.followerCount);
-      }
-    });
-  };
-
-  const isSelf = userId === author.id;
+  const isSelf = userId === initialAuthor.id;
 
   return (
     <div className="group relative p-5 rounded-2xl bg-white/80 dark:bg-slate-900/50 border border-zinc-300/80 dark:border-white/5 shadow-sm hover:shadow-md transition-all duration-300 backdrop-blur-xl flex flex-col gap-4 overflow-hidden">
@@ -67,11 +57,11 @@ export default function AuthorCard({ author }: { author: AuthorInfo }) {
       {/* Top: Avatar bên trái + Tên + Chỉ số */}
       <div className="relative z-10 flex items-center gap-3.5">
         {/* Avatar */}
-        <Link href={`/profile/${author.username ?? author.id}`} className="relative shrink-0 block group/avatar">
+        <Link href={`/profile/${initialAuthor.username ?? initialAuthor.id}`} className="relative shrink-0 block group/avatar">
           <div className="absolute inset-0 rounded-full bg-primary/20 blur-md opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-300" />
           <div className="relative rounded-full p-[2px] bg-white dark:bg-slate-800 shadow-sm ring-1 ring-zinc-300 dark:ring-white/10 group-hover/avatar:ring-primary/40 transition-all duration-300">
             <div className="rounded-full overflow-hidden bg-zinc-100 dark:bg-slate-900">
-              <Avatar src={author.image} name={author.name} size={52} className="w-full h-full object-cover" />
+              <Avatar src={initialAuthor.image} name={initialAuthor.name} size={52} className="w-full h-full object-cover" />
             </div>
           </div>
         </Link>
@@ -79,15 +69,15 @@ export default function AuthorCard({ author }: { author: AuthorInfo }) {
         {/* Name + Stats */}
         <div className="flex-1 min-w-0 pt-0.5">
           <Link
-            href={`/profile/${author.username ?? author.id}`}
+            href={`/profile/${initialAuthor.username ?? initialAuthor.id}`}
             className="block text-[16px] font-bold text-zinc-800 dark:text-white hover:text-primary transition-colors leading-tight truncate"
           >
-            {author.name}
+            {initialAuthor.name}
           </Link>
           
           <div className="flex items-center gap-2 text-[12px] text-zinc-500 dark:text-slate-400 font-medium mt-1.5">
             <div className="flex items-center gap-1 bg-zinc-100 dark:bg-white/5 px-1.5 py-0.5 rounded-md">
-              <span className="text-zinc-700 dark:text-slate-200 font-bold">{formatCount(author.articleCount)}</span>
+              <span className="text-zinc-700 dark:text-slate-200 font-bold">{formatCount(initialAuthor.articleCount)}</span>
               <span className="text-[10px] uppercase tracking-wider">bài</span>
             </div>
             <span className="w-1 h-1 rounded-full bg-zinc-200 dark:bg-slate-700" />
@@ -100,10 +90,10 @@ export default function AuthorCard({ author }: { author: AuthorInfo }) {
       </div>
 
       {/* Middle: Bio */}
-      {author.bio && (
+      {initialAuthor.bio && (
         <div className="relative z-10 w-full mb-1">
           <p className="text-[13px] text-zinc-600 dark:text-slate-300 leading-relaxed italic border-l-2 border-primary/30 dark:border-primary/50 pl-3">
-            {author.bio}
+            {initialAuthor.bio}
           </p>
         </div>
       )}
@@ -114,7 +104,7 @@ export default function AuthorCard({ author }: { author: AuthorInfo }) {
         {/* Social Icons — chỉ hiện khi có URL */}
         <div className="flex items-center gap-1.5">
           {SOCIAL_LINKS.map(({ key, icon: Icon, hoverColor }) => {
-            const url = (author as any)[key];
+            const url = (initialAuthor as any)[key];
             if (!url) return null;
             return (
               <a key={key} href={url} target="_blank" rel="noopener noreferrer" className={`w-7 h-7 rounded-full bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-500 dark:text-slate-400 ${hoverColor} transition-colors`}>
@@ -130,7 +120,7 @@ export default function AuthorCard({ author }: { author: AuthorInfo }) {
             {session ? (
               <button
                 onClick={handleFollow}
-                disabled={isPending}
+                disabled={followPending}
                 className={`group/btn relative flex items-center justify-start gap-2 px-4 py-1.5 rounded-full text-[11px] font-bold transition-all overflow-hidden w-[130px] ${
                   isFollowing
                     ? 'bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-500 dark:hover:text-rose-400 border border-zinc-300 dark:border-white/10 hover:border-rose-200 dark:hover:border-rose-500/30'

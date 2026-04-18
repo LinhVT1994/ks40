@@ -253,13 +253,11 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
       }
     };
     window.addEventListener('click', onClickOutside);
-    // Show bar briefly on enter
+    // Show bar always in focus mode
     setVisible(true);
-    const timer = setTimeout(() => setVisible(false), 2000);
     
     return () => {
       window.removeEventListener('click', onClickOutside);
-      clearTimeout(timer);
     };
   }, [active]);
 

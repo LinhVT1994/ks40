@@ -10,7 +10,7 @@ export default function MemberContainer({
   className?: string;
 }) {
   return (
-    <div className={`max-w-[1600px] mx-auto w-full p-4 md:p-8 pb-20 ${className}`}>
+    <div className={`max-w-[1280px] mx-auto w-full p-4 md:p-8 pb-20 ${className}`}>
       {children}
     </div>
   );

@@ -13,11 +13,6 @@ export default async function MemberLayout({
 
   return (
     <div className="flex bg-zinc-50 dark:bg-slate-950 font-display text-zinc-800 dark:text-slate-100 min-h-screen relative">
-      {/* Background glow effects — hidden on mobile for performance */}
-      <div className="fixed top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-[1200px] pointer-events-none z-0 hidden md:block">
-        <div className="absolute top-[-20%] left-[10%] w-[400px] h-[400px] dark:block bg-primary/20 rounded-full blur-[80px] mix-blend-screen"></div>
-        <div className="absolute top-[10%] right-[10%] w-[350px] h-[350px] dark:block bg-accent-purple/20 rounded-full blur-[80px] mix-blend-screen"></div>
-      </div>
 
       <main className="flex-1 flex flex-col relative z-10 w-full">
         {announcement && <AnnouncementBanner announcement={announcement} />}

@@ -2,7 +2,7 @@
 
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
-import { unstable_cache } from 'next/cache';
+import { unstable_cache, revalidateTag } from 'next/cache';
 
 // Thông tin tác giả (không có isFollowing) — cached 1 giờ
 const _getAuthorInfoCached = unstable_cache(
@@ -40,7 +40,7 @@ export async function getAuthorInfoAction(authorId: string) {
   const [author, followerCount, articleCount, isFollowing] = await Promise.all([
     db.user.findUnique({
       where:  { id: authorId },
-      select: { id: true, name: true, image: true, bio: true, websiteUrl: true, facebookUrl: true, instagramUrl: true, twitterUrl: true, linkedinUrl: true, githubUrl: true, youtubeUrl: true },
+      select: { id: true, name: true, image: true, bio: true, username: true, websiteUrl: true, facebookUrl: true, instagramUrl: true, twitterUrl: true, linkedinUrl: true, githubUrl: true, youtubeUrl: true },
     }),
     db.follow.count({ where: { followingId: authorId } }),
     db.article.count({ where: { authorId, status: 'PUBLISHED' } }),
@@ -66,5 +66,9 @@ export async function toggleFollowAction(authorId: string): Promise<{ success: b
   }
 
   const followerCount = await db.follow.count({ where: { followingId: authorId } });
+  
+  // Revalidate author info cache
+  revalidateTag('author-info', 'everything');
+  
   return { success: true, isFollowing: !existing, followerCount };
 }

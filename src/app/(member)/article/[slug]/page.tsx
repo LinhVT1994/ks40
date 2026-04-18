@@ -10,7 +10,7 @@ import ArticleContent from '@/features/member/components/ArticleContent';
 import ArticleComments from '@/features/member/components/ArticleComments';
 import ArticleRating from '@/features/member/components/ArticleRating';
 import { getArticleRatingSummaryAction } from '@/features/articles/actions/rating';
-import ArticleSidebar from '@/features/member/components/ArticleSidebar';
+import AuthorCard from '@/features/member/components/AuthorCard';
 import RelatedArticles from '@/features/member/components/RelatedArticles';
 import ArticleNavigation from '@/features/member/components/ArticleNavigation';
 import ArticleResources from '@/features/member/components/ArticleResources';
@@ -23,6 +23,8 @@ import NextArticleCard from '@/features/member/components/NextArticleCard';
 import FocusMode from '@/features/member/components/FocusMode';
 import MemberContainer from '@/components/layout/MemberContainer';
 import BackButton from '@/components/shared/BackButton';
+import { ArticleInteractionProvider } from '@/features/articles/context/ArticleInteractionContext';
+import FloatingInteractionHub from '@/features/member/components/FloatingInteractionHub';
 
 export const revalidate = 3600;
 
@@ -72,15 +74,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ArticleDetailPage({ params }: Props) {
   const { slug } = await params;
 
-  // Auth một lần duy nhất — lấy role để filter content và userId cho user-specific data
   const session = await auth();
   const role    = (session?.user as { role?: string })?.role;
   const userId  = session?.user?.id;
 
-  // Nội dung bài viết — cached theo (slug, role), không gọi auth() thêm
   const article = await getArticleBySlugStaticAction(slug, role);
 
-  // Nếu không có quyền truy cập, thử lấy preview (gated)
   const preview = !article ? await getArticlePreviewAction(slug) : null;
   if (!article && !preview) notFound();
 
@@ -100,18 +99,13 @@ export default async function ArticleDetailPage({ params }: Props) {
     !isGated ? getArticleRatingSummaryAction(data.id) : Promise.resolve(null),
   ]);
 
-  // Gắn trạng thái tương tác của user vào article
   const articleWithInteraction = article
     ? { ...article, isLiked: userInteraction.isLiked, isBookmarked: userInteraction.isBookmarked }
     : null;
 
-  const historyArticles: { article: ArticleCard; progress: number }[] = [];
-
   const related  = articles.filter(a => a.id !== data.id && a.topic.id === (data as { topic?: { id: string } }).topic?.id).slice(0, 7);
-  const trending = [...articles].sort((a, b) => b.viewCount - a.viewCount).filter(a => a.id !== data.id).slice(0, 4);
   const headings = isGated ? [] : parseHeadings(data.content);
 
-  // Build a minimal article-like object for ArticleHero when gated
   const heroArticle = articleWithInteraction ?? {
     ...preview!,
     authorId:    '',
@@ -134,7 +128,6 @@ export default async function ArticleDetailPage({ params }: Props) {
     ? (rawImage.startsWith('http') ? rawImage : `${SITE_URL}${rawImage}`)
     : null;
 
-  // wordCount approx — bỏ HTML/markdown tag thô
   const wordCount = typeof data.content === 'string'
     ? data.content.replace(/<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length
     : 0;
@@ -183,73 +176,107 @@ export default async function ArticleDetailPage({ params }: Props) {
     },
   };
 
+  const initialLiked = userInteraction.isLiked;
+  const initialBookmarked = userInteraction.isBookmarked;
+  const initialLikeCount = (article as any)?._count?.likes ?? 0;
+
   return (
     <MemberContainer>
       <JsonLd data={jsonLd} />
-      {!isGated && <div data-focus-hide><FloatingTOC headings={headings} /></div>}
-      {!isGated && <FocusMode readTime={data.readTime} headings={headings} />}
-
-      <div data-focus-grid className="flex flex-col xl:grid xl:grid-cols-12 gap-10 items-start">
-        {/* Main content */}
-        <main data-focus-main className="flex-1 min-w-0 xl:col-span-9">
-          <div data-focus-hide className="mb-6">
-            <BackButton />
-          </div>
-          <ArticleHero article={heroArticle as any} />
-          {!isGated && seriesCtx && (
-            <div data-focus-hide><SeriesBanner ctx={seriesCtx} /></div>
-          )}
-          <div data-focus-prose>
-            <ArticleContent
-              articleId={data.id}
-              content={data.content}
-              overview={!isGated ? (articleWithInteraction!.overview ?? undefined) : undefined}
-              objectives={!isGated ? (articleWithInteraction!.objectives ?? undefined) : undefined}
-              likeCount={!isGated ? articleWithInteraction!._count.likes : 0}
-              commentCount={!isGated ? articleWithInteraction!._count.comments : 0}
-              isLiked={!isGated ? (articleWithInteraction!.isLiked ?? false) : false}
-              isBookmarked={!isGated ? (articleWithInteraction!.isBookmarked ?? false) : false}
-              isGated={isGated}
-              audience={data.audience}
-            />
-          </div>
-
+      <ArticleInteractionProvider
+        articleId={data.id}
+        initialLiked={initialLiked}
+        initialBookmarked={initialBookmarked}
+        initialLikeCount={initialLikeCount}
+        author={{
+          id: (data.author as any).id,
+          name: data.author.name,
+          image: data.author.image,
+          username: (data.author as any).username,
+          articleCount: authorInfo?.articleCount ?? 0,
+          bio: authorInfo?.bio ?? null,
+        }}
+        initialIsFollowing={authorInfo?.isFollowing ?? false}
+        initialFollowerCount={authorInfo?.followerCount ?? 0}
+      >
+        <div className="relative max-w-[820px] mx-auto">
+          {/* Desktop Hanging Sidebars (Left: TOC, Right: Interaction) */}
           {!isGated && (
             <>
-              <div>
-                <ArticleResources resources={articleWithInteraction!.resources ?? []} />
-                <ArticleNavigation prev={navigation.prev} next={navigation.next} />
-                {(articleWithInteraction as any).nextArticle && (
-                  <NextArticleCard article={(articleWithInteraction as any).nextArticle} />
-                )}
+              <div className="hidden xl:block absolute right-full top-0 h-full pointer-events-none">
+                <div className="sticky top-32 pr-12 2xl:pr-20 pointer-events-auto">
+                  <aside className="xl:w-60 2xl:w-64">
+                    <FloatingTOC headings={headings} />
+                  </aside>
+                </div>
               </div>
-              {ratingSummary && (
-                <ArticleRating
-                  articleId={data.id}
-                  initialSummary={ratingSummary}
-                />
-              )}
-              <div>
-                <ArticleComments articleId={data.id} initialComments={comments as any} />
+
+              <div className="hidden xl:block absolute left-full top-0 h-full pointer-events-none">
+                <div data-focus-hide className="sticky top-40 pl-12 2xl:pl-20 pointer-events-auto">
+                  <FloatingInteractionHub />
+                </div>
               </div>
             </>
           )}
-          <div>
-            <RelatedArticles articles={related} />
-          </div>
-        </main>
 
-        {/* Sidebar — right */}
-        <aside data-focus-hide className="hidden xl:block xl:col-span-3 shrink-0 xl:sticky xl:top-[100px] xl:border-l xl:border-zinc-200 dark:xl:border-white/5 xl:pl-4">
-          <ArticleSidebar 
-            related={related} 
-            trending={trending} 
-            history={historyArticles}
-            headings={[]} 
-            author={authorInfo} 
-          />
-        </aside>
-      </div>
+          {/* Mobile TOC Drawer */}
+          {!isGated && (
+            <div className="xl:hidden">
+              <FloatingTOC headings={headings} />
+            </div>
+          )}
+          
+          {!isGated && <FocusMode readTime={data.readTime} headings={headings} />}
+
+          <main data-focus-main className="w-full animate-in fade-in duration-1000 min-w-0">
+            <div data-focus-hide className="mb-8 opacity-60 hover:opacity-100 transition-opacity">
+              <BackButton />
+            </div>
+            <ArticleHero article={heroArticle as any} />
+            {!isGated && seriesCtx && (
+              <div data-focus-hide><SeriesBanner ctx={seriesCtx} /></div>
+            )}
+            <div data-focus-prose>
+              <ArticleContent
+                articleId={data.id}
+                content={data.content}
+                overview={!isGated ? (articleWithInteraction!.overview ?? undefined) : undefined}
+                objectives={!isGated ? (articleWithInteraction!.objectives ?? undefined) : undefined}
+                likeCount={initialLikeCount}
+                commentCount={!isGated ? articleWithInteraction!._count.comments : 0}
+                isLiked={initialLiked}
+                isBookmarked={initialBookmarked}
+                isGated={isGated}
+                audience={data.audience}
+              />
+            </div>
+
+            {!isGated && (
+              <>
+                <div>
+                  <ArticleResources resources={articleWithInteraction!.resources ?? []} />
+                  <ArticleNavigation prev={navigation.prev} next={navigation.next} />
+                  {(articleWithInteraction as any).nextArticle && (
+                    <NextArticleCard article={(articleWithInteraction as any).nextArticle} />
+                  )}
+                </div>
+                {ratingSummary && (
+                  <ArticleRating
+                    articleId={data.id}
+                    initialSummary={ratingSummary}
+                  />
+                )}
+                <div>
+                  <ArticleComments articleId={data.id} initialComments={comments as any} />
+                </div>
+              </>
+            )}
+            <div>
+              <RelatedArticles articles={related} />
+            </div>
+          </main>
+        </div>
+      </ArticleInteractionProvider>
     </MemberContainer>
   );
 }

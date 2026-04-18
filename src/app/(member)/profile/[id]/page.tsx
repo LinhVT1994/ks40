@@ -142,7 +142,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
         <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-b from-primary/10 via-accent-purple/5 to-transparent -z-10" />
         <div className="absolute top-0 left-0 right-0 h-[400px] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] -z-10" />
 
-        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-40">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-40">
           <PublicProfileClient
             user={{ ...user, avatarUrl, totalViews, totalLikes }}
             articles={articles as any}
@@ -162,7 +162,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
       <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-b from-primary/10 via-accent-purple/5 to-transparent -z-10" />
       <div className="absolute top-0 left-0 right-0 h-[400px] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] -z-10" />
 
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-40">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-40">
         <ProfileClient
           user={{
             ...user,

@@ -5,6 +5,7 @@ import { User } from 'next-auth';
 import { useSession } from 'next-auth/react';
 import { Camera, Loader2, CheckCircle2, Globe, Facebook, Instagram, Twitter, Linkedin, Github, Youtube } from 'lucide-react';
 import { updateProfileAction } from '@/features/member/actions/profile';
+import { compressImage } from '@/lib/compress-image';
 
 type SocialUser = User & {
   bio?: string | null;
@@ -75,15 +76,18 @@ export default function SettingsProfile({ user }: { user: SocialUser }) {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert('Kích thước ảnh tối đa là 2MB');
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Kích thước ảnh tối đa là 10MB');
       return;
     }
 
     try {
       setIsUploading(true);
+      const blob = await compressImage(file, 512, 512, 0.85);
+      const ext  = blob.type === 'image/webp' ? 'webp' : 'jpg';
+      const compressed = new File([blob], `avatar.${ext}`, { type: blob.type });
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', compressed);
       
       const res = await fetch('/api/upload/avatar', {
         method: 'POST',

@@ -38,6 +38,7 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
+
 .animate-wave {
   animation: wave-animation 2.5s infinite;
   transform-origin: 70% 70%;
@@ -75,11 +76,11 @@
 
 @layer base {
   body {
-    @apply bg-background-light dark:bg-background-dark text-zinc-800 dark:text-white antialiased transition-colors duration-300 font-sans;
+    @apply bg-background-light dark:bg-background-dark text-zinc-800 dark:text-zinc-300 antialiased transition-colors duration-300 font-sans;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display font-bold tracking-tight;
+    @apply font-display font-bold tracking-tight text-zinc-900 dark:text-zinc-100;
   }
 
   .dark {
@@ -517,7 +518,7 @@ html.dark .focus-toc-panel {
 pre {
   background-color: var(--code-bg) !important;
   color: var(--code-text) !important;
-  transition: background-color 0.4s ease, color 0.4s ease;
+  /* transition: background-color 0.4s ease, color 0.4s ease; */
   border: 1px solid rgba(0, 0, 0, 0.05);
   /* Prevent horizontal overflow on mobile */
   max-width: 100% !important;
@@ -532,9 +533,15 @@ pre {
 
 pre code {
   color: inherit !important;
+  background: transparent !important;
   /* Inline code inside pre: don't break layout */
   white-space: pre !important;
   word-break: normal !important;
+}
+
+/* Ensure no token backgrounds in code blocks */
+pre span {
+  background: transparent !important;
 }
 
 /* Inline code: break long words to prevent overflow */

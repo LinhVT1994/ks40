@@ -402,7 +402,7 @@ const _getArticleContentCached = unstable_cache(
     const article = await db.article.findFirst({
       where: { slug, status: ArticleStatus.PUBLISHED, audience: { in: audienceFilter } },
       include: {
-        author:      { select: { name: true, image: true, username: true } },
+        author:      { select: { id: true, name: true, image: true, username: true } },
         tags:        { include: { tag: { select: { name: true, slug: true } } } },
         resources:   { select: { id: true, name: true, size: true, mimeType: true }, orderBy: { createdAt: 'asc' } },
         _count:      { select: { likes: true, comments: true, bookmarks: true } },
@@ -458,7 +458,7 @@ export async function getArticleBySlugAction(slug: string) {
   const article = await db.article.findFirst({
     where: { slug, status: ArticleStatus.PUBLISHED, audience: { in: audienceFilter } },
     include: {
-      author:      { select: { name: true, image: true, username: true } },
+      author:      { select: { id: true, name: true, image: true, username: true } },
       tags:        { include: { tag: { select: { name: true, slug: true } } } },
       resources:   { select: { id: true, name: true, size: true, mimeType: true }, orderBy: { createdAt: 'asc' } },
       _count:      { select: { likes: true, comments: true, bookmarks: true } },

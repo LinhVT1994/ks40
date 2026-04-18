@@ -1,17 +1,16 @@
 'use client';
 
 import { useState, useTransition, useEffect, useRef } from 'react';
-import dynamic from 'next/dynamic';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Heart, MessageCircle, Bookmark, Share2, Sparkles, Target, Lock as LockIcon } from 'lucide-react';
+import { Bookmark, Sparkles, Target, Lock as LockIcon } from 'lucide-react';
 import { toggleLikeAction } from '@/features/articles/actions/like';
 import { toggleBookmarkAction } from '@/features/articles/actions/bookmark';
 import { upsertReadHistoryAction, markArticleOpenedAction } from '@/features/articles/actions/read-history';
 import { incrementViewAction } from '@/features/articles/actions/article';
-import ReactMarkdown from 'react-markdown';
-
-const MarkdownViewer = dynamic(() => import('@/components/shared/MarkdownViewer'), { ssr: false });
+import MarkdownViewer from '@/components/shared/MarkdownViewer';
+import { useInteraction } from '@/features/articles/context/ArticleInteractionContext';
+import ShareMenu from '@/components/shared/ShareMenu';
 
 interface ArticleContentProps {
   articleId: string;
@@ -36,13 +35,11 @@ export default function ArticleContent({
   const router = useRouter();
   const pathname = usePathname();
 
-  const [liked, setLiked] = useState(isLiked);
-  const [bookmarked, setBookmarked] = useState(isBookmarked);
-  const [likes, setLikes] = useState(likeCount);
-  const [likePending, startLike] = useTransition();
-  const [bookmarkPending, startBookmark] = useTransition();
-  const [bookmarkToast, setBookmarkToast] = useState<string | null>(null);
-  const [readProgress, setReadProgress] = useState(0);
+  const { 
+    liked, bookmarked, likes, 
+    handleLike, handleBookmark, bookmarkToast, setReadProgress,
+    readProgress, likePending, bookmarkPending
+  } = useInteraction();
 
   const contentRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef(0);
@@ -68,7 +65,7 @@ export default function ArticleContent({
       if (cancelled) return;
       lastSavedRef.current = Math.max(lastSavedRef.current, progress);
       progressRef.current  = Math.max(progressRef.current, progress);
-      setReadProgress(prev => Math.max(prev, progress));
+      setReadProgress(Math.max(0, progress));
     });
 
     // Chỉ ghi khi tiến thêm ≥5% so với lần lưu trước (không bao giờ lùi)
@@ -85,7 +82,7 @@ export default function ArticleContent({
       const { top, height } = el.getBoundingClientRect();
       const p = Math.max(0, Math.min(1, (-top + window.innerHeight * 0.6) / height));
       progressRef.current = Math.max(progressRef.current, p); // không lùi
-      setReadProgress(prev => Math.max(prev, p));
+      setReadProgress(progressRef.current);
       clearTimeout(saveTimer.current);
       saveTimer.current = setTimeout(() => save(progressRef.current), 3000);
     };
@@ -111,32 +108,6 @@ export default function ArticleContent({
     };
   }, [articleId]);
 
-  const requireAuth = () => {
-    router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
-  };
-
-  const handleLike = () => {
-    if (!session) { requireAuth(); return; }
-    startLike(async () => {
-      const result = await toggleLikeAction(articleId);
-      setLiked(result.liked);
-      setLikes(result.count);
-    });
-  };
-
-  const handleBookmark = () => {
-    if (!session) { requireAuth(); return; }
-    const next = !bookmarked;
-    setBookmarked(next);
-    startBookmark(async () => {
-      const result = await toggleBookmarkAction(articleId);
-      setBookmarked(result.bookmarked);
-      const msg = result.bookmarked ? 'Đã lưu bài viết' : 'Đã bỏ lưu';
-      setBookmarkToast(msg);
-      setTimeout(() => setBookmarkToast(null), 2000);
-    });
-  };
-
   return (
     <div ref={contentRef} className="w-full min-w-0 max-w-none">
       {/* Reading progress bar — fixed top */}
@@ -147,36 +118,35 @@ export default function ArticleContent({
         />
       </div>
       {overview && (
-        <div className="bg-zinc-50 dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 p-8 rounded-3xl mb-6 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-8 text-primary/5 group-hover:text-primary/10 transition-colors pointer-events-none">
-            <Sparkles className="w-24 h-24" />
-          </div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-4 text-primary">
-              <Sparkles className="w-5 h-5" />
-              <h3 className="font-display font-bold text-sm uppercase tracking-widest">Tóm tắt</h3>
+        <div className="w-full max-w-[720px] mx-auto">
+          <div className="bg-primary/[0.03] dark:bg-primary/[0.01] border border-primary/10 dark:border-white/5 p-6 rounded-2xl mb-10 relative group transition-all duration-500 shadow-sm hover:shadow-md">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2 text-primary">
+                <Sparkles className="w-3.5 h-3.5" />
+                <h3 className="font-bold text-[10px] uppercase tracking-[0.2em]">Tóm tắt nội dung</h3>
+              </div>
+              <p className="text-zinc-700 dark:text-zinc-300 leading-relaxed text-lg font-medium italic opacity-90">
+                "{overview}"
+              </p>
             </div>
-            <p className="text-zinc-600 dark:text-slate-400 leading-relaxed text-base italic max-w-4xl">
-              "{overview}"
-            </p>
           </div>
         </div>
       )}
 
       {objectives && (
-        <div className="bg-emerald-50 dark:bg-emerald-500/[0.05] border border-emerald-200 dark:border-emerald-500/20 p-8 rounded-3xl mb-12 relative overflow-hidden group">
-          <div className="absolute top-0 right-0 p-8 text-emerald-500/10 group-hover:text-emerald-500/20 transition-colors pointer-events-none">
-            <Target className="w-24 h-24" />
-          </div>
-          <div className="relative z-10">
-            <div className="flex items-center gap-2 mb-4 text-emerald-600 dark:text-emerald-400">
-              <Target className="w-5 h-5" />
-              <h3 className="font-display font-bold text-sm uppercase tracking-widest">Sau bài này bạn sẽ</h3>
-            </div>
-            <div className="prose prose-sm dark:prose-invert max-w-none
-              prose-ul:space-y-1.5 prose-li:text-zinc-700 dark:prose-li:text-slate-300
-              prose-li:marker:text-emerald-500">
-              <MarkdownViewer content={objectives} />
+        <div className="w-full max-w-[720px] mx-auto">
+          <div className="bg-emerald-500/[0.03] dark:bg-emerald-500/[0.01] border border-emerald-500/10 dark:border-emerald-500/5 p-6 rounded-2xl mb-16 relative group transition-all duration-500 shadow-sm hover:shadow-md">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
+                <Target className="w-3.5 h-3.5" />
+                <h3 className="font-bold text-[10px] uppercase tracking-[0.2em]">Mục tiêu bài học</h3>
+              </div>
+              <div className="prose prose-sm dark:prose-invert max-w-none
+                prose-p:mt-0 prose-ul:mt-0
+                prose-ul:space-y-1 prose-li:text-zinc-700 dark:prose-li:text-zinc-300
+                prose-li:marker:text-emerald-500/40 prose-li:text-base prose-li:font-medium">
+                <MarkdownViewer content={objectives} />
+              </div>
             </div>
           </div>
         </div>
@@ -194,51 +164,51 @@ export default function ArticleContent({
           </div>
 
           {/* Bottom-aligned Gate Overlay with smooth fade */}
-          <div className="absolute inset-x-0 bottom-0 h-[300px] bg-gradient-to-t from-zinc-50 dark:from-slate-950 via-zinc-50/98 dark:via-slate-950/98 via-30% to-transparent flex flex-col items-center justify-end pb-12 px-6 text-center">
-            <div className="max-w-sm w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="absolute inset-x-0 bottom-0 h-[400px] bg-gradient-to-t from-zinc-50 dark:from-slate-950 via-zinc-50/98 dark:via-slate-950/98 via-40% to-transparent flex flex-col items-center justify-end pb-16 px-6 text-center">
+            <div className="max-w-md w-full p-8 rounded-[2.5rem] bg-white dark:bg-zinc-900 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.1)] dark:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.4)] border border-zinc-200/50 dark:border-white/5 space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700">
               {/* Icon */}
-              <div className={`w-12 h-12 mx-auto rounded-full flex items-center justify-center shadow-lg ${audience === 'PREMIUM' ? 'bg-amber-500/10 text-amber-500' : 'bg-primary/10 text-primary'}`}>
-                {audience === 'PREMIUM' ? <Sparkles className="w-6 h-6" /> : <LockIcon className="w-6 h-6" />}
+              <div className={`w-16 h-16 mx-auto rounded-3xl flex items-center justify-center shadow-2xl rotate-3 transition-transform hover:rotate-0 duration-500 ${audience === 'PREMIUM' ? 'bg-amber-500/10 text-amber-500' : 'bg-primary/10 text-primary'}`}>
+                {audience === 'PREMIUM' ? <Sparkles className="w-8 h-8" /> : <LockIcon className="w-8 h-8" />}
               </div>
 
               {/* Text */}
-              <div className="space-y-1">
-                <h3 className="text-base font-bold text-zinc-800 dark:text-white">
-                  {!session ? 'Đăng nhập để đọc tiếp' : audience === 'PREMIUM' ? 'Nội dung Premium' : 'Dành cho thành viên'}
+              <div className="space-y-3">
+                <h3 className="text-xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight">
+                  {!session ? 'Bắt đầu hành trình của bạn' : audience === 'PREMIUM' ? 'Nội dung đặc quyền' : 'Khu vực thành viên'}
                 </h3>
-                <p className="text-sm text-zinc-500 dark:text-slate-400 leading-normal">
+                <p className="text-zinc-500 dark:text-zinc-400 leading-relaxed font-medium">
                   {!session 
-                    ? 'Tạo tài khoản miễn phí để đọc toàn bộ bài viết này và hàng trăm bài học khác.'
+                    ? 'Đăng ký tài khoản để mở khóa toàn bộ kiến thức chuyên sâu và tài liệu thực hành đi kèm.'
                     : audience === 'PREMIUM' 
-                      ? 'Nâng cấp lên Premium để mở khóa toàn bộ bài viết, video và tài liệu độc quyền.'
-                      : 'Tham gia chương trình Thành viên để truy cập nội dung này.'
+                      ? 'Nâng cấp lên gói Premium để truy cập nội dung này cùng hệ sinh thái bài giảng độc quyền.'
+                      : 'Nội dung này dành riêng cho cộng đồng học viên chính thức.'
                   }
                 </p>
               </div>
 
               {/* Buttons */}
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <div className="flex flex-col gap-3">
                 {!session ? (
                   <>
                     <a
                       href={`/login?callbackUrl=${encodeURIComponent(pathname)}`}
-                      className="w-full sm:w-auto px-8 py-2.5 bg-primary text-white text-sm font-bold rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 active:scale-95"
+                      className="w-full py-4 bg-primary text-white font-black rounded-2xl hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 active:scale-[0.98]"
                     >
-                      Đăng nhập
+                      Đăng nhập ngay
                     </a>
                     <a
                       href="/register"
-                      className="w-full sm:w-auto px-8 py-2.5 bg-white dark:bg-white/5 text-zinc-700 dark:text-slate-300 text-sm font-bold rounded-xl border border-zinc-300 dark:border-white/10 hover:border-primary/40 hover:text-primary transition-all active:scale-95"
+                      className="w-full py-4 bg-zinc-50 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 font-bold rounded-2xl border border-zinc-200 dark:border-white/10 hover:border-primary/40 hover:text-primary transition-all active:scale-[0.98]"
                     >
-                      Đăng ký miễn phí
+                      Tạo tài khoản miễn phí
                     </a>
                   </>
                 ) : (
                   <a
                     href={audience === 'PREMIUM' ? '/pricing' : '#'}
-                    className={`w-full sm:w-auto px-10 py-3 rounded-xl font-bold text-sm text-white shadow-xl transition-all active:scale-95 ${audience === 'PREMIUM' ? 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/20' : 'bg-primary hover:bg-primary/90 shadow-primary/20'}`}
+                    className={`w-full py-4 rounded-2xl font-black text-white shadow-2xl transition-all active:scale-[0.98] ${audience === 'PREMIUM' ? 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/20' : 'bg-primary hover:bg-primary/90 shadow-primary/20'}`}
                   >
-                    {audience === 'PREMIUM' ? 'Nâng cấp Premium ngay' : 'Tham gia Membership'}
+                    {audience === 'PREMIUM' ? 'Nâng cấp Premium' : 'Đăng ký Hội viên'}
                   </a>
                 )}
               </div>
@@ -247,45 +217,7 @@ export default function ArticleContent({
         </div>
       )}
 
-      {/* Interaction Bar */}
-      <div className="mt-16 pt-8 border-t border-zinc-200 dark:border-white/5 flex items-center justify-between">
-        <div className="flex items-center gap-6">
-          <button
-            onClick={handleLike}
-            disabled={likePending}
-            className={`flex items-center gap-2 transition-all group ${liked ? 'text-rose-500' : 'text-zinc-500 hover:text-rose-500'}`}
-          >
-            <div className="p-2 rounded-full group-hover:bg-rose-50 dark:group-hover:bg-rose-500/10 transition-colors">
-              <Heart className={`w-6 h-6 group-hover:scale-110 transition-transform ${liked ? 'fill-current' : ''}`} />
-            </div>
-            <span className="font-bold text-sm">{likes}</span>
-          </button>
 
-          <span className="flex items-center gap-2 text-zinc-500">
-            <div className="p-2 rounded-full">
-              <MessageCircle className="w-6 h-6" />
-            </div>
-            <span className="font-bold text-sm">{commentCount}</span>
-          </span>
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            onClick={handleBookmark}
-            disabled={bookmarkPending}
-            className={`p-2 rounded-full transition-all ${bookmarked ? 'text-primary bg-primary/10' : 'text-zinc-500 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/5'}`}
-            title={bookmarked ? 'Bỏ lưu' : 'Lưu bài viết'}
-          >
-            <Bookmark className={`w-5 h-5 transition-all ${bookmarked ? 'fill-current' : ''}`} />
-          </button>
-          <button
-            onClick={() => navigator.share?.({ title: document.title, url: window.location.href })}
-            className="p-2 rounded-full text-zinc-500 hover:text-zinc-800 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition-all"
-          >
-            <Share2 className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
 
       {/* Bookmark toast */}
       {bookmarkToast && (

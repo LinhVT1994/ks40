@@ -7,13 +7,18 @@ import { createCommentAction, deleteCommentAction, toggleCommentLikeAction, getR
 import { useSession } from 'next-auth/react';
 import AvatarImg from '@/components/shared/Avatar';
 import { toast } from 'sonner';
+import { compressImage } from '@/lib/compress-image';
 
 const MAX_IMAGES = 4;
-const MAX_IMAGE_SIZE = 2 * 1024 * 1024; // 2MB per image
+const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB raw; compressed before upload
 
 async function uploadCommentImage(file: File): Promise<string> {
+  const blob = await compressImage(file, 1280, 1280, 0.82);
+  const ext  = blob.type === 'image/webp' ? 'webp' : 'jpg';
+  const compressed = new File([blob], `comment.${ext}`, { type: blob.type });
+
   const fd = new FormData();
-  fd.append('file', file);
+  fd.append('file', compressed);
   const res = await fetch('/api/upload/comment-image', { method: 'POST', body: fd });
   if (!res.ok) {
     const { error } = await res.json().catch(() => ({ error: 'Upload lỗi' }));
@@ -93,7 +98,7 @@ export default function ArticleComments({
     const accepted: File[] = [];
     for (const f of picked.slice(0, remaining)) {
       if (!f.type.startsWith('image/')) { toast.error(`${f.name}: không phải ảnh`); continue; }
-      if (f.size > MAX_IMAGE_SIZE)      { toast.error(`${f.name}: quá 2MB`); continue; }
+      if (f.size > MAX_IMAGE_SIZE)      { toast.error(`${f.name}: quá 10MB`); continue; }
       accepted.push(f);
     }
     return accepted;

@@ -39,7 +39,7 @@ export default async function SettingsPage() {
   const initialTopics = followedTopics.map(f => f.topicId);
 
   return (
-    <div className="max-w-[1600px] mx-auto px-4 md:px-8 py-10 w-full animate-in fade-in duration-500">
+    <div className="max-w-[1280px] mx-auto px-4 md:px-8 py-10 w-full animate-in fade-in duration-500">
       <div>
         <h1 className="text-3xl font-display font-bold text-zinc-800 dark:text-white tracking-tight">Cài đặt</h1>
         <p className="text-zinc-500 mt-2 text-sm leading-relaxed">Quản lý trang hồ sơ cá nhân, các tùy chỉnh thuật toán<br />và thiết lập bảo mật truy cập hệ thống dành cho bạn.</p>
