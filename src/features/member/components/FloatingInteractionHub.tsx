@@ -2,19 +2,30 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Heart, Bookmark, Share2, UserPlus, UserCheck } from 'lucide-react';
-import { useInteraction } from '@/features/articles/context/ArticleInteractionContext';
+import { useInteractionOptional } from '@/features/articles/context/ArticleInteractionContext';
 import Avatar from '@/components/shared/Avatar';
 import Link from 'next/link';
 import ShareMenu from '@/components/shared/ShareMenu';
 
 export default function FloatingInteractionHub() {
-  const { 
-    liked, likes, likePending, handleLike,
-    bookmarked, bookmarkPending, handleBookmark,
-    readProgress,
-    author, isFollowing, followerCount, followPending, handleFollow,
-    sidebarsVisible, showSidebars, hideSidebars
-  } = useInteraction();
+  const interaction = useInteractionOptional();
+  
+  const liked = interaction?.liked ?? false;
+  const likes = interaction?.likes ?? 0;
+  const likePending = interaction?.likePending ?? false;
+  const handleLike = interaction?.handleLike ?? (() => {});
+  const bookmarked = interaction?.bookmarked ?? false;
+  const bookmarkPending = interaction?.bookmarkPending ?? false;
+  const handleBookmark = interaction?.handleBookmark ?? (() => {});
+  const readProgress = interaction?.readProgress ?? 0;
+  const author = interaction?.author ?? { id: '', name: '', image: null, articleCount: 0, bio: null };
+  const isFollowing = interaction?.isFollowing ?? false;
+  const followerCount = interaction?.followerCount ?? 0;
+  const followPending = interaction?.followPending ?? false;
+  const handleFollow = interaction?.handleFollow ?? (() => {});
+  const sidebarsVisible = interaction?.sidebarsVisible ?? true;
+  const showSidebars = interaction?.showSidebars ?? (() => {});
+  const hideSidebars = interaction?.hideSidebars ?? (() => {});
 
   const [focusActive, setFocusActive] = useState(false);
 

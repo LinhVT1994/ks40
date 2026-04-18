@@ -9,7 +9,7 @@ import { toggleBookmarkAction } from '@/features/articles/actions/bookmark';
 import { upsertReadHistoryAction, markArticleOpenedAction } from '@/features/articles/actions/read-history';
 import { incrementViewAction } from '@/features/articles/actions/article';
 import MarkdownViewer from '@/components/shared/MarkdownViewer';
-import { useInteraction } from '@/features/articles/context/ArticleInteractionContext';
+import { useInteractionOptional } from '@/features/articles/context/ArticleInteractionContext';
 import ShareMenu from '@/components/shared/ShareMenu';
 
 interface ArticleContentProps {
@@ -35,11 +35,18 @@ export default function ArticleContent({
   const router = useRouter();
   const pathname = usePathname();
 
-  const { 
-    liked, bookmarked, likes, 
-    handleLike, handleBookmark, bookmarkToast, setReadProgress,
-    readProgress, likePending, bookmarkPending
-  } = useInteraction();
+  const interaction = useInteractionOptional();
+  
+  const liked = interaction?.liked ?? false;
+  const bookmarked = interaction?.bookmarked ?? false;
+  const likes = interaction?.likes ?? likeCount;
+  const handleLike = interaction?.handleLike ?? (() => {});
+  const handleBookmark = interaction?.handleBookmark ?? (() => {});
+  const bookmarkToast = interaction?.bookmarkToast ?? null;
+  const setReadProgress = interaction?.setReadProgress ?? (() => {});
+  const readProgress = interaction?.readProgress ?? 0;
+  const likePending = interaction?.likePending ?? false;
+  const bookmarkPending = interaction?.bookmarkPending ?? false;
 
   const contentRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef(0);

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import { UserPlus, UserCheck, Globe, Facebook, Instagram, Twitter, Linkedin, Github, Youtube } from 'lucide-react';
@@ -35,7 +35,7 @@ const SOCIAL_LINKS = [
   { key: 'youtubeUrl',   icon: Youtube,   hoverColor: 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10' },
 ] as const;
 
-import { useInteraction } from '@/features/articles/context/ArticleInteractionContext';
+import { useInteractionOptional } from '@/features/articles/context/ArticleInteractionContext';
 
 function formatCount(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
@@ -45,7 +45,41 @@ export default function AuthorCard({ author: initialAuthor }: { author: AuthorIn
   const { data: session } = useSession();
   const userId = session?.user?.id;
 
-  const { isFollowing, followerCount, handleFollow, followPending } = useInteraction();
+  const context = useInteractionOptional();
+  
+  // Use context if available (on Article pages), otherwise fallback to local state
+  const [localIsFollowing, setLocalIsFollowing] = useState(initialAuthor.isFollowing);
+  const [localFollowerCount, setLocalFollowerCount] = useState(initialAuthor.followerCount);
+  const [localFollowPending, startFollowTransition] = useTransition();
+
+  const isFollowing = context ? context.isFollowing : localIsFollowing;
+  const followerCount = context ? context.followerCount : localFollowerCount;
+  const followPending = context ? context.followPending : localFollowPending;
+
+  const handleFollow = useCallback(async () => {
+    if (!session) {
+      window.location.href = `/login?callbackUrl=${encodeURIComponent(window.location.pathname)}`;
+      return;
+    }
+
+    if (context) {
+      context.handleFollow();
+      return;
+    }
+
+    // Fallback logic for non-article pages
+    startFollowTransition(async () => {
+      try {
+        const result = await toggleFollowAction(initialAuthor.id);
+        if (result.success) {
+          setLocalIsFollowing(result.isFollowing);
+          setLocalFollowerCount(result.followerCount);
+        }
+      } catch (error) {
+        console.error('Failed to toggle follow:', error);
+      }
+    });
+  }, [session, context, initialAuthor.id]);
 
   const isSelf = userId === initialAuthor.id;
 

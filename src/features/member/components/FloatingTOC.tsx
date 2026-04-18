@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { X, Maximize2, Minimize2 } from 'lucide-react';
 import { smoothScrollTo } from '@/lib/scroll-utils';
-import { useInteraction } from '@/features/articles/context/ArticleInteractionContext';
+import { useInteractionOptional } from '@/features/articles/context/ArticleInteractionContext';
 
 type Heading = { level: number; text: string; id: string };
 
@@ -27,7 +27,10 @@ export default function FloatingTOC({
   const [focusActive, setFocusActive] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
 
-  const { sidebarsVisible, showSidebars, hideSidebars } = useInteraction();
+  const interaction = useInteractionOptional();
+  const sidebarsVisible = interaction?.sidebarsVisible ?? true;
+  const showSidebars = interaction?.showSidebars ?? (() => {});
+  const hideSidebars = interaction?.hideSidebars ?? (() => {});
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const itemRefs = useRef<Map<string, HTMLAnchorElement | null>>(new Map());
