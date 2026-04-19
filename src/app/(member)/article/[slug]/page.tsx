@@ -26,7 +26,7 @@ import BackButton from '@/components/shared/BackButton';
 import { ArticleInteractionProvider } from '@/features/articles/context/ArticleInteractionContext';
 import FloatingInteractionHub from '@/features/member/components/FloatingInteractionHub';
 
-export const revalidate = 3600;
+export const dynamic = 'force-dynamic';
 
 export async function generateStaticParams() {
   return getPublishedArticleSlugsAction();
@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const fullTitle   = `${article.title} | ${SITE_NAME}`;
   const description = article.summary ?? `Đọc bài viết ${article.title} trên ${SITE_NAME}`;
   const ogImage     = article.thumbnail ?? article.cover
-    ?? `${SITE_URL}/og?title=${encodeURIComponent(article.title)}&author=${encodeURIComponent(article.author.name)}&topic=${encodeURIComponent(article.topic?.label ?? '')}&color=${encodeURIComponent(article.topic?.color ?? '#64748b')}`;
+    ?? `${SITE_URL}/og?title=${encodeURIComponent(article.title)}&author=${encodeURIComponent(article.author?.name ?? 'Unknown')}&topic=${encodeURIComponent(article.topic?.label ?? '')}&color=${encodeURIComponent(article.topic?.color ?? '#64748b')}`;
 
   return {
     title,
@@ -103,7 +103,7 @@ export default async function ArticleDetailPage({ params }: Props) {
     ? { ...article, isLiked: userInteraction.isLiked, isBookmarked: userInteraction.isBookmarked }
     : null;
 
-  const related  = articles.filter(a => a.id !== data.id && a.topic.id === (data as { topic?: { id: string } }).topic?.id).slice(0, 7);
+  const related  = articles.filter(a => a.id !== data.id && a.topic?.id === (data as { topic?: { id: string } }).topic?.id).slice(0, 7);
   const headings = isGated ? [] : parseHeadings(data.content);
 
   const heroArticle = articleWithInteraction ?? {
@@ -189,10 +189,10 @@ export default async function ArticleDetailPage({ params }: Props) {
         initialBookmarked={initialBookmarked}
         initialLikeCount={initialLikeCount}
         author={{
-          id: (data.author as any).id,
-          name: data.author.name,
-          image: data.author.image,
-          username: (data.author as any).username,
+          id: (data.author as any)?.id ?? '',
+          name: data.author?.name ?? 'Unknown',
+          image: data.author?.image ?? null,
+          username: (data.author as any)?.username ?? '',
           articleCount: authorInfo?.articleCount ?? 0,
           bio: authorInfo?.bio ?? null,
         }}
