@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Eye, Heart, Clock, Sparkles, ArrowRight } from 'lucide-react';
 import type { ArticleCard } from '@/features/articles/actions/article';
 
@@ -14,16 +15,22 @@ function ArticleGridCard({ article, isLarge }: { article: ArticleCard; isLarge?:
   return (
     <Link href={`/article/${article.slug}`} className="block group h-full">
       <div className="relative h-full flex flex-col overflow-hidden bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-2xl hover:border-primary/30 dark:hover:border-primary/20 transition-all duration-500 hover:shadow-xl hover:shadow-primary/5 group">
-        <div 
-          className={`w-full bg-cover bg-center relative transition-transform duration-700 group-hover:scale-105 ${isLarge ? "aspect-[3/1]" : "aspect-[16/10]"}`}
-          style={article.thumbnail ? { backgroundImage: `url('${article.thumbnail}')`, backgroundPosition: article.thumbnailPosition ?? '50% 50%' } : undefined}
-        >
-          {!article.thumbnail && (
+        <div className={`w-full relative overflow-hidden ${isLarge ? "aspect-[3/1]" : "aspect-[16/10]"}`}>
+          {article.thumbnail ? (
+            <Image
+              src={article.thumbnail}
+              alt={article.title}
+              fill
+              sizes={isLarge ? "(max-width: 640px) 100vw, 50vw" : "(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"}
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              style={{ objectPosition: article.thumbnailPosition ?? '50% 50%' }}
+            />
+          ) : (
             <div className="absolute inset-0 flex items-center justify-center bg-zinc-100 dark:bg-white/5 text-3xl font-bold text-zinc-300 dark:text-white/10">
               {article.title[0]}
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-800/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-zinc-800/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           
           <div className="absolute top-3 left-3 px-2 py-0.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-full border border-white/20 shadow-sm transition-transform duration-300 group-hover:scale-95">
             <span className="text-[9px] font-bold text-primary uppercase tracking-widest flex items-center gap-1.5">

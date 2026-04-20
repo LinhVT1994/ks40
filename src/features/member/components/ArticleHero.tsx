@@ -2,6 +2,7 @@
 
 import { Tag, Clock, UserPlus, UserCheck, Heart, Bookmark, Share2 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import Avatar from '@/components/shared/Avatar';
 import type { ArticleFull } from '@/features/articles/actions/article';
 import { useInteractionOptional } from '@/features/articles/context/ArticleInteractionContext';
@@ -18,18 +19,23 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
   return (
     <div className="w-full relative overflow-visible mb-12 group/hero">
       {/* Background Aesthetic Glow */}
-      <div className="absolute -top-24 -left-24 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none -z-10 animate-pulse duration-[10s]" />
-      <div className="absolute top-0 -right-24 w-72 h-72 bg-emerald-500/5 rounded-full blur-[80px] pointer-events-none -z-10" />
+      <div aria-hidden="true" className="absolute -top-24 -left-24 w-96 h-96 bg-primary/5 rounded-full blur-[100px] pointer-events-none -z-10 animate-pulse duration-[10s]" />
+      <div aria-hidden="true" className="absolute top-0 -right-24 w-72 h-72 bg-emerald-500/5 rounded-full blur-[80px] pointer-events-none -z-10" />
 
       <div className="flex flex-col gap-10">
         {article.cover && (
-          <div className="w-full aspect-[21/9] rounded-2xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.6)] relative group/cover animate-in fade-in zoom-in-95 duration-1000 border border-zinc-200/50 dark:border-white/5">
-            <div
-              className="w-full h-full bg-cover bg-center transition-transform duration-[2s] ease-out group-hover/cover:scale-110"
-              style={{ backgroundImage: `url('${article.cover}')`, backgroundPosition: article.coverPosition ?? '50% 50%' }}
+          <div className="w-full aspect-[21/9] rounded-2xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.6)] relative group/cover animate-in fade-in zoom-in-95 duration-500 border border-zinc-200/50 dark:border-white/5">
+            <Image
+              src={article.cover}
+              alt={article.title}
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1280px) 80vw, 820px"
+              className="object-cover transition-transform duration-[2s] ease-out group-hover/cover:scale-110"
+              style={{ objectPosition: article.coverPosition ?? '50% 50%' }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover/cover:opacity-40 transition-opacity duration-700" />
-            <div className="absolute inset-0 opacity-0 group-hover/cover:opacity-100 transition-opacity duration-1000 bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none" />
+            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-60 group-hover/cover:opacity-40 transition-opacity duration-700" />
+            <div aria-hidden="true" className="absolute inset-0 opacity-0 group-hover/cover:opacity-100 transition-opacity duration-1000 bg-gradient-to-tr from-white/10 via-transparent to-transparent pointer-events-none" />
           </div>
         )}
 
@@ -44,11 +50,11 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
             </Link>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-5xl font-black text-zinc-900 dark:text-zinc-100 font-display leading-[1.15] tracking-tight text-justify animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <h1 className="text-4xl sm:text-5xl lg:text-5xl font-black text-zinc-900 dark:text-zinc-100 font-display leading-[1.15] tracking-tight text-justify animate-in fade-in slide-in-from-bottom-2 duration-500">
             {article.title}
           </h1>
 
-          <div className="flex flex-wrap items-center gap-x-10 gap-y-6 text-zinc-500 dark:text-zinc-500 text-sm animate-in fade-in slide-in-from-bottom-6 duration-700 delay-100">
+          <div className="flex flex-wrap items-center gap-x-10 gap-y-6 text-zinc-500 dark:text-zinc-500 text-sm animate-in fade-in duration-500 delay-75">
             <Link href={`/profile/${article.author.username ?? article.authorId}`} className="flex items-center gap-3.5 hover:text-primary transition-colors group/author">
               <div className="relative">
                 <Avatar src={article.author.image} name={article.author.name} size={44} />

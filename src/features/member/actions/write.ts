@@ -96,6 +96,12 @@ export async function updateArticleQuickAction(
   patch: { status?: ArticleStatus; audience?: ArticleAudience; rejectionReason?: string; badges?: ArticleBadge[] }
 ) {
   try {
+    const session = await auth();
+    const role = (session?.user as { role?: string } | undefined)?.role;
+    if (role !== 'ADMIN') {
+      return { success: false, error: 'Chỉ quản trị viên mới có quyền thực hiện thao tác này.' };
+    }
+
     const updateData: any = { ...patch };
 
     // If status is PUBLISHED, ensure publishedAt is set

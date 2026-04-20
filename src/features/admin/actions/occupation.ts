@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
-import { revalidateTag } from 'next/cache';
+import { updateTag } from 'next/cache';
 
 export type OccupationOptionAdmin = {
   id: string;
@@ -41,7 +41,7 @@ export async function createOccupationOptionAction(data: {
     },
   });
 
-  revalidateTag('occupation-options', 'everything');
+  updateTag('occupation-options');
   return { success: true };
 }
 
@@ -59,13 +59,13 @@ export async function updateOccupationOptionAction(
       ...(data.order !== undefined && { order: data.order }),
     },
   });
-  revalidateTag('occupation-options', 'everything');
+  updateTag('occupation-options');
   return { success: true };
 }
 
 export async function deleteOccupationOptionAction(id: string): Promise<{ success: boolean }> {
   await db.occupationOption.delete({ where: { id } });
-  revalidateTag('occupation-options', 'everything');
+  updateTag('occupation-options');
   return { success: true };
 }
 
@@ -73,5 +73,5 @@ export async function reorderOccupationOptionsAction(ids: string[]): Promise<voi
   await db.$transaction(
     ids.map((id, index) => db.occupationOption.update({ where: { id }, data: { order: index } })),
   );
-  revalidateTag('occupation-options', 'everything');
+  updateTag('occupation-options');
 }

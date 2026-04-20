@@ -65,8 +65,11 @@ export default function MemberStep3({ data, onBack, onPublish, isPending }: Step
     readTime,
     viewCount: 0,
     publishedAt: new Date(),
+    updatedAt: new Date(),
+    seriesId: null,
     authorId: 'preview-author',
     author: {
+      id: 'preview-author',
       name: data.author?.name || 'Tác giả',
       image: data.author?.image || null,
       username: null,

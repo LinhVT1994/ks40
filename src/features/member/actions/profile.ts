@@ -3,7 +3,7 @@
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { ArticleStatus } from '@prisma/client';
-import { revalidateTag } from 'next/cache';
+import { updateTag } from 'next/cache';
 
 export async function getPublicProfileAction(identifier: string) {
   // 1. Try finding by ID first (most stable)
@@ -155,7 +155,7 @@ export async function updateProfileAction(data: {
       where: { id: userId },
       data,
     });
-    revalidateTag('author-info', 'everything');
+    updateTag('author-info');
     return { success: true, user };
   } catch {
     return { success: false, error: 'Lỗi cập nhật hồ sơ' };

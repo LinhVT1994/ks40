@@ -2,7 +2,7 @@
 
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
-import { unstable_cache, revalidateTag } from 'next/cache';
+import { unstable_cache, updateTag } from 'next/cache';
 
 // Thông tin tác giả (không có isFollowing) — cached 1 giờ
 const _getAuthorInfoCached = unstable_cache(
@@ -52,6 +52,10 @@ export async function getAuthorInfoAction(authorId: string) {
 }
 
 export async function toggleFollowAction(authorId: string): Promise<{ success: boolean; isFollowing: boolean; followerCount: number }> {
+  if (typeof authorId !== 'string' || !/^[a-z0-9]{10,32}$/i.test(authorId)) {
+    return { success: false, isFollowing: false, followerCount: 0 };
+  }
+
   const session = await auth();
   const userId  = session?.user?.id;
   if (!userId) return { success: false, isFollowing: false, followerCount: 0 };
@@ -68,7 +72,7 @@ export async function toggleFollowAction(authorId: string): Promise<{ success: b
   const followerCount = await db.follow.count({ where: { followingId: authorId } });
   
   // Revalidate author info cache
-  revalidateTag('author-info');
+  updateTag('author-info');
   
   return { success: true, isFollowing: !existing, followerCount };
 }

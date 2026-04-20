@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
 import { auth } from '@/auth';
-import { getArticleBySlugStaticAction, getArticleUserInteractionAction, getArticlePreviewAction, getArticlesAction, getArticleNavigationAction, getSeriesContextAction, getPublishedArticleSlugsAction } from '@/features/articles/actions/article';
+import { getArticleBySlugStaticAction, getArticleUserInteractionAction, getArticlePreviewAction, getArticlesAction, getArticleNavigationAction, getSeriesContextAction } from '@/features/articles/actions/article';
 import type { ArticleCard } from '@/features/articles/actions/article';
 import { getCommentsAction } from '@/features/articles/actions/comment';
 import { getAuthorInfoStaticAction } from '@/features/member/actions/follow';
@@ -27,10 +27,6 @@ import { ArticleInteractionProvider } from '@/features/articles/context/ArticleI
 import FloatingInteractionHub from '@/features/member/components/FloatingInteractionHub';
 
 export const dynamic = 'force-dynamic';
-
-export async function generateStaticParams() {
-  return getPublishedArticleSlugsAction();
-}
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -85,9 +81,9 @@ export default async function ArticleDetailPage({ params }: Props) {
 
   const isGated    = !article;
   const data       = article ?? preview!;
-  const authorId   = (article as { authorId?: string })?.authorId ?? (preview as any)?.author?.id ?? '';
+  const authorId   = article?.authorId ?? preview?.author?.id ?? '';
 
-  const seriesId = (article as { seriesId?: string | null })?.seriesId ?? null;
+  const seriesId = article?.seriesId ?? null;
 
   const [comments, { articles }, authorInfo, navigation, seriesCtx, userInteraction, ratingSummary] = await Promise.all([
     !isGated ? getCommentsAction(data.id) : Promise.resolve([]),
@@ -103,7 +99,7 @@ export default async function ArticleDetailPage({ params }: Props) {
     ? { ...article, isLiked: userInteraction.isLiked, isBookmarked: userInteraction.isBookmarked }
     : null;
 
-  const related  = articles.filter(a => a.id !== data.id && a.topic?.id === (data as { topic?: { id: string } }).topic?.id).slice(0, 7);
+  const related  = articles.filter(a => a.id !== data.id && a.topic?.id === data.topic?.id).slice(0, 7);
   const headings = isGated ? [] : parseHeadings(data.content);
 
   const heroArticle = articleWithInteraction ?? {
@@ -133,7 +129,7 @@ export default async function ArticleDetailPage({ params }: Props) {
     : 0;
 
   const articleUrl = `${SITE_URL}/article/${data.slug}`;
-  const updatedAt  = (data as { updatedAt?: Date }).updatedAt;
+  const updatedAt  = data.updatedAt;
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -170,7 +166,7 @@ export default async function ArticleDetailPage({ params }: Props) {
       '@type': 'BreadcrumbList',
       itemListElement: [
         { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: SITE_URL },
-        { '@type': 'ListItem', position: 2, name: (data as { topic?: { label: string; slug: string } }).topic?.label ?? '', item: `${SITE_URL}/topic/${(data as { topic?: { slug: string } }).topic?.slug ?? ''}` },
+        { '@type': 'ListItem', position: 2, name: data.topic?.label ?? '', item: `${SITE_URL}/topic/${data.topic?.slug ?? ''}` },
         { '@type': 'ListItem', position: 3, name: data.title,    item: `${SITE_URL}/article/${data.slug}` },
       ],
     },
@@ -178,7 +174,7 @@ export default async function ArticleDetailPage({ params }: Props) {
 
   const initialLiked = userInteraction.isLiked;
   const initialBookmarked = userInteraction.isBookmarked;
-  const initialLikeCount = (article as any)?._count?.likes ?? 0;
+  const initialLikeCount = article?._count?.likes ?? 0;
 
   return (
     <MemberContainer>
@@ -189,10 +185,10 @@ export default async function ArticleDetailPage({ params }: Props) {
         initialBookmarked={initialBookmarked}
         initialLikeCount={initialLikeCount}
         author={{
-          id: (data.author as any)?.id ?? authorId,
+          id: data.author?.id ?? authorId,
           name: data.author?.name ?? 'Unknown',
           image: data.author?.image ?? null,
-          username: (data.author as any)?.username ?? '',
+          username: (data.author as { username?: string | null }).username ?? '',
           articleCount: authorInfo?.articleCount ?? 0,
           bio: authorInfo?.bio ?? null,
         }}
@@ -228,7 +224,7 @@ export default async function ArticleDetailPage({ params }: Props) {
           
           {!isGated && <FocusMode readTime={data.readTime} headings={headings} />}
 
-          <main data-focus-main className="w-full animate-in fade-in duration-1000 min-w-0">
+          <main data-focus-main className="w-full animate-in fade-in duration-500 min-w-0">
             <div data-focus-hide className="mb-8 opacity-60 hover:opacity-100 transition-opacity">
               <BackButton />
             </div>

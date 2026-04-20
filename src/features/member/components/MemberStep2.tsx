@@ -187,8 +187,11 @@ export default function MemberStep2({
     readTime,
     viewCount: 0,
     publishedAt: new Date(),
+    updatedAt: new Date(),
+    seriesId: null,
     authorId: 'preview-author',
     author: {
+      id: 'preview-author',
       name: author?.name || 'Tác giả',
       image: author?.image || null,
       username: null,

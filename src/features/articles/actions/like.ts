@@ -5,6 +5,10 @@ import { db } from '@/lib/db';
 import { createNotificationAction } from '@/features/notifications/actions/notification';
 
 export async function toggleLikeAction(articleId: string): Promise<{ liked: boolean; count: number }> {
+  if (typeof articleId !== 'string' || !/^[a-z0-9]{10,32}$/i.test(articleId)) {
+    throw new Error('Invalid articleId');
+  }
+
   const session = await auth();
   const userId  = session?.user?.id;
   if (!userId) throw new Error('Unauthenticated');

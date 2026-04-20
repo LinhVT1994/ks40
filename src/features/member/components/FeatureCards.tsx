@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useRef, useTransition, useCallback, useEffect } from 'react';
 import { Heart, MessageCircle, LayoutGrid, Clock, Eye, Loader2, Bookmark, ChevronRight, ArrowDown, Star, Lock, Tag, Filter, Calendar } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import TagList from './TagList';
 import type { ArticleCard } from '@/features/articles/actions/article';
 import { getArticlesAction, getForYouArticlesAction } from '@/features/articles/actions/article';
@@ -398,10 +399,18 @@ export default function FeatureCards({
                       {/* Thumbnail Link */}
                       <Link
                         href={`/article/${article.slug}`}
-                        className="w-24 sm:w-36 h-20 sm:h-28 shrink-0 bg-cover bg-center relative rounded-xl overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5"
-                        style={article.thumbnail ? { backgroundImage: `url('${article.thumbnail}')`, backgroundPosition: article.thumbnailPosition ?? '50% 50%' } : undefined}
+                        className="w-24 sm:w-36 h-20 sm:h-28 shrink-0 relative rounded-xl overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5"
                       >
-                        {!article.thumbnail && (
+                        {article.thumbnail ? (
+                          <Image
+                            src={article.thumbnail}
+                            alt={article.title}
+                            fill
+                            sizes="(max-width: 640px) 96px, 144px"
+                            className="object-cover"
+                            style={{ objectPosition: article.thumbnailPosition ?? '50% 50%' }}
+                          />
+                        ) : (
                           <div className="absolute inset-0 flex items-center justify-center text-zinc-300 dark:text-white/10 text-3xl font-bold transition-transform duration-700 group-hover:scale-110">
                             {article.title[0]}
                           </div>
@@ -672,11 +681,19 @@ function TrendingHorizontal({ articles, discoveryArticles, topicIds }: { article
           <React.Fragment key={article.id}>
             <Link href={`/article/${article.slug}`} className="block group">
               <div className="cursor-pointer py-3 hover:bg-zinc-100/80 dark:hover:bg-white/[0.02] transition-all duration-300 flex flex-row items-stretch min-h-[120px] px-3 -mx-3 rounded-xl">
-                <div
-                  className="w-24 sm:w-36 shrink-0 bg-cover bg-center relative rounded-lg overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-300 dark:text-white/10 text-3xl font-bold"
-                  style={article.thumbnail ? { backgroundImage: `url('${article.thumbnail}')`, backgroundPosition: article.thumbnailPosition ?? '50% 50%' } : undefined}
-                >
-                  {!article.thumbnail && article.title[0]}
+                <div className="w-24 sm:w-36 shrink-0 relative rounded-lg overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-300 dark:text-white/10 text-3xl font-bold">
+                  {article.thumbnail ? (
+                    <Image
+                      src={article.thumbnail}
+                      alt={article.title}
+                      fill
+                      sizes="(max-width: 640px) 96px, 144px"
+                      className="object-cover"
+                      style={{ objectPosition: article.thumbnailPosition ?? '50% 50%' }}
+                    />
+                  ) : (
+                    article.title[0]
+                  )}
                 </div>
                 <div className="pl-3 sm:pl-5 pr-1 flex-1 flex flex-col min-w-0 py-1">
                   <h4 className="text-sm sm:text-base font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors font-display line-clamp-2 flex-1 mb-1.5">

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowRight, Clock, Heart } from 'lucide-react';
 
 type NextArticle = {
@@ -40,11 +41,14 @@ export default function NextArticleCard({ article }: { article: NextArticle }) {
         {/* Image */}
         {image ? (
           <div className="relative sm:w-72 h-48 sm:h-auto shrink-0 overflow-hidden">
-            <div
-              className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105"
-              style={{ backgroundImage: `url('${image}')` }}
+            <Image
+              src={image}
+              alt={article.title}
+              fill
+              sizes="(max-width: 640px) 100vw, 288px"
+              className="object-cover transition-transform duration-700 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 dark:to-black/10" />
+            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 dark:to-black/10" />
           </div>
         ) : (
           <div className="sm:w-72 h-48 sm:h-auto shrink-0 bg-gradient-to-br from-primary/10 to-accent-purple/10 flex items-center justify-center">

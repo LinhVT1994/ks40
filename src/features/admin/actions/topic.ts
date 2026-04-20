@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/db';
 import { auth } from '@/auth';
-import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
+import { revalidatePath, updateTag, unstable_cache } from 'next/cache';
 
 export type TopicItem = {
   id: string;
@@ -168,7 +168,7 @@ export async function saveTopicsAction(topics: TopicItem[]): Promise<void> {
   revalidatePath('/');
   revalidatePath('/admin/settings');
   revalidatePath('/admin/topics');
-  revalidateTag('topics', 'everything'); // bust getEnabledTopicsAction cache
+  updateTag('topics'); // bust getEnabledTopicsAction cache
 }
 
 // ── Topic Follow ──────────────────────────────────────────────

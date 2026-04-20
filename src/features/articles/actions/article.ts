@@ -22,7 +22,7 @@ export type ArticleCard = {
   readTime: number;
   viewCount: number;
   publishedAt: Date | null;
-  author: { name: string; image: string | null; username: string | null };
+  author: { id: string; name: string; image: string | null; username: string | null };
   _count: { likes: number; comments: number; bookmarks: number };
   isLiked?: boolean;
   isBookmarked?: boolean;
@@ -32,6 +32,8 @@ export type ArticleCard = {
 
 export type ArticleFull = ArticleCard & {
   authorId: string;
+  seriesId: string | null;
+  updatedAt: Date;
   content: string;
   overview: string | null;
   objectives: string | null;
@@ -94,7 +96,7 @@ const _getRankedDiscoveryIds = unstable_cache(
       .map(a => a.id);
   },
   ['discovery-ranked'],
-  { revalidate: 300 }, // 5 phút
+  { revalidate: 300, tags: ['discovery-ranked', 'articles'] },
 );
 
 // ── Actions ────────────────────────────────────────────────────
@@ -157,7 +159,7 @@ export async function getArticlesAction(options: GetArticlesOptions = {}) {
     topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } },
     audience: true, badges: true,
     readTime: true, viewCount: true, publishedAt: true,
-    author:  { select: { name: true, image: true, username: true } },
+    author:  { select: { id: true, name: true, image: true, username: true } },
     _count:  { select: { likes: true, comments: true, bookmarks: true } },
     ratings: { where: { hidden: false }, select: { score: true } },
     ...(userId && {
@@ -283,7 +285,7 @@ export async function getForYouArticlesAction(options: {
     thumbnail: true, thumbnailPosition: true, cover: true, coverPosition: true,
     topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } },
     audience: true, badges: true, readTime: true, viewCount: true, publishedAt: true,
-    author:  { select: { name: true, image: true, username: true } },
+    author:  { select: { id: true, name: true, image: true, username: true } },
     _count:  { select: { likes: true, comments: true, bookmarks: true } },
     ratings: { where: { hidden: false }, select: { score: true } },
     ...(userId && {
@@ -415,7 +417,7 @@ const _getArticleContentCached = unstable_cache(
     return { ...article, isLiked: false, isBookmarked: false } as ArticleFull;
   },
   ['article-content'],
-  { revalidate: 3600 },
+  { revalidate: 3600, tags: ['article-content', 'articles'] },
 );
 
 // Dùng cho page render — role từ session của page, không gọi auth() thêm
@@ -480,8 +482,25 @@ export async function getArticleBySlugAction(slug: string) {
   } as ArticleFull;
 }
 
+export type ArticlePreview = {
+  id: string;
+  title: string;
+  slug: string;
+  summary: string | null;
+  thumbnail: string | null;
+  cover: string | null;
+  audience: ArticleAudience;
+  publishedAt: Date | null;
+  updatedAt: Date;
+  readTime: number;
+  topic: { id: string; slug: string; label: string; emoji: string | null; color: string | null; parentId: string | null; parent: { id: string; slug: string; label: string } | null };
+  author: { id: string; name: string; image: string | null };
+  tags: { tag: { name: string; slug: string } }[];
+  content: string;
+};
+
 // Returns truncated article for SEO metadata + content gate (no auth check, skips PRIVATE)
-export async function getArticlePreviewAction(slug: string) {
+export async function getArticlePreviewAction(slug: string): Promise<ArticlePreview | null> {
   const article = await db.article.findFirst({
     where: { slug, status: ArticleStatus.PUBLISHED, audience: { not: ArticleAudience.PRIVATE } },
     select: {
@@ -633,7 +652,7 @@ const _getPopularTagsCached = unstable_cache(
     }));
   },
   ['popular-tags'],
-  { revalidate: 600 } // 10 minutes
+  { revalidate: 600, tags: ['popular-tags', 'articles'] },
 );
 
 export async function getPopularTagsAction(limit = 12) {

@@ -99,6 +99,16 @@ export async function createCommentAction(
   parentId?: string,
   images: string[] = [],
 ): Promise<{ success: boolean; error?: string; comment?: CommentWithAuthor }> {
+  if (typeof articleId !== 'string' || !/^[a-z0-9]{10,32}$/i.test(articleId)) {
+    return { success: false, error: 'Bài viết không hợp lệ.' };
+  }
+  if (parentId !== undefined && (typeof parentId !== 'string' || !/^[a-z0-9]{10,32}$/i.test(parentId))) {
+    return { success: false, error: 'Bình luận gốc không hợp lệ.' };
+  }
+  if (typeof content !== 'string') {
+    return { success: false, error: 'Nội dung không hợp lệ.' };
+  }
+
   const session = await auth();
   const userId  = session?.user?.id;
   if (!userId) return { success: false, error: 'Bạn cần đăng nhập để bình luận.' };

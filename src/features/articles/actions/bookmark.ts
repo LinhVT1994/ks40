@@ -5,6 +5,10 @@ import { db } from '@/lib/db';
 import { ArticleCard } from './article';
 
 export async function toggleBookmarkAction(articleId: string): Promise<{ bookmarked: boolean }> {
+  if (typeof articleId !== 'string' || !/^[a-z0-9]{10,32}$/i.test(articleId)) {
+    throw new Error('Invalid articleId');
+  }
+
   const session = await auth();
   const userId  = session?.user?.id;
   if (!userId) throw new Error('Unauthenticated');

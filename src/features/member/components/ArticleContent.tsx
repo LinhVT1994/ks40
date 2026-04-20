@@ -118,10 +118,10 @@ export default function ArticleContent({
   return (
     <div ref={contentRef} className="w-full min-w-0 max-w-none">
       {/* Reading progress bar — fixed top */}
-      <div className="fixed top-0 left-0 right-0 z-[60] h-0.5 bg-transparent pointer-events-none">
+      <div aria-hidden="true" className="fixed top-0 left-0 right-0 z-[60] h-[2px] bg-transparent pointer-events-none">
         <div
-          className="h-full bg-primary duration-150 ease-out"
-          style={{ width: `${readProgress * 100}%` }}
+          className="h-full bg-gradient-to-r from-primary to-indigo-500 transition-[width] duration-300 ease-out"
+          style={{ width: `${Math.min(100, readProgress * 100)}%` }}
         />
       </div>
       {overview && (
