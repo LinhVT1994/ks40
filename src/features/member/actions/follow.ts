@@ -19,7 +19,7 @@ const _getAuthorInfoCached = unstable_cache(
     return { ...author, followerCount, articleCount, isFollowing: false };
   },
   ['author-info'],
-  { revalidate: 3600 },
+  { revalidate: 3600, tags: ['author-info'] },
 );
 
 // Static version — base data từ cache, isFollowing check riêng nếu có userId
@@ -68,7 +68,7 @@ export async function toggleFollowAction(authorId: string): Promise<{ success: b
   const followerCount = await db.follow.count({ where: { followingId: authorId } });
   
   // Revalidate author info cache
-  revalidateTag('author-info', 'everything');
+  revalidateTag('author-info');
   
   return { success: true, isFollowing: !existing, followerCount };
 }

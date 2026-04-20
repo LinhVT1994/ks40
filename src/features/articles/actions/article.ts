@@ -489,7 +489,7 @@ export async function getArticlePreviewAction(slug: string) {
       thumbnail: true, cover: true, audience: true,
       publishedAt: true, updatedAt: true, readTime: true,
       topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } },
-      author:    { select: { name: true, image: true } },
+      author:    { select: { id: true, name: true, image: true } },
       tags:      { include: { tag: { select: { name: true, slug: true } } } },
       content:   true,
     },

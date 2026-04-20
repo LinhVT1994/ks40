@@ -3,6 +3,7 @@
 import React, { createContext, useContext, ReactNode, useState, useMemo, useCallback, useTransition } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+import { toast } from 'sonner';
 import { useArticleInteraction } from '../hooks/useArticleInteraction';
 import { toggleFollowAction } from '@/features/member/actions/follow';
 
@@ -117,19 +118,48 @@ export function ArticleInteractionProvider({
       router.push(`/login?callbackUrl=${encodeURIComponent(pathname)}`);
       return;
     }
-    
+
+    if (!author.id) {
+      toast.error('Không xác định được tác giả', {
+        description: 'Dữ liệu bài viết thiếu thông tin. Vui lòng tải lại trang.',
+      });
+      return;
+    }
+
+    if (session.user?.id === author.id) {
+      toast.info('Đây là bài viết của bạn', {
+        description: 'Không thể tự theo dõi chính mình.',
+      });
+      return;
+    }
+
     startFollowTransition(async () => {
       try {
         const result = await toggleFollowAction(author.id);
         if (result.success) {
           setIsFollowing(result.isFollowing);
           setFollowerCount(result.followerCount);
+          toast.success(
+            result.isFollowing ? `Đang theo dõi ${author.name}` : `Đã hủy theo dõi ${author.name}`,
+            {
+              description: result.isFollowing
+                ? 'Bạn sẽ nhận thông báo khi có bài viết mới.'
+                : 'Bạn sẽ không nhận thông báo từ tác giả này nữa.',
+            },
+          );
+        } else {
+          toast.error('Không thể cập nhật', {
+            description: 'Hệ thống từ chối thao tác. Vui lòng thử lại.',
+          });
         }
       } catch (error) {
         console.error('Failed to toggle follow:', error);
+        toast.error('Có lỗi xảy ra', {
+          description: 'Không thể kết nối đến máy chủ. Vui lòng thử lại.',
+        });
       }
     });
-  }, [session, router, pathname, author.id]);
+  }, [session, router, pathname, author.id, author.name]);
 
   const value = useMemo(() => ({
     ...interaction,

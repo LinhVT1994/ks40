@@ -85,14 +85,14 @@ export default async function ArticleDetailPage({ params }: Props) {
 
   const isGated    = !article;
   const data       = article ?? preview!;
-  const authorId   = (article as { authorId?: string })?.authorId ?? '';
+  const authorId   = (article as { authorId?: string })?.authorId ?? (preview as any)?.author?.id ?? '';
 
   const seriesId = (article as { seriesId?: string | null })?.seriesId ?? null;
 
   const [comments, { articles }, authorInfo, navigation, seriesCtx, userInteraction, ratingSummary] = await Promise.all([
     !isGated ? getCommentsAction(data.id) : Promise.resolve([]),
     getArticlesAction({ limit: 20 }),
-    !isGated && authorId ? getAuthorInfoStaticAction(authorId, userId) : Promise.resolve(null),
+    authorId ? getAuthorInfoStaticAction(authorId, userId) : Promise.resolve(null),
     !isGated ? getArticleNavigationAction(data.publishedAt) : Promise.resolve({ prev: null, next: null }),
     !isGated && seriesId ? getSeriesContextAction(seriesId, data.id) : Promise.resolve(null),
     !isGated && userId && article ? getArticleUserInteractionAction(article.id, userId) : Promise.resolve({ isLiked: false, isBookmarked: false }),
@@ -189,7 +189,7 @@ export default async function ArticleDetailPage({ params }: Props) {
         initialBookmarked={initialBookmarked}
         initialLikeCount={initialLikeCount}
         author={{
-          id: (data.author as any)?.id ?? '',
+          id: (data.author as any)?.id ?? authorId,
           name: data.author?.name ?? 'Unknown',
           image: data.author?.image ?? null,
           username: (data.author as any)?.username ?? '',

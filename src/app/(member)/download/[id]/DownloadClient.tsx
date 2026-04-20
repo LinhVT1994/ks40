@@ -51,7 +51,7 @@ export default function DownloadClient({ resource }: { resource: Resource }) {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-slate-950 flex flex-col items-center justify-center p-4 gap-8">
+    <div className="min-h-screen bg-background-light dark:bg-background-dark flex flex-col items-center justify-center p-4 gap-8">
       {/* AdSense script */}
       {ADSENSE_CLIENT && (
         <Script

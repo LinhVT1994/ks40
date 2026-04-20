@@ -183,7 +183,7 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-zinc-50 dark:bg-slate-950">
+    <div className="flex flex-col h-screen overflow-hidden bg-background-light dark:bg-background-dark">
       {/* Immersive Header / Local Nav */}
       <div className="flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-zinc-300 dark:border-white/5 shrink-0 z-50">
         <div className="flex items-center gap-4">

@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Bookmark, Sparkles, Target, Lock as LockIcon } from 'lucide-react';
+import { Bookmark, Sparkles, Target, Lock as LockIcon, Quote, CheckCircle2 } from 'lucide-react';
 import { toggleLikeAction } from '@/features/articles/actions/like';
 import { toggleBookmarkAction } from '@/features/articles/actions/bookmark';
 import { upsertReadHistoryAction, markArticleOpenedAction } from '@/features/articles/actions/read-history';
@@ -120,41 +120,52 @@ export default function ArticleContent({
       {/* Reading progress bar — fixed top */}
       <div className="fixed top-0 left-0 right-0 z-[60] h-0.5 bg-transparent pointer-events-none">
         <div
-          className="h-full bg-primary transition-[width] duration-150 ease-out"
+          className="h-full bg-primary duration-150 ease-out"
           style={{ width: `${readProgress * 100}%` }}
         />
       </div>
       {overview && (
-        <div className="w-full max-w-[720px] mx-auto">
-          <div className="bg-primary/[0.03] dark:bg-primary/[0.01] border border-primary/10 dark:border-white/5 p-6 rounded-2xl mb-10 relative group transition-all duration-500 shadow-sm hover:shadow-md">
-            <div className="flex flex-col gap-3">
-              <div className="flex items-center gap-2 text-primary">
-                <Sparkles className="w-3.5 h-3.5" />
-                <h3 className="font-bold text-[10px] uppercase tracking-[0.2em]">Tóm tắt nội dung</h3>
+        <div className="w-full max-w-[720px] mx-auto px-4 md:px-0">
+          <div className="relative overflow-hidden px-0 py-2 mb-8 group">
+              <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-1">
+                  <h2 className="font-bold text-2xl md:text-3xl text-zinc-900 dark:text-zinc-100">Tóm tắt nhanh</h2>
+                </div>
+                  
+                <p className="text-zinc-800 dark:text-zinc-200 leading-relaxed text-lg md:text-xl font-medium tracking-tight opacity-95 [&_p]:m-0">
+                  {overview}
+                </p>
               </div>
-              <p className="text-zinc-700 dark:text-zinc-300 leading-relaxed text-lg font-medium italic opacity-90">
-                "{overview}"
-              </p>
-            </div>
           </div>
         </div>
       )}
 
       {objectives && (
-        <div className="w-full max-w-[720px] mx-auto">
-          <div className="bg-emerald-500/[0.03] dark:bg-emerald-500/[0.01] border border-emerald-500/10 dark:border-emerald-500/5 p-6 rounded-2xl mb-16 relative group transition-all duration-500 shadow-sm hover:shadow-md">
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400">
-                <Target className="w-3.5 h-3.5" />
-                <h3 className="font-bold text-[10px] uppercase tracking-[0.2em]">Mục tiêu bài học</h3>
+        <div className="w-full max-w-[720px] mx-auto px-4 md:px-0">
+          <div className="relative overflow-hidden px-0 py-2 mb-12 group">
+            {/* Background Decorative Pattern */}
+            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
+            
+              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
+                <h2 className="font-bold text-2xl md:text-3xl text-zinc-900 dark:text-zinc-100">Mục tiêu bài đọc</h2>
+                <p className="text-zinc-600 dark:text-zinc-400 text-lg md:text-xl font-medium">Sau khi đọc xong bài này, bạn sẽ:</p>
               </div>
-              <div className="prose prose-sm dark:prose-invert max-w-none
-                prose-p:mt-0 prose-ul:mt-0
-                prose-ul:space-y-1 prose-li:text-zinc-700 dark:prose-li:text-zinc-300
-                prose-li:marker:text-emerald-500/40 prose-li:text-base prose-li:font-medium">
-                <MarkdownViewer content={objectives} />
+
+                <div className="max-w-none 
+                  [&_ul]:list-none [&_ul]:p-0 [&_ul]:m-0 [&_ul]:space-y-4
+                  [&_li]:relative [&_li]:pl-6
+                  [&_li]:text-zinc-700 dark:[&_li]:text-zinc-300
+                  [&_li]:text-lg md:[&_li]:text-xl font-medium tracking-tight
+                  [&_li]:before:content-[''] [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:top-[0.65em]
+                  [&_li]:before:w-1.5 [&_li]:before:h-1.5 [&_li]:before:rounded-full [&_li]:before:bg-emerald-500/60
+                  [&_li]:before:shrink-0"
+                >
+                  <div className="markdown-content">
+                    <MarkdownViewer content={objectives} />
+                  </div>
+                </div>
               </div>
-            </div>
           </div>
         </div>
       )}

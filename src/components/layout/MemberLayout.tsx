@@ -12,7 +12,7 @@ export default async function MemberLayout({
   const announcement = await getAnnouncementAction();
 
   return (
-    <div className="flex bg-zinc-50 dark:bg-slate-950 font-display text-zinc-800 dark:text-slate-100 min-h-screen relative">
+    <div className="flex bg-background-light dark:bg-background-dark font-display text-zinc-800 dark:text-slate-100 min-h-screen relative">
 
       <main className="flex-1 flex flex-col relative z-10 w-full">
         {announcement && <AnnouncementBanner announcement={announcement} />}

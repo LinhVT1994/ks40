@@ -13,20 +13,7 @@ export default function LandingHero() {
 
       {/* Background Ornaments — hidden on mobile for performance */}
       <div className="absolute inset-0 z-0 hidden md:block">
-        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-primary/20 rounded-full blur-[80px]" />
-        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-indigo-500/20 rounded-full blur-[80px]" />
-        <svg className="absolute inset-0 w-full h-full opacity-30 dark:opacity-50 pointer-events-none">
-          <filter id="luminous" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="40" />
-          </filter>
-          <circle cx="50%" cy="40%" r="20%" fill="url(#hero-gradient)" filter="url(#luminous)" />
-          <defs>
-            <linearGradient id="hero-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0.4" />
-            </linearGradient>
-          </defs>
-        </svg>
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px]" />
       </div>
       
       {/* Top Badge */}
@@ -48,7 +35,7 @@ export default function LandingHero() {
           transition={{ duration: 1, ease: "easeOut" }}
           className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tighter text-zinc-800 dark:text-white leading-[1.1] mb-8 font-display"
         >
-          <span className="sr-only">Lenote — Nền tảng chia sẻ tri thức và kinh nghiệm đa góc nhìn. </span>
+          <span className="sr-only">Lenote — Nâng tầm tri thức.</span>
           <motion.span 
             className="inline-block"
             whileHover={{ scale: 1.02, textShadow: "0 0 20px rgba(59,130,246,0.3)" }}
@@ -56,19 +43,12 @@ export default function LandingHero() {
           >
             NÂNG TẦM
           </motion.span> <br />
-          <motion.span 
+          <motion.span
             whileHover={{ scale: 1.05, filter: "brightness(1.2)" }}
             transition={{ type: "spring", stiffness: 300 }}
             className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-primary to-emerald-500 animate-text-shimmer bg-[length:200%_auto] cursor-pointer"
           >
             TRI THỨC
-          </motion.span> <br />
-          <motion.span 
-            className="inline-block"
-            whileHover={{ scale: 1.02, textShadow: "0 0 20px rgba(16,185,129,0.3)" }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            TRONG TĨNH LẶNG
           </motion.span>
         </motion.h1>
 

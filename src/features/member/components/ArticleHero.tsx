@@ -44,7 +44,7 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
             </Link>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-zinc-900 dark:text-zinc-100 font-display leading-[1.15] tracking-tight text-justify animate-in fade-in slide-in-from-bottom-4 duration-700">
+          <h1 className="text-4xl sm:text-5xl lg:text-5xl font-black text-zinc-900 dark:text-zinc-100 font-display leading-[1.15] tracking-tight text-justify animate-in fade-in slide-in-from-bottom-4 duration-700">
             {article.title}
           </h1>
 
@@ -92,7 +92,7 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
               {date && (
                 <div className="flex flex-col -space-y-0.5">
                   <span className="text-[10px] uppercase tracking-[0.15em] font-black text-zinc-400 dark:text-zinc-500 mb-0.5">Xuất bản</span>
-                  <span className="font-bold text-zinc-800 dark:text-zinc-200">{date}</span>
+                  <span className="font-bold text-zinc-800 dark:text-zinc-200 text-sm">{date}</span>
                 </div>
               )}
             </div>
@@ -101,7 +101,7 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
 
             <div className="flex flex-col -space-y-0.5">
               <span className="text-[10px] uppercase tracking-[0.15em] font-black text-zinc-400 dark:text-zinc-500 mb-0.5">Thời lượng</span>
-              <div className="flex items-center gap-1.5 font-bold text-zinc-800 dark:text-zinc-200">
+              <div className="flex items-center gap-1.5 font-bold text-zinc-800 dark:text-zinc-200 text-sm">
                 <Clock className="w-3.5 h-3.5" />
                 <span>{article.readTime} phút đọc</span>
               </div>

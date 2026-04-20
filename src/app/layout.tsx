@@ -129,15 +129,20 @@ export default async function RootLayout({
               <ProductivityHub />
               <NotesPanel />
             </Suspense>
-            <Toaster 
-              position="top-right" 
-              expand={false} 
+            <Toaster
+              position="top-center"
+              expand={false}
               richColors={false}
               closeButton={false}
               theme="system"
+              offset={24}
+              gap={12}
+              duration={3500}
+              visibleToasts={4}
               className="premium-toaster"
               toastOptions={{
                 className: 'premium-toast group',
+                unstyled: false,
               }}
             />
           </ThemeProvider>
