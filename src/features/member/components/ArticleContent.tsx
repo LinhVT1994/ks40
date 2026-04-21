@@ -120,9 +120,13 @@ export default function ArticleContent({
       {/* Reading progress bar — fixed top */}
       <div aria-hidden="true" className="fixed top-0 left-0 right-0 z-[60] h-[2px] bg-transparent pointer-events-none">
         <div
-          className="h-full bg-gradient-to-r from-primary to-indigo-500 transition-[width] duration-300 ease-out"
+          className="h-full bg-gradient-to-r from-primary via-indigo-500 to-primary transition-[width] duration-300 ease-out relative shadow-[0_0_4px_rgba(59,130,246,0.3)]"
           style={{ width: `${Math.min(100, readProgress * 100)}%` }}
-        />
+        >
+          {/* Subtle Leading Glow */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-full bg-white blur-[2px] opacity-40" />
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-full bg-white shadow-[0_0_5px_#fff] opacity-60" />
+        </div>
       </div>
       {overview && (
         <div className="w-full max-w-[720px] mx-auto px-4 md:px-0">

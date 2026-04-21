@@ -5,6 +5,7 @@ import { Heart, MessageCircle, LayoutGrid, Clock, Eye, Loader2, Bookmark, Chevro
 import Link from 'next/link';
 import Image from 'next/image';
 import TagList from './TagList';
+import { GlanceTrigger } from './GlancePreview';
 import type { ArticleCard } from '@/features/articles/actions/article';
 import { getArticlesAction, getForYouArticlesAction } from '@/features/articles/actions/article';
 import { toggleBookmarkAction, getBookmarksAction } from '@/features/articles/actions/bookmark';
@@ -221,10 +222,10 @@ export default function FeatureCards({
 
   return (
     <section ref={topRef} className="mt-6 sm:mt-8 lg:mt-12 overflow-visible">
-      <div className="flex flex-col lg:flex-row xl:grid xl:grid-cols-12 gap-10 items-stretch">
+      <div className="flex flex-col lg:flex-row xl:grid xl:grid-cols-12 2xl:grid-cols-12 gap-10 items-stretch">
         
         {/* Sidebar Topics */}
-        <aside className="lg:w-52 xl:col-span-2 shrink-0 relative">
+        <aside className="lg:w-52 xl:col-span-2 2xl:col-span-2 shrink-0 relative">
           <div className="lg:sticky lg:top-[100px]">
 
             <div className="flex items-center gap-2 mb-3 lg:mb-4 px-2">
@@ -317,7 +318,7 @@ export default function FeatureCards({
         </aside>
 
         {/* Main Feed Content */}
-        <div className="flex-1 xl:col-span-7">
+        <div className="flex-1 xl:col-span-7 2xl:col-span-7">
           {/* Feed Switcher Tabs & Dropdown */}
           <div className="flex items-center justify-between mb-10 border-b border-zinc-200 dark:border-white/5 relative">
             <div className="flex items-center gap-8">
@@ -365,18 +366,22 @@ export default function FeatureCards({
                  <Filter className="w-3.5 h-3.5" />
                </button>
 
-               {/* Dropdown Menu */}
+               {/* Glassmorphism Dropdown Menu */}
                {isTimeframeOpen && (
-                 <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-slate-900 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl z-50 py-2 animate-in fade-in zoom-in-95 duration-200">
+                 <div className="absolute right-0 top-full mt-3 w-56 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl z-50 py-2.5 animate-in fade-in zoom-in-95 duration-200 ring-1 ring-black/5 dark:ring-white/5">
+                    <div className="px-4 py-2 mb-1 border-b border-zinc-100 dark:border-white/5">
+                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Lọc theo thời gian</span>
+                    </div>
                     {timeframeOptions.map(o => (
                       <button
                         key={o.id}
                         onClick={() => handleTimeframeChange(o.id)}
-                        className={`w-full px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider transition-colors hover:bg-zinc-50 dark:hover:bg-white/5 ${
-                          activeTimeframe === o.id ? 'text-primary' : 'text-zinc-500 dark:text-slate-400'
+                        className={`w-full px-4 py-2.5 text-left text-[11px] font-bold uppercase tracking-wider transition-all flex items-center justify-between group/link ${
+                          activeTimeframe === o.id ? 'text-primary' : 'text-zinc-500 dark:text-slate-400 hover:text-zinc-800 dark:hover:text-white hover:bg-zinc-50/50 dark:hover:bg-white/5'
                         }`}
                       >
                         {o.label}
+                        {activeTimeframe === o.id && <div className="w-1 h-1 rounded-full bg-primary" />}
                       </button>
                     ))}
                  </div>
@@ -389,196 +394,203 @@ export default function FeatureCards({
               currentArticles.map((article, idx) => (
                 <React.Fragment key={article.id}>
                   <div className="block group">
-                    <div className="py-3 sm:py-4 relative hover:bg-white dark:hover:bg-white/[0.03] hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col rounded-2xl px-2 sm:px-3 -mx-1 border border-transparent hover:border-zinc-200/50 dark:hover:border-white/5">
-                      
-                      {/* Focus Indicator Bar */}
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 bg-primary rounded-full scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-center" />
-
-                      <div className="flex flex-row gap-3 sm:gap-4 items-start w-full">
-
-                      {/* Thumbnail Link */}
-                      <Link
-                        href={`/article/${article.slug}`}
-                        className="w-24 sm:w-36 h-20 sm:h-28 shrink-0 relative rounded-xl overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5"
-                      >
-                        {article.thumbnail ? (
-                          <Image
-                            src={article.thumbnail}
-                            alt={article.title}
-                            fill
-                            sizes="(max-width: 640px) 96px, 144px"
-                            className="object-cover"
-                            style={{ objectPosition: article.thumbnailPosition ?? '50% 50%' }}
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center text-zinc-300 dark:text-white/10 text-3xl font-bold transition-transform duration-700 group-hover:scale-110">
-                            {article.title[0]}
-                          </div>
-                        )}
+                    <GlanceTrigger article={article}>
+                      <div className="py-3 sm:py-4 relative hover:bg-white dark:hover:bg-white/[0.03] hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col rounded-2xl px-2 sm:px-3 -mx-1 border border-transparent hover:border-zinc-200/50 dark:hover:border-white/5 cursor-pointer">
                         
-                        {/* Shimmer Sweep Overlay */}
-                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none z-10 overflow-hidden">
-                          <div 
-                            className="absolute inset-0 w-2/3 h-full bg-white/30 blur-[40px] -skew-x-[20deg]"
-                            style={{ animation: 'shimmer-sweep 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite' }}
-                          />
-                        </div>
+                        {/* Focus Indicator Bar */}
+                        <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 rounded-full scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-center ${
+                          article.audience === 'PREMIUM' ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'bg-primary'
+                        }`} />
 
-                        {/* Badges */}
-                        <div className="absolute top-1 right-1 flex flex-col gap-1 z-20">
-                          {article.badges.slice(0, 1).map(b => (
-                            <span key={b} className="bg-primary/90 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase shadow-sm">
-                              {BADGE_LABELS[b] ?? b}
-                            </span>
-                          ))}
-                        </div>
-                      </Link>
+                        <div className="flex flex-row gap-3 sm:gap-4 items-start w-full">
 
-                      {/* Content Area */}
-                      <div className="flex-1 min-w-0 flex flex-col pt-0.5 transition-transform duration-500 group-hover:translate-x-1">
-                        <div className="flex items-start justify-between gap-3 mb-1">
-                          <Link href={`/article/${article.slug}`} className="flex-1">
-                            <h4 className="text-[15px] sm:text-lg font-bold text-zinc-800 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors font-display line-clamp-2 leading-tight">
-                              {article.title}
-                            </h4>
-                          </Link>
+                        {/* Thumbnail Link */}
+                        <Link
+                          href={`/article/${article.slug}`}
+                          className={`w-24 sm:w-36 2xl:w-48 h-20 sm:h-28 2xl:h-32 shrink-0 relative rounded-xl overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 border transition-colors duration-500 ${
+                            article.audience === 'PREMIUM' 
+                              ? 'border-amber-200/50 dark:border-amber-500/20 group-hover:border-amber-500/50 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.1)]' 
+                              : 'border-zinc-200 dark:border-white/5 group-hover:border-primary/30'
+                          }`}
+                        >
+                          {article.thumbnail ? (
+                            <Image
+                              src={article.thumbnail}
+                              alt={article.title}
+                              fill
+                              sizes="(max-width: 640px) 96px, (max-width: 1536px) 144px, 192px"
+                              className="object-cover"
+                              style={{ objectPosition: article.thumbnailPosition ?? '50% 50%' }}
+                            />
+                          ) : (
+                            <div className="absolute inset-0 flex items-center justify-center text-zinc-300 dark:text-white/10 text-3xl font-bold transition-transform duration-700 group-hover:scale-110">
+                              {article.title[0]}
+                            </div>
+                          )}
                           
-                          {/* Top-right Badges */}
-                          <div className="shrink-0 hidden sm:flex items-center gap-2 mt-0.5">
-                            {article.audience === 'PREMIUM' && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-bold uppercase tracking-wider border border-amber-200 dark:border-amber-500/20">
-                                <Star className="w-2.5 h-2.5 fill-current" /> Premium
-                              </span>
-                            )}
-                            {article.audience === 'MEMBERS' && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[9px] font-bold uppercase tracking-wider border border-blue-200 dark:border-blue-500/20">
-                                <Lock className="w-2.5 h-2.5" /> Members
-                              </span>
-                            )}
-                            <Link 
-                                href={`/topic/${article.topic.slug}`}
-                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-slate-400 text-[9px] font-bold uppercase tracking-wider border border-zinc-300 dark:border-white/5 hover:border-primary/30 hover:text-primary transition-colors relative z-30"
-                            >
-                                <Tag className="w-2.5 h-2.5" />
-                                {article.topic.label}
-                            </Link>
+                          {/* Shimmer Sweep Overlay */}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none z-10 overflow-hidden">
+                            <div 
+                              className="absolute inset-0 w-2/3 h-full bg-white/30 blur-[40px] -skew-x-[20deg]"
+                              style={{ animation: 'shimmer-sweep 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite' }}
+                            />
                           </div>
-                        </div>
 
-                        <Link href={`/article/${article.slug}`} className="mb-0 sm:mb-3">
-                          <p className="text-xs sm:text-sm text-zinc-500 dark:text-slate-400 line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-500">
-                            {article.summary}
-                          </p>
+                          {/* Badges */}
+                          <div className="absolute top-1 right-1 flex flex-col gap-1 z-20">
+                            {article.badges.slice(0, 1).map(b => (
+                              <span key={b} className="bg-primary/90 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase shadow-sm">
+                                {BADGE_LABELS[b] ?? b}
+                              </span>
+                            ))}
+                          </div>
                         </Link>
 
-                        {/* Desktop Stats */}
-                        <div className="hidden sm:flex mt-auto items-end justify-between pt-0 gap-2">
-                          <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-zinc-500 text-xs">
-                            {/* Author Info Integrated into Stats */}
-                            <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-4">
-                            <Link 
-                              href={`/profile/${article.author.username || article.author.id}`}
-                              className="font-semibold text-zinc-600 dark:text-slate-300 text-[11px] hover:text-primary transition-colors relative z-30"
-                            >
-                              <span className="font-normal opacity-70">bởi</span> {article.author.name}
+                        {/* Content Area */}
+                        <div className="flex-1 min-w-0 flex flex-col pt-0.5 transition-transform duration-500 group-hover:translate-x-1">
+                          <div className="flex items-start justify-between gap-3 mb-1">
+                            <Link href={`/article/${article.slug}`} className="flex-1">
+                              <h4 className="text-[15px] sm:text-lg font-bold text-zinc-800 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors font-display line-clamp-2 leading-tight">
+                                {article.title}
+                              </h4>
                             </Link>
+                            
+                            {/* Top-right Badges */}
+                            <div className="shrink-0 hidden sm:flex items-center gap-2 mt-0.5">
+                              {article.audience === 'PREMIUM' && (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-bold uppercase tracking-wider border border-amber-200 dark:border-amber-500/20">
+                                  <Star className="w-2.5 h-2.5 fill-current" /> Premium
+                                </span>
+                              )}
+                              {article.audience === 'MEMBERS' && (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[9px] font-bold uppercase tracking-wider border border-blue-200 dark:border-blue-500/20">
+                                  <Lock className="w-2.5 h-2.5" /> Members
+                                </span>
+                              )}
+                              <Link 
+                                  href={`/topic/${article.topic.slug}`}
+                                  className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-slate-400 text-[9px] font-bold uppercase tracking-wider border border-zinc-300 dark:border-white/5 hover:border-primary/30 hover:text-primary transition-colors relative z-30"
+                              >
+                                  <Tag className="w-2.5 h-2.5" />
+                                  {article.topic.label}
+                              </Link>
                             </div>
-
-                            <span className="flex items-center gap-1 group/stat transition-colors hover:text-rose-500">
-                              <Heart className="w-3.5 h-3.5 group-hover/stat:fill-rose-500/10" />
-                              <span className="font-bold">{article._count.likes}</span>
-                            </span>
-                            <span className="flex items-center gap-1 group/stat transition-colors hover:text-primary">
-                              <MessageCircle className="w-3.5 h-3.5 group-hover/stat:fill-primary/10" />
-                              <span className="font-bold">{article._count.comments}</span>
-                            </span>
-                            <span className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                              <Eye className="w-3.5 h-3.5" />
-                              <span className="font-medium text-[10px]">{formatViews(article.viewCount)}</span>
-                            </span>
-                            {(article.ratingCount ?? 0) > 0 && (
-                              <span className="flex items-center gap-1 text-yellow-500">
-                                <Star className="w-3.5 h-3.5 fill-yellow-400" />
-                                <span className="font-bold text-[10px]">{(article.avgRating ?? 0).toFixed(1)}</span>
-                              </span>
-                            )}
-                            <span className="flex items-center gap-1 border-l border-zinc-200 dark:border-white/10 pl-4 ml-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                              <Clock className="w-3.5 h-3.5" />
-                              <span className="font-medium text-[10px]">{article.readTime} phút</span>
-                            </span>
                           </div>
 
-                          <div className="flex items-center gap-2 shrink-0">
-                             {article.publishedAt && (
-                                <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-500 dark:text-slate-400 mr-3 tracking-tight">
-                                    <Calendar className="w-3 h-3 opacity-70" />
-                                    <span>{formatDate(article.publishedAt)}</span>
-                                </div>
-                            )}
-                            <button
-                              onClick={(e) => handleBookmark(e, article.id)}
-                              className={`p-1.5 rounded-lg transition-all relative z-40 ${bookmarked.get(article.id) ? 'text-primary bg-primary/5' : 'text-zinc-300 hover:text-primary dark:text-white/20 dark:hover:text-primary hover:bg-primary/5'}`}
-                              title={bookmarked.get(article.id) ? 'Bỏ lưu' : 'Lưu bài viết'}
-                            >
-                              <Bookmark className={`w-4 h-4 transition-all ${bookmarked.get(article.id) ? 'fill-current' : ''}`} />
-                            </button>
+                          <Link href={`/article/${article.slug}`} className="mb-0 sm:mb-3">
+                            <p className="text-xs sm:text-sm text-zinc-500 dark:text-slate-400 line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-500">
+                              {article.summary}
+                            </p>
+                          </Link>
+
+                          {/* Desktop Stats */}
+                          <div className="hidden sm:flex mt-auto items-end justify-between pt-0 gap-2">
+                            <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-zinc-500 text-xs">
+                              {/* Author Info Integrated into Stats */}
+                              <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-4">
+                              <Link 
+                                href={`/profile/${article.author.username || article.author.id}`}
+                                className="font-semibold text-zinc-600 dark:text-slate-300 text-[11px] hover:text-primary transition-colors relative z-30"
+                              >
+                                <span className="font-normal opacity-70">bởi</span> {article.author.name}
+                              </Link>
+                              </div>
+
+                              <span className="flex items-center gap-1 group/stat transition-colors hover:text-rose-500">
+                                <Heart className="w-3.5 h-3.5 group-hover/stat:fill-rose-500/10" />
+                                <span className="font-bold">{article._count.likes}</span>
+                              </span>
+                              <span className="flex items-center gap-1 group/stat transition-colors hover:text-primary">
+                                <MessageCircle className="w-3.5 h-3.5 group-hover/stat:fill-primary/10" />
+                                <span className="font-bold">{article._count.comments}</span>
+                              </span>
+                              <span className="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                                <Eye className="w-3.5 h-3.5" />
+                                <span className="font-medium text-[10px]">{formatViews(article.viewCount)}</span>
+                              </span>
+                              {(article.ratingCount ?? 0) > 0 && (
+                                <span className="flex items-center gap-1 text-yellow-500">
+                                  <Star className="w-3.5 h-3.5 fill-yellow-400" />
+                                  <span className="font-bold text-[10px]">{(article.avgRating ?? 0).toFixed(1)}</span>
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1 border-l border-zinc-200 dark:border-white/10 pl-4 ml-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                                <Clock className="w-3.5 h-3.5" />
+                                <span className="font-medium text-[10px]">{article.readTime} phút</span>
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                               {article.publishedAt && (
+                                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-500 dark:text-slate-400 mr-3 tracking-tight">
+                                      <Calendar className="w-3 h-3 opacity-70" />
+                                      <span>{formatDate(article.publishedAt)}</span>
+                                  </div>
+                              )}
+                              <button
+                                onClick={(e) => handleBookmark(e, article.id)}
+                                className={`p-1.5 rounded-lg transition-all relative z-40 ${bookmarked.get(article.id) ? 'text-primary bg-primary/5' : 'text-zinc-300 hover:text-primary dark:text-white/20 dark:hover:text-primary hover:bg-primary/5'}`}
+                                title={bookmarked.get(article.id) ? 'Bỏ lưu' : 'Lưu bài viết'}
+                              >
+                                <Bookmark className={`w-4 h-4 transition-all ${bookmarked.get(article.id) ? 'fill-current' : ''}`} />
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
 
-                    {/* Mobile Stats (Full width footer) */}
-                    <div className="flex sm:hidden mt-3 items-center justify-between pt-2.5 border-t border-zinc-100/80 dark:border-white/5 gap-2 w-full">
-                        <div className="flex items-center flex-wrap gap-x-3 gap-y-2 text-zinc-500 dark:text-slate-400 text-[11px] font-medium">
-                            <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-3">
-                            <Link 
-                              href={`/profile/${article.author.username || article.author.id}`}
-                              className="font-semibold text-zinc-600 dark:text-slate-300 text-[10px] hover:text-primary transition-colors relative z-30"
-                            >
-                              <span className="font-normal opacity-70">bởi</span> {article.author.name}
-                            </Link>
-                            </div>
-                            <span className="flex items-center gap-1 group/stat hover:text-rose-500">
-                              <Heart className="w-3.5 h-3.5" />
-                              <span className="font-bold">{article._count.likes}</span>
-                            </span>
-                            <span className="flex items-center gap-1 group/stat hover:text-primary">
-                              <MessageCircle className="w-3.5 h-3.5" />
-                              <span className="font-bold">{article._count.comments}</span>
-                            </span>
-                            <span className="flex items-center gap-1 opacity-60">
-                              <Eye className="w-3.5 h-3.5" />
-                              <span>{formatViews(article.viewCount)}</span>
-                            </span>
-                            {(article.ratingCount ?? 0) > 0 && (
-                              <span className="flex items-center gap-1 text-yellow-500">
-                                <Star className="w-3.5 h-3.5 fill-yellow-400" />
-                                <span className="font-bold">{(article.avgRating ?? 0).toFixed(1)}</span>
-                              </span>
-                            )}
-                            <span className="flex items-center gap-1 border-l border-zinc-200 dark:border-white/10 pl-2 opacity-60">
-                              <Clock className="w-3 h-3" />
-                              <span>{article.readTime}p</span>
-                            </span>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                            {article.publishedAt && (
-                              <div className="flex items-center gap-1 text-[10px] text-zinc-400 font-medium">
-                                  <span>{formatDate(article.publishedAt)}</span>
+                      {/* Mobile Stats (Full width footer) */}
+                      <div className="flex sm:hidden mt-3 items-center justify-between pt-2.5 border-t border-zinc-100/80 dark:border-white/5 gap-2 w-full">
+                          <div className="flex items-center flex-wrap gap-x-3 gap-y-2 text-zinc-500 dark:text-slate-400 text-[11px] font-medium">
+                              <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-3">
+                              <Link 
+                                href={`/profile/${article.author.username || article.author.id}`}
+                                className="font-semibold text-zinc-600 dark:text-slate-300 text-[10px] hover:text-primary transition-colors relative z-30"
+                              >
+                                <span className="font-normal opacity-70">bởi</span> {article.author.name}
+                              </Link>
                               </div>
-                            )}
-                            <button
-                              onClick={(e) => handleBookmark(e, article.id)}
-                              className={`p-1 rounded-lg transition-all relative z-40 ${bookmarked.get(article.id) ? 'text-primary' : 'text-zinc-300 dark:text-white/20'}`}
-                            >
-                              <Bookmark className={`w-4 h-4 ${bookmarked.get(article.id) ? 'fill-current' : ''}`} />
-                            </button>
-                        </div>
-                    </div>
-
-                    </div>
+                              <span className="flex items-center gap-1 group/stat hover:text-rose-500">
+                                <Heart className="w-3.5 h-3.5" />
+                                <span className="font-bold">{article._count.likes}</span>
+                              </span>
+                              <span className="flex items-center gap-1 group/stat hover:text-primary">
+                                <MessageCircle className="w-3.5 h-3.5" />
+                                <span className="font-bold">{article._count.comments}</span>
+                              </span>
+                              <span className="flex items-center gap-1 opacity-60">
+                                <Eye className="w-3.5 h-3.5" />
+                                <span>{formatViews(article.viewCount)}</span>
+                              </span>
+                              {(article.ratingCount ?? 0) > 0 && (
+                                <span className="flex items-center gap-1 text-yellow-500">
+                                  <Star className="w-3.5 h-3.5 fill-yellow-400" />
+                                  <span className="font-bold">{(article.avgRating ?? 0).toFixed(1)}</span>
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1 border-l border-zinc-200 dark:border-white/10 pl-2 opacity-60">
+                                <Clock className="w-3 h-3" />
+                                <span>{article.readTime}p</span>
+                              </span>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                              {article.publishedAt && (
+                                <div className="flex items-center gap-1 text-[10px] text-zinc-400 font-medium">
+                                    <span>{formatDate(article.publishedAt)}</span>
+                                </div>
+                              )}
+                              <button
+                                onClick={(e) => handleBookmark(e, article.id)}
+                                className={`p-1 rounded-lg transition-all relative z-40 ${bookmarked.get(article.id) ? 'text-primary' : 'text-zinc-300 dark:text-white/20'}`}
+                              >
+                                <Bookmark className={`w-4 h-4 ${bookmarked.get(article.id) ? 'fill-current' : ''}`} />
+                              </button>
+                          </div>
+                      </div>
+                      </div>
+                    </GlanceTrigger>
                   </div>
-                  {idx < currentArticles.length - 1 && <div className="h-px bg-zinc-100 dark:bg-white/5 w-full my-1" />}
+                  {idx < currentArticles.length - 1 && <div className="h-px bg-zinc-100 dark:bg-white/5 w-full my-2 sm:my-3 lg:my-4" />}
                 </React.Fragment>
               ))
             ) : (
@@ -640,7 +652,7 @@ export default function FeatureCards({
           </div>
         </div>
 
-        <aside className="hidden xl:block xl:col-span-3 shrink-0 xl:border-l xl:border-zinc-200 dark:xl:border-white/5 xl:pl-4">
+        <aside className="hidden xl:block xl:col-span-3 2xl:col-span-3 shrink-0 xl:border-l xl:border-zinc-200 dark:xl:border-white/5 xl:pl-4">
           <div className="xl:sticky xl:top-[100px] space-y-14">
             <TagList tags={popularTags} />
             <TrendingSidebar articles={followedArticles} discoveryArticles={discoveryArticles} topicIds={topicIds} />
@@ -689,47 +701,42 @@ function TrendingHorizontal({ articles, discoveryArticles, topicIds }: { article
       <div className="flex flex-col">
         {trending.map((article, idx) => (
           <React.Fragment key={article.id}>
-            <div className="relative group">
-              {/* Absolute Cover Link for the article */}
+            <GlanceTrigger article={article} className="relative group">
               <Link 
                 href={`/article/${article.slug}`} 
-                className="absolute inset-0 z-0" 
+                className="absolute inset-0 z-20 cursor-pointer" 
                 aria-label={article.title}
               />
-              
-              <div className="py-3 hover:bg-zinc-100/80 dark:hover:bg-white/[0.02] transition-all duration-300 flex flex-row items-stretch min-h-[120px] px-3 -mx-3 rounded-xl pointer-events-none">
-                <div className="w-24 sm:w-36 shrink-0 relative rounded-lg overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-300 dark:text-white/10 text-3xl font-bold">
-                  {article.thumbnail ? (
-                    <Image
-                      src={article.thumbnail}
-                      alt={article.title}
-                      fill
-                      sizes="(max-width: 640px) 96px, 144px"
-                      className="object-cover"
-                      style={{ objectPosition: article.thumbnailPosition ?? '50% 50%' }}
-                    />
-                  ) : (
-                    article.title[0]
-                  )}
+              <div className="py-3 hover:bg-zinc-100/80 dark:hover:bg-white/[0.02] transition-all duration-500 ease-[cubic-bezier(0.34,1,0.64,1)] flex flex-row items-stretch min-h-[120px] px-3 -mx-3 rounded-xl relative cursor-pointer group-hover:translate-x-1 group-hover:shadow-2xl group-hover:shadow-primary/5">
+                <div className="absolute -left-1 top-2 text-4xl font-black text-zinc-100 dark:text-white/[0.02] italic select-none z-0 group-hover:text-primary/20 transition-colors duration-500">
+                  {String(idx + 1).padStart(2, '0')}
                 </div>
-                <div className="pl-3 sm:pl-5 pr-1 flex-1 flex flex-col min-w-0 py-1 relative z-10 pointer-events-auto">
-                  <h4 className="text-sm sm:text-base font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors font-display line-clamp-2 flex-1 mb-1.5">
+                <div className="w-24 sm:w-28 h-auto rounded-lg bg-cover bg-center shrink-0 border border-zinc-200 dark:border-white/5 relative z-10 overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-300 dark:text-white/20 font-bold text-2xl"
+                  style={article.thumbnail ? { backgroundImage: `url('${article.thumbnail}')`, backgroundPosition: article.thumbnailPosition ?? '50% 50%' } : undefined}
+                >
+                  {!article.thumbnail && article.title[0]}
+                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none z-10 overflow-hidden">
+                    <div 
+                      className="absolute inset-0 w-full h-full bg-white/20 blur-[20px] -skew-x-[20deg]"
+                      style={{ animation: 'shimmer-sweep 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite' }}
+                    />
+                  </div>
+                </div>
+                <div className="flex-1 min-w-0 flex flex-col justify-center ml-4 relative z-10">
+                  <span className="text-[10px] uppercase tracking-widest text-primary font-bold mb-1 opacity-80">{article.topic.label}</span>
+                  <h4 className="text-sm sm:text-[15px] font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors line-clamp-2 leading-tight mb-2">
                     {article.title}
                   </h4>
-                  <div className="flex items-center gap-3 mt-auto text-zinc-500">
-                    <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-3 relative z-20">
-                      <Link 
-                        href={`/profile/${article.author.username || article.author.id}`}
-                        className="text-[10px] font-semibold text-zinc-600 dark:text-slate-400 hover:text-primary transition-colors"
-                      >
-                        <span className="font-normal opacity-70">bởi</span> {article.author.name}
-                      </Link>
-                    </div>
+                  <div className="flex items-center gap-3 text-zinc-500 dark:text-slate-400">
                     <span className="flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span className="text-[11px] font-medium">{article.readTime}p</span>
+                    </span>
+                    <span className="flex items-center gap-1 group/stat transition-colors hover:text-rose-500">
                       <Heart className="w-3.5 h-3.5" />
                       <span className="text-[11px] font-medium">{article._count.likes}</span>
                     </span>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 group/stat transition-colors hover:text-primary">
                       <MessageCircle className="w-3.5 h-3.5" />
                       <span className="text-[11px] font-medium">{article._count.comments}</span>
                     </span>
@@ -740,7 +747,7 @@ function TrendingHorizontal({ articles, discoveryArticles, topicIds }: { article
                   </div>
                 </div>
               </div>
-            </div>
+            </GlanceTrigger>
             {idx < trending.length - 1 && <div className="h-px bg-zinc-100 dark:bg-white/5 w-full my-1" />}
           </React.Fragment>
         ))}
@@ -751,7 +758,6 @@ function TrendingHorizontal({ articles, discoveryArticles, topicIds }: { article
 
 function TrendingSidebar({ articles, discoveryArticles, topicIds }: { articles: ArticleCard[]; discoveryArticles: ArticleCard[]; topicIds: string[] }) {
   const trending = useMemo(() => {
-    // Similarly, prioritize followed trending then backfill
     let list = articles.filter(a => topicIds.includes(a.topic.id));
     if (list.length < 4) {
       const listSet = new Set(list.map(a => a.id));
@@ -772,19 +778,27 @@ function TrendingSidebar({ articles, discoveryArticles, topicIds }: { articles: 
       </div>
       <div className="flex flex-col gap-1">
         {trending.map(article => (
-          <div key={article.id} className="relative group">
-            {/* Absolute Cover Link for the article */}
+          <GlanceTrigger key={article.id} article={article} className="relative group">
             <Link 
               href={`/article/${article.slug}`} 
-              className="absolute inset-0 z-0" 
+              className="absolute inset-0 z-20 cursor-pointer" 
               aria-label={article.title}
             />
-            <div className="flex gap-3 p-2 hover:bg-zinc-100/80 dark:hover:bg-white/[0.02] transition-all duration-300 rounded-xl pointer-events-none">
+            <div className="flex gap-4 p-2.5 hover:bg-zinc-100/80 dark:hover:bg-white/[0.02] transition-all duration-300 rounded-xl relative cursor-pointer group-hover:translate-x-1 group-hover:shadow-lg group-hover:shadow-primary/5">
+               <div className="absolute -left-1 -top-1 w-6 h-6 flex items-center justify-center text-[10px] font-black italic text-primary/40 dark:text-white/10 select-none group-hover:text-primary transition-colors duration-300">
+                  {String(trending.indexOf(article) + 1).padStart(2, '0')}
+               </div>
               <div
-                className="w-14 h-14 rounded-lg bg-cover bg-center shrink-0 border border-zinc-200 dark:border-white/5 overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-300 dark:text-white/20 font-bold text-lg"
+                className="w-14 h-14 rounded-lg bg-cover bg-center shrink-0 border border-zinc-200 dark:border-white/5 overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-300 dark:text-white/20 font-bold text-lg relative"
                 style={article.thumbnail ? { backgroundImage: `url('${article.thumbnail}')`, backgroundPosition: article.thumbnailPosition ?? '50% 50%' } : undefined}
               >
                 {!article.thumbnail && article.title[0]}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none z-10 overflow-hidden">
+                  <div 
+                    className="absolute inset-0 w-full h-full bg-white/20 blur-[20px] -skew-x-[20deg]"
+                    style={{ animation: 'shimmer-sweep 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite' }}
+                  />
+                </div>
               </div>
               <div className="flex-1 min-w-0 pt-0.5 relative z-10 pointer-events-auto">
                 <h4 className="text-sm font-bold text-zinc-800 dark:text-white line-clamp-2 group-hover:text-primary transition-colors leading-tight mb-1.5">
@@ -815,7 +829,7 @@ function TrendingSidebar({ articles, discoveryArticles, topicIds }: { articles: 
                 </div>
               </div>
             </div>
-          </div>
+          </GlanceTrigger>
         ))}
       </div>
     </div>
@@ -841,10 +855,10 @@ function RecentHistory({ history, currentUserId }: { history: any[]; currentUser
       </div>
       <div className="flex flex-col gap-5">
         {recent.map((item) => (
-          <Link key={item.article.id} href={`/article/${item.article.slug}`} className="group block">
+          <Link key={item.article.id} href={`/article/${item.article.slug}`} className="group block -mx-2 px-2 py-2 rounded-xl transition-all duration-300 hover:bg-zinc-100/50 dark:hover:bg-white/[0.03]">
             <div className="flex gap-3">
               <div 
-                className="w-12 h-12 shrink-0 rounded-lg bg-zinc-100 dark:bg-white/5 bg-cover bg-center overflow-hidden border border-zinc-200 dark:border-white/5"
+                className="w-12 h-12 shrink-0 rounded-lg bg-zinc-100 dark:bg-white/5 bg-cover bg-center overflow-hidden border border-zinc-200 dark:border-white/5 transition-transform duration-300 group-hover:scale-110"
                 style={item.article.thumbnail ? { backgroundImage: `url('${item.article.thumbnail}')` } : undefined}
               />
               <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
@@ -853,9 +867,9 @@ function RecentHistory({ history, currentUserId }: { history: any[]; currentUser
                 </h4>
                 <div className="flex flex-col gap-1.5 mt-1.5">
                   <div className="w-full h-0.5 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full" style={{ width: `${Math.round(item.progress * 100)}%` }} />
+                    <div className="h-full bg-primary rounded-full group-hover:bg-indigo-500 transition-colors duration-300" style={{ width: `${Math.round(item.progress * 100)}%` }} />
                   </div>
-                  <span className="text-[9px] font-bold text-zinc-500 dark:text-slate-500 uppercase tracking-tighter">
+                  <span className="text-[9px] font-bold text-zinc-500 dark:text-slate-500 uppercase tracking-tighter group-hover:text-primary/70 transition-colors">
                     Đã đọc {Math.round(item.progress * 100)}%
                   </span>
                 </div>

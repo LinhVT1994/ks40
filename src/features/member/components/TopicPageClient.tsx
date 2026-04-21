@@ -8,6 +8,7 @@ import {
   ChevronRight, Loader2, Lock, Star, Tag, LayoutGrid, ArrowDown,
   ArrowLeft, Calendar
 } from 'lucide-react';
+import { GlanceTrigger } from './GlancePreview';
 
 import type { ArticleCard } from '@/features/articles/actions/article';
 import { getArticlesAction } from '@/features/articles/actions/article';
@@ -116,7 +117,7 @@ export default function TopicPageClient({
   const color = parentTopic?.color ?? topic.color ?? '#3b82f6';
 
   return (
-    <div className="max-w-[1200px] mx-auto w-full px-4 md:px-8 pb-32">
+    <div className="max-w-[1200px] 2xl:max-w-[1440px] mx-auto w-full px-4 md:px-8 pb-32">
       {/* Hero Header */}
       <header className="mt-8 sm:mt-12 flex flex-col items-start">
         {/* Back Button */}
@@ -233,7 +234,7 @@ export default function TopicPageClient({
       </header>
 
       {/* Main Content Grid */}
-      <div className="max-w-4xl mx-auto mt-16 items-start">
+      <div className="max-w-4xl 2xl:max-w-5xl mx-auto mt-16 items-start">
         
         {/* Article Feed */}
         <div className="w-full flex flex-col gap-2">
@@ -241,123 +242,125 @@ export default function TopicPageClient({
               articles.map((article, idx) => (
                 <React.Fragment key={article.id}>
                   <div className="block group">
-                    <div className="py-4 sm:py-5 relative hover:bg-white dark:hover:bg-white/[0.03] hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col rounded-2xl px-3 sm:px-4 -mx-2 border border-transparent hover:border-zinc-200/50 dark:hover:border-white/5">
-                      
-                      {/* Focus Indicator */}
-                      <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-14 bg-primary rounded-full scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-center" style={{ backgroundColor: color }} />
-
-                      <div className="flex flex-row gap-3 sm:gap-5 items-start w-full">
-
-                      {/* Thumbnail */}
-                      <Link
-                        href={`/article/${article.slug}`}
-                        className="w-24 sm:w-40 h-20 sm:h-28 shrink-0 bg-cover bg-center relative rounded-xl overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5"
-                        style={article.thumbnail ? { backgroundImage: `url('${article.thumbnail}')`, backgroundPosition: article.thumbnailPosition ?? '50% 50%' } : undefined}
-                      >
-                        {!article.thumbnail && (
-                          <div className="absolute inset-0 flex items-center justify-center text-zinc-300 dark:text-white/10 text-3xl font-bold transition-transform duration-700 group-hover:scale-110">
-                            {article.title[0]}
-                          </div>
-                        )}
+                    <GlanceTrigger article={article}>
+                      <div className="py-4 sm:py-5 relative hover:bg-white dark:hover:bg-white/[0.03] hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col rounded-2xl px-3 sm:px-4 -mx-2 border border-transparent hover:border-zinc-200/50 dark:hover:border-white/5 cursor-pointer">
                         
-                        {/* Shimmer Sweep */}
-                        <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none z-10 overflow-hidden">
-                          <div 
-                            className="absolute inset-0 w-2/3 h-full bg-white/30 blur-[40px] -skew-x-[20deg]"
-                            style={{ animation: 'shimmer-sweep 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite' }}
-                          />
-                        </div>
+                        {/* Focus Indicator */}
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-14 bg-primary rounded-full scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-center" style={{ backgroundColor: color }} />
 
-                        {/* Badges */}
-                        <div className="absolute top-1 right-1 flex flex-col gap-1 z-20">
-                          {article.badges.slice(0, 1).map(b => (
-                            <span key={b} className="bg-primary/90 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase shadow-sm" style={{ backgroundColor: color }}>
-                              {BADGE_LABELS[b] ?? b}
-                            </span>
-                          ))}
-                        </div>
-                      </Link>
+                        <div className="flex flex-row gap-3 sm:gap-5 items-start w-full">
 
-                      {/* Content Area */}
-                      <div className="flex-1 min-w-0 flex flex-col pt-1 transition-transform duration-500 group-hover:translate-x-1">
-                        <div className="flex items-start justify-between gap-3 mb-1.5">
-                          <Link href={`/article/${article.slug}`} className="flex-1">
-                            <h4 className="text-[15px] sm:text-xl font-bold text-zinc-800 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors font-display line-clamp-2 leading-snug" style={{ '--tw-text-opacity': '1' } as any}>
-                              {article.title}
-                            </h4>
-                          </Link>
+                        {/* Thumbnail */}
+                        <Link
+                          href={`/article/${article.slug}`}
+                          className="w-24 sm:w-40 2xl:w-52 h-20 sm:h-28 2xl:h-36 shrink-0 bg-cover bg-center relative rounded-xl overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 border border-zinc-200 dark:border-white/5"
+                          style={article.thumbnail ? { backgroundImage: `url('${article.thumbnail}')`, backgroundPosition: article.thumbnailPosition ?? '50% 50%' } : undefined}
+                        >
+                          {!article.thumbnail && (
+                            <div className="absolute inset-0 flex items-center justify-center text-zinc-300 dark:text-white/10 text-3xl font-bold transition-transform duration-700 group-hover:scale-110">
+                              {article.title[0]}
+                            </div>
+                          )}
                           
-                          {/* Audience Badge */}
-                          <div className="shrink-0 hidden sm:flex items-center gap-2 mt-0.5">
-                            {article.audience === 'PREMIUM' && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-bold uppercase tracking-wider border border-amber-200 dark:border-amber-500/20">
-                                <Star className="w-2.5 h-2.5 fill-current" /> Premium
-                              </span>
-                            )}
-                            {article.audience === 'MEMBERS' && (
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[9px] font-bold uppercase tracking-wider border border-blue-200 dark:border-blue-500/20">
-                                <Lock className="w-2.5 h-2.5" /> Members
-                              </span>
-                            )}
+                          {/* Shimmer Sweep */}
+                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none z-10 overflow-hidden">
+                            <div 
+                              className="absolute inset-0 w-2/3 h-full bg-white/30 blur-[40px] -skew-x-[20deg]"
+                              style={{ animation: 'shimmer-sweep 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite' }}
+                            />
                           </div>
-                        </div>
 
-                        <Link href={`/article/${article.slug}`} className="mb-0 sm:mb-4">
-                          <p className="text-xs sm:text-sm text-zinc-500 dark:text-slate-300 line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-500">
-                            {article.summary}
-                          </p>
+                          {/* Badges */}
+                          <div className="absolute top-1 right-1 flex flex-col gap-1 z-20">
+                            {article.badges.slice(0, 1).map(b => (
+                              <span key={b} className="bg-primary/90 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase shadow-sm" style={{ backgroundColor: color }}>
+                                {BADGE_LABELS[b] ?? b}
+                              </span>
+                            ))}
+                          </div>
                         </Link>
 
-                        {/* Desktop Stats */}
-                        <div className="hidden sm:flex mt-auto items-end justify-between pt-0 gap-2">
-                          <div className="flex items-center flex-wrap gap-x-5 text-zinc-500 dark:text-slate-300 text-xs">
-                            {/* Author Info */}
-                            <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-5 relative z-30">
-                              <Link 
-                                href={`/profile/${article.author.username || article.author.id}`}
-                                className="font-semibold text-zinc-600 dark:text-slate-300 text-[11px] hover:text-primary transition-colors"
-                              >
-                                <span className="font-normal opacity-70">bởi</span> {article.author.name}
-                              </Link>
+                        {/* Content Area */}
+                        <div className="flex-1 min-w-0 flex flex-col pt-1 transition-transform duration-500 group-hover:translate-x-1">
+                          <div className="flex items-start justify-between gap-3 mb-1.5">
+                            <Link href={`/article/${article.slug}`} className="flex-1">
+                              <h4 className="text-[15px] sm:text-xl font-bold text-zinc-800 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors font-display line-clamp-2 leading-snug" style={{ '--tw-text-opacity': '1' } as any}>
+                                {article.title}
+                              </h4>
+                            </Link>
+                            
+                            {/* Audience Badge */}
+                            <div className="shrink-0 hidden sm:flex items-center gap-2 mt-0.5">
+                              {article.audience === 'PREMIUM' && (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-bold uppercase tracking-wider border border-amber-200 dark:border-amber-500/20">
+                                  <Star className="w-2.5 h-2.5 fill-current" /> Premium
+                                </span>
+                              )}
+                              {article.audience === 'MEMBERS' && (
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 text-[9px] font-bold uppercase tracking-wider border border-blue-200 dark:border-blue-500/20">
+                                  <Lock className="w-2.5 h-2.5" /> Members
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <Link href={`/article/${article.slug}`} className="mb-0 sm:mb-4">
+                            <p className="text-xs sm:text-sm text-zinc-500 dark:text-slate-300 line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-500">
+                              {article.summary}
+                            </p>
+                          </Link>
+
+                          {/* Desktop Stats */}
+                          <div className="hidden sm:flex mt-auto items-end justify-between pt-0 gap-2">
+                            <div className="flex items-center flex-wrap gap-x-5 text-zinc-500 dark:text-slate-300 text-xs">
+                              {/* Author Info */}
+                              <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-5 relative z-30">
+                                <Link 
+                                  href={`/profile/${article.author.username || article.author.id}`}
+                                  className="font-semibold text-zinc-600 dark:text-slate-300 text-[11px] hover:text-primary transition-colors"
+                                >
+                                  <span className="font-normal opacity-70">bởi</span> {article.author.name}
+                                </Link>
+                              </div>
+
+                              <span className="flex items-center gap-1.5 group/stat transition-colors hover:text-rose-500 font-bold">
+                                <Heart className="w-4 h-4 group-hover/stat:fill-rose-500/10" />
+                                {formatCount(article._count.likes)}
+                              </span>
+                              <span className="flex items-center gap-1.5 group/stat transition-colors hover:text-primary font-bold">
+                                <MessageCircle className="w-4 h-4 group-hover/stat:fill-primary/10" />
+                                {formatCount(article._count.comments)}
+                              </span>
+                              <span className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                                <Eye className="w-4 h-4" />
+                                <span className="font-medium text-[10px]">{formatCount(article.viewCount)}</span>
+                              </span>
+                              <span className="flex items-center gap-1.5 border-l border-zinc-200 dark:border-white/10 pl-5 ml-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                                <Clock className="w-4 h-4" />
+                                <span className="font-medium text-[10px]">{article.readTime} phút</span>
+                              </span>
                             </div>
 
-                            <span className="flex items-center gap-1.5 group/stat transition-colors hover:text-rose-500 font-bold">
-                              <Heart className="w-4 h-4 group-hover/stat:fill-rose-500/10" />
-                              {formatCount(article._count.likes)}
-                            </span>
-                            <span className="flex items-center gap-1.5 group/stat transition-colors hover:text-primary font-bold">
-                              <MessageCircle className="w-4 h-4 group-hover/stat:fill-primary/10" />
-                              {formatCount(article._count.comments)}
-                            </span>
-                            <span className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-                              <Eye className="w-4 h-4" />
-                              <span className="font-medium text-[10px]">{formatCount(article.viewCount)}</span>
-                            </span>
-                            <span className="flex items-center gap-1.5 border-l border-zinc-200 dark:border-white/10 pl-5 ml-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                              <Clock className="w-4 h-4" />
-                              <span className="font-medium text-[10px]">{article.readTime} phút</span>
-                            </span>
+                            <div className="flex items-center gap-3 shrink-0">
+                              {article.publishedAt && (
+                                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-500 dark:text-slate-400 mr-2 tracking-tight">
+                                      <Calendar className="w-3 h-3 opacity-70" />
+                                      <span>{formatDate(article.publishedAt)}</span>
+                                  </div>
+                              )}
+                              <button
+                                onClick={(e) => handleBookmark(e, article.id)}
+                                className={`p-1.5 rounded-lg transition-all relative z-40 ${bookmarked.get(article.id) ? 'text-primary bg-primary/5' : 'text-zinc-300 hover:text-primary dark:text-white/20 dark:hover:text-primary hover:bg-primary/5'}`}
+                                title={bookmarked.get(article.id) ? 'Bỏ lưu' : 'Lưu bài viết'}
+                              >
+                                <Bookmark className={`w-4 h-4 transition-all ${bookmarked.get(article.id) ? 'fill-current' : ''}`} />
+                              </button>
+                            </div>
                           </div>
-
-                          <div className="flex items-center gap-3 shrink-0">
-                             {article.publishedAt && (
-                                <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-500 dark:text-slate-400 mr-2 tracking-tight">
-                                    <Calendar className="w-3 h-3 opacity-70" />
-                                    <span>{formatDate(article.publishedAt)}</span>
-                                </div>
-                            )}
-                            <button
-                              onClick={(e) => handleBookmark(e, article.id)}
-                              className={`p-1.5 rounded-lg transition-all relative z-40 ${bookmarked.get(article.id) ? 'text-primary bg-primary/5' : 'text-zinc-300 hover:text-primary dark:text-white/20 dark:hover:text-primary hover:bg-primary/5'}`}
-                              title={bookmarked.get(article.id) ? 'Bỏ lưu' : 'Lưu bài viết'}
-                            >
-                              <Bookmark className={`w-4 h-4 transition-all ${bookmarked.get(article.id) ? 'fill-current' : ''}`} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>{/* end content area */}
-                      </div>{/* end flex-row */}
-                    </div>{/* end flex-col card */}
+                        </div>{/* end content area */}
+                        </div>{/* end flex-row */}
+                      </div>{/* end flex-col card */}
+                    </GlanceTrigger>
 
                     {/* Mobile Stats (Full width footer) */}
                     <div className="flex sm:hidden mt-3 items-center justify-between pt-3 border-t border-zinc-100/80 dark:border-white/5 gap-2 w-full">
@@ -401,10 +404,9 @@ export default function TopicPageClient({
                             </button>
                         </div>
                     </div>
-
-                  </div>
-                  {idx < articles.length - 1 && <div className="h-px bg-zinc-100 dark:bg-white/5 w-full my-2" />}
-                </React.Fragment>
+                </div>
+                {idx < articles.length - 1 && <div className="h-px bg-zinc-100 dark:bg-white/5 w-full my-3" />}
+              </React.Fragment>
               ))
             ) : (
                 <div className="py-24 text-center rounded-3xl border border-dashed border-zinc-300 dark:border-white/10 bg-white/50 dark:bg-white/5">

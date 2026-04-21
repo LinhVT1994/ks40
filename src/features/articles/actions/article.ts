@@ -497,6 +497,8 @@ export type ArticlePreview = {
   author: { id: string; name: string; image: string | null };
   tags: { tag: { name: string; slug: string } }[];
   content: string;
+  objectives: string | null;
+  _count: { likes: number; comments: number };
 };
 
 // Returns truncated article for SEO metadata + content gate (no auth check, skips PRIVATE)
@@ -511,6 +513,8 @@ export async function getArticlePreviewAction(slug: string): Promise<ArticlePrev
       author:    { select: { id: true, name: true, image: true } },
       tags:      { include: { tag: { select: { name: true, slug: true } } } },
       content:   true,
+      objectives: true,
+      _count:    { select: { likes: true, comments: true } },
     },
   });
   if (!article) return null;

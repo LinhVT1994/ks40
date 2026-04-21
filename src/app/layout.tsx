@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { Inter } from "next/font/google";
+import { Inter, Dancing_Script } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import SessionProvider from "@/components/SessionProvider";
 import JsonLd from "@/components/shared/JsonLd";
@@ -12,6 +12,12 @@ import "./globals.css";
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
   variable: "--font-sans",
+});
+
+const dancingScript = Dancing_Script({
+  subsets: ["latin"],
+  variable: "--font-signature",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -75,7 +81,7 @@ export default async function RootLayout({
   const session = await auth();
   return (
     <html lang="vi" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased min-h-screen flex flex-col relative bg-background-light dark:bg-background-dark text-zinc-800 dark:text-white transition-colors duration-300 overflow-x-hidden`}>
+      <body className={`${inter.variable} ${dancingScript.variable} font-sans antialiased min-h-screen flex flex-col relative bg-background-light dark:bg-background-dark text-zinc-800 dark:text-white transition-colors duration-300 overflow-x-hidden`}>
         {/* Google tag (gtag.js) */}
         <Script async src="https://www.googletagmanager.com/gtag/js?id=G-5TFV08TJ3B" />
         <Script id="google-analytics">

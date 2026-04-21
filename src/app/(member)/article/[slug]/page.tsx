@@ -195,12 +195,12 @@ export default async function ArticleDetailPage({ params }: Props) {
         initialIsFollowing={authorInfo?.isFollowing ?? false}
         initialFollowerCount={authorInfo?.followerCount ?? 0}
       >
-        <div data-focus-wrapper className="relative max-w-[820px] mx-auto">
+        <div data-focus-wrapper className="relative max-w-[820px] 2xl:max-w-[960px] mx-auto">
           {/* Desktop Hanging Sidebars (Left: TOC, Right: Interaction) */}
           {!isGated && (
             <>
               <div data-focus-hide className="hidden xl:block absolute right-full top-0 h-full pointer-events-none">
-                <div className="sticky top-32 pr-12 2xl:pr-20 pointer-events-auto">
+                <div className="sticky top-32 pr-12 xl:pr-14 2xl:pr-24 transition-all pointer-events-auto">
                   <aside className="xl:w-60 2xl:w-64">
                     <FloatingTOC headings={headings} />
                   </aside>
@@ -208,7 +208,7 @@ export default async function ArticleDetailPage({ params }: Props) {
               </div>
 
               <div className="hidden xl:block absolute left-full top-0 h-full pointer-events-none">
-                <div data-focus-hide className="sticky top-32 pl-12 2xl:pl-20 pointer-events-auto">
+                <div data-focus-hide className="sticky top-32 pl-12 xl:pl-14 2xl:pl-24 transition-all pointer-events-auto">
                   <FloatingInteractionHub />
                 </div>
               </div>

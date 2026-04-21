@@ -12,6 +12,8 @@ import {
 } from 'lucide-react';
 import { deleteMemberArticleAction } from '@/features/member/actions/write';
 import type { TopicItem } from '@/features/admin/actions/topic';
+import ProfileArticleCard from '@/features/member/components/ProfileArticleCard';
+import { cn } from '@/lib/utils';
 // import DailyMotivation from '@/features/member/components/Dashboard/DailyMotivation';
 
 /* ── Shared helpers ─────────────────────────────────────────── */
@@ -132,46 +134,11 @@ function ArticleList({ articles: initialArticles, totalArticles, totalPages: ini
     <div>
       <div className={`grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 transition-opacity ${loading ? 'opacity-50 pointer-events-none' : ''}`}>
         {articles.map((a, i) => (
-          <Link
-            key={a.id}
-            href={`/article/${a.slug}`}
-            style={{ animationDelay: `${i * 100}ms` }}
-            className="group relative cursor-pointer bg-white/40 dark:bg-white/[0.02] backdrop-blur-md max-md:backdrop-blur-sm border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
-          >
-            <div className="aspect-[16/10] overflow-hidden relative">
-              <Image
-                src={a.thumbnail || '/placeholder-article.jpg'}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover transition-transform duration-700 group-hover:scale-110"
-                alt={a.title}
-              />
-              <div className="absolute top-3 left-3">
-                <span className="backdrop-blur-md max-md:backdrop-blur-sm bg-white/80 dark:bg-slate-900/80 text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wide shadow-sm border border-white/20 dark:border-white/5"
-                  style={{ color: a.topic.color ?? '#3B82F6' }}>
-                  {a.topic.label}
-                </span>
-              </div>
-            </div>
-            <div className="p-5 flex flex-col flex-1">
-              <h3 className="text-lg font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors line-clamp-2 leading-snug mb-2">{a.title}</h3>
-              {a.summary && <p className="text-sm text-zinc-500 line-clamp-2 mb-4 leading-relaxed">{a.summary}</p>}
-
-              <div className="mt-auto pt-4 border-t border-zinc-200 dark:border-white/5 flex items-center justify-between text-zinc-500">
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1.5"><Heart className="w-4 h-4" /><span className="text-sm font-bold tabular-nums">{fmtViews(a._count.likes)}</span></span>
-                  <span className="flex items-center gap-1.5"><Eye className="w-4.5 h-4.5" /><span className="text-sm font-bold tabular-nums">{fmtViews(a.viewCount)}</span></span>
-                </div>
-              </div>
-            </div>
-
-            {/* Premium Hover Guide Overlay */}
-            <div className="absolute inset-0 bg-primary/5 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center pointer-events-none">
-               <div className="bg-white/90 dark:bg-slate-900/90 px-4 py-2 rounded-full shadow-2xl border border-primary/20 scale-90 group-hover:scale-100 transition-all duration-500">
-                  <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Nhấn để xem bài</span>
-               </div>
-            </div>
-          </Link>
+          <ProfileArticleCard 
+            key={a.id} 
+            article={a as any} 
+            index={i} 
+          />
         ))}
       </div>
 
@@ -223,46 +190,11 @@ function BookmarkList({ bookmarks }: { bookmarks: Bookmark[] }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
       {bookmarks.map((b, i) => (
-        <Link 
+        <ProfileArticleCard 
           key={b.id} 
-          href={`/article/${b.slug}`} 
-          style={{ animationDelay: `${i * 100}ms` }}
-          className="group relative cursor-pointer bg-white/40 dark:bg-white/[0.02] backdrop-blur-md max-md:backdrop-blur-sm border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 hover:-translate-y-1 animate-in fade-in slide-in-from-bottom-4 fill-mode-both"
-        >
-          <div className="aspect-[16/10] overflow-hidden relative">
-            <Image 
-              src={b.thumbnail || '/placeholder-article.jpg'} 
-              fill
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-110"
-              alt={b.title}
-            />
-            <div className="absolute top-3 left-3">
-              <span className="backdrop-blur-md bg-white/80 dark:bg-slate-900/80 text-[10px] font-bold px-2.5 py-1 rounded-md tracking-wide shadow-sm border border-white/20 dark:border-white/5"
-                style={{ color: b.topic.color ?? '#3B82F6' }}>
-                {b.topic.label}
-              </span>
-            </div>
-          </div>
-            <div className="p-5 flex flex-col flex-1">
-              <h3 className="text-lg font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors line-clamp-2 leading-snug mb-2">{b.title}</h3>
-              {b.summary && <p className="text-sm text-zinc-500 line-clamp-2 mb-4 leading-relaxed">{b.summary}</p>}
-
-              <div className="mt-auto pt-4 border-t border-zinc-200 dark:border-white/5 flex items-center justify-between text-zinc-500">
-                <div className="flex items-center gap-4">
-                  <span className="flex items-center gap-1.5"><Heart className="w-4 h-4" /><span className="text-sm font-bold tabular-nums">{fmtViews(b._count.likes)}</span></span>
-                  <span className="flex items-center gap-1.5"><Eye className="w-4.5 h-4.5" /><span className="text-sm font-bold tabular-nums">{fmtViews(b.viewCount)}</span></span>
-                </div>
-              </div>
-            </div>
-
-            {/* Premium Hover Guide Overlay */}
-            <div className="absolute inset-0 bg-primary/5 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center pointer-events-none">
-               <div className="bg-white/90 dark:bg-slate-900/90 px-4 py-2 rounded-full shadow-2xl border border-primary/20 scale-90 group-hover:scale-100 transition-all duration-500">
-                  <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Nhấn để đọc ngay</span>
-               </div>
-            </div>
-        </Link>
+          article={b as any} 
+          index={i} 
+        />
       ))}
     </div>
   );
@@ -279,54 +211,47 @@ function HistoryList({ history }: { history: HistoryItem[] }) {
   return (
     <div className="space-y-4">
       {history.map(({ article, progress }, i) => (
-        <Link 
-          key={article.id} 
-          href={`/article/${article.slug}`} 
-          style={{ animationDelay: `${i * 70}ms` }}
-          className="group flex items-center gap-5 p-4 bg-white/40 dark:bg-white/[0.02] backdrop-blur-md border border-zinc-200 dark:border-white/5 rounded-2xl hover:shadow-xl hover:shadow-primary/5 transition-all animate-in fade-in slide-in-from-left-4 fill-mode-both"
-        >
-          <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 relative">
-            <Image 
-              src={article.thumbnail || '/placeholder.jpg'} 
-              fill
-              sizes="64px"
-              className="object-cover grayscale group-hover:grayscale-0 transition-all" 
-              alt={article.title} 
-            />
-            {progress >= 0.95 && (
-               <div className="absolute inset-0 bg-primary/20 backdrop-blur-[2px] max-md:backdrop-blur-none flex items-center justify-center">
-                  <Heart className="w-6 h-6 text-white animate-pulse" />
-               </div>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors line-clamp-1 mb-1">{article.title}</h3>
-            {article.summary && (
-              <p className="text-sm text-zinc-500 dark:text-slate-400 line-clamp-1 mb-2 leading-relaxed">
-                {article.summary}
-              </p>
-            )}
-            <div className="mt-2.5 flex items-end gap-6">
-              <div className="flex-1 space-y-2">
-                 <div className="flex items-center justify-between text-xs font-semibold tracking-wide text-zinc-500">
-                    <span>Tiến độ đọc</span>
-                    <span className="text-primary">{Math.round(progress * 100)}%</span>
+        <GlanceTrigger key={article.id} article={article as any}>
+          <Link 
+            href={`/article/${article.slug}`} 
+            style={{ animationDelay: `${i * 70}ms` }}
+            className="group relative flex items-center gap-5 p-4 bg-white/40 dark:bg-white/[0.02] backdrop-blur-md border border-zinc-200 dark:border-white/5 rounded-2xl hover:shadow-xl hover:shadow-primary/5 transition-all animate-in fade-in slide-in-from-left-4 fill-mode-both"
+          >
+            <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 relative">
+              <Image 
+                src={article.thumbnail || '/placeholder.jpg'} 
+                fill
+                sizes="64px"
+                className="object-cover grayscale group-hover:grayscale-0 transition-all" 
+                alt={article.title} 
+              />
+              {progress >= 0.95 && (
+                 <div className="absolute inset-0 bg-primary/20 backdrop-blur-[2px] max-md:backdrop-blur-none flex items-center justify-center">
+                    <Heart className="w-6 h-6 text-white animate-pulse" />
                  </div>
-                 <div className="h-1 w-full bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-gradient-to-r from-primary to-accent-purple transition-all duration-1000" style={{ width: `${progress * 100}%` }} />
-                 </div>
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="text-sm font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors line-clamp-1 mb-1">{article.title}</h3>
+              {article.summary && (
+                <p className="text-sm text-zinc-500 dark:text-slate-400 line-clamp-1 mb-2 leading-relaxed">
+                  {article.summary}
+                </p>
+              )}
+              <div className="mt-2.5 flex items-end gap-6">
+                <div className="flex-1 space-y-2">
+                   <div className="flex items-center justify-between text-xs font-semibold tracking-wide text-zinc-500">
+                      <span>Tiến độ đọc</span>
+                      <span className="text-primary">{Math.round(progress * 100)}%</span>
+                   </div>
+                   <div className="h-1 w-full bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-primary to-accent-purple transition-all duration-1000" style={{ width: `${progress * 100}%` }} />
+                   </div>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Minimalist Hover Guide Overlay for History */}
-          <div className="absolute inset-0 bg-primary/5 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center pointer-events-none">
-             <div className="bg-primary text-white px-4 py-2 rounded-full shadow-2xl scale-90 group-hover:scale-100 transition-all duration-500 flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-widest">Tiếp tục đọc</span>
-                <BookOpen className="w-3 h-3" />
-             </div>
-          </div>
-        </Link>
+          </Link>
+        </GlanceTrigger>
       ))}
     </div>
   );
@@ -952,48 +877,51 @@ export default function ProfileClient({
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
       {/* Sidebar: Profile + Navigation */}
       <div className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-24 space-y-12">
-        {/* User Identity - Simplified Floating Version */}
-        <div className="flex flex-col items-center px-4 text-center">
-          <div className="relative w-24 h-24 shrink-0 shadow-sm rounded-full">
+        {/* User Identity - Premium Compact Version */}
+        <div className="flex flex-col items-center px-4 text-center py-6">
+          <div className="relative w-16 h-16 shrink-0 shadow-xl rounded-full p-0.5 bg-white/20 backdrop-blur-md border border-white/30">
              <Image 
                src={user.avatarUrl} 
                alt={user.name ?? ''}
                fill
                unoptimized
-               sizes="96px"
-               className="rounded-full object-cover border border-zinc-200 dark:border-white/10"
+               sizes="64px"
+               className="rounded-full object-cover border-2 border-white dark:border-slate-800"
              />
           </div>
           
-          <div className="mt-6 flex items-center justify-center gap-2 group">
-            <h1 className="text-xl font-black text-zinc-800 dark:text-white tracking-tight">
+          <div className="mt-4 flex items-center justify-center gap-2 group">
+            <h1 className="text-lg font-black text-zinc-800 dark:text-white tracking-tight">
               {user.name}
             </h1>
             {isOwner && (
               <Link href="/settings" className="p-1 text-zinc-500 hover:text-primary transition-colors" title="Thiết lập">
-                <Settings className="w-4 h-4" />
+                <Settings className="w-3.5 h-3.5" />
               </Link>
             )}
           </div>
           {user.username && (
-            <p className="text-xs text-zinc-400 dark:text-slate-500 mt-1">@{user.username}</p>
+            <p className="text-[10px] font-bold text-primary tracking-widest uppercase opacity-70 mb-3">@{user.username}</p>
           )}
 
           {user.bio && (
-            <p className="mt-2 text-sm text-zinc-500 dark:text-slate-400 leading-relaxed font-semibold italic">
-              "{user.bio}"
-            </p>
+            <div className="relative group px-2 max-w-[180px]">
+              <p className="text-sm text-zinc-800 dark:text-slate-200 leading-relaxed font-signature font-medium italic">
+                &ldquo;{user.bio}&rdquo;
+              </p>
+              <div className="mt-1 h-0.5 w-6 bg-primary/30 mx-auto rounded-full" />
+            </div>
           )}
 
-          <div className="mt-6 flex items-center justify-center gap-6">
+          <div className="mt-5 flex items-center justify-center gap-5">
             {[
-              { label: 'Bài viết', value: user._count.articles },
               { label: 'Lượt xem', value: fmtViews(user.totalViews) },
               { label: 'Lượt thích', value: fmtViews(user.totalLikes) },
+              { label: 'Theo dõi', value: fmtViews(totalFollowers) },
             ].map(s => (
               <div key={s.label} className="flex flex-col items-center">
-                <span className="text-base font-black text-zinc-800 dark:text-white leading-none tracking-tight">{s.value}</span>
-                <span className="text-[9px] font-semibold text-zinc-500 uppercase tracking-tighter mt-1">{s.label}</span>
+                <span className="text-sm font-black text-zinc-800 dark:text-white leading-none tracking-tight">{s.value}</span>
+                <span className="text-[8px] font-semibold text-zinc-500 uppercase tracking-tighter mt-1">{s.label}</span>
               </div>
             ))}
           </div>

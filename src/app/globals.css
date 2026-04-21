@@ -33,6 +33,11 @@
   100% { background-position: 0% 50%; }
 }
 
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 @keyframes welcome-fade-up {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
@@ -240,6 +245,28 @@ html.focus-mode [data-focus-prose] {
   position: relative;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
+  .font-signature {
+    font-family: var(--font-signature), cursive;
+  }
+}
+
+@keyframes aura-move {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(10%, 10%) scale(1.1); }
+  66% { transform: translate(-10%, 5%) scale(0.9); }
+}
+
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-aura {
+  animation: aura-move 15s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 6s ease-in-out infinite;
 }
 
 .ks-highlight-delete {
