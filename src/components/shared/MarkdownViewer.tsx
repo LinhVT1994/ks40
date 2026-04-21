@@ -11,11 +11,17 @@ import { vscDarkPlus, oneLight } from 'react-syntax-highlighter/dist/cjs/styles/
 import { useTheme } from 'next-themes';
 import { slugify } from '@/lib/slugify';
 
+const MONO_FONT = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
+
 const CodeBlock = React.memo(({ node, inline, className, children, ...props }: any) => {
   const content = Array.isArray(children) ? children.join('') : String(children);
   const match = /language-(\w+)/.exec(className || '');
   const [copied, setCopied] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
   const lang = match ? match[1] : 'text';
+
+  useEffect(() => setMounted(true), []);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content.replace(/\n$/, ''));
@@ -24,6 +30,7 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
   };
 
   const isInline = inline ?? (!match && !content.includes('\n'));
+  const isDark = mounted && resolvedTheme === 'dark';
 
   if (!isInline) {
     return (
@@ -32,17 +39,13 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
           border-zinc-200 bg-zinc-50/50 dark:border-white/10 dark:bg-black/40
           ${PROSE_WIDTH}`}
       >
-        {/* Absolute Copy Button */}
+        {/* Copy Button */}
         <div className="absolute top-3 right-3 flex items-center gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button
             onClick={handleCopy}
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all scale-95 hover:scale-100 active:scale-90 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-xl"
           >
-            {copied ? (
-              <Check className="w-3 h-3 text-emerald-400 dark:text-emerald-600" />
-            ) : (
-              <Copy className="w-3 h-3" />
-            )}
+            {copied ? <Check className="w-3 h-3 text-emerald-400 dark:text-emerald-600" /> : <Copy className="w-3 h-3" />}
             <span>{copied ? 'Copied' : 'Copy'}</span>
           </button>
         </div>
@@ -50,36 +53,33 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
         {/* Language Badge */}
         {match && (
           <div className="absolute bottom-3 right-4 z-10 opacity-40 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">
-              {lang}
-            </span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">{lang}</span>
           </div>
         )}
 
-        <div className={`max-h-[640px] overflow-auto text-[13px] md:text-[14px] font-mono leading-relaxed
-          scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-white/10 scrollbar-track-transparent
-          [&_*]:!whitespace-pre [&_code]:!font-mono
-        `}>
+        <div className="max-h-[640px] overflow-auto text-[13px] md:text-[14px] leading-relaxed [&_*]:!whitespace-pre
+          scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-white/10 scrollbar-track-transparent">
           {match ? (
             <SyntaxHighlighter
+              style={isDark ? vscDarkPlus : oneLight}
               language={lang}
               PreTag="div"
-              useInlineStyles={false} // CRITICAL: Disable inline styles to prevent flickering
-              className="syntax-highlighter"
               customStyle={{
                 margin: 0,
                 padding: '1.25rem 1.5rem',
                 background: 'transparent',
                 fontSize: 'inherit',
                 lineHeight: 'inherit',
-                fontFamily: 'inherit',
+                fontFamily: MONO_FONT,
                 overflow: 'visible',
+                whiteSpace: 'pre',
               }}
+              codeTagProps={{ style: { fontFamily: MONO_FONT, background: 'transparent' } }}
             >
               {content.replace(/\n$/, '')}
             </SyntaxHighlighter>
           ) : (
-            <pre className="px-6 py-5 text-sm leading-relaxed whitespace-pre text-zinc-700 dark:text-zinc-300">
+            <pre style={{ fontFamily: MONO_FONT }} className="px-6 py-5 text-sm leading-relaxed whitespace-pre text-zinc-700 dark:text-zinc-300">
               {content}
             </pre>
           )}
@@ -96,6 +96,7 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
 });
 
 const PROSE_WIDTH = 'max-w-[720px] mx-auto';
+const WIDE_WIDTH  = 'max-w-[960px] mx-auto';
 
 function ImageLightbox({ src, alt, onClose }: { src: string; alt: string; onClose: () => void }) {
   React.useEffect(() => {
@@ -134,8 +135,35 @@ function ImageLightbox({ src, alt, onClose }: { src: string; alt: string; onClos
   );
 }
 
+function TableLightbox({ children, onClose }: { children: React.ReactNode; onClose: () => void }) {
+  React.useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', handler);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.removeEventListener('keydown', handler);
+      document.body.style.overflow = '';
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 backdrop-blur-sm animate-in fade-in duration-200 p-6"
+      onClick={onClose}
+    >
+      <div
+        className="relative max-w-[95vw] max-h-[90vh] overflow-auto rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 shadow-2xl animate-in zoom-in-95 duration-200"
+        onClick={e => e.stopPropagation()}
+      >
+<div className="overflow-x-auto rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900">{children}</div>
+      </div>
+    </div>
+  );
+}
+
 export default function MarkdownViewer({ content }: { content: string }) {
   const [lightbox, setLightbox] = React.useState<{ src: string; alt: string } | null>(null);
+  const [tableLightbox, setTableLightbox] = React.useState<React.ReactNode | null>(null);
   return (
     <>
     <style jsx global>{`
@@ -191,21 +219,22 @@ export default function MarkdownViewer({ content }: { content: string }) {
       .syntax-highlighter .token.variable { color: var(--token-accent2); }
     `}</style>
     {lightbox && <ImageLightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
+    {tableLightbox && <TableLightbox onClose={() => setTableLightbox(null)}>{tableLightbox}</TableLightbox>}
     <div className="w-full min-w-0 break-words">
       <div className={`prose prose-xl prose-slate dark:prose-invert max-w-none w-full min-w-0
         prose-headings:font-display prose-headings:font-bold prose-headings:tracking-tight
         prose-headings:text-zinc-900 dark:prose-headings:text-zinc-100
-        prose-h1:text-page sm:prose-h1:text-4xl lg:prose-h1:text-4xl prose-h1:mt-16 prose-h1:mb-8
-        prose-h2:text-2xl sm:prose-h2:text-3xl lg:prose-h2:text-3xl prose-h2:mt-16 prose-h2:mb-6
-        prose-h3:text-xl sm:prose-h3:text-2xl lg:prose-h3:text-2xl prose-h3:mt-12 prose-h3:mb-5
-        prose-h4:text-lg sm:prose-h4:text-xl prose-h4:mt-10 prose-h4:mb-4
+        prose-h1:text-page sm:prose-h1:text-4xl lg:prose-h1:text-4xl prose-h1:mt-10 prose-h1:mb-8
+        prose-h2:text-2xl sm:prose-h2:text-3xl lg:prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-6
+        prose-h3:text-xl sm:prose-h3:text-2xl lg:prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-5
+        prose-h4:text-lg sm:prose-h4:text-xl prose-h4:mt-6 prose-h4:mb-4
         prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline prose-a:underline-offset-4
         prose-blockquote:border-l-4 prose-blockquote:border-primary/20 prose-blockquote:bg-zinc-50/50 dark:prose-blockquote:bg-white/[0.02] prose-blockquote:py-4 prose-blockquote:px-8 prose-blockquote:rounded-r-xl prose-blockquote:not-italic prose-blockquote:text-xl lg:prose-blockquote:text-xl prose-blockquote:font-medium prose-blockquote:text-zinc-700 dark:prose-blockquote:text-zinc-200 prose-blockquote:max-w-[720px] prose-blockquote:mx-auto prose-blockquote:my-14 prose-blockquote:relative prose-blockquote:before:content-none
         prose-ul:list-disc prose-ul:pl-8 prose-ul:space-y-4 prose-ul:max-w-[720px] prose-ul:mx-auto
         prose-ol:list-decimal prose-ol:pl-8 prose-ol:space-y-4 prose-ol:max-w-[720px] prose-ol:mx-auto
         prose-li:text-zinc-700 dark:prose-li:text-zinc-300 prose-li:marker:text-primary prose-li:leading-relaxed prose-li:text-lg lg:prose-li:text-xl
         prose-strong:text-zinc-900 dark:prose-strong:text-zinc-100 prose-strong:font-bold
-        prose-hr:border-zinc-200 dark:prose-hr:border-white/10 prose-hr:my-20
+        prose-hr:hidden
       `}>
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
@@ -213,14 +242,26 @@ export default function MarkdownViewer({ content }: { content: string }) {
           components={{
             code: CodeBlock as any,
             pre: ({ children }: any) => <>{children}</>,
-            p: (props: any) => (
-              <div className={`mb-10 last:mb-0 text-zinc-700 dark:text-zinc-200 text-lg lg:text-xl leading-[1.85] animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both ${PROSE_WIDTH}`} {...props} />
-            ),
-            table: ({ children }: any) => (
-              <div className={`overflow-x-auto my-12 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900/50 shadow-md dark:shadow-none not-prose animate-in fade-in zoom-in-95 duration-700 ${PROSE_WIDTH}`}>
-                <table className="w-full text-base text-left border-collapse">{children}</table>
-              </div>
-            ),
+            p: ({ node, children, ...props }: any) => {
+              const isImageOnly = node?.children?.length === 1 && node.children[0]?.tagName === 'img';
+              if (isImageOnly) return <>{children}</>;
+              return <div className={`mb-7 last:mb-0 text-zinc-700 dark:text-zinc-200 text-lg lg:text-xl leading-[1.85] animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both ${PROSE_WIDTH}`} {...props} />;
+            },
+            table: ({ children }: any) => {
+              const tableEl = <table className="w-full min-w-max text-base text-left border-collapse">{children}</table>;
+              return (
+                <div className={`relative my-12 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900/50 shadow-md dark:shadow-none not-prose animate-in fade-in zoom-in-95 duration-700 group/table ${WIDE_WIDTH}`}>
+                  <button
+                    onClick={() => setTableLightbox(tableEl)}
+                    className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-zinc-100 dark:bg-white/10 text-zinc-400 hover:text-zinc-700 dark:hover:text-white opacity-0 group-hover/table:opacity-100 transition-all"
+                    title="Phóng to"
+                  >
+                    <ZoomIn className="w-3.5 h-3.5" />
+                  </button>
+                  <div className="overflow-x-auto">{tableEl}</div>
+                </div>
+              );
+            },
             thead: ({ children }: any) => (
               <thead className="bg-zinc-50/30 dark:bg-white/[0.03] border-b border-zinc-200 dark:border-white/10">{children}</thead>
             ),
@@ -234,7 +275,7 @@ export default function MarkdownViewer({ content }: { content: string }) {
               <tr className="group transition-colors hover:bg-zinc-50/50 dark:hover:bg-white/[0.02]">{children}</tr>
             ),
             img: ({ src, alt, ...props }: any) => src ? (
-              <div className={`my-24 group relative ${PROSE_WIDTH}`}>
+              <div className={`my-12 group relative ${WIDE_WIDTH}`}>
                 <div className="relative cursor-zoom-in" onClick={() => setLightbox({ src, alt: alt ?? '' })}>
                   <img
                     src={src} alt={alt ?? ''} loading="lazy"

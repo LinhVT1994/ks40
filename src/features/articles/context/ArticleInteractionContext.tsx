@@ -79,39 +79,10 @@ export function ArticleInteractionProvider({
   const [followerCount, setFollowerCount] = useState(initialFollowerCount);
   const [followPending, startFollowTransition] = useTransition();
 
-  // Sidebar Visibility Strategy
-  const [sidebarsVisible, setSidebarsVisible] = useState(true);
-  const peekTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-  const exitTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const showSidebars = useCallback(() => {
-    if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
-    if (peekTimerRef.current) clearTimeout(peekTimerRef.current);
-    setSidebarsVisible(true);
-  }, []);
-
-  const hideSidebars = useCallback(() => {
-    if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
-    exitTimerRef.current = setTimeout(() => {
-      setSidebarsVisible(false);
-    }, 1200);
-  }, []);
-
-  // Synchronized Mount Peek
-  React.useEffect(() => {
-    // Show immediately on mount
-    setSidebarsVisible(true);
-    
-    // Hide after 5 seconds of discovery
-    peekTimerRef.current = setTimeout(() => {
-      setSidebarsVisible(false);
-    }, 5000);
-
-    return () => {
-      if (peekTimerRef.current) clearTimeout(peekTimerRef.current);
-      if (exitTimerRef.current) clearTimeout(exitTimerRef.current);
-    };
-  }, []);
+  // Sidebar Visibility Strategy — always visible in normal mode
+  const sidebarsVisible = true;
+  const showSidebars = useCallback(() => {}, []);
+  const hideSidebars = useCallback(() => {}, []);
 
   const handleFollow = useCallback(() => {
     if (!session) {

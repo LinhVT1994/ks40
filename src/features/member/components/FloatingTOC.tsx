@@ -25,13 +25,14 @@ export default function FloatingTOC({
   const [internalOpen, setInternalOpen] = useState(false);
   const [activeId, setActiveId] = useState('');
   const [focusActive, setFocusActive] = useState(false);
-  const [isMoving, setIsMoving] = useState(false);
+
 
   const interaction = useInteractionOptional();
   const sidebarsVisible = interaction?.sidebarsVisible ?? true;
   const showSidebars = interaction?.showSidebars ?? (() => {});
   const hideSidebars = interaction?.hideSidebars ?? (() => {});
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollLockRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   
   const itemRefs = useRef<Map<string, HTMLAnchorElement | null>>(new Map());
   const listRef = useRef<HTMLDivElement>(null);
@@ -50,30 +51,35 @@ export default function FloatingTOC({
 
   useEffect(() => {
     if (headings.length === 0) return;
-    const handleScroll = () => {
-      // Active heading = last heading whose top has scrolled past 1/3 of the viewport.
-      // This avoids the "off by one" feel where the next heading lights up the moment it
-      // enters the top edge, even though the reader is still finishing the previous section.
-      const triggerLine = Math.max(160, window.innerHeight * 0.33);
+
+    // OFFSET matches scroll-margin-top (100px) so the active heading after
+    // clicking in the TOC is the same one the scroll handler would compute.
+    const OFFSET = 100;
+
+    const getActive = () => {
       let current = '';
       for (const { id } of headings) {
         const el = document.getElementById(id);
-        if (el) {
-          const top = el.getBoundingClientRect().top;
-          if (top <= triggerLine) current = id;
-        }
+        if (el && el.getBoundingClientRect().top <= OFFSET) current = id;
       }
-      // Fallback: if no heading has crossed the line yet but we're near the top, pick the first one
-      if (!current && headings.length > 0) {
+      if (!current) {
         const firstEl = document.getElementById(headings[0].id);
-        if (firstEl && firstEl.getBoundingClientRect().top <= window.innerHeight) {
+        if (firstEl && firstEl.getBoundingClientRect().top < window.innerHeight) {
           current = headings[0].id;
         }
       }
-      setActiveId(current);
+      return current;
     };
+
+    const handleScroll = () => {
+      // Skip scroll-handler updates while a click-triggered scroll animation
+      // is in progress — otherwise intermediate positions override the clicked id.
+      if (scrollLockRef.current) return;
+      setActiveId(getActive());
+    };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    setActiveId(getActive());
     return () => window.removeEventListener('scroll', handleScroll);
   }, [headings]);
 
@@ -88,10 +94,7 @@ export default function FloatingTOC({
       const elRect = activeEl.getBoundingClientRect();
       const contRect = container.getBoundingClientRect();
       const top = elRect.top - contRect.top;
-      setIsMoving(true);
       setIndicatorStyle({ top, height: elRect.height, opacity: 1 });
-      const timer = setTimeout(() => setIsMoving(false), 500);
-      return () => clearTimeout(timer);
     }
   }, [activeId, headings]);
 
@@ -142,9 +145,14 @@ export default function FloatingTOC({
 
     // Use document-relative position (rect.top + window.scrollY) instead of offsetTop,
     // since offsetTop is relative to offsetParent and can be wrong for nested layouts.
+    // Lock scroll handler for the duration of the animation so intermediate
+    // scroll positions don't overwrite the id we just set above.
+    if (scrollLockRef.current) clearTimeout(scrollLockRef.current);
+    scrollLockRef.current = setTimeout(() => { scrollLockRef.current = null; }, 900);
+
     const rect = el.getBoundingClientRect();
-    const targetY = rect.top + window.scrollY - 110;
-    smoothScrollTo(targetY, 1000);
+    const targetY = rect.top + window.scrollY - 100;
+    smoothScrollTo(targetY, 800);
   };
 
   if (headings.length === 0) return null;
@@ -245,10 +253,10 @@ export default function FloatingTOC({
                     level === 3 ? (isLeft ? 'pl-4' : 'pr-4') : 'pl-0'
                   }`}
                 >
-                  <div className={`text-[14px] leading-relaxed transition-all duration-300 px-4 ${
+                  <div className={`text-[14px] leading-relaxed transition-colors duration-300 px-4 font-bold ${
                     isActive
-                      ? 'text-primary font-bold'
-                      : 'text-zinc-500 dark:text-slate-500 font-medium hover:text-zinc-800 dark:hover:text-white'
+                      ? 'text-primary'
+                      : 'text-zinc-500 dark:text-slate-500 hover:text-zinc-800 dark:hover:text-white'
                   } ${isLeft ? 'text-left' : 'text-right'}`}>
                     {text}
                   </div>
@@ -259,7 +267,7 @@ export default function FloatingTOC({
         </nav>
 
         {/* Focus Mode toggle — Pushed to bottom with mt-auto */}
-        <div className="mt-auto mx-3 xl:mx-0 pt-4 border-t border-zinc-200 dark:border-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="mt-auto mx-3 xl:mx-0 pt-4 border-t border-zinc-200 dark:border-white/5">
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('toggle-focus-mode'))}
             className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-[12px] font-bold transition-all ${

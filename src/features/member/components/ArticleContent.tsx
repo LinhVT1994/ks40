@@ -158,7 +158,7 @@ export default function ArticleContent({
                   [&_li]:text-zinc-700 dark:[&_li]:text-zinc-300
                   [&_li]:text-lg md:[&_li]:text-xl font-medium tracking-tight
                   [&_li]:before:content-[''] [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:top-[0.65em]
-                  [&_li]:before:w-1.5 [&_li]:before:h-1.5 [&_li]:before:rounded-full [&_li]:before:bg-emerald-500/60
+                  [&_li]:before:w-1.5 [&_li]:before:h-1.5 [&_li]:before:rounded-full [&_li]:before:bg-primary
                   [&_li]:before:shrink-0"
                 >
                   <div className="markdown-content">
@@ -167,6 +167,12 @@ export default function ArticleContent({
                 </div>
               </div>
           </div>
+        </div>
+      )}
+
+      {objectives && (
+        <div className="w-full max-w-[720px] mx-auto px-4 md:px-0 mb-12">
+          <div className="w-full h-px bg-zinc-200 dark:bg-white/10" />
         </div>
       )}
 

@@ -354,7 +354,6 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
           <span className="text-[10px] text-zinc-500 tabular-nums w-10">{Math.round(zoom * 100)}%</span>
         </div>
 
-        <div className="focus-bar-divider" />
 
         {/* Notes Toggle */}
         {onToggleNotes && (
@@ -367,8 +366,7 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
               <FileEdit className="w-4 h-4 group-hover:text-primary transition-colors" />
               <span className="text-[11px] font-bold hidden sm:inline">Ghi chú</span>
             </button>
-            <div className="focus-bar-divider" />
-          </>
+              </>
         )}
 
         {/* Ambient Sounds Library */}
@@ -441,7 +439,6 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
           )}
         </div>
 
-        <div className="focus-bar-divider" />
 
         {/* Auto-scroll controls */}
         <div className="flex items-center gap-2">
@@ -470,7 +467,6 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
           </div>
         </div>
 
-        <div className="focus-bar-divider" />
 
         {/* Progress */}
         <div className="flex items-center gap-2 min-w-0">
@@ -479,7 +475,6 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
           </div>
           <span className="text-xs font-bold text-white tabular-nums">{progress}%</span>
         </div>
-        <div className="focus-bar-divider" />
 
         {/* Stopwatch & Time Left */}
         <div className="flex items-baseline gap-2.5 min-w-fit px-1">
@@ -500,7 +495,6 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
           </div>
         </div>
 
-        <div className="focus-bar-divider" />
 
         {/* Exit */}
         <button onClick={exit} className="focus-bar-btn focus-bar-exit" title="Thoát (Esc)">

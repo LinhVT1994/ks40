@@ -195,11 +195,11 @@ export default async function ArticleDetailPage({ params }: Props) {
         initialIsFollowing={authorInfo?.isFollowing ?? false}
         initialFollowerCount={authorInfo?.followerCount ?? 0}
       >
-        <div className="relative max-w-[820px] mx-auto">
+        <div data-focus-wrapper className="relative max-w-[820px] mx-auto">
           {/* Desktop Hanging Sidebars (Left: TOC, Right: Interaction) */}
           {!isGated && (
             <>
-              <div className="hidden xl:block absolute right-full top-0 h-full pointer-events-none">
+              <div data-focus-hide className="hidden xl:block absolute right-full top-0 h-full pointer-events-none">
                 <div className="sticky top-32 pr-12 2xl:pr-20 pointer-events-auto">
                   <aside className="xl:w-60 2xl:w-64">
                     <FloatingTOC headings={headings} />

@@ -64,6 +64,9 @@ export async function createMemberArticleAction(data: MemberArticleFormData): Pr
   const existing = await db.article.findUnique({ where: { slug: data.slug } });
   if (existing) return { success: false, error: 'Slug đã tồn tại.' };
 
+  const topic = await db.topic.findUnique({ where: { id: data.topicId } });
+  if (!topic) return { success: false, error: 'Chủ đề không hợp lệ hoặc không tồn tại.' };
+
   const tagIds = await upsertTags(data.tags ?? []);
 
   const article = await db.article.create({

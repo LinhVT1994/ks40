@@ -127,6 +127,10 @@ html.focus-mode [data-focus-grid] {
   display: block !important;
 }
 
+html.focus-mode [data-focus-wrapper] {
+  max-width: none !important;
+}
+
 html.focus-mode [data-focus-main] {
   max-width: 850px !important;
   margin-left: auto !important;
