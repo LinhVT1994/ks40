@@ -167,7 +167,7 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
 
   if (compact) {
     return (
-      <div className="prose prose-zinc dark:prose-invert max-w-none
+      <div className="prose prose-xl prose-zinc dark:prose-invert max-w-none
         prose-p:m-0 prose-p:leading-relaxed
         prose-strong:text-zinc-900 dark:prose-strong:text-zinc-100 prose-strong:font-bold
         prose-em:italic
@@ -238,7 +238,7 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
     {lightbox && <ImageLightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
     {tableLightbox && <TableLightbox onClose={() => setTableLightbox(null)}>{tableLightbox}</TableLightbox>}
     <div className="w-full min-w-0 break-words">
-      <div className={`prose prose-xl prose-slate dark:prose-invert max-w-none w-full min-w-0
+      <div className={`prose prose-xl prose-zinc dark:prose-invert max-w-none w-full min-w-0
         prose-headings:font-display prose-headings:font-bold prose-headings:tracking-tight
         prose-headings:text-zinc-900 dark:prose-headings:text-zinc-100
         prose-h1:text-page sm:prose-h1:text-4xl lg:prose-h1:text-4xl prose-h1:mt-10 prose-h1:mb-8
@@ -246,7 +246,6 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
         prose-h3:text-xl sm:prose-h3:text-2xl lg:prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-5
         prose-h4:text-lg sm:prose-h4:text-xl prose-h4:mt-6 prose-h4:mb-4
         prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline prose-a:underline-offset-4
-        prose-blockquote:border-l-4 prose-blockquote:border-primary/40 prose-blockquote:bg-primary/5 dark:prose-blockquote:bg-primary/10 prose-blockquote:py-6 prose-blockquote:px-8 prose-blockquote:rounded-r-2xl prose-blockquote:not-italic prose-blockquote:text-xl lg:prose-blockquote:text-xl prose-blockquote:font-medium prose-blockquote:text-zinc-800 dark:prose-blockquote:text-zinc-100 prose-blockquote:max-w-[720px] prose-blockquote:mx-auto prose-blockquote:my-16 prose-blockquote:relative prose-blockquote:before:content-['"'] prose-blockquote:before:absolute prose-blockquote:before:-top-4 prose-blockquote:before:-left-4 prose-blockquote:before:text-6xl prose-blockquote:before:text-primary/20 prose-blockquote:before:font-serif
         prose-ul:list-disc prose-ul:pl-8 prose-ul:space-y-4 prose-ul:max-w-[720px] prose-ul:mx-auto prose-ul:mb-8
         prose-ol:list-decimal prose-ol:pl-8 prose-ol:space-y-4 prose-ol:max-w-[720px] prose-ol:mx-auto
         prose-li:text-zinc-700 dark:prose-li:text-zinc-300 prose-li:marker:text-primary prose-li:leading-relaxed prose-li:text-lg lg:prose-li:text-xl
@@ -257,12 +256,17 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw]}
           components={{
+            blockquote: ({ children }: any) => (
+              <blockquote className={`border-l-4 border-primary/40 bg-primary/5 dark:bg-primary/10 py-6 px-8 rounded-r-2xl not-italic text-xl lg:text-xl font-medium text-zinc-800 dark:text-zinc-100 my-16 relative ${PROSE_WIDTH} before:content-['"'] before:absolute before:-top-4 before:-left-4 before:text-6xl before:text-primary/20 before:font-serif`}>
+                {children}
+              </blockquote>
+            ),
             code: CodeBlock as any,
             pre: ({ children }: any) => <>{children}</>,
             p: ({ node, children, ...props }: any) => {
               const isImageOnly = node?.children?.length === 1 && node.children[0]?.tagName === 'img';
               if (isImageOnly) return <>{children}</>;
-              return <div className={`mb-8 last:mb-0 text-zinc-700 dark:text-zinc-200 text-lg lg:text-xl leading-[1.85] animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both ${PROSE_WIDTH}`} {...props} />;
+              return <div className={`mb-8 last:mb-0 text-zinc-700 dark:text-zinc-200 text-lg lg:text-xl leading-[1.85] ${PROSE_WIDTH}`} {...props} />;
             },
             table: ({ children }: any) => {
               const tableEl = <table className="w-full min-w-max text-base text-left border-collapse">{children}</table>;
@@ -312,10 +316,10 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
                 )}
               </div>
             ) : null,
-            h1: ({ children }: any) => { const id = slugify(String(children)); return <h1 id={id} className={`animate-in fade-in slide-in-from-left-4 duration-700 fill-mode-both ${PROSE_WIDTH}`}>{children}</h1>; },
-            h2: ({ children }: any) => { const id = slugify(String(children)); return <h2 id={id} className={`animate-in fade-in slide-in-from-left-4 duration-700 fill-mode-both ${PROSE_WIDTH}`}>{children}</h2>; },
-            h3: ({ children }: any) => { const id = slugify(String(children)); return <h3 id={id} className={`animate-in fade-in slide-in-from-left-4 duration-700 fill-mode-both ${PROSE_WIDTH}`}>{children}</h3>; },
-            h4: ({ children }: any) => <h4 className={`animate-in fade-in duration-700 fill-mode-both ${PROSE_WIDTH}`}>{children}</h4>,
+            h1: ({ children }: any) => { const id = slugify(String(children)); return <h1 id={id} className={`${PROSE_WIDTH}`}>{children}</h1>; },
+            h2: ({ children }: any) => { const id = slugify(String(children)); return <h2 id={id} className={`${PROSE_WIDTH}`}>{children}</h2>; },
+            h3: ({ children }: any) => { const id = slugify(String(children)); return <h3 id={id} className={`${PROSE_WIDTH}`}>{children}</h3>; },
+            h4: ({ children }: any) => <h4 className={`${PROSE_WIDTH}`}>{children}</h4>,
           }}
         >
           {content}
