@@ -409,7 +409,7 @@ const _getArticleContentCached = unstable_cache(
         resources:   { select: { id: true, name: true, size: true, mimeType: true }, orderBy: { createdAt: 'asc' } },
         _count:      { select: { likes: true, comments: true, bookmarks: true } },
         topic:       { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } },
-        nextArticle: { select: { id: true, title: true, slug: true, summary: true, thumbnail: true, cover: true, topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } }, readTime: true, author: { select: { name: true, image: true, username: true } }, _count: { select: { likes: true } } } },
+        nextArticle: { select: { id: true, title: true, slug: true, summary: true, thumbnail: true, cover: true, topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } }, readTime: true, author: { select: { id: true, name: true, image: true, username: true } }, _count: { select: { likes: true } } } },
       },
     });
 
@@ -465,7 +465,7 @@ export async function getArticleBySlugAction(slug: string) {
       resources:   { select: { id: true, name: true, size: true, mimeType: true }, orderBy: { createdAt: 'asc' } },
       _count:      { select: { likes: true, comments: true, bookmarks: true } },
       topic:       { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } },
-      nextArticle: { select: { id: true, title: true, slug: true, summary: true, thumbnail: true, cover: true, topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } }, readTime: true, author: { select: { name: true, image: true, username: true } }, _count: { select: { likes: true } } } },
+      nextArticle: { select: { id: true, title: true, slug: true, summary: true, thumbnail: true, cover: true, topic: { select: { id: true, slug: true, label: true, emoji: true, color: true, parentId: true, parent: { select: { id: true, slug: true, label: true } } } }, readTime: true, author: { select: { id: true, name: true, image: true, username: true } }, _count: { select: { likes: true } } } },
       ...(userId && {
         likes:     { where: { userId } },
         bookmarks: { where: { userId } },
@@ -515,12 +515,23 @@ export async function getArticlePreviewAction(slug: string): Promise<ArticlePrev
   });
   if (!article) return null;
 
-  // Truncate to ~50% of character length to preserve whitespaces and specific markdown nuances (newlines, etc)
+  // Truncate to ~50% of character length, aligning to the nearest paragraph break for a cleaner look
   const length = article.content.length;
-  if (length > 100) {
-    const halfLen = Math.floor(length * 0.5);
-    const cutPos  = article.content.lastIndexOf(' ', halfLen);
-    const preview = article.content.slice(0, cutPos > 0 ? cutPos : halfLen) + '\n\n...';
+  if (length > 200) {
+    const targetPos = Math.floor(length * 0.5);
+    // Try to find the nearest paragraph break (\n\n) after the 50% mark
+    let cutPos = article.content.indexOf('\n\n', targetPos);
+    
+    // If no paragraph break found ahead, try looking back slightly or just find the nearest space
+    if (cutPos === -1 || cutPos > targetPos + 500) {
+      cutPos = article.content.lastIndexOf('\n\n', targetPos);
+    }
+    
+    if (cutPos === -1) {
+      cutPos = article.content.lastIndexOf(' ', targetPos);
+    }
+
+    const preview = article.content.slice(0, cutPos > 0 ? cutPos : targetPos).trim() + '\n\n...';
     return { ...article, content: preview };
   }
   

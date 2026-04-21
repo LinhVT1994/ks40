@@ -14,7 +14,7 @@ export type CommentWithAuthor = {
   images: string[];
   createdAt: Date;
   parentId: string | null;
-  author: { id: string; name: string; image: string | null };
+  author: { id: string; name: string; image: string | null; username: string | null };
   replies: CommentWithAuthor[];
   replyCount: number;
   repliesLoaded: boolean;
@@ -32,7 +32,7 @@ export async function getCommentsAction(articleId: string): Promise<CommentWithA
     where:   { articleId, status: CommentStatus.VISIBLE, parentId: null },
     orderBy: { createdAt: 'desc' },
     include: {
-      author:  { select: { id: true, name: true, image: true } },
+      author:  { select: { id: true, name: true, image: true, username: true } },
       likes:   { select: { userId: true, type: true } },
       _count:  { select: { replies: { where: { status: CommentStatus.VISIBLE } } } },
     },
@@ -68,7 +68,7 @@ export async function getRepliesAction(commentId: string): Promise<CommentWithAu
     where:   { parentId: commentId, status: CommentStatus.VISIBLE },
     orderBy: { createdAt: 'asc' },
     include: {
-      author: { select: { id: true, name: true, image: true } },
+      author: { select: { id: true, name: true, image: true, username: true } },
       likes:  { select: { userId: true, type: true } },
     },
   });
@@ -116,9 +116,14 @@ export async function createCommentAction(
   const trimmed = content.trim();
   if (trimmed.length > 1000) return { success: false, error: 'Bình luận tối đa 1000 ký tự.' };
 
-  // Validate images: chặn URL bên ngoài, chỉ cho phép file đã upload qua endpoint comment-image
+  // Validate images: chặn URL bên ngoài, chỉ cho phép file đã upload qua endpoint comment-image (local hoặc azure)
   const cleanImages = (Array.isArray(images) ? images : [])
-    .filter(u => typeof u === 'string' && u.startsWith('/uploads/comments/'))
+    .filter(u => 
+      typeof u === 'string' && (
+        u.startsWith('/uploads/comments/') || 
+        (u.includes('.blob.core.windows.net/') && u.includes('/comments/'))
+      )
+    )
     .slice(0, MAX_COMMENT_IMAGES);
 
   if (!trimmed && cleanImages.length === 0) {
@@ -133,7 +138,7 @@ export async function createCommentAction(
       authorId: userId,
       parentId: parentId ?? null,
     },
-    include: { author: { select: { id: true, name: true, image: true } } },
+    include: { author: { select: { id: true, name: true, image: true, username: true } } },
   });
 
   // Lấy thông tin bài viết để gửi notification

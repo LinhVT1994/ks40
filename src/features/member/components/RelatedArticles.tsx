@@ -13,8 +13,15 @@ function formatViews(n: number) {
 
 function ArticleGridCard({ article, isLarge }: { article: ArticleCard; isLarge?: boolean }) {
   return (
-    <Link href={`/article/${article.slug}`} className="block group h-full">
-      <div className="relative h-full flex flex-col overflow-hidden bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-2xl hover:border-primary/30 dark:hover:border-primary/20 transition-all duration-500 hover:shadow-xl hover:shadow-primary/5 group">
+    <div className="relative group h-full">
+      {/* Absolute Cover Link for the article */}
+      <Link 
+        href={`/article/${article.slug}`} 
+        className="absolute inset-0 z-0" 
+        aria-label={article.title}
+      />
+      
+      <div className="relative z-10 h-full flex flex-col overflow-hidden bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-2xl group-hover:border-primary/30 dark:group-hover:border-primary/20 transition-all duration-500 group-hover:shadow-xl group-hover:shadow-primary/5 pointer-events-none">
         <div className={`w-full relative overflow-hidden ${isLarge ? "aspect-[3/1]" : "aspect-[16/10]"}`}>
           {article.thumbnail ? (
             <Image
@@ -43,12 +50,15 @@ function ArticleGridCard({ article, isLarge }: { article: ArticleCard; isLarge?:
           </div>
         </div>
         
-        <div className="p-4 flex flex-col flex-1">
+        <div className="p-4 flex flex-col flex-1 pointer-events-auto">
           {/* Author Info */}
-          <div className="flex items-center mb-2 opacity-80 group-hover:opacity-100 transition-opacity">
-            <span className="text-[10px] font-semibold text-zinc-500 dark:text-slate-400">
+          <div className="flex items-center mb-2 opacity-80 group-hover:opacity-100 transition-opacity relative z-20">
+            <Link 
+              href={`/profile/${article.author.username || article.author.id}`}
+              className="text-[10px] font-semibold text-zinc-500 dark:text-slate-400 hover:text-primary transition-colors"
+            >
               <span className="font-normal opacity-70">bởi</span> {article.author?.name}
-            </span>
+            </Link>
           </div>
 
           <h4 className="font-display font-bold text-sm sm:text-base text-zinc-800 dark:text-white group-hover:text-primary transition-colors duration-300 mb-2 line-clamp-2 leading-snug">
@@ -77,7 +87,7 @@ function ArticleGridCard({ article, isLarge }: { article: ArticleCard; isLarge?:
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -110,7 +120,10 @@ export default function RelatedArticles({ articles }: { articles: ArticleCard[] 
         {displayArticles.map((article, index) => (
           <div 
             key={article.id} 
-            className={index === 0 ? "sm:col-span-2 lg:col-span-2" : "col-span-1"}
+            className={`animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both ${
+              index === 0 ? "sm:col-span-2 lg:col-span-2" : "col-span-1"
+            }`}
+            style={{ animationDelay: `${index * 100}ms` }}
           >
             <ArticleGridCard article={article} isLarge={index === 0} />
           </div>

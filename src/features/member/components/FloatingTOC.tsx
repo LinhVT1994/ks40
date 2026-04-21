@@ -224,7 +224,7 @@ export default function FloatingTOC({
         <nav className={`flex flex-col overflow-y-auto flex-1 xl:max-h-none ${isLeft ? 'pl-5 pr-4 xl:pl-0 xl:pr-0' : 'pr-5 pl-4 items-end xl:pr-0 xl:pl-0'}`}>
           <div className={`px-3 mb-6 flex items-center gap-3 text-[11px] font-black text-primary/50 dark:text-primary/40 uppercase tracking-[0.4em] ${isLeft ? '' : 'flex-row-reverse'}`}>
              <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-             Contents
+             Mục lục
           </div>
           
           <div ref={listRef} className="flex flex-col gap-0 relative">
@@ -253,7 +253,7 @@ export default function FloatingTOC({
                     level === 3 ? (isLeft ? 'pl-4' : 'pr-4') : 'pl-0'
                   }`}
                 >
-                  <div className={`text-[14px] leading-relaxed transition-colors duration-300 px-4 font-bold ${
+                  <div className={`text-[13px] leading-relaxed transition-colors duration-300 px-4 font-medium ${
                     isActive
                       ? 'text-primary'
                       : 'text-zinc-500 dark:text-slate-500 hover:text-zinc-800 dark:hover:text-white'

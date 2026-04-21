@@ -35,7 +35,7 @@ export default function ArticleResources({ resources }: { resources: Resource[] 
         onClick={() => setOpen(o => !o)}
         className="w-full flex items-center justify-between gap-2 group"
       >
-        <h3 className="text-sm font-bold text-zinc-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2">
+        <h3 className="text-sm font-bold text-zinc-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2 font-display">
           <Download className="w-4 h-4" /> Tài nguyên đính kèm
           <span className="text-xs font-normal normal-case text-zinc-500">({resources.length})</span>
         </h3>

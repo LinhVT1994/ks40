@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 import React from 'react';
 import { Send, CheckCircle2, ChevronLeft } from 'lucide-react';
 import ArticleHero from '@/features/member/components/ArticleHero';
@@ -133,8 +134,10 @@ export default function MemberStep3({ data, onBack, onPublish, isPending }: Step
                    )}
                 </div>
                 <div>
-                   <div className="text-sm font-bold text-zinc-800 dark:text-white">{data.author?.name || 'Tác giả'}</div>
-                   <div className="text-[10px] text-zinc-500 uppercase font-black tracking-tight">Thành viên cộng đồng</div>
+                   <Link href={`/profile/preview-author`} className="hover:text-primary transition-colors">
+                     <div className="text-sm font-bold text-zinc-800 dark:text-white transition-colors">{data.author?.name || 'Tác giả'}</div>
+                     <div className="text-[10px] text-zinc-500 uppercase font-black tracking-tight">Thành viên cộng đồng</div>
+                   </Link>
                 </div>
               </div>
             </div>

@@ -208,7 +208,7 @@ export default async function ArticleDetailPage({ params }: Props) {
               </div>
 
               <div className="hidden xl:block absolute left-full top-0 h-full pointer-events-none">
-                <div data-focus-hide className="sticky top-40 pl-12 2xl:pl-20 pointer-events-auto">
+                <div data-focus-hide className="sticky top-32 pl-12 2xl:pl-20 pointer-events-auto">
                   <FloatingInteractionHub />
                 </div>
               </div>

@@ -33,7 +33,7 @@ export default function ArticleRating({ articleId, initialSummary }: Props) {
 
   return (
     <div className="mt-12 pt-8 border-t border-zinc-200 dark:border-white/5">
-      <h3 className="text-sm font-bold text-zinc-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6">
+      <h3 className="text-sm font-bold text-zinc-500 dark:text-slate-400 uppercase tracking-widest flex items-center gap-2 mb-6 font-display">
         <Star className="w-4 h-4" /> Đánh giá bài viết
       </h3>
 

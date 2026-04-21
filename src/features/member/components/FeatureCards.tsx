@@ -476,7 +476,12 @@ export default function FeatureCards({
                           <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-zinc-500 text-xs">
                             {/* Author Info Integrated into Stats */}
                             <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-4">
-                              <span className="font-semibold text-zinc-600 dark:text-slate-300 text-[11px]"><span className="font-normal opacity-70">bởi</span> {article.author.name}</span>
+                            <Link 
+                              href={`/profile/${article.author.username || article.author.id}`}
+                              className="font-semibold text-zinc-600 dark:text-slate-300 text-[11px] hover:text-primary transition-colors relative z-30"
+                            >
+                              <span className="font-normal opacity-70">bởi</span> {article.author.name}
+                            </Link>
                             </div>
 
                             <span className="flex items-center gap-1 group/stat transition-colors hover:text-rose-500">
@@ -526,7 +531,12 @@ export default function FeatureCards({
                     <div className="flex sm:hidden mt-3 items-center justify-between pt-2.5 border-t border-zinc-100/80 dark:border-white/5 gap-2 w-full">
                         <div className="flex items-center flex-wrap gap-x-3 gap-y-2 text-zinc-500 dark:text-slate-400 text-[11px] font-medium">
                             <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-3">
-                              <span className="font-semibold text-zinc-600 dark:text-slate-300 text-[10px]"><span className="font-normal opacity-70">bởi</span> {article.author.name}</span>
+                            <Link 
+                              href={`/profile/${article.author.username || article.author.id}`}
+                              className="font-semibold text-zinc-600 dark:text-slate-300 text-[10px] hover:text-primary transition-colors relative z-30"
+                            >
+                              <span className="font-normal opacity-70">bởi</span> {article.author.name}
+                            </Link>
                             </div>
                             <span className="flex items-center gap-1 group/stat hover:text-rose-500">
                               <Heart className="w-3.5 h-3.5" />
@@ -679,8 +689,15 @@ function TrendingHorizontal({ articles, discoveryArticles, topicIds }: { article
       <div className="flex flex-col">
         {trending.map((article, idx) => (
           <React.Fragment key={article.id}>
-            <Link href={`/article/${article.slug}`} className="block group">
-              <div className="cursor-pointer py-3 hover:bg-zinc-100/80 dark:hover:bg-white/[0.02] transition-all duration-300 flex flex-row items-stretch min-h-[120px] px-3 -mx-3 rounded-xl">
+            <div className="relative group">
+              {/* Absolute Cover Link for the article */}
+              <Link 
+                href={`/article/${article.slug}`} 
+                className="absolute inset-0 z-0" 
+                aria-label={article.title}
+              />
+              
+              <div className="py-3 hover:bg-zinc-100/80 dark:hover:bg-white/[0.02] transition-all duration-300 flex flex-row items-stretch min-h-[120px] px-3 -mx-3 rounded-xl pointer-events-none">
                 <div className="w-24 sm:w-36 shrink-0 relative rounded-lg overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-300 dark:text-white/10 text-3xl font-bold">
                   {article.thumbnail ? (
                     <Image
@@ -695,15 +712,18 @@ function TrendingHorizontal({ articles, discoveryArticles, topicIds }: { article
                     article.title[0]
                   )}
                 </div>
-                <div className="pl-3 sm:pl-5 pr-1 flex-1 flex flex-col min-w-0 py-1">
+                <div className="pl-3 sm:pl-5 pr-1 flex-1 flex flex-col min-w-0 py-1 relative z-10 pointer-events-auto">
                   <h4 className="text-sm sm:text-base font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors font-display line-clamp-2 flex-1 mb-1.5">
                     {article.title}
                   </h4>
                   <div className="flex items-center gap-3 mt-auto text-zinc-500">
-                    <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-3">
-                      <span className="text-[10px] font-semibold text-zinc-600 dark:text-slate-400">
+                    <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-3 relative z-20">
+                      <Link 
+                        href={`/profile/${article.author.username || article.author.id}`}
+                        className="text-[10px] font-semibold text-zinc-600 dark:text-slate-400 hover:text-primary transition-colors"
+                      >
                         <span className="font-normal opacity-70">bởi</span> {article.author.name}
-                      </span>
+                      </Link>
                     </div>
                     <span className="flex items-center gap-1">
                       <Heart className="w-3.5 h-3.5" />
@@ -713,14 +733,14 @@ function TrendingHorizontal({ articles, discoveryArticles, topicIds }: { article
                       <MessageCircle className="w-3.5 h-3.5" />
                       <span className="text-[11px] font-medium">{article._count.comments}</span>
                     </span>
-                    <span className="flex items-center gap-1">
+                    <span className="flex items-center gap-1 text-zinc-500">
                       <Eye className="w-3.5 h-3.5" />
                       <span className="text-[11px] font-medium">{formatViews(article.viewCount)}</span>
                     </span>
                   </div>
                 </div>
               </div>
-            </Link>
+            </div>
             {idx < trending.length - 1 && <div className="h-px bg-zinc-100 dark:bg-white/5 w-full my-1" />}
           </React.Fragment>
         ))}
@@ -752,23 +772,32 @@ function TrendingSidebar({ articles, discoveryArticles, topicIds }: { articles: 
       </div>
       <div className="flex flex-col gap-1">
         {trending.map(article => (
-          <Link href={`/article/${article.slug}`} key={article.id} className="block group">
-            <div className="flex gap-3 p-2 hover:bg-zinc-100/80 dark:hover:bg-white/[0.02] transition-all duration-300 rounded-xl">
+          <div key={article.id} className="relative group">
+            {/* Absolute Cover Link for the article */}
+            <Link 
+              href={`/article/${article.slug}`} 
+              className="absolute inset-0 z-0" 
+              aria-label={article.title}
+            />
+            <div className="flex gap-3 p-2 hover:bg-zinc-100/80 dark:hover:bg-white/[0.02] transition-all duration-300 rounded-xl pointer-events-none">
               <div
                 className="w-14 h-14 rounded-lg bg-cover bg-center shrink-0 border border-zinc-200 dark:border-white/5 overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-300 dark:text-white/20 font-bold text-lg"
                 style={article.thumbnail ? { backgroundImage: `url('${article.thumbnail}')`, backgroundPosition: article.thumbnailPosition ?? '50% 50%' } : undefined}
               >
                 {!article.thumbnail && article.title[0]}
               </div>
-              <div className="flex-1 min-w-0 pt-0.5">
+              <div className="flex-1 min-w-0 pt-0.5 relative z-10 pointer-events-auto">
                 <h4 className="text-sm font-bold text-zinc-800 dark:text-white line-clamp-2 group-hover:text-primary transition-colors leading-tight mb-1.5">
                   {article.title}
                 </h4>
                 <div className="flex items-center gap-2 text-zinc-500">
-                  <div className="flex items-center">
-                    <span className="text-[10px] font-semibold text-zinc-600 dark:text-slate-400 truncate max-w-[90px]">
+                  <div className="flex items-center relative z-20">
+                    <Link 
+                      href={`/profile/${article.author.username || article.author.id}`}
+                      className="text-[10px] font-semibold text-zinc-600 dark:text-slate-400 truncate max-w-[90px] hover:text-primary transition-colors"
+                    >
                       <span className="font-normal opacity-70">bởi</span> {article.author.name}
-                    </span>
+                    </Link>
                   </div>
                   <span className="text-[10px] opacity-40">•</span>
                   <span className="flex items-center gap-1">
@@ -786,7 +815,7 @@ function TrendingSidebar({ articles, discoveryArticles, topicIds }: { articles: 
                 </div>
               </div>
             </div>
-          </Link>
+          </div>
         ))}
       </div>
     </div>

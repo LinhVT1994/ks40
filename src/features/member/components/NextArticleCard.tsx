@@ -14,7 +14,7 @@ type NextArticle = {
   cover: string | null;
   category: string;
   readTime: number;
-  author: { name: string; image: string | null };
+  author: { id: string; name: string; image: string | null; username: string | null };
   _count: { likes: number };
 };
 
@@ -34,13 +34,17 @@ export default function NextArticleCard({ article }: { article: NextArticle }) {
         <span className="h-px flex-1 bg-zinc-200 dark:bg-white/5" />
       </p>
 
-      <Link
-        href={`/article/${article.slug}`}
-        className="group relative flex flex-col sm:flex-row gap-0 rounded-[2rem] overflow-hidden border border-zinc-300 dark:border-white/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 active:scale-[0.99] bg-white dark:bg-slate-900"
-      >
+      <div className="relative group flex flex-col sm:flex-row gap-0 rounded-[2rem] overflow-hidden border border-zinc-300 dark:border-white/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 bg-white dark:bg-slate-900">
+        {/* Absolute Cover Link for the article */}
+        <Link 
+          href={`/article/${article.slug}`} 
+          className="absolute inset-0 z-0" 
+          aria-label={article.title}
+        />
+        
         {/* Image */}
         {image ? (
-          <div className="relative sm:w-72 h-48 sm:h-auto shrink-0 overflow-hidden">
+          <div className="relative sm:w-72 h-48 sm:h-auto shrink-0 overflow-hidden pointer-events-none">
             <Image
               src={image}
               alt={article.title}
@@ -51,13 +55,13 @@ export default function NextArticleCard({ article }: { article: NextArticle }) {
             <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-transparent to-white/5 dark:to-black/10" />
           </div>
         ) : (
-          <div className="sm:w-72 h-48 sm:h-auto shrink-0 bg-gradient-to-br from-primary/10 to-accent-purple/10 flex items-center justify-center">
+          <div className="sm:w-72 h-48 sm:h-auto shrink-0 bg-gradient-to-br from-primary/10 to-accent-purple/10 flex items-center justify-center pointer-events-none">
             <ArrowRight className="w-10 h-10 text-primary/20" />
           </div>
         )}
 
         {/* Content */}
-        <div className="flex-1 p-6 sm:p-8 flex flex-col justify-between gap-4">
+        <div className="relative z-10 flex-1 p-6 sm:p-8 flex flex-col justify-between gap-4 pointer-events-none">
           <div>
             <span className="inline-block px-2.5 py-1 rounded-lg bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest mb-3">
               {CATEGORY_LABELS[article.category] ?? article.category}
@@ -73,20 +77,23 @@ export default function NextArticleCard({ article }: { article: NextArticle }) {
           </div>
 
           <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 text-xs text-zinc-500">
-              <span className="flex items-center gap-1.5">
+            <div className="flex items-center gap-4 text-xs text-zinc-500 pointer-events-auto">
+              <span className="flex items-center gap-1.5 opacity-80">
                 <Clock className="w-3.5 h-3.5" /> {article.readTime} phút
               </span>
-              <span className="flex items-center gap-1.5">
+              <Link 
+                href={`/profile/${article.author.username || article.author.id}`}
+                className="flex items-center gap-1.5 hover:text-primary transition-colors font-semibold"
+              >
                 <Heart className="w-3.5 h-3.5" /> {article.author.name}
-              </span>
+              </Link>
             </div>
             <div className="flex items-center gap-2 text-sm font-bold text-primary opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all duration-300">
               Đọc ngay <ArrowRight className="w-4 h-4" />
             </div>
           </div>
         </div>
-      </Link>
+      </div>
     </div>
   );
 }

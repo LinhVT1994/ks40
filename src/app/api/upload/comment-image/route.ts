@@ -5,7 +5,7 @@ import { auth } from '@/auth';
 import { uploadToAzure, isAzureConfigured } from '@/lib/azure-storage';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads');
-const MAX_SIZE   = 2 * 1024 * 1024; // 2 MB
+const MAX_SIZE   = 5 * 1024 * 1024; // 5 MB
 const ALLOWED    = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
 export async function POST(req: NextRequest) {

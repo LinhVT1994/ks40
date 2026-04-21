@@ -954,14 +954,14 @@ export default function ProfileClient({
       <div className="lg:col-span-4 xl:col-span-3 lg:sticky lg:top-24 space-y-12">
         {/* User Identity - Simplified Floating Version */}
         <div className="flex flex-col items-center px-4 text-center">
-          <div className="relative w-24 h-24 shrink-0">
+          <div className="relative w-24 h-24 shrink-0 shadow-sm rounded-full">
              <Image 
                src={user.avatarUrl} 
                alt={user.name ?? ''}
                fill
                unoptimized
                sizes="96px"
-               className="rounded-full object-cover border border-zinc-200 dark:border-white/10 shadow-sm"
+               className="rounded-full object-cover border border-zinc-200 dark:border-white/10"
              />
           </div>
           

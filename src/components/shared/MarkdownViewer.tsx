@@ -46,7 +46,7 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
             className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all scale-95 hover:scale-100 active:scale-90 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-xl"
           >
             {copied ? <Check className="w-3 h-3 text-emerald-400 dark:text-emerald-600" /> : <Copy className="w-3 h-3" />}
-            <span>{copied ? 'Copied' : 'Copy'}</span>
+            <span>{copied ? 'Đã chép' : 'Sao chép'}</span>
           </button>
         </div>
 
@@ -161,9 +161,26 @@ function TableLightbox({ children, onClose }: { children: React.ReactNode; onClo
   );
 }
 
-export default function MarkdownViewer({ content }: { content: string }) {
+export default function MarkdownViewer({ content, compact = false }: { content: string; compact?: boolean }) {
   const [lightbox, setLightbox] = React.useState<{ src: string; alt: string } | null>(null);
   const [tableLightbox, setTableLightbox] = React.useState<React.ReactNode | null>(null);
+
+  if (compact) {
+    return (
+      <div className="prose prose-zinc dark:prose-invert max-w-none
+        prose-p:m-0 prose-p:leading-relaxed
+        prose-strong:text-zinc-900 dark:prose-strong:text-zinc-100 prose-strong:font-bold
+        prose-em:italic
+        prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline
+        prose-code:text-[0.85em] prose-code:bg-zinc-100 dark:prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
+      ">
+        <ReactMarkdown remarkPlugins={[remarkGfm]} allowedElements={['p','strong','em','a','code','br','ul','ol','li']} unwrapDisallowed>
+          {content}
+        </ReactMarkdown>
+      </div>
+    );
+  }
+
   return (
     <>
     <style jsx global>{`
@@ -229,8 +246,8 @@ export default function MarkdownViewer({ content }: { content: string }) {
         prose-h3:text-xl sm:prose-h3:text-2xl lg:prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-5
         prose-h4:text-lg sm:prose-h4:text-xl prose-h4:mt-6 prose-h4:mb-4
         prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline prose-a:underline-offset-4
-        prose-blockquote:border-l-4 prose-blockquote:border-primary/20 prose-blockquote:bg-zinc-50/50 dark:prose-blockquote:bg-white/[0.02] prose-blockquote:py-4 prose-blockquote:px-8 prose-blockquote:rounded-r-xl prose-blockquote:not-italic prose-blockquote:text-xl lg:prose-blockquote:text-xl prose-blockquote:font-medium prose-blockquote:text-zinc-700 dark:prose-blockquote:text-zinc-200 prose-blockquote:max-w-[720px] prose-blockquote:mx-auto prose-blockquote:my-14 prose-blockquote:relative prose-blockquote:before:content-none
-        prose-ul:list-disc prose-ul:pl-8 prose-ul:space-y-4 prose-ul:max-w-[720px] prose-ul:mx-auto
+        prose-blockquote:border-l-4 prose-blockquote:border-primary/40 prose-blockquote:bg-primary/5 dark:prose-blockquote:bg-primary/10 prose-blockquote:py-6 prose-blockquote:px-8 prose-blockquote:rounded-r-2xl prose-blockquote:not-italic prose-blockquote:text-xl lg:prose-blockquote:text-xl prose-blockquote:font-medium prose-blockquote:text-zinc-800 dark:prose-blockquote:text-zinc-100 prose-blockquote:max-w-[720px] prose-blockquote:mx-auto prose-blockquote:my-16 prose-blockquote:relative prose-blockquote:before:content-['"'] prose-blockquote:before:absolute prose-blockquote:before:-top-4 prose-blockquote:before:-left-4 prose-blockquote:before:text-6xl prose-blockquote:before:text-primary/20 prose-blockquote:before:font-serif
+        prose-ul:list-disc prose-ul:pl-8 prose-ul:space-y-4 prose-ul:max-w-[720px] prose-ul:mx-auto prose-ul:mb-8
         prose-ol:list-decimal prose-ol:pl-8 prose-ol:space-y-4 prose-ol:max-w-[720px] prose-ol:mx-auto
         prose-li:text-zinc-700 dark:prose-li:text-zinc-300 prose-li:marker:text-primary prose-li:leading-relaxed prose-li:text-lg lg:prose-li:text-xl
         prose-strong:text-zinc-900 dark:prose-strong:text-zinc-100 prose-strong:font-bold
@@ -245,7 +262,7 @@ export default function MarkdownViewer({ content }: { content: string }) {
             p: ({ node, children, ...props }: any) => {
               const isImageOnly = node?.children?.length === 1 && node.children[0]?.tagName === 'img';
               if (isImageOnly) return <>{children}</>;
-              return <div className={`mb-7 last:mb-0 text-zinc-700 dark:text-zinc-200 text-lg lg:text-xl leading-[1.85] animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both ${PROSE_WIDTH}`} {...props} />;
+              return <div className={`mb-8 last:mb-0 text-zinc-700 dark:text-zinc-200 text-lg lg:text-xl leading-[1.85] animate-in fade-in slide-in-from-bottom-4 duration-700 fill-mode-both ${PROSE_WIDTH}`} {...props} />;
             },
             table: ({ children }: any) => {
               const tableEl = <table className="w-full min-w-max text-base text-left border-collapse">{children}</table>;

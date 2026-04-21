@@ -57,7 +57,7 @@ export default function FloatingInteractionHub() {
       <div className="flex flex-col items-start gap-4 group/author w-full">
         <div className="flex flex-col items-start gap-3 w-full">
           <Link 
-            href={`/profile/${author.username ?? author.id}`}
+            href={`/profile/${author.username || author.id}`}
             className="relative block shrink-0"
           >
             <div className="absolute inset-0 rounded-full bg-primary/20 blur-md opacity-0 group-hover/author:opacity-100 transition-opacity duration-300" />
@@ -68,9 +68,15 @@ export default function FloatingInteractionHub() {
             </div>
           </Link>
           
-          <span className="text-[16px] font-bold text-zinc-900 dark:text-white leading-tight" title={author.name}>
-            {author.name}
-          </span>
+          <div className="relative group/name">
+            <Link href={`/profile/${author.username || author.id}`} className="text-[16px] font-bold text-zinc-900 dark:text-white leading-tight hover:text-primary transition-colors">
+              {author.name}
+            </Link>
+            <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-semibold whitespace-nowrap opacity-0 scale-95 group-hover/name:opacity-100 group-hover/name:scale-100 transition-all duration-200 shadow-lg origin-bottom">
+              Xem trang cá nhân
+              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-zinc-900 dark:border-t-zinc-100" />
+            </div>
+          </div>
         </div>
 
         {author.bio && (
@@ -94,13 +100,13 @@ export default function FloatingInteractionHub() {
           <>
             <UserCheck className="w-3.5 h-3.5 group-hover/follow:hidden" />
             <UserPlus className="w-3.5 h-3.5 hidden group-hover/follow:block rotate-45" />
-            <span className="group-hover/follow:hidden">Following</span>
-            <span className="hidden group-hover/follow:inline">Unfollow</span>
+            <span className="group-hover/follow:hidden">Đang theo dõi</span>
+            <span className="hidden group-hover/follow:inline">Hủy theo dõi</span>
           </>
         ) : (
           <>
             <UserPlus className="w-3.5 h-3.5" />
-            <span>Follow</span>
+            <span>Theo dõi</span>
           </>
         )}
       </button>

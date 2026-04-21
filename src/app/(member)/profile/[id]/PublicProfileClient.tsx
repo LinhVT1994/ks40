@@ -100,7 +100,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
           {/* Avatar */}
           <div className="relative shrink-0">
             <div className="absolute -inset-2 bg-gradient-to-tr from-primary/20 to-accent-purple/20 rounded-full blur-xl opacity-60" />
-            <div className="relative w-28 h-28 sm:w-32 sm:h-32 shadow-lg">
+            <div className="relative w-28 h-28 sm:w-32 sm:h-32 shadow-lg rounded-full">
                <Image
                  src={user.avatarUrl}
                  alt={user.name ?? ''}

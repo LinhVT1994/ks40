@@ -312,10 +312,13 @@ export default function TopicPageClient({
                         <div className="hidden sm:flex mt-auto items-end justify-between pt-0 gap-2">
                           <div className="flex items-center flex-wrap gap-x-5 text-zinc-500 dark:text-slate-300 text-xs">
                             {/* Author Info */}
-                            <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-5">
-                              <span className="font-semibold text-zinc-600 dark:text-slate-300 text-[11px]">
+                            <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-5 relative z-30">
+                              <Link 
+                                href={`/profile/${article.author.username || article.author.id}`}
+                                className="font-semibold text-zinc-600 dark:text-slate-300 text-[11px] hover:text-primary transition-colors"
+                              >
                                 <span className="font-normal opacity-70">bởi</span> {article.author.name}
-                              </span>
+                              </Link>
                             </div>
 
                             <span className="flex items-center gap-1.5 group/stat transition-colors hover:text-rose-500 font-bold">
@@ -359,10 +362,13 @@ export default function TopicPageClient({
                     {/* Mobile Stats (Full width footer) */}
                     <div className="flex sm:hidden mt-3 items-center justify-between pt-3 border-t border-zinc-100/80 dark:border-white/5 gap-2 w-full">
                         <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-zinc-500 dark:text-slate-400 text-[11px] font-medium">
-                            <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-3.5">
-                              <span className="font-semibold text-zinc-600 dark:text-slate-300 text-[10px]">
+                            <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-3.5 relative z-30">
+                              <Link 
+                                href={`/profile/${article.author.username || article.author.id}`}
+                                className="font-semibold text-zinc-600 dark:text-slate-300 text-[10px] hover:text-primary transition-colors"
+                              >
                                 <span className="font-normal opacity-70">bởi</span> {article.author.name}
-                              </span>
+                              </Link>
                             </div>
                             <span className="flex items-center gap-1.5 group/stat hover:text-rose-500">
                               <Heart className="w-3.5 h-3.5" />

@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { useState, useTransition, useMemo, useRef } from 'react';
 import { MessageCircle, Send, User, Reply, Trash2, ArrowDownUp, ThumbsUp, ThumbsDown, ImagePlus, X } from 'lucide-react';
 import { createCommentAction, deleteCommentAction, toggleCommentLikeAction, getRepliesAction, type CommentWithAuthor } from '@/features/articles/actions/comment';
@@ -28,20 +29,54 @@ async function uploadCommentImage(file: File): Promise<string> {
   return url as string;
 }
 
-function CommentImages({ images }: { images: string[] }) {
+function ImageLightbox({ src, alt, onClose }: { src: string; alt: string; onClose: () => void }) {
+  useState(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  });
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-200 p-4"
+      onClick={onClose}
+    >
+      <button
+        onClick={onClose}
+        className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-10"
+      >
+        <X className="w-5 h-5" />
+      </button>
+      <div className="relative max-w-full max-h-full flex items-center justify-center">
+        <img
+          src={src}
+          alt={alt}
+          className="max-w-[95vw] max-h-[95vh] object-contain rounded-2xl shadow-2xl animate-in zoom-in-95 duration-200"
+          onClick={e => e.stopPropagation()}
+        />
+      </div>
+    </div>
+  );
+}
+
+function CommentImages({ images, onImageClick }: { images: string[]; onImageClick: (src: string) => void }) {
   if (!images || images.length === 0) return null;
   return (
     <div className={`mb-3 grid gap-2 ${images.length === 1 ? 'grid-cols-1 max-w-xs' : 'grid-cols-2 max-w-md'}`}>
       {images.map((src, i) => (
-        <a key={i} href={src} target="_blank" rel="noopener noreferrer" className="block relative aspect-video">
+        <button 
+          key={i} 
+          onClick={() => onImageClick(src)}
+          className="block relative aspect-video group/img cursor-zoom-in overflow-hidden rounded-xl border border-zinc-200 dark:border-white/5"
+        >
           <Image
             src={src}
             alt={`Ảnh ${i + 1}`}
             fill
             sizes="(max-width: 768px) 100vw, 400px"
-            className="w-full h-auto max-h-64 object-cover rounded-xl border border-zinc-200 dark:border-white/5"
+            className="w-full h-auto max-h-64 object-cover transition-transform duration-500 group-hover/img:scale-105"
           />
-        </a>
+          <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/10 transition-colors" />
+        </button>
       ))}
     </div>
   );
@@ -59,8 +94,14 @@ function timeAgo(date: Date) {
   return `${Math.floor(h / 24)} ngày trước`;
 }
 
-function Avatar({ image, name }: { image?: string | null; name: string }) {
-  return <AvatarImg src={image} name={name} size={40} className="shrink-0" />;
+function Avatar({ image, name, username, id, isSelf }: { image?: string | null; name: string; username?: string | null; id?: string; isSelf?: boolean }) {
+  const content = <AvatarImg src={image} name={name} size={40} className="shrink-0" />;
+  if (isSelf) return content;
+  return (
+    <Link href={`/profile/${username || id}`} className="hover:opacity-80 transition-opacity">
+      {content}
+    </Link>
+  );
 }
 
 export default function ArticleComments({
@@ -75,6 +116,7 @@ export default function ArticleComments({
 
   const [comments,      setComments]      = useState(initialComments);
   const [text,          setText]          = useState('');
+  const [lightbox,      setLightbox]      = useState<string | null>(null);
   const [replyTo,       setReplyTo]       = useState<{ topLevelId: string; name: string } | null>(null);
   const [replyText,     setReplyText]     = useState('');
   const [sort,          setSort]          = useState<SortOption>('newest');
@@ -247,6 +289,7 @@ export default function ArticleComments({
 
   return (
     <div className="mt-20 border-t border-zinc-200 dark:border-white/5 pt-12">
+      {lightbox && <ImageLightbox src={lightbox} alt="Ảnh phóng to" onClose={() => setLightbox(null)} />}
       <div className="flex items-start justify-between gap-4 mb-10 flex-wrap">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-2xl bg-primary/10 text-primary">
@@ -285,7 +328,7 @@ export default function ArticleComments({
       {/* Input */}
       {session ? (
         <div className="flex gap-4 mb-12">
-          <Avatar image={session.user?.image} name={session.user?.name ?? ''} />
+          <Avatar image={session.user?.image} name={session.user?.name ?? ''} isSelf />
           <div className="flex-1 relative">
             <textarea
               value={text}
@@ -350,10 +393,12 @@ export default function ArticleComments({
         {filtered.map(c => (
           <div key={c.id}>
             <div className="flex gap-4">
-              <Avatar image={c.author.image} name={c.author.name} />
+              <Avatar image={c.author.image} name={c.author.name} username={c.author.username} id={c.author.id} />
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-sm text-zinc-800 dark:text-white">{c.author.name}</span>
+                  <Link href={`/profile/${c.author.username || c.author.id}`} className="font-bold text-sm text-zinc-800 dark:text-white hover:text-primary transition-colors">
+                    {c.author.name}
+                  </Link>
                   <div className="flex items-center gap-2">
                     <span className="text-[11px] text-zinc-500" suppressHydrationWarning>{timeAgo(c.createdAt)}</span>
                     {userId === c.author.id && (
@@ -364,7 +409,7 @@ export default function ArticleComments({
                   </div>
                 </div>
                 {c.content && <p className="text-zinc-600 dark:text-slate-300 text-[15px] leading-relaxed mb-3">{c.content}</p>}
-                <CommentImages images={c.images} />
+                <CommentImages images={c.images} onImageClick={setLightbox} />
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => handleLike(c.id, null, 'LIKE')}
@@ -416,10 +461,12 @@ export default function ArticleComments({
                   <div className="mt-4 space-y-4 pl-4 border-l-2 border-zinc-200 dark:border-white/5">
                     {expandedReplies.has(c.id) && c.replies.map(r => (
                       <div key={r.id} className="flex gap-3">
-                        <Avatar image={r.author.image} name={r.author.name} />
+                        <Avatar image={r.author.image} name={r.author.name} username={r.author.username} id={r.author.id} />
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="font-bold text-sm text-zinc-800 dark:text-white">{r.author.name}</span>
+                            <Link href={`/profile/${r.author.username || r.author.id}`} className="font-bold text-sm text-zinc-800 dark:text-white hover:text-primary transition-colors">
+                              {r.author.name}
+                            </Link>
                             <div className="flex items-center gap-2">
                               <span className="text-[11px] text-zinc-500" suppressHydrationWarning>{timeAgo(r.createdAt)}</span>
                               {userId === r.author.id && (
@@ -439,7 +486,7 @@ export default function ArticleComments({
                               })() : r.content}
                             </p>
                           )}
-                          <CommentImages images={r.images} />
+                          <CommentImages images={r.images} onImageClick={setLightbox} />
                           <div className="flex items-center gap-3">
                             <button
                               onClick={() => handleLike(r.id, c.id, 'LIKE')}
@@ -482,7 +529,7 @@ export default function ArticleComments({
                     {/* Reply input — always at bottom of replies */}
                     {replyTo?.topLevelId === c.id && (
                       <div className="flex gap-3 pt-1">
-                        <Avatar image={session?.user?.image} name={session?.user?.name ?? ''} />
+                        <Avatar image={session?.user?.image} name={session?.user?.name ?? ''} isSelf />
                         <div className="flex-1 relative">
                           <textarea
                             value={replyText}
