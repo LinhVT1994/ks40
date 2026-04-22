@@ -3,7 +3,7 @@
 import { useState, useTransition, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
-import { UserPlus, UserCheck, Globe, Facebook, Instagram, Twitter, Linkedin, Github, Youtube } from 'lucide-react';
+import { UserPlus, UserCheck, Globe, Facebook, Instagram, Twitter, Linkedin, Github, Youtube, Music } from 'lucide-react';
 import Avatar from '@/components/shared/Avatar';
 import { toggleFollowAction } from '@/features/member/actions/follow';
 
@@ -23,6 +23,7 @@ type AuthorInfo = {
   linkedinUrl?: string | null;
   githubUrl?: string | null;
   youtubeUrl?: string | null;
+  tiktokUrl?: string | null;
 };
 
 const SOCIAL_LINKS = [
@@ -33,6 +34,7 @@ const SOCIAL_LINKS = [
   { key: 'linkedinUrl',  icon: Linkedin,  hoverColor: 'hover:text-blue-700 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-500/10' },
   { key: 'githubUrl',    icon: Github,    hoverColor: 'hover:text-zinc-800 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/20' },
   { key: 'youtubeUrl',   icon: Youtube,   hoverColor: 'hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10' },
+  { key: 'tiktokUrl',    icon: Music,     hoverColor: 'hover:text-zinc-900 dark:hover:text-white hover:bg-zinc-200 dark:hover:bg-white/20' },
 ] as const;
 
 import { useInteractionOptional } from '@/features/articles/context/ArticleInteractionContext';

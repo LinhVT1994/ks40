@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react';
 import { User } from 'next-auth';
 import { useSession } from 'next-auth/react';
-import { Camera, Loader2, CheckCircle2, Globe, Facebook, Instagram, Twitter, Linkedin, Github, Youtube } from 'lucide-react';
+import { Camera, Loader2, CheckCircle2, Globe, Facebook, Instagram, Twitter, Linkedin, Github, Youtube, Music } from 'lucide-react';
 import { updateProfileAction } from '@/features/member/actions/profile';
 import { compressImage } from '@/lib/compress-image';
 
@@ -17,6 +17,7 @@ type SocialUser = User & {
   linkedinUrl?: string | null;
   githubUrl?: string | null;
   youtubeUrl?: string | null;
+  tiktokUrl?: string | null;
 };
 
 const SOCIAL_FIELDS = [
@@ -27,6 +28,7 @@ const SOCIAL_FIELDS = [
   { key: 'linkedinUrl',  label: 'LinkedIn',  icon: Linkedin,  placeholder: 'https://linkedin.com/in/username' },
   { key: 'githubUrl',    label: 'GitHub',    icon: Github,    placeholder: 'https://github.com/username' },
   { key: 'youtubeUrl',   label: 'YouTube',   icon: Youtube,   placeholder: 'https://youtube.com/@channel' },
+  { key: 'tiktokUrl',    label: 'TikTok',    icon: Music,     placeholder: 'https://tiktok.com/@username' },
 ] as const;
 
 export default function SettingsProfile({ user }: { user: SocialUser }) {

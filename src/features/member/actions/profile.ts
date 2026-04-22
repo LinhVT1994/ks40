@@ -22,6 +22,7 @@ export async function getPublicProfileAction(identifier: string) {
       linkedinUrl: true,
       githubUrl: true,
       youtubeUrl: true,
+      tiktokUrl: true,
       createdAt: true,
       _count: {
         select: {
@@ -48,6 +49,7 @@ export async function getPublicProfileAction(identifier: string) {
         linkedinUrl: true,
         githubUrl: true,
         youtubeUrl: true,
+        tiktokUrl: true,
         createdAt: true,
         _count: {
           select: {
@@ -126,6 +128,7 @@ export async function updateProfileAction(data: {
   linkedinUrl?: string;
   githubUrl?: string;
   youtubeUrl?: string;
+  tiktokUrl?: string;
   image?: string;
 }) {
   const session = await auth();

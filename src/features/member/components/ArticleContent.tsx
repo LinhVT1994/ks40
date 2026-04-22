@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useTransition, useEffect, useRef } from 'react';
+import { useState, useTransition, useEffect, useRef, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Bookmark, Sparkles, Target, Lock as LockIcon, Quote, CheckCircle2 } from 'lucide-react';
+import { Bookmark, Sparkles, Target, Lock as LockIcon, Quote, CheckCircle2, BookMarked } from 'lucide-react';
 import { toggleLikeAction } from '@/features/articles/actions/like';
 import { toggleBookmarkAction } from '@/features/articles/actions/bookmark';
 import { upsertReadHistoryAction, markArticleOpenedAction } from '@/features/articles/actions/read-history';
@@ -11,6 +11,9 @@ import { incrementViewAction } from '@/features/articles/actions/article';
 import MarkdownViewer from '@/components/shared/MarkdownViewer';
 import { useInteractionOptional } from '@/features/articles/context/ArticleInteractionContext';
 import ShareMenu from '@/components/shared/ShareMenu';
+import ArticleAnnotationLayer from '@/features/articles/components/ArticleAnnotationLayer';
+import ArticleNotesPanel from '@/features/articles/components/ArticleNotesPanel';
+import type { ArticleAnnotation } from '@/features/articles/actions/annotation';
 
 interface ArticleContentProps {
   articleId: string;
@@ -24,16 +27,22 @@ interface ArticleContentProps {
   isGated?: boolean;
   isPreview?: boolean;
   audience?: string;
+  articleTitle?: string;
+  initialAnnotations?: ArticleAnnotation[];
 }
 
 export default function ArticleContent({
   articleId, content, overview, objectives,
   likeCount, commentCount, isLiked, isBookmarked,
   isGated = false, isPreview = false, audience,
+  articleTitle = '',
+  initialAnnotations = [],
 }: ArticleContentProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname();
+  const [annotations, setAnnotations] = useState<ArticleAnnotation[]>(initialAnnotations);
+  const [notesPanelOpen, setNotesPanelOpen] = useState(false);
 
   const interaction = useInteractionOptional();
   
@@ -182,7 +191,15 @@ export default function ArticleContent({
 
       {/* Content — markdown */}
       {!isGated ? (
-        <MarkdownViewer content={content} />
+        <ArticleAnnotationLayer
+          articleId={articleId}
+          initialAnnotations={initialAnnotations}
+          onAnnotationsChange={setAnnotations}
+        >
+          <div data-article-content>
+            <MarkdownViewer content={content} />
+          </div>
+        </ArticleAnnotationLayer>
       ) : (
         // Gated: Integrated design (No Card)
         <div className="relative max-w-[816px] mx-auto">
@@ -253,6 +270,39 @@ export default function ArticleContent({
       )}
 
 
+
+      {/* Notes panel toggle button (only logged-in, non-gated) */}
+      {session && !isGated && (
+        <>
+          <button
+            onClick={() => setNotesPanelOpen(true)}
+            className="fixed bottom-24 right-6 z-50 flex items-center gap-2 px-4 py-2.5 bg-zinc-800/90 dark:bg-white/10 backdrop-blur-xl border border-white/10 text-white text-sm font-semibold rounded-full shadow-2xl hover:bg-zinc-700/90 transition-all hover:scale-105 active:scale-95"
+            title="Xem ghi chú & highlight"
+          >
+            <BookMarked className="w-4 h-4 text-primary" />
+            {annotations.length > 0 && (
+              <span className="bg-primary text-white text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">
+                {annotations.length}
+              </span>
+            )}
+          </button>
+
+          <ArticleNotesPanel
+            isOpen={notesPanelOpen}
+            onClose={() => setNotesPanelOpen(false)}
+            articleTitle={articleTitle}
+            annotations={annotations}
+            onAnnotationDeleted={id => setAnnotations(prev => prev.filter(a => a.id !== id))}
+            onScrollToAnnotation={id => {
+              setNotesPanelOpen(false);
+              setTimeout(() => {
+                const el = document.querySelector(`[data-annotation-id="${id}"]`);
+                el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              }, 300);
+            }}
+          />
+        </>
+      )}
 
       {/* Bookmark toast */}
       {bookmarkToast && (

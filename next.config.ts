@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.githubusercontent.com' },
       { protocol: 'https', hostname: 'ui-avatars.com' },
       { protocol: 'https', hostname: 'api.dicebear.com' },
+      { protocol: 'https', hostname: 'picsum.photos' },
       // Azure Blob Storage
       { protocol: 'https', hostname: '**.blob.core.windows.net' },
     ],

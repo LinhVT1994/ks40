@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -10,6 +10,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus, oneLight } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { useTheme } from 'next-themes';
 import { slugify } from '@/lib/slugify';
+import { cn } from '@/lib/utils';
 
 const MONO_FONT = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
 
@@ -17,11 +18,8 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
   const content = Array.isArray(children) ? children.join('') : String(children);
   const match = /language-(\w+)/.exec(className || '');
   const [copied, setCopied] = useState(false);
-  const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
   const lang = match ? match[1] : 'text';
-
-  useEffect(() => setMounted(true), []);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content.replace(/\n$/, ''));
@@ -30,7 +28,8 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
   };
 
   const isInline = inline ?? (!match && !content.includes('\n'));
-  const isDark = mounted && resolvedTheme === 'dark';
+  // Default to dark since app defaultTheme="dark"; avoids flash on first render
+  const isDark = resolvedTheme !== 'light';
 
   if (!isInline) {
     return (
@@ -173,8 +172,9 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
         prose-em:italic
         prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline
         prose-code:text-[0.85em] prose-code:bg-zinc-100 dark:prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
+        prose-blockquote:border-l-0 prose-blockquote:py-6 prose-blockquote:px-0 prose-blockquote:italic prose-blockquote:text-zinc-600 dark:prose-blockquote:text-zinc-400 prose-blockquote:font-medium prose-blockquote:relative prose-blockquote:before:content-['\201C'] prose-blockquote:before:absolute prose-blockquote:before:top-0 prose-blockquote:before:-left-4 prose-blockquote:before:text-5xl prose-blockquote:before:text-primary/10 prose-blockquote:after:content-['\201D'] prose-blockquote:after:absolute prose-blockquote:after:bottom-0 prose-blockquote:after:-right-4 prose-blockquote:after:text-5xl prose-blockquote:after:text-primary/10
       ">
-        <ReactMarkdown remarkPlugins={[remarkGfm]} allowedElements={['p','strong','em','a','code','br','ul','ol','li']} unwrapDisallowed>
+        <ReactMarkdown remarkPlugins={[remarkGfm]} allowedElements={['p','strong','em','a','code','br','ul','ol','li','blockquote']} unwrapDisallowed>
           {content}
         </ReactMarkdown>
       </div>
@@ -234,6 +234,38 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
       .syntax-highlighter .token.regex,
       .syntax-highlighter .token.important,
       .syntax-highlighter .token.variable { color: var(--token-accent2); }
+
+      /* Blockquote Internal Paragraph Fix */
+      blockquote div {
+        max-width: none !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+        font-size: inherit !important;
+        line-height: inherit !important;
+      }
+      blockquote > div:last-child {
+        display: inline !important;
+      }
+      blockquote > div:last-child::after {
+        content: '”';
+        display: inline-block;
+        margin-left: 0.75rem;
+        font-family: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+        font-size: 3.5rem; /* ~6xl */
+        line-height: 0;
+        vertical-align: middle;
+        position: relative;
+        top: 0.6rem;
+        color: #4f46e5;
+        opacity: 0.1;
+        transition: opacity 0.2s;
+      }
+      .dark blockquote div:last-child::after {
+        color: #818cf8; /* primary-light color */
+      }
+      blockquote:hover div:last-child::after {
+        opacity: 0.2;
+      }
     `}</style>
     {lightbox && <ImageLightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
     {tableLightbox && <TableLightbox onClose={() => setTableLightbox(null)}>{tableLightbox}</TableLightbox>}
@@ -257,7 +289,13 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
           rehypePlugins={[rehypeRaw]}
           components={{
             blockquote: ({ children }: any) => (
-              <blockquote className={`border-l-4 border-primary/40 bg-primary/5 dark:bg-primary/10 py-6 px-8 rounded-r-2xl not-italic text-xl lg:text-xl font-medium text-zinc-800 dark:text-zinc-100 my-16 relative ${PROSE_WIDTH} before:content-['"'] before:absolute before:-top-4 before:-left-4 before:text-6xl before:text-primary/20 before:font-serif`}>
+              <blockquote className={cn(
+                "not-prose border-none bg-transparent py-8 px-0 my-10 relative group text-zinc-600 dark:text-zinc-400 italic font-medium leading-relaxed text-xl lg:text-2xl",
+                PROSE_WIDTH
+              )}>
+                <span className="absolute top-0 -left-10 text-6xl text-primary/10 font-serif pointer-events-none group-hover:text-primary/20 transition-colors select-none">
+                  &ldquo;
+                </span>
                 {children}
               </blockquote>
             ),
@@ -266,7 +304,7 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
             p: ({ node, children, ...props }: any) => {
               const isImageOnly = node?.children?.length === 1 && node.children[0]?.tagName === 'img';
               if (isImageOnly) return <>{children}</>;
-              return <div className={`mb-8 last:mb-0 text-zinc-700 dark:text-zinc-200 text-lg lg:text-xl leading-[1.85] ${PROSE_WIDTH}`} {...props} />;
+              return <div className={`mb-8 last:mb-0 text-zinc-700 dark:text-zinc-200 text-lg lg:text-xl leading-[1.85] ${PROSE_WIDTH}`} {...props}>{children}</div>;
             },
             table: ({ children }: any) => {
               const tableEl = <table className="w-full min-w-max text-base text-left border-collapse">{children}</table>;

@@ -44,7 +44,7 @@ export default function TextSelectionToolbar({
       return;
     }
 
-    const range = sel.getRangeAt(0);
+    const range = sel.getRangeAt(0).cloneRange();
     const rect = range.getBoundingClientRect();
 
     // Check if selection is already highlighted
