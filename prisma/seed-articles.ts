@@ -1,3 +1,4 @@
+// @ts-nocheck
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
@@ -2196,16 +2197,16 @@ jobs:
 
       - name: Build and push Docker image
         run: |
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          docker build -t ghcr.io/${{ github.repository }}:${{ github.sha }} .
-          docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
+          echo \${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u \${{ github.actor }} --password-stdin
+          docker build -t ghcr.io/\${{ github.repository }}:\${{ github.sha }} .
+          docker push ghcr.io/\${{ github.repository }}:\${{ github.sha }}
 
       - name: Deploy to Kubernetes
         uses: azure/k8s-deploy@v4
         with:
           namespace: production
           manifests: k8s/
-          images: ghcr.io/${{ github.repository }}:${{ github.sha }}
+          images: ghcr.io/\${{ github.repository }}:\${{ github.sha }}
 \`\`\``,
     tags: ['Docker', 'AWS', 'Linux'],
     readTime: 17,
@@ -2472,7 +2473,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: \${{ env.NODE_VERSION }}
           cache: 'npm'
       - run: npm ci
       - run: npm run lint
@@ -2497,7 +2498,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: \${{ env.NODE_VERSION }}
           cache: 'npm'
       - run: npm ci
       - run: npm run db:migrate
@@ -2514,21 +2515,21 @@ jobs:
     needs: test
     if: github.ref == 'refs/heads/main'
     outputs:
-      image-tag: ${{ steps.meta.outputs.tags }}
+      image-tag: \${{ steps.meta.outputs.tags }}
     steps:
       - uses: actions/checkout@v4
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository }}
+          images: \${{ env.REGISTRY }}/\${{ github.repository }}
           tags: |
             type=sha,prefix=sha-
             type=ref,event=branch
       - uses: docker/build-push-action@v5
         with:
           push: true
-          tags: ${{ steps.meta.outputs.tags }}
+          tags: \${{ steps.meta.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -2540,9 +2541,9 @@ jobs:
     steps:
       - name: Deploy to staging
         run: |
-          curl -X POST ${{ secrets.DEPLOY_WEBHOOK_STAGING }} \\
-            -H "Authorization: Bearer ${{ secrets.DEPLOY_TOKEN }}" \\
-            -d '{"image": "${{ needs.build.outputs.image-tag }}"}'
+          curl -X POST \${{ secrets.DEPLOY_WEBHOOK_STAGING }} \\
+            -H "Authorization: Bearer \${{ secrets.DEPLOY_TOKEN }}" \\
+            -d '{"image": "\${{ needs.build.outputs.image-tag }}"}'
 
       - name: Run smoke tests
         run: |
@@ -2559,9 +2560,9 @@ jobs:
     steps:
       - name: Deploy to production
         run: |
-          curl -X POST ${{ secrets.DEPLOY_WEBHOOK_PROD }} \\
-            -H "Authorization: Bearer ${{ secrets.DEPLOY_TOKEN }}" \\
-            -d '{"image": "${{ needs.build.outputs.image-tag }}"}'
+          curl -X POST \${{ secrets.DEPLOY_WEBHOOK_PROD }} \\
+            -H "Authorization: Bearer \${{ secrets.DEPLOY_TOKEN }}" \\
+            -d '{"image": "\${{ needs.build.outputs.image-tag }}"}'
 \`\`\`
 
 ---

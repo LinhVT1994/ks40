@@ -5,10 +5,7 @@ import { getReadHistoryAction } from '@/features/articles/actions/read-history';
 import { getMemberDraftsAction } from '@/features/member/actions/write';
 import { getFollowersAction, getFollowingAction } from '@/features/member/actions/profile-follow';
 import { getProfileArticlesAction, getPublicProfileAction } from '@/features/member/actions/profile';
-import { getDashboardStatsAction, getContinueReadingAction } from '@/features/member/actions/dashboard';
 import { getArticleRatingsAction } from '@/features/articles/actions/rating';
-import { getEnabledTopicsAction } from '@/features/admin/actions/topic';
-import { db } from '@/lib/db';
 import ProfileClient from '../profile/[id]/ProfileClient';
 import JsonLd from '@/components/shared/JsonLd';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
@@ -31,8 +28,7 @@ export default async function PersonalDashboardPage() {
 
   const [
     bookmarks, history, drafts, followersData, followingData,
-    articlesData, dashboardStats, lastActivity,
-    ratingsData, availableTopicsData, followedTopicsData
+    articlesData, ratingsData
   ] = await Promise.all([
     getBookmarksAction(),
     getReadHistoryAction(),
@@ -40,17 +36,8 @@ export default async function PersonalDashboardPage() {
     getFollowersAction(user.id),
     getFollowingAction(user.id),
     getProfileArticlesAction(user.id),
-    getDashboardStatsAction(),
-    getContinueReadingAction(),
     canWrite ? getArticleRatingsAction({ authorId: user.id, limit: 20, includeHidden: true }) : Promise.resolve(null),
-    getEnabledTopicsAction(),
-    (db as any).topicFollow.findMany({
-      where: { userId: currentUserId },
-      select: { topicId: true }
-    }),
   ]);
-
-  const followedTopicIds = (followedTopicsData as { topicId: string }[]).map(f => f.topicId);
 
   const profileUrl = `${SITE_URL}/me`;
   const personJsonLd = {
@@ -109,11 +96,7 @@ export default async function PersonalDashboardPage() {
           totalFollowingPages={totalFollowingPages}
           isOwner={true}
           canWrite={canWrite}
-          stats={dashboardStats}
-          lastActivity={lastActivity}
           ratingsData={ratingsData}
-          availableTopics={availableTopicsData || []}
-          initialTopics={followedTopicIds}
         />
       </div>
     </div>

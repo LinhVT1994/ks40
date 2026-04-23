@@ -7,8 +7,6 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { Check, Copy, X, ZoomIn } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus, oneLight } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import { useTheme } from 'next-themes';
 import { slugify } from '@/lib/slugify';
 import { cn } from '@/lib/utils';
 
@@ -18,7 +16,6 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
   const content = Array.isArray(children) ? children.join('') : String(children);
   const match = /language-(\w+)/.exec(className || '');
   const [copied, setCopied] = useState(false);
-  const { resolvedTheme } = useTheme();
   const lang = match ? match[1] : 'text';
 
   const handleCopy = () => {
@@ -28,8 +25,6 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
   };
 
   const isInline = inline ?? (!match && !content.includes('\n'));
-  // Default to dark since app defaultTheme="dark"; avoids flash on first render
-  const isDark = resolvedTheme !== 'light';
 
   if (!isInline) {
     return (
@@ -60,9 +55,10 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
           scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-white/10 scrollbar-track-transparent">
           {match ? (
             <SyntaxHighlighter
-              style={isDark ? vscDarkPlus : oneLight}
+              style={{}}
               language={lang}
               PreTag="div"
+              className="syntax-highlighter"
               customStyle={{
                 margin: 0,
                 padding: '1.25rem 1.5rem',
@@ -183,90 +179,6 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
 
   return (
     <>
-    <style jsx global>{`
-      /* Zen Minimalist Syntax Highlighting */
-      .syntax-highlighter {
-        --token-text: #3f3f46;
-        --token-muted: #a0a0a0;
-        --token-comment: #a0a0a0;
-        --token-accent1: #4f46e5; /* Actions: Keywords, Functions */
-        --token-accent2: #18181b; /* Data: Strings, Numbers */
-      }
-
-      .dark .syntax-highlighter {
-        --token-text: #e4e4e7;
-        --token-muted: #71717a;
-        --token-comment: #52525b;
-        --token-accent1: #818cf8; /* Actions */
-        --token-accent2: #ffffff; /* Data */
-      }
-
-      .syntax-highlighter .token.comment,
-      .syntax-highlighter .token.prolog,
-      .syntax-highlighter .token.doctype,
-      .syntax-highlighter .token.cdata { color: var(--token-comment); font-style: italic; }
-      
-      .syntax-highlighter .token.punctuation,
-      .syntax-highlighter .token.operator,
-      .syntax-highlighter .token.namespace { color: var(--token-muted); }
-      
-      .syntax-highlighter .token.property,
-      .syntax-highlighter .token.tag,
-      .syntax-highlighter .token.boolean,
-      .syntax-highlighter .token.number,
-      .syntax-highlighter .token.constant,
-      .syntax-highlighter .token.symbol,
-      .syntax-highlighter .token.deleted { color: var(--token-accent2); font-weight: 600; }
-      
-      .syntax-highlighter .token.selector,
-      .syntax-highlighter .token.attr-name,
-      .syntax-highlighter .token.string,
-      .syntax-highlighter .token.char,
-      .syntax-highlighter .token.builtin,
-      .syntax-highlighter .token.inserted { color: var(--token-accent2); }
-      
-      .syntax-highlighter .token.atrule,
-      .syntax-highlighter .token.attr-value,
-      .syntax-highlighter .token.keyword,
-      .syntax-highlighter .token.function,
-      .syntax-highlighter .token.class-name { color: var(--token-accent1); font-weight: 600; }
-      
-      .syntax-highlighter .token.regex,
-      .syntax-highlighter .token.important,
-      .syntax-highlighter .token.variable { color: var(--token-accent2); }
-
-      /* Blockquote Internal Paragraph Fix */
-      blockquote div {
-        max-width: none !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        font-size: inherit !important;
-        line-height: inherit !important;
-      }
-      blockquote > div:last-child {
-        display: inline !important;
-      }
-      blockquote > div:last-child::after {
-        content: '”';
-        display: inline-block;
-        margin-left: 0.75rem;
-        font-family: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
-        font-size: 3.5rem; /* ~6xl */
-        line-height: 0;
-        vertical-align: middle;
-        position: relative;
-        top: 0.6rem;
-        color: #4f46e5;
-        opacity: 0.1;
-        transition: opacity 0.2s;
-      }
-      .dark blockquote div:last-child::after {
-        color: #818cf8; /* primary-light color */
-      }
-      blockquote:hover div:last-child::after {
-        opacity: 0.2;
-      }
-    `}</style>
     {lightbox && <ImageLightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
     {tableLightbox && <TableLightbox onClose={() => setTableLightbox(null)}>{tableLightbox}</TableLightbox>}
     <div className="w-full min-w-0 break-words">

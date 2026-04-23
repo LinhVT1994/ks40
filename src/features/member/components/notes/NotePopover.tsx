@@ -2,16 +2,17 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FileEdit, Sparkles } from 'lucide-react';
+import { FileEdit, Sparkles, Trash2 } from 'lucide-react';
 
 interface NotePopoverProps {
   rect: DOMRect;
   content: string;
   onClose: () => void;
   onEdit?: () => void;
+  onDelete?: () => void;
 }
 
-export default function NotePopover({ rect, content, onClose, onEdit }: NotePopoverProps) {
+export default function NotePopover({ rect, content, onClose, onEdit, onDelete }: NotePopoverProps) {
   // If the popover would go off the bottom of the screen, show it above the text.
   const showAbove = rect.bottom + 150 > window.innerHeight;
 
@@ -30,7 +31,7 @@ export default function NotePopover({ rect, content, onClose, onEdit }: NotePopo
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: showAbove ? -10 : 10 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="fixed z-[101] w-[320px] rounded-[1.25rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.7)] border border-white/40 dark:border-white/10 backdrop-blur-3xl max-md:backdrop-blur-lg bg-white/60 dark:bg-slate-900/60 overflow-hidden group"
+        className="fixed z-[101] w-[300px] rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-zinc-200 dark:border-white/10 bg-white dark:bg-[#202020] overflow-hidden group"
         style={{
           left: Math.max(16, Math.min(window.innerWidth - 336, rect.left + rect.width / 2)),
           top: showAbove ? rect.top - 16 : rect.bottom + 12,
@@ -38,24 +39,31 @@ export default function NotePopover({ rect, content, onClose, onEdit }: NotePopo
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Vision Pro style glowing ambient orbs */}
-        <div className="absolute -top-12 -right-12 w-32 h-32 bg-primary/20 dark:bg-primary/30 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-amber-500/10 dark:bg-amber-400/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent dark:from-white/5 dark:to-transparent pointer-events-none" />
 
-        <div className="relative z-10 p-5">
+        <div className="p-4">
           {/* Elegant Micro-Header */}
-          <div className="flex items-center justify-between mb-3 border-b border-zinc-200 dark:border-white/5 pb-3">
+          <div className="flex items-center justify-between mb-3 border-b border-zinc-100 dark:border-white/5 pb-2.5">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-full bg-gradient-to-tr from-primary to-blue-400 flex items-center justify-center text-white shadow-sm shadow-primary/20">
-                <Sparkles className="w-3 h-3" />
-              </div>
-              <span className="text-[10px] uppercase tracking-widest font-black text-zinc-500 dark:text-slate-400">
-                Ghi chú
+              <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
+              <span className="text-[12px] font-semibold text-zinc-600 dark:text-zinc-300">
+                Ghi chú 
               </span>
             </div>
             
             <div className="flex items-center gap-1">
+              {onDelete && (
+                <button 
+                  onClick={() => {
+                    if (confirm('Bạn có chắc muốn xoá ghi chú này vĩnh viễn?')) {
+                      onDelete();
+                    }
+                  }} 
+                  className="p-1.5 rounded-lg text-zinc-400 hover:text-red-500 hover:bg-red-50/80 dark:hover:bg-red-500/10 transition-colors"
+                  title="Xoá ghi chú"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
               {onEdit && (
                 <button 
                   onClick={onEdit} 
@@ -69,7 +77,7 @@ export default function NotePopover({ rect, content, onClose, onEdit }: NotePopo
           </div>
           
           {/* Note Content */}
-          <p className="text-[15px] leading-relaxed text-zinc-800 dark:text-slate-200 font-medium whitespace-pre-wrap">
+          <p className="text-[14px] leading-relaxed text-zinc-800 dark:text-zinc-200 font-medium whitespace-pre-wrap">
             {content}
           </p>
         </div>

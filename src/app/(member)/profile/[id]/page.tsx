@@ -77,7 +77,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     followersData, authorInfo, articlesData
   ] = await Promise.all([
     getFollowersAction(user.id),
-    getAuthorInfoAction(user.id, currentUserId),
+    getAuthorInfoAction(user.id),
     getProfileArticlesAction(user.id),
   ]);
 

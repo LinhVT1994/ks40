@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
-  Heart, EYE as Eye, Clock, Calendar, FileText, Star,
+  Heart, Eye, Clock, Calendar, FileText, Star,
   Bookmark, History, PenLine, Trash2, Settings,
   AlertCircle, UserCheck, UserMinus, Globe, Facebook, Instagram, Twitter, Linkedin, Github, Youtube, Music,
 } from 'lucide-react';

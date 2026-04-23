@@ -10,28 +10,35 @@ export type SiteAnnouncement = {
 };
 
 export async function getAnnouncementAction(): Promise<SiteAnnouncement | null> {
-  const rows = await db.$queryRaw<{ value: unknown }[]>`
-    SELECT value FROM "SiteConfig" WHERE key = 'site_announcement' LIMIT 1
-  `;
-  const data = rows[0]?.value as SiteAnnouncement | null;
-  if (!data?.active) return null;
-  if (data.expiresAt && new Date(data.expiresAt) < new Date()) return null;
-  return data;
+  try {
+    const config = await db.siteConfig.findUnique({
+      where: { key: 'site_announcement' },
+    });
+    const data = config?.value as SiteAnnouncement | null;
+    if (!data?.active) return null;
+    if (data.expiresAt && new Date(data.expiresAt) < new Date()) return null;
+    return data;
+  } catch (error) {
+    // If table does not exist due to pending migrations, return null safely
+    return null; 
+  }
 }
 
 export async function getSiteConfigAction(key: string) {
-  const rows = await db.$queryRaw<{ value: unknown }[]>`
-    SELECT value FROM "SiteConfig" WHERE key = ${key} LIMIT 1
-  `;
-  return rows[0]?.value ?? null;
+  try {
+    const config = await db.siteConfig.findUnique({
+      where: { key },
+    });
+    return config?.value ?? null;
+  } catch (error) {
+    return null;
+  }
 }
 
 export async function setSiteConfigAction(key: string, value: unknown) {
-  const json = JSON.stringify(value);
-  await db.$executeRaw`
-    INSERT INTO "SiteConfig" (key, value, "updatedAt")
-    VALUES (${key}, ${json}::jsonb, NOW())
-    ON CONFLICT (key) DO UPDATE
-      SET value = ${json}::jsonb, "updatedAt" = NOW()
-  `;
+  await db.siteConfig.upsert({
+    where: { key },
+    update: { value: value as any },
+    create: { key, value: value as any },
+  });
 }

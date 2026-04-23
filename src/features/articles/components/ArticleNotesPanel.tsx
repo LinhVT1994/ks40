@@ -2,15 +2,17 @@
 
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, FileEdit, Trash2, MapPin, Search } from 'lucide-react';
+import { X, FileEdit, Trash2, MapPin, Search, Sparkles, BookOpen } from 'lucide-react';
 import type { ArticleAnnotation } from '@/features/articles/actions/annotation';
 import { deleteAnnotationAction } from '@/features/articles/actions/annotation';
+import MarkdownViewer from '@/components/shared/MarkdownViewer';
 
 interface ArticleNotesPanelProps {
   isOpen: boolean;
   onClose: () => void;
   articleTitle: string;
   annotations: ArticleAnnotation[];
+  onAddGeneralNote?: (note: string) => Promise<void>;
   onAnnotationDeleted: (id: string) => void;
   onScrollToAnnotation: (id: string) => void;
 }
@@ -54,12 +56,13 @@ function getBadgeClass(color: string, hasNote: boolean) {
 
 function getCardBgClass(color: string, hasNote: boolean) {
   const c = COLOR_MAP[color] ?? 'amber';
-  if (hasNote) return 'bg-white dark:bg-white/5 border border-zinc-300/60 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20';
+  if (hasNote) return 'bg-white dark:bg-transparent border border-zinc-200 dark:border-white/10 hover:border-zinc-300 dark:hover:border-white/20 hover:bg-zinc-50/50 dark:hover:bg-white/5';
+  
   switch (c) {
-    case 'blue':    return 'bg-blue-50/50 hover:bg-blue-50 dark:bg-blue-500/5 dark:hover:bg-blue-500/10 border border-blue-200/60 dark:border-blue-500/10 hover:border-blue-300 dark:hover:border-blue-500/20';
-    case 'emerald': return 'bg-emerald-50/50 hover:bg-emerald-50 dark:bg-emerald-500/5 dark:hover:bg-emerald-500/10 border border-emerald-200/60 dark:border-emerald-500/10 hover:border-emerald-300 dark:hover:border-emerald-500/20';
-    case 'pink':    return 'bg-pink-50/50 hover:bg-pink-50 dark:bg-pink-500/5 dark:hover:bg-pink-500/10 border border-pink-200/60 dark:border-pink-500/10 hover:border-pink-300 dark:hover:border-pink-500/20';
-    default:        return 'bg-amber-50/50 hover:bg-amber-50 dark:bg-amber-500/5 dark:hover:bg-amber-500/10 border border-amber-200/60 dark:border-amber-500/10 hover:border-amber-300 dark:hover:border-amber-500/20';
+    case 'blue':    return 'bg-blue-50 hover:bg-blue-100/80 dark:bg-blue-500/5 dark:hover:bg-blue-500/10 border border-blue-200 dark:border-blue-500/10 hover:border-blue-300 dark:hover:border-blue-500/20';
+    case 'emerald': return 'bg-emerald-50 hover:bg-emerald-100/80 dark:bg-emerald-500/5 dark:hover:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/10 hover:border-emerald-300 dark:hover:border-emerald-500/20';
+    case 'pink':    return 'bg-pink-50 hover:bg-pink-100/80 dark:bg-pink-500/5 dark:hover:bg-pink-500/10 border border-pink-200 dark:border-pink-500/10 hover:border-pink-300 dark:hover:border-pink-500/20';
+    default:        return 'bg-amber-50 hover:bg-amber-100/80 dark:bg-amber-500/5 dark:hover:bg-amber-500/10 border border-amber-200 dark:border-amber-500/10 hover:border-amber-300 dark:hover:border-amber-500/20';
   }
 }
 
@@ -68,11 +71,48 @@ export default function ArticleNotesPanel({
   onClose,
   articleTitle,
   annotations,
+  onAddGeneralNote,
   onAnnotationDeleted,
   onScrollToAnnotation,
 }: ArticleNotesPanelProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<FilterType>('Tất cả');
+  const [panelWidth, setPanelWidth] = useState<number>(420);
+  const [isCreatingGeneral, setIsCreatingGeneral] = useState(false);
+  const [generalNoteText, setGeneralNoteText] = useState('');
+  const [isSubmittingGeneral, setIsSubmittingGeneral] = useState(false);
+  const isDragging = React.useRef(false);
+
+  const startResizing = React.useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, []);
+
+  const stopResizing = React.useCallback(() => {
+    isDragging.current = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  }, []);
+
+  const resize = React.useCallback((e: MouseEvent) => {
+    if (isDragging.current) {
+      const newWidth = window.innerWidth - e.clientX;
+      if (newWidth >= 300 && newWidth <= Math.min(800, window.innerWidth - 100)) {
+        setPanelWidth(newWidth);
+      }
+    }
+  }, []);
+
+  React.useEffect(() => {
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResizing);
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [resize, stopResizing]);
 
   const filtered = annotations.filter(ann => {
     const searchLower = searchQuery.toLowerCase();
@@ -86,6 +126,10 @@ export default function ArticleNotesPanel({
       (filterType === 'Highlight' && !ann.note);
 
     return matchesSearch && matchesType;
+  }).sort((a, b) => {
+    if (a.paragraphIndex === -1 && b.paragraphIndex !== -1) return -1;
+    if (a.paragraphIndex !== -1 && b.paragraphIndex === -1) return 1;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
   const handleDelete = async (id: string) => {
@@ -105,6 +149,18 @@ export default function ArticleNotesPanel({
     return d.toLocaleDateString('vi-VN');
   };
 
+  const handleSaveGeneralNote = async () => {
+    if (!generalNoteText.trim() || !onAddGeneralNote) return;
+    setIsSubmittingGeneral(true);
+    try {
+      await onAddGeneralNote(generalNoteText);
+      setGeneralNoteText('');
+      setIsCreatingGeneral(false);
+    } finally {
+      setIsSubmittingGeneral(false);
+    }
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -118,38 +174,48 @@ export default function ArticleNotesPanel({
           />
 
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-full w-[400px] bg-zinc-50 dark:bg-slate-900 border-l border-zinc-300 dark:border-white/10 z-[120] shadow-2xl flex flex-col"
+            initial={{ x: '100%', opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            exit={{ x: '100%', opacity: 0 }}
+            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            className="fixed top-0 right-0 h-full bg-white dark:bg-slate-900 border-l border-zinc-200 dark:border-white/10 z-[120] shadow-2xl flex flex-col overflow-hidden sm:max-w-none max-w-[100vw]"
+            style={{ width: `${panelWidth}px` }}
           >
+            {/* Resize Handle */}
+            <div
+              className="absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize hover:bg-primary/50 active:bg-primary z-50 transition-colors group"
+              onMouseDown={startResizing}
+            >
+               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[2px] h-8 bg-zinc-300 dark:bg-zinc-600 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
+
             {/* Header */}
-            <div className="p-6 border-b border-zinc-300 dark:border-white/10 flex items-center justify-between bg-white dark:bg-slate-900/50">
-              <div>
-                <h2 className="text-xl font-black text-zinc-800 dark:text-white">Ghi chú & Highlight</h2>
-                <p className="text-xs font-bold text-zinc-500 mt-1 truncate w-64 uppercase tracking-widest">
+            <div className="relative p-5 border-b border-zinc-200 dark:border-white/10 flex items-center justify-between bg-zinc-50/50 dark:bg-slate-900/50">
+              <div className="min-w-0 pr-4">
+                <h2 className="text-[15px] font-black tracking-tight text-zinc-800 dark:text-zinc-100">Ghi chú cá nhân</h2>
+                <p className="text-[11px] font-medium text-zinc-500 dark:text-zinc-400 mt-0.5 truncate uppercase tracking-wider">
                   {articleTitle}
                 </p>
               </div>
               <button
                 onClick={onClose}
-                className="p-2 bg-zinc-100 hover:bg-zinc-200 dark:bg-white/5 dark:hover:bg-white/10 rounded-xl text-zinc-500 dark:text-slate-400 dark:hover:text-white transition-all hover:scale-105 active:scale-95"
+                className="shrink-0 p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-md text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors"
+                title="Đóng lại"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Search & Filters */}
-            <div className="border-b border-zinc-300 dark:border-white/10 bg-white/50 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-10 shrink-0 px-5 pt-4 pb-3 flex flex-col gap-3">
+            <div className="border-b border-zinc-200 dark:border-white/10 shrink-0 px-5 pt-4 pb-3 flex flex-col gap-3">
               <div className="relative group">
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-400 group-focus-within:text-primary transition-colors" />
                 <input
                   type="text"
-                  placeholder="Tìm ghi chú hoặc nội dung trích dẫn..."
+                  placeholder="Tìm kiếm..."
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  className="w-full bg-zinc-100 dark:bg-black/20 border border-transparent focus:border-primary/50 dark:focus:border-primary/50 text-[13px] text-zinc-800 dark:text-slate-200 rounded-xl pl-10 pr-10 py-2.5 outline-none transition-all placeholder:text-zinc-500"
+                  className="w-full bg-zinc-100 focus:bg-white dark:bg-black/20 dark:focus:bg-black/40 border border-transparent focus:border-primary/50 dark:focus:border-primary/50 text-[13px] text-zinc-800 dark:text-zinc-200 rounded-lg pl-9 pr-8 py-2 outline-none transition-all placeholder:text-zinc-500"
                 />
                 <AnimatePresence>
                   {searchQuery && (
@@ -158,31 +224,31 @@ export default function ArticleNotesPanel({
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.8 }}
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-600 dark:hover:text-slate-200 bg-white dark:bg-white/10 rounded-md shadow-sm"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 rounded-full transition-transform"
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <X className="w-3 h-3" />
                     </motion.button>
                   )}
                 </AnimatePresence>
               </div>
 
               {/* Tabs */}
-              <div className="flex items-center gap-6 border-b border-zinc-200 dark:border-white/10 w-full overflow-x-auto custom-scrollbar pt-3 px-1 -mx-1">
+              <div className="flex items-center gap-5 w-full overflow-x-auto custom-scrollbar px-1 -mx-1">
                 {(['Tất cả', 'Ghi chú', 'Highlight'] as FilterType[]).map(type => {
                   const isActive = filterType === type;
                   return (
                     <button
                       key={type}
                       onClick={() => setFilterType(type)}
-                      className={`relative pb-3 text-[10px] font-black uppercase tracking-[0.2em] transition-colors whitespace-nowrap ${
-                        isActive ? 'text-primary' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-slate-200'
+                      className={`relative pb-2 text-[11px] font-bold uppercase tracking-wider transition-colors whitespace-nowrap ${
+                        isActive ? 'text-primary' : 'text-zinc-400 hover:text-zinc-600 dark:text-zinc-500 dark:hover:text-zinc-300'
                       }`}
                     >
                       {type}
                       {isActive && (
                         <motion.div
                           layoutId="articleAnnotationTabFilter"
-                          className="absolute bottom-[-1px] left-0 w-full h-[2px] bg-primary rounded-t-full z-10"
+                          className="absolute bottom-0 left-0 w-full h-[2px] bg-primary rounded-full z-10"
                           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                         />
                       )}
@@ -193,79 +259,121 @@ export default function ArticleNotesPanel({
             </div>
 
             {/* List */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-3 bg-zinc-50/50 dark:bg-transparent custom-scrollbar">
+            <div className="relative flex-1 overflow-y-auto p-5 space-y-3 custom-scrollbar bg-zinc-50/50 dark:bg-transparent">
+              {onAddGeneralNote && (
+                <div className="mb-4">
+                  {!isCreatingGeneral ? (
+                    <button
+                      onClick={() => setIsCreatingGeneral(true)}
+                      className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-zinc-300 dark:border-white/20 rounded-xl text-[13px] font-bold text-zinc-500 hover:text-primary hover:border-primary hover:bg-primary/5 transition-all outline-none"
+                    >
+                      <BookOpen className="w-4 h-4" /> Thêm ghi chú toàn bài
+                    </button>
+                  ) : (
+                    <motion.div
+                      initial={{ opacity: 0, y: -5 }} animate={{ opacity: 1, y: 0 }}
+                      className="p-3 bg-white dark:bg-slate-800 rounded-xl border border-primary/20 shadow-sm space-y-2"
+                    >
+                      <textarea
+                        autoFocus
+                        value={generalNoteText}
+                        onChange={e => setGeneralNoteText(e.target.value)}
+                        placeholder="Nhập ghi chú tóm tắt bài viết..."
+                        className="w-full min-h-[80px] bg-transparent text-[14px] text-zinc-800 dark:text-zinc-100 placeholder:text-zinc-400 outline-none resize-none"
+                      />
+                      <div className="flex justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-white/10">
+                        <button
+                          onClick={() => setIsCreatingGeneral(false)}
+                          className="px-3 py-1.5 text-[12px] font-bold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-md transition-colors"
+                        >
+                          Hủy
+                        </button>
+                        <button
+                          onClick={handleSaveGeneralNote}
+                          disabled={!generalNoteText.trim() || isSubmittingGeneral}
+                          className="px-3 py-1.5 text-[12px] font-bold bg-primary text-white rounded-md hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                        >
+                          {isSubmittingGeneral ? 'Đang lưu...' : 'Lưu lại'}
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </div>
+              )}
+
               {filtered.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-zinc-500 text-center">
-                  <div className="w-10 h-10 bg-white dark:bg-white/5 shadow-sm rounded-xl flex items-center justify-center mb-3">
-                    <Search className="w-5 h-5 text-zinc-500" />
+                <div className="h-full flex flex-col items-center justify-center text-zinc-500 text-center py-10">
+                  <div className="w-12 h-12 bg-white dark:bg-white/5 shadow-sm rounded-xl flex items-center justify-center mb-3 border border-zinc-200/50 dark:border-white/10">
+                    <Search className="w-5 h-5 text-zinc-400" />
                   </div>
-                  <p className="text-[13px] font-medium">
+                  <p className="text-[13px] font-medium text-zinc-600 dark:text-zinc-400">
                     {annotations.length === 0
-                      ? 'Chưa có ghi chú nào. Chọn văn bản để bắt đầu.'
-                      : `Không tìm thấy kết quả khớp với "${searchQuery}"`}
+                      ? 'Chưa có ghi chú nào.'
+                      : 'Không tìm thấy kết quả.'}
                   </p>
                 </div>
               ) : (
                 filtered.map((ann, index) => (
                   <motion.div
                     key={ann.id}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: 5 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.04 }}
-                    className={`p-3.5 rounded-xl space-y-2 shadow-sm hover:shadow-md dark:shadow-none group transition-all duration-200 cursor-pointer ${getCardBgClass(ann.color, !!ann.note)}`}
+                    transition={{ delay: Math.min(index * 0.03, 0.3) }}
+                    className={`p-3.5 rounded-xl space-y-2.5 group transition-colors duration-200 cursor-pointer ${getCardBgClass(ann.color, !!ann.note)}`}
                     onClick={() => onScrollToAnnotation(ann.id)}
                   >
-                    {/* Highlight quote */}
-                    <div className="flex items-center gap-2 opacity-70">
-                      <div className={`w-1 h-3 rounded-full ${getBorderClass(ann.color).split(' ')[0].replace('border-', 'bg-')}`} />
-                      <p className={`text-[11px] font-serif italic truncate flex-1 leading-none pt-0.5 ${!ann.note ? 'text-zinc-800 dark:text-slate-200 font-medium not-italic' : ''}`}>
-                        &ldquo;{ann.selectedText}&rdquo;
-                      </p>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <span className={`text-[8.5px] px-1.5 py-0.5 rounded uppercase tracking-widest font-black ${getBadgeClass(ann.color, !!ann.note)}`}>
-                          {ann.note ? 'Ghi chú' : 'Highlight'}
+                    {/* Header: Type & Time & Actions */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-1.5">
+                        <span className={`text-[10px] px-1.5 py-0.5 rounded uppercase tracking-wider font-bold ${ann.paragraphIndex === -1 ? 'bg-primary/10 text-primary dark:bg-primary/20 dark:text-primary' : getBadgeClass(ann.color, !!ann.note)}`}>
+                          {ann.paragraphIndex === -1 ? 'Ghi chú toàn bài' : ann.note ? 'Ghi chú' : 'Highlight'}
                         </span>
-                        <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">
+                        <span className="text-[11px] font-semibold text-zinc-400">
                           {formatTime(ann.createdAt)}
                         </span>
                       </div>
+                      
+                      {/* Actions */}
+                      <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                         {ann.paragraphIndex !== -1 && (
+                           <button
+                             onClick={e => { e.stopPropagation(); onScrollToAnnotation(ann.id); }}
+                             className="p-1 rounded-md text-zinc-400 hover:text-primary hover:bg-primary/10 transition-colors"
+                             title="Đi tới đoạn"
+                           >
+                             <MapPin className="w-3.5 h-3.5" />
+                           </button>
+                         )}
+                         <button
+                           onClick={e => { e.stopPropagation(); handleDelete(ann.id); }}
+                           className="p-1 rounded-md text-zinc-400 hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                           title="Xóa"
+                         >
+                           <Trash2 className="w-3.5 h-3.5" />
+                         </button>
+                      </div>
                     </div>
+
+                    {/* Highlight quote (skip if general note) */}
+                    {ann.paragraphIndex !== -1 && (
+                      <div className={`relative pl-3 border-l-[3px] ${getBorderClass(ann.color).split(' ')[0]} ${!ann.note ? 'opacity-90' : 'opacity-70'}`}>
+                        <p className={`text-[15px] leading-relaxed break-words line-clamp-4 ${!ann.note ? 'text-zinc-800 dark:text-zinc-200 font-medium' : 'text-zinc-600 dark:text-zinc-400 italic'}`}>
+                          {ann.selectedText}
+                        </p>
+                      </div>
+                    )}
 
                     {/* Note content */}
                     {ann.note && (
-                      <p className="text-[13px] font-medium text-zinc-800 dark:text-slate-200 leading-snug pt-1">
-                        {ann.note}
-                      </p>
-                    )}
-
-                    {/* Hover actions */}
-                    <div className="flex items-center justify-between pt-1 overflow-hidden h-0 group-hover:h-6 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                      <button
-                        onClick={e => { e.stopPropagation(); onScrollToAnnotation(ann.id); }}
-                        className="text-[10px] font-bold text-primary hover:underline uppercase tracking-wide flex items-center gap-1"
-                      >
-                        <MapPin className="w-3 h-3" /> Đi tới đoạn
-                      </button>
-                      <div className="flex items-center gap-0.5">
-                        <button
-                          onClick={e => { e.stopPropagation(); handleDelete(ann.id); }}
-                          className="p-1 hover:bg-red-500/10 dark:hover:bg-red-500/20 rounded-md text-zinc-500 hover:text-red-500 transition-colors"
-                          title="Xóa"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
+                      <div className="pt-1 prose prose-zinc dark:prose-invert prose-p:text-[16px] prose-p:font-medium prose-p:text-zinc-800 dark:prose-p:text-zinc-100 prose-p:leading-relaxed max-w-none">
+                        <MarkdownViewer content={ann.note} />
                       </div>
-                    </div>
+                    )}
                   </motion.div>
                 ))
               )}
             </div>
 
-            {/* Footer */}
-            <div className="p-6 border-t border-zinc-300 dark:border-white/10 bg-white dark:bg-slate-900 flex justify-between items-center">
-              <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">KS4.0 Personal Notes</span>
-              <span className="text-[10px] font-bold text-zinc-400">{annotations.length} ghi chú</span>
-            </div>
           </motion.div>
         </>
       )}

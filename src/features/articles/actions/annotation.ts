@@ -57,7 +57,7 @@ export async function createAnnotationAction(data: {
     data: { userId, ...data },
   });
 
-  revalidateTag(`article-annotations:${data.articleId}:${userId}`);
+  revalidateTag(`article-annotations:${data.articleId}:${userId}`, 'default');
   return annotation;
 }
 
@@ -74,7 +74,7 @@ export async function updateAnnotationAction(
     data,
   });
 
-  revalidateTag(`article-annotations:${annotation.articleId}:${userId}`);
+  revalidateTag(`article-annotations:${annotation.articleId}:${userId}`, 'default');
   return annotation;
 }
 
@@ -90,5 +90,5 @@ export async function deleteAnnotationAction(id: string): Promise<void> {
   if (!annotation) return;
 
   await db.articleAnnotation.delete({ where: { id, userId } });
-  revalidateTag(`article-annotations:${annotation.articleId}:${userId}`);
+  revalidateTag(`article-annotations:${annotation.articleId}:${userId}`, 'default');
 }

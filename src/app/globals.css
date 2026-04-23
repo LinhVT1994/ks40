@@ -233,22 +233,32 @@ html.focus-mode [data-focus-prose] {
   }
 }
 
-/* KS Highlight: Golden Amber Selection */
+/* Signature font utility */
+.font-signature {
+  font-family: var(--font-signature), cursive;
+}
+
+/* KS Highlight Data-Color Mappings (Monochromatic Silver/Graphite) */
 .ks-highlight {
-  background-color: rgba(251, 191, 36, 0.25);
-  border-bottom: 2px solid rgba(251, 191, 36, 0.4);
-  border-radius: 2px;
-  padding: 0;
-  margin: 0;
-  transition: background-color 0.2s ease;
+  --hl-color: 113, 113, 122; /* Graphite / Zinc 500 */
+  background-color: rgba(var(--hl-color), 0.5);
+  color: inherit;
+  text-decoration: none;
+  border-radius: 4px;
+  padding: 0 2px;
+  margin: 0 -2px;
+  transition: all 0.2s ease;
   cursor: pointer;
   position: relative;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
-  .font-signature {
-    font-family: var(--font-signature), cursive;
-  }
 }
+
+/* Map data-color attributes to RGB variables for highlights */
+.ks-highlight[data-color="yellow"] { --hl-color: 250, 204, 21;  } /* Yellow 400 */
+.ks-highlight[data-color="blue"]   { --hl-color: 96, 165, 250;  } /* Blue 400 */
+.ks-highlight[data-color="green"]  { --hl-color: 74, 222, 128;  } /* Green 400 */
+.ks-highlight[data-color="pink"]   { --hl-color: 244, 114, 182; } /* Pink 400 */
 
 @keyframes aura-move {
   0%, 100% { transform: translate(0, 0) scale(1); }
@@ -303,13 +313,18 @@ html.focus-mode [data-focus-prose] {
   transform: scale(1.2) !important;
 }
 
+/* Dark mode overrides */
+.dark .ks-highlight[data-color="yellow"] { --hl-color: 253, 224, 71;  } /* Yellow 300 */
+.dark .ks-highlight[data-color="blue"]   { --hl-color: 147, 197, 253; } /* Blue 300 */
+.dark .ks-highlight[data-color="green"]  { --hl-color: 134, 239, 172; } /* Green 300 */
+.dark .ks-highlight[data-color="pink"]   { --hl-color: 249, 168, 212; } /* Pink 300 */
+
 .dark .ks-highlight {
-  background-color: rgba(251, 191, 36, 0.2);
-  border-bottom-color: rgba(251, 191, 36, 0.3);
+  background-color: rgba(var(--hl-color), 0.55);
 }
 
 .ks-highlight:hover {
-  background-color: rgba(251, 191, 36, 0.35);
+  background-color: rgba(var(--hl-color), 0.65);
 }
 
 .focus-toc-line {
@@ -583,12 +598,105 @@ pre span {
 
 /* Inline Annotations (Tooltip Triggers) */
 .ks-highlight-note {
-  @apply bg-amber-500/10 dark:bg-amber-500/5 text-inherit underline decoration-primary/50 decoration-dotted underline-offset-4 cursor-pointer transition-all duration-300;
+  background-color: transparent !important;
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+  text-decoration-color: rgba(var(--hl-color), 0.9);
+}
+
+.dark .ks-highlight-note {
+  text-decoration-color: rgba(var(--hl-color), 0.7);
 }
 
 .ks-highlight-note:hover {
-  @apply bg-amber-500/20 dark:bg-amber-500/15 decoration-primary;
+  background-color: rgba(var(--hl-color), 0.15) !important;
 }
+
+/* ─── Blockquote closing quote mark ─────────────────────────────── */
+blockquote div {
+  max-width: none !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+}
+blockquote > div:last-child {
+  display: inline !important;
+}
+blockquote > div:last-child::after {
+  content: '\201D';
+  display: inline-block;
+  margin-left: 0.75rem;
+  font-family: ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
+  font-size: 3.5rem;
+  line-height: 0;
+  vertical-align: middle;
+  position: relative;
+  top: 0.6rem;
+  color: #4f46e5;
+  opacity: 0.1;
+  transition: opacity 0.2s;
+}
+.dark blockquote div:last-child::after {
+  color: #818cf8;
+}
+blockquote:hover div:last-child::after {
+  opacity: 0.2;
+}
+
+/* ─── Syntax Highlighting: Zen Minimal Theme ─────────────────────── */
+.syntax-highlighter {
+  color: var(--sh-text);
+  --sh-text: #3f3f46;
+  --sh-muted: #a1a1aa;
+  --sh-comment: #a1a1aa;
+  --sh-accent1: #4f46e5;
+  --sh-accent2: #18181b;
+}
+
+.dark .syntax-highlighter {
+  --sh-text: #e4e4e7;
+  --sh-muted: #71717a;
+  --sh-comment: #52525b;
+  --sh-accent1: #818cf8;
+  --sh-accent2: #f4f4f5;
+}
+
+.syntax-highlighter .token.comment,
+.syntax-highlighter .token.prolog,
+.syntax-highlighter .token.doctype,
+.syntax-highlighter .token.cdata { color: var(--sh-comment) !important; font-style: italic; }
+
+.syntax-highlighter .token.punctuation,
+.syntax-highlighter .token.operator,
+.syntax-highlighter .token.namespace { color: var(--sh-muted) !important; }
+
+.syntax-highlighter .token.property,
+.syntax-highlighter .token.tag,
+.syntax-highlighter .token.boolean,
+.syntax-highlighter .token.number,
+.syntax-highlighter .token.constant,
+.syntax-highlighter .token.symbol,
+.syntax-highlighter .token.deleted { color: var(--sh-accent2) !important; font-weight: 600; }
+
+.syntax-highlighter .token.selector,
+.syntax-highlighter .token.attr-name,
+.syntax-highlighter .token.string,
+.syntax-highlighter .token.char,
+.syntax-highlighter .token.builtin,
+.syntax-highlighter .token.inserted { color: var(--sh-accent2) !important; }
+
+.syntax-highlighter .token.atrule,
+.syntax-highlighter .token.attr-value,
+.syntax-highlighter .token.keyword,
+.syntax-highlighter .token.function,
+.syntax-highlighter .token.class-name { color: var(--sh-accent1) !important; font-weight: 600; }
+
+.syntax-highlighter .token.regex,
+.syntax-highlighter .token.important,
+.syntax-highlighter .token.variable { color: var(--sh-accent2) !important; }
 
 /* ─── Premium Zen Toast (Glass / Luminous / Minimalist) ───────────── */
 @keyframes toast-enter {

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import TextSelectionToolbar from '@/features/member/components/notes/TextSelectionToolbar';
 import InlineNoteEditor from '@/features/member/components/notes/InlineNoteEditor';
@@ -46,27 +46,31 @@ function colorToName(color: string): string {
   return color;
 }
 
-/**
- * Find all "leaf block" elements inside container.
- * MarkdownViewer renders <p> as <div>, so we include divs that
- * don't have other block-level children.
- */
+function getLeafBlocks(parent: Element): Element[] {
+  // Tags that group blocks but shouldn't be treated as a single massive block
+  const PASS_THROUGH_TAGS = new Set(['UL', 'OL', 'TABLE', 'TBODY', 'THEAD', 'TR']);
+  
+  const blocks: Element[] = [];
+  for (const child of Array.from(parent.children)) {
+    if (PASS_THROUGH_TAGS.has(child.tagName)) {
+      blocks.push(...getLeafBlocks(child));
+    } else {
+      if (child.textContent?.trim()) {
+        blocks.push(child);
+      }
+    }
+  }
+  return blocks;
+}
+
 function getBlockElements(container: Element): Element[] {
-  const BLOCK_CHILD_TAGS = new Set([
-    'P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
-    'UL', 'OL', 'LI', 'BLOCKQUOTE', 'PRE', 'TABLE', 'SECTION', 'ARTICLE',
-  ]);
-
-  const candidates = Array.from(
-    container.querySelectorAll('p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, td, th, div'),
-  );
-
-  return candidates.filter(el => {
-    if (!el.textContent?.trim()) return false;
-    // Keep only leaf-level blocks (no block-level children)
-    const hasBlockChild = Array.from(el.children).some(c => BLOCK_CHILD_TAGS.has(c.tagName));
-    return !hasBlockChild;
-  });
+  // Find all `.prose` scope containers (Overview, Objectives, Main Content)
+  const proseScopes = Array.from(container.querySelectorAll('.prose'));
+  if (proseScopes.length === 0) {
+    proseScopes.push(container);
+  }
+  
+  return proseScopes.flatMap(scope => getLeafBlocks(scope));
 }
 
 function captureSelectionPosition(
@@ -75,29 +79,87 @@ function captureSelectionPosition(
 ): { paragraphIndex: number; startOffset: number; endOffset: number } | null {
   const blocks = getBlockElements(container);
 
+  // Find the exact block that intersects with the user's selection
   let paragraphIndex = -1;
   for (let i = 0; i < blocks.length; i++) {
-    if (blocks[i].contains(range.startContainer)) {
+    if (range.intersectsNode(blocks[i])) {
       paragraphIndex = i;
       break;
     }
   }
-  if (paragraphIndex === -1) return null;
 
+  if (paragraphIndex === -1) return null;
   const block = blocks[paragraphIndex];
 
-  // Count characters from block start to range start
-  const preRange = document.createRange();
-  try {
-    preRange.setStart(block, 0);
-    preRange.setEnd(range.startContainer, range.startOffset);
-  } catch {
-    return null;
+  // Calculate startOffset using TreeWalker directly on the block's text nodes
+  const tw = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+  let charCount = 0;
+  let startOffset = -1;
+  
+  let textNode: Node | null;
+  while ((textNode = tw.nextNode())) {
+    if (range.intersectsNode(textNode)) {
+      const localOffset = textNode === range.startContainer ? range.startOffset : 0;
+      startOffset = charCount + localOffset;
+      break;
+    }
+    charCount += (textNode as Text).length;
   }
-  const startOffset = preRange.toString().length;
-  const endOffset = startOffset + range.toString().length;
 
+  if (startOffset === -1) startOffset = 0;
+
+  const endOffset = startOffset + range.toString().length;
   return { paragraphIndex, startOffset, endOffset };
+}
+
+
+function wrapRangeWithMarks(
+  range: Range,
+  annotation: { id: string; color: string; note?: string | null },
+  onDelete: (id: string, domEl: HTMLElement) => void,
+  onNoteClick: (id: string, rect: DOMRect) => void,
+  onHover?: (id: string, text: string, rect: DOMRect) => void,
+  onHoverEnd?: () => void,
+): HTMLElement[] {
+  const marks: HTMLElement[] = [];
+  const textNodes: Text[] = [];
+
+  const tw = document.createTreeWalker(range.commonAncestorContainer, NodeFilter.SHOW_TEXT);
+  let textNode: Node | null;
+  while ((textNode = tw.nextNode())) {
+    if (range.intersectsNode(textNode)) {
+      textNodes.push(textNode as Text);
+    }
+  }
+
+  // Fallback for single exact text node selections
+  if (textNodes.length === 0 && range.startContainer.nodeType === Node.TEXT_NODE) {
+    textNodes.push(range.startContainer as Text);
+  }
+
+  for (const t of textNodes) {
+    const isStart = t === range.startContainer;
+    const isEnd = t === range.endContainer;
+
+    const startOffset = isStart ? range.startOffset : 0;
+    const endOffset = isEnd ? range.endOffset : t.length;
+
+    if (startOffset === endOffset && startOffset !== 0) continue;
+
+    const markRange = document.createRange();
+    try {
+      markRange.setStart(t, startOffset);
+      markRange.setEnd(t, endOffset);
+
+      const mark = createMarkElement(annotation as ArticleAnnotation, onDelete, onNoteClick, onHover, onHoverEnd);
+      markRange.surroundContents(mark);
+      marks.push(mark);
+    } catch {
+      continue;
+    }
+  }
+
+  return marks;
 }
 
 function applyHighlightToDOM(
@@ -105,23 +167,19 @@ function applyHighlightToDOM(
   container: Element,
   onDelete: (id: string, el: HTMLElement) => void,
   onNoteClick: (id: string, rect: DOMRect) => void,
+  onHover?: (id: string, text: string, rect: DOMRect) => void,
+  onHoverEnd?: () => void,
 ) {
+  if (annotation.paragraphIndex === -1) return; // Skip general notes
+
   const blocks = getBlockElements(container);
   const block = blocks[annotation.paragraphIndex];
   if (!block) return;
 
-  // Verify the text still exists in this block
-  const blockText = block.textContent ?? '';
-  const expectedSlice = blockText.slice(annotation.startOffset, annotation.endOffset);
-  if (!expectedSlice || expectedSlice.trim() !== annotation.selectedText.trim()) return;
-
-  // Walk text nodes to find the right position
   const tw = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
   let charCount = 0;
-  let startNode: Text | null = null;
-  let startNodeOffset = 0;
-  let endNode: Text | null = null;
-  let endNodeOffset = 0;
+  let startNode: Text | null = null, endNode: Text | null = null;
+  let startNodeOffset = 0, endNodeOffset = 0;
 
   let textNode: Node | null;
   while ((textNode = tw.nextNode())) {
@@ -145,20 +203,15 @@ function applyHighlightToDOM(
     range.setStart(startNode, startNodeOffset);
     range.setEnd(endNode, endNodeOffset);
 
-    const mark = createMarkElement(annotation, onDelete, onNoteClick);
-    try {
-      range.surroundContents(mark);
-    } catch {
-      const fragment = range.extractContents();
-      mark.insertBefore(fragment, mark.firstChild);
-      range.insertNode(mark);
-    }
-    // Append delete button AFTER surroundContents so it's inside mark
-    if (!annotation.note) {
-      const deleteBtn = mark.querySelector('.ks-highlight-delete') as HTMLElement | null;
+    const marks = wrapRangeWithMarks(range, annotation, onDelete, onNoteClick);
+
+    // Append delete button to the last mark segment
+    if (!annotation.note && marks.length > 0) {
+      const lastMark = marks[marks.length - 1];
+      const deleteBtn = lastMark.querySelector('.ks-highlight-delete') as HTMLElement | null;
       if (!deleteBtn) {
-        const btn = buildDeleteBtn(annotation.id, mark, onDelete);
-        mark.appendChild(btn);
+        const btn = buildDeleteBtn(annotation.id, lastMark, onDelete);
+        lastMark.appendChild(btn);
       }
     }
   } catch {
@@ -173,21 +226,14 @@ function createMarkElement(
 ): HTMLElement {
   const mark = document.createElement('mark');
   mark.className = `ks-highlight${annotation.note ? ' ks-highlight-note' : ''}`;
-  mark.style.backgroundColor = colorToHex(annotation.color);
+  mark.dataset.color = annotation.color || 'yellow';
   mark.dataset.annotationId = annotation.id;
   if (annotation.note) mark.dataset.note = annotation.note;
 
   if (annotation.note) {
-    mark.title = 'Nhấn để xem ghi chú';
     mark.onclick = (e) => {
       e.stopPropagation();
       onNoteClick(annotation.id, mark.getBoundingClientRect());
-    };
-  } else {
-    mark.title = 'Nhấn để xóa highlight';
-    mark.onclick = (e) => {
-      e.stopPropagation();
-      onDelete(annotation.id, mark);
     };
   }
   return mark;
@@ -267,93 +313,110 @@ export default function ArticleAnnotationLayer({
     annotationId: string;
     rect: DOMRect;
   } | null>(null);
+  const [isEditingExistingNote, setIsEditingExistingNote] = useState(false);
 
   useEffect(() => {
     onAnnotationsChange?.(annotations);
   }, [annotations, onAnnotationsChange]);
 
-  const handleDeleteFromDOM = useCallback(async (id: string, markEl: HTMLElement) => {
-    removeMarkFromDOM(markEl);
+  const handleDeleteFromDOM = useCallback(async (id: string, _markEl: HTMLElement) => {
+    const container = containerRef.current?.querySelector(CONTENT_SELECTOR) ?? containerRef.current;
+    if (container) {
+      const segments = Array.from(container.querySelectorAll(`mark.ks-highlight[data-annotation-id="${id}"]`));
+      segments.forEach(el => removeMarkFromDOM(el as HTMLElement));
+    }
+    
     setAnnotations(prev => prev.filter(a => a.id !== id));
     try { await deleteAnnotationAction(id); } catch {}
   }, []);
 
   const handleNoteClickFromDOM = useCallback((id: string, rect: DOMRect) => {
     setActivePopover({ annotationId: id, rect });
+    setIsEditingExistingNote(false);
   }, []);
 
-  // Re-apply saved annotations to DOM on mount
+  // Re-apply saved annotations to DOM dynamically to survive React reconciliation
   useEffect(() => {
     const container = containerRef.current?.querySelector(CONTENT_SELECTOR) ?? containerRef.current;
     if (!container) return;
 
-    // Remove any stale marks first
-    container.querySelectorAll('[data-annotation-id]').forEach(el => {
-      removeMarkFromDOM(el as HTMLElement);
-    });
+    // We compare what's currently in the DOM with the 'annotations' state
+    const existingMarks = new Set(
+      Array.from(container.querySelectorAll('mark.ks-highlight[data-annotation-id]'))
+        .map(el => (el as HTMLElement).dataset.annotationId)
+        .filter(Boolean)
+    );
 
-    for (const ann of initialAnnotations) {
-      applyHighlightToDOM(ann, container, handleDeleteFromDOM, handleNoteClickFromDOM);
+    // Apply any annotations that are missing from the DOM
+    for (const ann of annotations) {
+      if (!existingMarks.has(ann.id)) {
+        applyHighlightToDOM(ann, container, handleDeleteFromDOM, handleNoteClickFromDOM);
+      }
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [annotations, handleDeleteFromDOM, handleNoteClickFromDOM]);
 
   const handleHighlight = useCallback(async (text: string, range: Range, colorHex: string) => {
-    if (!session?.user?.id) return;
-    const container = containerRef.current?.querySelector(CONTENT_SELECTOR) ?? containerRef.current;
-    if (!container) return;
+    import('sonner').then(({ toast }) => {
+      if (!session?.user?.id) {
+        toast.error('Vui lòng đăng nhập để highlight');
+        return;
+      }
+      const container = containerRef.current?.querySelector(CONTENT_SELECTOR) ?? containerRef.current;
+      if (!container) {
+        toast.error('Không tìm thấy vùng lưu trữ bài viết');
+        return;
+      }
 
-    const pos = captureSelectionPosition(range, container);
-    if (!pos) return;
+      const pos = captureSelectionPosition(range, container);
+      if (!pos) {
+        toast.error('Không thể xác định vị trí đoạn trích. Hãy thử bôi đen gọn trong một đoạn văn.');
+        return;
+      }
 
-    const colorName = colorToName(colorHex);
+      const colorName = colorToName(colorHex);
 
-    // Optimistic DOM update
-    const mark = document.createElement('mark');
-    mark.className = 'ks-highlight';
-    mark.style.backgroundColor = colorToHex(colorHex);
-    mark.title = 'Nhấn để xóa highlight';
+      // Optimistic DOM update using safe wrapper
+      const marks = wrapRangeWithMarks(
+        range,
+        { id: 'pending', color: colorName },
+        (_id, el) => removeMarkFromDOM(el),
+        () => {},
+      );
+      if (marks.length === 0) return;
+      const primaryMark = marks[marks.length - 1];
 
-    try {
-      range.surroundContents(mark);
-    } catch {
-      const fragment = range.extractContents();
-      mark.appendChild(fragment);
-      range.insertNode(mark);
-    }
+      const deleteBtn = buildDeleteBtn('pending', primaryMark, (_id, el) => removeMarkFromDOM(el));
+      primaryMark.appendChild(deleteBtn);
+      window.getSelection()?.removeAllRanges();
 
-    const deleteBtn = buildDeleteBtn('pending', mark, (_id, el) => removeMarkFromDOM(el));
-    mark.appendChild(deleteBtn);
-    window.getSelection()?.removeAllRanges();
-
-    try {
-      const saved = await createAnnotationAction({
+      createAnnotationAction({
         articleId,
         selectedText: text.trim(),
         ...pos,
         color: colorName,
+      }).then(saved => {
+        // Update all generated mark segments with actual ID
+        marks.forEach(m => {
+          m.dataset.annotationId = saved.id;
+        });
+        deleteBtn.onclick = (e) => { e.stopPropagation(); handleDeleteFromDOM(saved.id, primaryMark); };
+        setAnnotations(prev => [...prev, saved]);
+        toast.success('Đã lưu highlight');
+      }).catch(err => {
+        marks.forEach(m => removeMarkFromDOM(m));
+        toast.error('Lưu thất bại: ' + (err.message || 'Lỗi kết nối'));
       });
-      mark.dataset.annotationId = saved.id;
-      mark.onclick = (e) => { e.stopPropagation(); handleDeleteFromDOM(saved.id, mark); };
-      deleteBtn.onclick = (e) => { e.stopPropagation(); handleDeleteFromDOM(saved.id, mark); };
-      setAnnotations(prev => [...prev, saved]);
-    } catch {
-      removeMarkFromDOM(mark);
-    }
+    });
   }, [session, articleId, handleDeleteFromDOM]);
 
   const handleAddNote = useCallback((text: string, range: Range) => {
     const rect = range.getBoundingClientRect();
-    const tempMark = document.createElement('mark');
-    tempMark.className = 'ks-highlight';
-    tempMark.style.backgroundColor = 'rgba(59,130,246,0.2)';
-    try {
-      range.surroundContents(tempMark);
-    } catch {
-      const fragment = range.extractContents();
-      tempMark.appendChild(fragment);
-      range.insertNode(tempMark);
-    }
+    const marks = wrapRangeWithMarks(
+      range,
+      { id: 'pending-note', color: 'yellow' },
+      () => {},
+      () => {},
+    );
     window.getSelection()?.removeAllRanges();
     setPendingSelection({ text, range, rect });
   }, []);
@@ -363,7 +426,9 @@ export default function ArticleAnnotationLayer({
     const container = containerRef.current?.querySelector(CONTENT_SELECTOR) ?? containerRef.current;
     if (!container) return;
 
-    const tempMark = container.querySelector('.ks-highlight:not([data-annotation-id])') as HTMLElement | null;
+    // We take pos from the first temporary mark segment
+    const allTempMarks = Array.from(container.querySelectorAll('.ks-highlight[data-annotation-id="pending-note"]'));
+    const tempMark = allTempMarks[0] as HTMLElement | undefined;
     const pos = tempMark ? captureSelectionFromElement(tempMark, container) : null;
     if (!pos) { setPendingSelection(null); return; }
 
@@ -375,20 +440,22 @@ export default function ArticleAnnotationLayer({
         color: 'yellow',
         note: noteContent,
       });
-      if (tempMark) {
-        tempMark.className = 'ks-highlight ks-highlight-note';
-        tempMark.style.backgroundColor = NAME_TO_HEX.yellow;
-        tempMark.dataset.annotationId = saved.id;
-        tempMark.dataset.note = noteContent;
-        tempMark.title = 'Nhấn để xem ghi chú';
-        tempMark.onclick = (e) => {
+      allTempMarks.forEach(m => {
+        const el = m as HTMLElement;
+        el.className = 'ks-highlight ks-highlight-note';
+        el.dataset.color = 'yellow';
+        el.dataset.annotationId = saved.id;
+        el.dataset.note = noteContent;
+        el.onclick = (e) => {
           e.stopPropagation();
-          handleNoteClickFromDOM(saved.id, tempMark.getBoundingClientRect());
+          handleNoteClickFromDOM(saved.id, el.getBoundingClientRect());
         };
-      }
+      });
       setAnnotations(prev => [...prev, saved]);
+      import('sonner').then(({ toast }) => toast.success('Đã lưu ghi chú'));
     } catch {
-      if (tempMark) removeMarkFromDOM(tempMark);
+      allTempMarks.forEach(m => removeMarkFromDOM(m as HTMLElement));
+      import('sonner').then(({ toast }) => toast.error('Lưu ghi chú thất bại'));
     }
     setPendingSelection(null);
   }, [pendingSelection, session, articleId, handleNoteClickFromDOM]);
@@ -396,8 +463,8 @@ export default function ArticleAnnotationLayer({
   const handleCancelNote = useCallback(() => {
     const container = containerRef.current?.querySelector(CONTENT_SELECTOR) ?? containerRef.current;
     if (container) {
-      const tempMark = container.querySelector('.ks-highlight:not([data-annotation-id])') as HTMLElement | null;
-      if (tempMark) removeMarkFromDOM(tempMark);
+      const allTempMarks = Array.from(container.querySelectorAll('.ks-highlight[data-annotation-id="pending-note"]'));
+      allTempMarks.forEach(m => removeMarkFromDOM(m as HTMLElement));
     }
     setPendingSelection(null);
   }, []);
@@ -422,6 +489,7 @@ export default function ArticleAnnotationLayer({
       }
     } catch {}
     setActivePopover(null);
+    setIsEditingExistingNote(false);
   }, []);
 
   const activeAnnotation = activePopover
@@ -450,17 +518,38 @@ export default function ArticleAnnotationLayer({
         )}
       </AnimatePresence>
 
+
+
       <AnimatePresence>
         {activePopover && activeAnnotation?.note && (
-          <NotePopover
-            rect={activePopover.rect}
-            content={activeAnnotation.note}
-            onClose={() => setActivePopover(null)}
-            onEdit={() => {
-              const newNote = prompt('Chỉnh sửa ghi chú:', activeAnnotation.note ?? '');
-              if (newNote !== null) handleUpdateNote(activeAnnotation.id, newNote);
-            }}
-          />
+          isEditingExistingNote ? (
+            <InlineNoteEditor
+              key="edit-existing-note"
+              selection={{ rect: activePopover.rect }}
+              initialValue={activeAnnotation.note}
+              onSave={(newNote) => handleUpdateNote(activeAnnotation.id, newNote)}
+              onCancel={() => setIsEditingExistingNote(false)}
+            />
+          ) : (
+            <NotePopover
+              key="view-existing-note"
+              rect={activePopover.rect}
+              content={activeAnnotation.note}
+              onClose={() => setActivePopover(null)}
+              onEdit={() => setIsEditingExistingNote(true)}
+              onDelete={() => {
+                const container = containerRef.current?.querySelector('.article-content') ?? containerRef.current;
+                const domEl = container?.querySelector(`[data-annotation-id="${activeAnnotation.id}"]`) as HTMLElement;
+                if (domEl) {
+                  handleDeleteFromDOM(activeAnnotation.id, domEl);
+                } else {
+                  // Fallback if not found in DOM
+                  handleDeleteFromDOM(activeAnnotation.id, document.createElement('div'));
+                }
+                setActivePopover(null);
+              }}
+            />
+          )
         )}
       </AnimatePresence>
     </div>
