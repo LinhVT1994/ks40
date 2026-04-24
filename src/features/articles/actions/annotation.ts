@@ -17,6 +17,7 @@ export interface ArticleAnnotation {
   updatedAt: Date;
   article?: {
     title: string;
+    slug: string;
   };
 }
 
@@ -30,7 +31,22 @@ export async function getArticleAnnotationsAction(articleId: string): Promise<Ar
     orderBy: { createdAt: 'desc' },
     include: {
       article: {
-        select: { title: true }
+        select: { title: true, slug: true }
+      }
+    }
+  });
+}
+
+export async function getAnnotationAction(id: string): Promise<ArticleAnnotation | null> {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return null;
+
+  return db.articleAnnotation.findUnique({
+    where: { id, userId },
+    include: {
+      article: {
+        select: { title: true, slug: true }
       }
     }
   });
@@ -46,7 +62,7 @@ export async function getAllUserAnnotationsAction(): Promise<ArticleAnnotation[]
     orderBy: { createdAt: 'desc' },
     include: {
       article: {
-        select: { title: true }
+        select: { title: true, slug: true }
       }
     }
   });

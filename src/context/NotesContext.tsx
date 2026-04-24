@@ -23,6 +23,8 @@ interface NotesContextType {
 
   // Shared Data
   activeNoteId: string | null;
+  scrollToNoteId: string | null;
+  setScrollToNoteId: (id: string | null) => void;
 }
 
 const NotesContext = createContext<NotesContextType | undefined>(undefined);
@@ -31,6 +33,7 @@ export function NotesProvider({ children }: { children: ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isScratchpadOpen, setIsScratchpadOpen] = useState(false);
   const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
+  const [scrollToNoteId, setScrollToNoteId] = useState<string | null>(null);
   const [currentArticleId, setCurrentArticleId] = useState<string | null>(null);
   const [currentArticleTitle, setCurrentArticleTitle] = useState<string | null>(null);
 
@@ -65,6 +68,8 @@ export function NotesProvider({ children }: { children: ReactNode }) {
       currentArticleTitle,
       setCurrentArticle,
       activeNoteId,
+      scrollToNoteId,
+      setScrollToNoteId,
     }}>
       {children}
     </NotesContext.Provider>

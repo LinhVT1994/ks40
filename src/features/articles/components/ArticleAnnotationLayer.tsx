@@ -3,6 +3,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSession } from 'next-auth/react';
+import { useSearchParams } from 'next/navigation';
+import { StickyNote } from 'lucide-react';
 import TextSelectionToolbar from '@/features/member/components/notes/TextSelectionToolbar';
 import InlineNoteEditor from '@/features/member/components/notes/InlineNoteEditor';
 import NotePopover from '@/features/member/components/notes/NotePopover';
@@ -12,6 +14,7 @@ import {
   updateAnnotationAction,
   type ArticleAnnotation,
 } from '@/features/articles/actions/annotation';
+import { useNotes } from '@/context/NotesContext';
 
 interface Props {
   articleId: string;
@@ -116,10 +119,6 @@ function captureSelectionPosition(
 function wrapRangeWithMarks(
   range: Range,
   annotation: { id: string; color: string; note?: string | null },
-  onDelete: (id: string, domEl: HTMLElement) => void,
-  onNoteClick: (id: string, rect: DOMRect) => void,
-  onHover?: (id: string, text: string, rect: DOMRect) => void,
-  onHoverEnd?: () => void,
 ): HTMLElement[] {
   const marks: HTMLElement[] = [];
   const textNodes: Text[] = [];
@@ -151,7 +150,7 @@ function wrapRangeWithMarks(
       markRange.setStart(t, startOffset);
       markRange.setEnd(t, endOffset);
 
-      const mark = createMarkElement(annotation as ArticleAnnotation, onDelete, onNoteClick, onHover, onHoverEnd);
+      const mark = createMarkElement(annotation as ArticleAnnotation);
       markRange.surroundContents(mark);
       marks.push(mark);
     } catch {
@@ -163,12 +162,8 @@ function wrapRangeWithMarks(
 }
 
 function applyHighlightToDOM(
-  annotation: ArticleAnnotation,
+  annotation: ArticleAnnotation | { id: string; paragraphIndex: number; startOffset: number; endOffset: number; color: string; note?: string | null },
   container: Element,
-  onDelete: (id: string, el: HTMLElement) => void,
-  onNoteClick: (id: string, rect: DOMRect) => void,
-  onHover?: (id: string, text: string, rect: DOMRect) => void,
-  onHoverEnd?: () => void,
 ) {
   if (annotation.paragraphIndex === -1) return; // Skip general notes
 
@@ -203,54 +198,37 @@ function applyHighlightToDOM(
     range.setStart(startNode, startNodeOffset);
     range.setEnd(endNode, endNodeOffset);
 
-    const marks = wrapRangeWithMarks(range, annotation, onDelete, onNoteClick);
+    const marks = wrapRangeWithMarks(range, annotation as any);
 
     // Append delete button to the last mark segment
     if (!annotation.note && marks.length > 0) {
       const lastMark = marks[marks.length - 1];
       const deleteBtn = lastMark.querySelector('.ks-highlight-delete') as HTMLElement | null;
       if (!deleteBtn) {
-        const btn = buildDeleteBtn(annotation.id, lastMark, onDelete);
+        const btn = buildDeleteBtn();
         lastMark.appendChild(btn);
       }
     }
   } catch {
-    // Silently skip
+    // ignore
   }
 }
 
 function createMarkElement(
   annotation: ArticleAnnotation,
-  onDelete: (id: string, el: HTMLElement) => void,
-  onNoteClick: (id: string, rect: DOMRect) => void,
 ): HTMLElement {
   const mark = document.createElement('mark');
   mark.className = `ks-highlight${annotation.note ? ' ks-highlight-note' : ''}`;
   mark.dataset.color = annotation.color || 'yellow';
   mark.dataset.annotationId = annotation.id;
   if (annotation.note) mark.dataset.note = annotation.note;
-
-  if (annotation.note) {
-    mark.onclick = (e) => {
-      e.stopPropagation();
-      onNoteClick(annotation.id, mark.getBoundingClientRect());
-    };
-  }
   return mark;
 }
 
-function buildDeleteBtn(
-  annotationId: string,
-  mark: HTMLElement,
-  onDelete: (id: string, el: HTMLElement) => void,
-): HTMLElement {
+function buildDeleteBtn() {
   const btn = document.createElement('span');
   btn.className = 'ks-highlight-delete';
   btn.innerHTML = '×';
-  btn.onclick = (e) => {
-    e.stopPropagation();
-    onDelete(annotationId, mark);
-  };
   return btn;
 }
 
@@ -314,6 +292,46 @@ export default function ArticleAnnotationLayer({
     rect: DOMRect;
   } | null>(null);
   const [isEditingExistingNote, setIsEditingExistingNote] = useState(false);
+  const [hoveredNote, setHoveredNote] = useState<{
+    id: string;
+    rect: DOMRect;
+    content: string;
+  } | null>(null);
+  const { scrollToNoteId, setScrollToNoteId, openSidebar } = useNotes();
+  const searchParams = useSearchParams();
+
+  // Handle direct navigation via URL ?noteId=xxx
+  useEffect(() => {
+    const noteId = searchParams?.get('noteId');
+    if (noteId) {
+      setScrollToNoteId(noteId);
+      // Clean up URL to prevent re-scroll on refresh if desired, 
+      // but usually keeping it is fine for sharing.
+    }
+  }, [searchParams, setScrollToNoteId]);
+
+  // Scroll to note handler
+  useEffect(() => {
+    if (!scrollToNoteId) return;
+    
+    const container = containerRef.current?.querySelector(CONTENT_SELECTOR) ?? containerRef.current;
+    if (!container) return;
+
+    const targetEl = container.querySelector(`[data-annotation-id="${scrollToNoteId}"]`) as HTMLElement | null;
+    
+    if (targetEl) {
+      targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Visual feedback: pulse/flash effect
+      targetEl.classList.add('ks-highlight-pulse');
+      setTimeout(() => {
+        targetEl.classList.remove('ks-highlight-pulse');
+        setScrollToNoteId(null);
+      }, 2000);
+    } else {
+      setScrollToNoteId(null);
+    }
+  }, [scrollToNoteId, setScrollToNoteId]);
 
   useEffect(() => {
     onAnnotationsChange?.(annotations);
@@ -347,13 +365,71 @@ export default function ArticleAnnotationLayer({
         .filter(Boolean)
     );
 
-    // Apply any annotations that are missing from the DOM
+    // Apply missing annotations
     for (const ann of annotations) {
       if (!existingMarks.has(ann.id)) {
-        applyHighlightToDOM(ann, container, handleDeleteFromDOM, handleNoteClickFromDOM);
+        applyHighlightToDOM(ann, container);
       }
     }
-  }, [annotations, handleDeleteFromDOM, handleNoteClickFromDOM]);
+  }, [annotations]);
+
+  // Unified Interaction Handler (Event Delegation)
+  useEffect(() => {
+    const container = containerRef.current?.querySelector(CONTENT_SELECTOR) ?? containerRef.current;
+    if (!container) return;
+
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const mark = target.closest('.ks-highlight') as HTMLElement | null;
+      if (!mark) return;
+      
+      const id = mark.dataset.annotationId;
+      if (!id) return;
+
+      const ann = annotations.find(a => a.id === id);
+      if (!ann) return;
+
+      e.stopPropagation();
+
+      if (target.closest('.ks-highlight-delete')) {
+        handleDeleteFromDOM(id, mark);
+        return;
+      }
+
+      if (ann.note) {
+        handleNoteClickFromDOM(id, mark.getBoundingClientRect());
+      } else {
+        openSidebar();
+        setScrollToNoteId(id);
+      }
+    };
+
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const mark = target.closest('.ks-highlight') as HTMLElement | null;
+      if (!mark) return;
+      
+      const id = mark.dataset.annotationId;
+      const note = mark.dataset.note;
+      if (id && note) {
+        setHoveredNote({ id, content: note, rect: mark.getBoundingClientRect() });
+      }
+    };
+
+    const handleMouseOut = () => {
+      setHoveredNote(null);
+    };
+
+    container.addEventListener('click', handleClick);
+    container.addEventListener('mouseover', handleMouseOver);
+    container.addEventListener('mouseout', handleMouseOut);
+
+    return () => {
+      container.removeEventListener('click', handleClick);
+      container.removeEventListener('mouseover', handleMouseOver);
+      container.removeEventListener('mouseout', handleMouseOut);
+    };
+  }, [annotations, openSidebar, setScrollToNoteId, handleNoteClickFromDOM, handleDeleteFromDOM]);
 
   const handleHighlight = useCallback(async (text: string, range: Range, colorHex: string) => {
     import('sonner').then(({ toast }) => {
@@ -379,8 +455,6 @@ export default function ArticleAnnotationLayer({
       const marks = wrapRangeWithMarks(
         range,
         { id: 'pending', color: colorName },
-        (_id, el) => removeMarkFromDOM(el),
-        () => {},
       );
       if (marks.length === 0) return;
       const primaryMark = marks[marks.length - 1];
@@ -414,8 +488,6 @@ export default function ArticleAnnotationLayer({
     const marks = wrapRangeWithMarks(
       range,
       { id: 'pending-note', color: 'yellow' },
-      () => {},
-      () => {},
     );
     window.getSelection()?.removeAllRanges();
     setPendingSelection({ text, range, rect });
@@ -550,6 +622,39 @@ export default function ArticleAnnotationLayer({
               }}
             />
           )
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {hoveredNote && !activePopover && (
+          <motion.div
+            initial={{ opacity: 0, y: 12, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 8, scale: 0.98 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+            className="fixed z-[60] pointer-events-none"
+            style={{
+              left: hoveredNote.rect.left + hoveredNote.rect.width / 2,
+              top: hoveredNote.rect.top - 14,
+              transform: 'translateX(-50%) translateY(-100%)',
+            }}
+          >
+            <div className="relative group">
+              <div className="relative bg-white dark:bg-[#0f172a] px-4 py-3 rounded-xl shadow-lg border border-zinc-200 dark:border-white/10 max-w-[260px]">
+                <p className="text-[13px] leading-relaxed text-slate-700 dark:text-slate-200 font-medium line-clamp-5">
+                  {hoveredNote.content}
+                </p>
+                
+                <div className="mt-2 flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.15em] text-blue-500/80">
+                  <div className="w-1 h-1 rounded-full bg-current" />
+                  <span>Ghi chú</span>
+                </div>
+              </div>
+              
+              {/* Simple Arrow */}
+              <div className="absolute left-1/2 -bottom-1 -translate-x-1/2 w-2 h-2 bg-white dark:bg-[#0f172a] rotate-45 border-r border-b border-zinc-200 dark:border-white/10" />
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

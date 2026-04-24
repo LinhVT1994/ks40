@@ -7,7 +7,13 @@ import {
   Heading as HeadingIcon, Quote as QuoteIcon, 
   Check, Edit2, Plus 
 } from 'lucide-react';
-import { type ArticleAnnotation, createAnnotationAction, updateAnnotationAction, deleteAnnotationAction } from '@/features/articles/actions/annotation';
+import { 
+  type ArticleAnnotation, 
+  createAnnotationAction, 
+  updateAnnotationAction, 
+  deleteAnnotationAction,
+  getAnnotationAction 
+} from '@/features/articles/actions/annotation';
 import { useNotes } from '@/context/NotesContext';
 
 export default function GlobalScratchpad() {
@@ -30,8 +36,43 @@ export default function GlobalScratchpad() {
 
   // Sync with context active note if provided
   useEffect(() => {
-    if (activeNoteId) setLocalActiveNoteId(activeNoteId);
+    if (activeNoteId) {
+      setLocalActiveNoteId(activeNoteId);
+      loadExistingNote(activeNoteId);
+    }
   }, [activeNoteId]);
+
+  const loadExistingNote = async (id: string) => {
+    try {
+      const data = await getAnnotationAction(id);
+      if (!data) return;
+
+      let title = '';
+      let body = data.note || '';
+
+      // If note starts with # Title, extract it
+      if (body.startsWith('# ')) {
+        const lines = body.split('\n');
+        title = lines[0].replace('# ', '');
+        body = lines.slice(1).join('\n').trim();
+      } else {
+        // Fallback title from article or timestamp
+        title = data.article?.title 
+          ? `Ghi chú: ${data.article.title}`
+          : `Ghi chú ${new Date(data.createdAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`;
+      }
+
+      setScratchpadTitle(title);
+      setScratchpadText(data.note || '');
+      lastSavedText.current = data.note || '';
+      
+      if (editorRef.current) {
+        editorRef.current.innerHTML = markdownToHtml(body);
+      }
+    } catch (err) {
+      console.error('Failed to load note:', err);
+    }
+  };
 
   // Background Auto-Save
   useEffect(() => {
@@ -165,6 +206,7 @@ export default function GlobalScratchpad() {
     try {
       await deleteAnnotationAction(localActiveNoteId);
       setScratchpadText(''); setScratchpadTitle(''); setLocalActiveNoteId(null);
+      openScratchpad(null); // Reset global context
       closeScratchpad();
     } catch {}
   };
@@ -193,7 +235,21 @@ export default function GlobalScratchpad() {
                 className="flex-1 bg-transparent border-none outline-none text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400"
              />
              <div className="flex items-center gap-1.5">
-               <button onClick={() => { setScratchpadTitle(''); setScratchpadText(''); setLocalActiveNoteId(null); if (editorRef.current) editorRef.current.innerHTML = ''; }} className="p-1.5 hover:bg-primary/10 rounded-lg text-zinc-400 hover:text-primary"><Plus className="w-4 h-4" /></button>
+                <button 
+                  onClick={() => { 
+                    setScratchpadTitle(''); 
+                    setScratchpadText(''); 
+                    setLocalActiveNoteId(null); 
+                    openScratchpad(null);
+                    if (editorRef.current) editorRef.current.innerHTML = ''; 
+                    const timeStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+                    setScratchpadTitle(`Ghi chú ${timeStr}`);
+                  }} 
+                  className="p-1.5 hover:bg-primary/10 rounded-lg text-zinc-400 hover:text-primary"
+                  title="Ghi chú mới"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
                {localActiveNoteId && <button onClick={handleDelete} className="p-1.5 hover:bg-red-500/10 rounded-lg text-zinc-400 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>}
                <button onClick={closeScratchpad} className="p-1.5 hover:bg-black/10 rounded-lg text-zinc-400"><X className="w-4 h-4" /></button>
              </div>

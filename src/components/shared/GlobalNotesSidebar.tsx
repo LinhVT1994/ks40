@@ -2,11 +2,12 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, FileEdit, Trash2, Search, BookOpen, ChevronLeft, ChevronDown, Pencil, StickyNote, Highlighter, SearchX } from 'lucide-react';
+import { X, FileEdit, Trash2, Search, BookOpen, ChevronLeft, ChevronDown, Pencil, StickyNote, Highlighter, SearchX, ExternalLink } from 'lucide-react';
 import type { ArticleAnnotation } from '@/features/articles/actions/annotation';
 import { deleteAnnotationAction, getAllUserAnnotationsAction, updateAnnotationAction } from '@/features/articles/actions/annotation';
 import MarkdownViewer from '@/components/shared/MarkdownViewer';
 import { useNotes } from '@/context/NotesContext';
+import { useRouter } from 'next/navigation';
 
 type FilterType = 'Tất cả' | 'Ghi chú' | 'Highlight';
 
@@ -97,7 +98,8 @@ function HighlightText({
 }
 
 export default function GlobalNotesSidebar() {
-  const { isSidebarOpen, closeSidebar, currentArticleId, currentArticleTitle, openScratchpad } = useNotes();
+  const router = useRouter();
+  const { isSidebarOpen, closeSidebar, currentArticleId, currentArticleTitle, openScratchpad, setScrollToNoteId } = useNotes();
   const [annotations, setAnnotations] = useState<ArticleAnnotation[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -188,6 +190,24 @@ export default function GlobalNotesSidebar() {
       if (selectedNote?.id === id) setSelectedNote(null);
     } catch {
       // toast error
+    }
+  };
+
+
+
+  const handleCardClick = (ann: ArticleAnnotation) => {
+    if (ann.articleId === currentArticleId) {
+      setScrollToNoteId(ann.id);
+    }
+    setSelectedNote(ann);
+  };
+
+  const handleNavigateToSource = (ann: ArticleAnnotation) => {
+    if (ann.articleId === currentArticleId) {
+      setScrollToNoteId(ann.id);
+    } else if (ann.article?.slug) {
+      closeSidebar();
+      router.push(`/article/${ann.article.slug}?noteId=${ann.id}`);
     }
   };
 
@@ -282,23 +302,20 @@ export default function GlobalNotesSidebar() {
                   className="flex flex-col h-full"
                 >
                   {/* Header */}
-                  <div className="p-6 border-b border-zinc-200/60 dark:border-white/5 flex items-center justify-between bg-white dark:bg-slate-900/50">
-                    <div>
-                      <h2 className="text-xl font-black text-zinc-800 dark:text-white">Ghi chú & Highlight</h2>
-                      <p className="text-[11px] font-bold text-zinc-500 mt-1 truncate uppercase tracking-widest italic opacity-80">
-                        {currentArticleTitle || 'Toàn bộ kho lưu trữ'}
-                      </p>
+                  <div className="px-5 py-3.5 border-b border-zinc-200/60 dark:border-white/5 flex items-center justify-between bg-white dark:bg-slate-900/50">
+                    <div className="min-w-0">
+                      <h2 className="text-lg font-black text-zinc-800 dark:text-white leading-tight">Ghi chú & Highlight</h2>
                     </div>
                     <button
                       onClick={closeSidebar}
-                      className="shrink-0 p-2 hover:bg-red-500/10 rounded-xl text-zinc-400 hover:text-red-500 transition-all duration-300"
+                      className="shrink-0 p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-xl text-zinc-400 hover:text-zinc-600 dark:hover:text-slate-200 transition-all duration-300"
                     >
                       <X className="w-5 h-5" />
                     </button>
                   </div>
 
                   {/* Search & Actions Area */}
-                  <div className="border-b border-zinc-200/60 dark:border-white/5 bg-white/50 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-10 shrink-0 px-5 pt-4 pb-3 flex flex-col gap-3">
+                  <div className="border-b border-zinc-200/60 dark:border-white/5 bg-white/50 dark:bg-slate-900/80 backdrop-blur-sm sticky top-0 z-10 shrink-0 px-5 pt-3.5 pb-2.5 flex flex-col gap-2.5">
                     <div className="flex items-center gap-2">
                       <div className="relative group flex-1">
                         <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 group-focus-within:text-primary transition-colors" />
@@ -338,7 +355,7 @@ export default function GlobalNotesSidebar() {
                     </div>
 
                     {/* Tabs Area */}
-                    <div className="flex items-center gap-6 border-b border-zinc-200 dark:border-white/10 w-full overflow-x-auto no-scrollbar pt-3 px-1 -mx-1">
+                    <div className="flex items-center gap-5 border-b border-zinc-200 dark:border-white/10 w-full overflow-x-auto no-scrollbar pt-2 px-1 -mx-1">
                       {(['Tất cả', 'Ghi chú', 'Highlight'] as FilterType[]).map(type => {
                         const isActive = filterType === type;
                         const count = counts[type];
@@ -346,15 +363,15 @@ export default function GlobalNotesSidebar() {
                           <button
                             key={type}
                             onClick={() => setFilterType(type)}
-                            className={`relative pb-3 text-[10px] font-black uppercase tracking-[0.2em] transition-colors whitespace-nowrap flex items-center gap-1.5 ${
-                              isActive ? 'text-primary' : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-slate-200'
+                            className={`relative pb-2.5 text-[9px] font-black uppercase tracking-[0.15em] transition-colors whitespace-nowrap flex items-center gap-1.5 ${
+                              isActive ? 'text-primary' : 'text-zinc-400 hover:text-zinc-600 dark:hover:text-slate-300'
                             }`}
                           >
                             <span>{type}</span>
-                            <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full leading-none min-w-[18px] text-center transition-colors ${
+                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-md leading-none min-w-[16px] text-center transition-colors ${
                               isActive
-                                ? 'bg-primary/15 text-primary'
-                                : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 dark:text-zinc-400'
+                                ? 'bg-primary/10 text-primary'
+                                : 'bg-zinc-100 dark:bg-white/5 text-zinc-400'
                             }`}>
                               {count}
                             </span>
@@ -395,9 +412,8 @@ export default function GlobalNotesSidebar() {
                       ) : (
                         <div className="h-full flex flex-col items-center justify-center text-center px-4 opacity-40 gap-2">
                           <BookOpen className="w-10 h-10" />
-                          <p className="text-sm font-bold uppercase tracking-widest">Trống trải quá...</p>
                           <p className="text-[11px] text-zinc-500 normal-case tracking-normal max-w-[220px]">
-                            Bạn chưa có ghi chú hay highlight nào ở đây.
+                            Hãy bắt đầu highlight hoặc ghi chú để tạo nên dấu ấn cá nhân của bạn.
                           </p>
                         </div>
                       )
@@ -423,7 +439,7 @@ export default function GlobalNotesSidebar() {
                             key={ann.id}
                             annotation={ann}
                             highlightTokens={searchTokens}
-                            onClick={() => setSelectedNote(ann)}
+                            onClick={() => handleCardClick(ann)}
                             onEdit={() => {
                               closeSidebar();
                               openScratchpad(ann.id);
@@ -466,6 +482,7 @@ export default function GlobalNotesSidebar() {
                   note={selectedNote} 
                   onBack={() => setSelectedNote(null)} 
                   onDelete={handleDelete}
+                  onNavigate={handleNavigateToSource}
                 />
               )}
             </AnimatePresence>
@@ -590,26 +607,34 @@ function NoteCard({
           </p>
 
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity -mr-1 -mt-1 shrink-0">
-            <button
-              onClick={e => {
-                e.stopPropagation();
-                onEdit();
-              }}
-              title="Sửa ghi chú"
-              className="p-1.5 rounded-md hover:bg-primary/10 text-zinc-400 hover:text-primary transition-colors active:scale-90"
-            >
-              <Pencil className="w-4 h-4" />
-            </button>
-            <button
-              onClick={e => {
-                e.stopPropagation();
-                onDelete();
-              }}
-              title="Xóa"
-              className="p-1.5 rounded-md hover:bg-red-500/10 text-zinc-400 hover:text-red-500 transition-colors active:scale-90"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            {hasNote ? (
+              <>
+                <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    onEdit();
+                  }}
+                  title="Sửa ghi chú"
+                  className="p-1.5 rounded-md hover:bg-primary/10 text-zinc-400 hover:text-primary transition-colors active:scale-90"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={e => {
+                    e.stopPropagation();
+                    onDelete();
+                  }}
+                  title="Xóa"
+                  className="p-1.5 rounded-md hover:bg-red-500/10 text-zinc-400 hover:text-red-500 transition-colors active:scale-90"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </>
+            ) : (
+              <div className="p-1.5 rounded-md text-primary/60 group-hover:text-primary transition-colors active:scale-90">
+                <ExternalLink className="w-4 h-4" />
+              </div>
+            )}
           </div>
         </div>
 
@@ -658,11 +683,13 @@ function NoteCard({
 function NoteDetail({ 
   note, 
   onBack, 
-  onDelete 
+  onDelete,
+  onNavigate
 }: { 
   note: ArticleAnnotation; 
   onBack: () => void; 
   onDelete: (id: string) => void;
+  onNavigate: (ann: ArticleAnnotation) => void;
 }) {
   return (
     <motion.div 
@@ -673,17 +700,17 @@ function NoteDetail({
       className="flex flex-col h-full bg-white dark:bg-slate-900"
     >
       {/* Detail Header */}
-      <div className="p-6 border-b border-zinc-200/60 dark:border-white/5 flex items-center gap-4 bg-white dark:bg-slate-900/50">
+      <div className="px-5 py-3.5 border-b border-zinc-200/60 dark:border-white/5 flex items-center gap-3 bg-white dark:bg-slate-900/50">
         <button
           onClick={onBack}
-          className="p-2 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl text-zinc-500 transition-all active:scale-90"
+          className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-slate-200 transition-all active:scale-90"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <div>
-          <h2 className="text-lg font-black text-zinc-800 dark:text-white uppercase tracking-wider leading-none">Chi tiết ghi chú</h2>
-          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest mt-1 block">
-             Lưu ngày {new Date(note.createdAt).toLocaleDateString('vi-VN')}
+        <div className="min-w-0">
+          <h2 className="text-[15px] font-black text-zinc-800 dark:text-white uppercase tracking-wider leading-none">Chi tiết</h2>
+          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-1 block">
+             Lưu {new Date(note.createdAt).toLocaleDateString('vi-VN')}
           </span>
         </div>
       </div>
@@ -701,30 +728,27 @@ function NoteDetail({
         {/* The Personal Note */}
         {note.note && (
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-               <div className="h-px flex-1 bg-zinc-100 dark:bg-white/5" />
-               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Suy ngẫm của bạn</span>
-               <div className="h-px flex-1 bg-zinc-100 dark:bg-white/5" />
-            </div>
             <div className="prose prose-sm dark:prose-invert max-w-none">
               <MarkdownViewer content={note.note} />
             </div>
           </div>
         )}
 
-        {/* Meta Info */}
-        <div className="pt-8 space-y-4">
-           <div className="p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 space-y-3">
-              <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-primary" />
-                <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500">Nguồn bài viết</span>
-              </div>
-              <p className="text-sm font-bold text-zinc-800 dark:text-slate-200">
-                {/* Normally we'd fetch article title here if not available, but for now we display articleId or placeholders */}
-                Bản tin Premium #{note.articleId.slice(-4)}
-              </p>
-           </div>
-        </div>
+         {/* Meta Info */}
+         <div className="pt-8 space-y-4">
+            <button
+              onClick={() => onNavigate(note)}
+              className="w-full p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 space-y-3 text-left hover:border-primary/30 transition-colors group/source"
+            >
+               <div className="flex items-center gap-2">
+                 <BookOpen className="w-4 h-4 text-zinc-400 group-hover/source:text-primary transition-colors" />
+                 <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500">Nguồn bài viết</span>
+               </div>
+               <p className="text-sm font-bold text-zinc-800 dark:text-slate-200 group-hover/source:text-primary transition-colors">
+                 {note.article?.title || `Bản tin Premium #${note.articleId.slice(-4)}`}
+               </p>
+            </button>
+         </div>
       </div>
 
       {/* Detail Actions */}
