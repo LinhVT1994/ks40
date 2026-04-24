@@ -17,12 +17,14 @@ import {
   Moon
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { useNotes } from '@/context/NotesContext';
 
 const HIDE_PATHS = ['/login', '/register', '/forgot-password', '/reset-password', '/write'];
 
 export default function ProductivityHub() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const { toggleSidebar } = useNotes();
   const [isOpen, setIsOpen] = useState(false);
   const [isFocusActive, setIsFocusActive] = useState(false);
   const [isTimerActive, setIsTimerActive] = useState(false);
@@ -127,7 +129,10 @@ export default function ProductivityHub() {
               <HubLabel label="Làm việc" />
               <div className="grid grid-cols-2 gap-1.5">
                 <CompactButton
-                  onClick={toggleFocus}
+                  onClick={() => {
+                    toggleFocus();
+                    setIsOpen(false);
+                  }}
                   isActive={isFocusActive}
                   activeClass="bg-primary text-white"
                   icon={<Maximize2 className="w-3.5 h-3.5" />}
@@ -136,7 +141,10 @@ export default function ProductivityHub() {
                   disabled={!isPremium}
                 />
                 <CompactButton
-                  onClick={toggleTimer}
+                  onClick={() => {
+                    toggleTimer();
+                    setIsOpen(false);
+                  }}
                   isActive={isTimerActive}
                   activeClass="bg-amber-400 text-zinc-900"
                   icon={<Timer className="w-3.5 h-3.5" />}
@@ -154,7 +162,8 @@ export default function ProductivityHub() {
                 <CompactButton
                   onClick={() => {
                     if (!isPremium) return;
-                    window.dispatchEvent(new CustomEvent('toggle-global-notes'));
+                    toggleSidebar();
+                    setIsOpen(false);
                   }}
                   isActive={false}
                   activeClass=""
@@ -180,7 +189,10 @@ export default function ProductivityHub() {
               <HubLabel label="Giao diện" />
               <div className="grid grid-cols-2 gap-1.5">
                 <CompactButton
-                  onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                  onClick={() => {
+                    setTheme(theme === 'dark' ? 'light' : 'dark');
+                    setIsOpen(false);
+                  }}
                   isActive={false}
                   activeClass=""
                   icon={mounted && theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}

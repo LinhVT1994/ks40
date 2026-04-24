@@ -67,8 +67,10 @@ export const viewport: Viewport = {
 
 import GlobalTimer from "@/components/shared/GlobalTimer";
 import ProductivityHub from "@/components/shared/ProductivityHub";
-import NotesPanel from "@/features/member/components/NotesPanel";
 import InteractiveGlow from "@/components/shared/InteractiveGlow";
+import { NotesProvider } from "@/context/NotesContext";
+import GlobalNotesSidebar from "@/components/shared/GlobalNotesSidebar";
+import GlobalScratchpad from "@/components/shared/GlobalScratchpad";
 import { Suspense } from "react";
 
 import { Toaster } from "sonner";
@@ -129,12 +131,15 @@ export default async function RootLayout({
             enableSystem={true}
           >
             <InteractiveGlow />
-            {children}
-            <Suspense fallback={null}>
-              <GlobalTimer />
-              <ProductivityHub />
-              <NotesPanel />
-            </Suspense>
+            <NotesProvider>
+              {children}
+              <Suspense fallback={null}>
+                <GlobalTimer />
+                <ProductivityHub />
+                <GlobalNotesSidebar />
+                <GlobalScratchpad />
+              </Suspense>
+            </NotesProvider>
             <Toaster
               position="top-center"
               expand={false}

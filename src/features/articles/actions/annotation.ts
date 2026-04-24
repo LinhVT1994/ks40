@@ -15,6 +15,9 @@ export interface ArticleAnnotation {
   note: string | null;
   createdAt: Date;
   updatedAt: Date;
+  article?: {
+    title: string;
+  };
 }
 
 export async function getArticleAnnotationsAction(articleId: string): Promise<ArticleAnnotation[]> {
@@ -24,19 +27,28 @@ export async function getArticleAnnotationsAction(articleId: string): Promise<Ar
 
   return db.articleAnnotation.findMany({
     where: { userId, articleId },
-    orderBy: { createdAt: 'asc' },
-    select: {
-      id: true,
-      articleId: true,
-      selectedText: true,
-      paragraphIndex: true,
-      startOffset: true,
-      endOffset: true,
-      color: true,
-      note: true,
-      createdAt: true,
-      updatedAt: true,
-    },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      article: {
+        select: { title: true }
+      }
+    }
+  });
+}
+
+export async function getAllUserAnnotationsAction(): Promise<ArticleAnnotation[]> {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return [];
+
+  return db.articleAnnotation.findMany({
+    where: { userId },
+    orderBy: { createdAt: 'desc' },
+    include: {
+      article: {
+        select: { title: true }
+      }
+    }
   });
 }
 

@@ -149,8 +149,8 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
   // ── Keyboard shortcuts ─────────────────────────────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || e.metaKey || e.ctrlKey) return;
+      const target = e.target as HTMLElement;
+      if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable || e.metaKey || e.ctrlKey) return;
       if (e.key === 'f' || e.key === 'F') toggle();
       if (e.key === 'Escape' && active) exit();
       if ((e.key === ' ' || e.key === 'Spacebar') && active) {

@@ -3,7 +3,7 @@
 import { useState, useTransition, useEffect, useRef, useCallback } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Bookmark, Sparkles, Target, Lock as LockIcon, Quote, CheckCircle2, BookMarked, PenLine, X, GripHorizontal, Trash2 } from 'lucide-react';
+import { Bookmark, Sparkles, Lock as LockIcon, CheckCircle2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toggleLikeAction } from '@/features/articles/actions/like';
 import { toggleBookmarkAction } from '@/features/articles/actions/bookmark';
@@ -13,9 +13,7 @@ import MarkdownViewer from '@/components/shared/MarkdownViewer';
 import { useInteractionOptional } from '@/features/articles/context/ArticleInteractionContext';
 import ShareMenu from '@/components/shared/ShareMenu';
 import ArticleAnnotationLayer from '@/features/articles/components/ArticleAnnotationLayer';
-import ArticleNotesPanel from '@/features/articles/components/ArticleNotesPanel';
-import { type ArticleAnnotation, createAnnotationAction, updateAnnotationAction } from '@/features/articles/actions/annotation';
-import { Check } from 'lucide-react';
+import { type ArticleAnnotation } from '@/features/articles/actions/annotation';
 
 interface ArticleContentProps {
   articleId: string;
@@ -33,6 +31,8 @@ interface ArticleContentProps {
   initialAnnotations?: ArticleAnnotation[];
 }
 
+import { useNotes } from '@/context/NotesContext';
+
 export default function ArticleContent({
   articleId, content, overview, objectives,
   likeCount, commentCount, isLiked, isBookmarked,
@@ -43,151 +43,17 @@ export default function ArticleContent({
   const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname();
+  const { setCurrentArticle } = useNotes();
   const [annotations, setAnnotations] = useState<ArticleAnnotation[]>(initialAnnotations);
-  const [notesPanelOpen, setNotesPanelOpen] = useState(false);
-  const [scratchpadOpen, setScratchpadOpen] = useState(false);
-  const [scratchpadText, setScratchpadText] = useState('');
-  const [scratchpadSize, setScratchpadSize] = useState({ width: 440, height: 480 });
-  const [activeScratchpadId, setActiveScratchpadId] = useState<string | null>(null);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
-  const lastSavedText = useRef('');
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Background Auto-Save Engine
+  // Sync Global Context with current Article
   useEffect(() => {
-    if (!scratchpadOpen) return;
-    const currentText = scratchpadText.trim();
-    
-    if (currentText === lastSavedText.current) {
-      return;
-    }
-    
-    // Reset status to idle while typing
-    if (saveStatus !== 'idle') setSaveStatus('idle');
-    clearTimeout(typingTimeoutRef.current);
-    
-    typingTimeoutRef.current = setTimeout(async () => {
-      if (!currentText) return;
-      setSaveStatus('saving');
-      try {
-        if (activeScratchpadId) {
-          const updated = await updateAnnotationAction(activeScratchpadId, { note: currentText });
-          setAnnotations(prev => prev.map(a => a.id === activeScratchpadId ? updated : a));
-          lastSavedText.current = currentText;
-          setSaveStatus('saved');
-        } else {
-          const saved = await createAnnotationAction({
-            articleId,
-            selectedText: '',
-            paragraphIndex: -1,
-            startOffset: -1,
-            endOffset: -1,
-            color: 'blue',
-            note: currentText,
-          });
-          setActiveScratchpadId(saved.id);
-          setAnnotations(prev => [saved, ...prev]);
-          lastSavedText.current = currentText;
-          setSaveStatus('saved');
-        }
-      } catch {
-        setSaveStatus('idle');
-      }
-    }, 2500);
+    setCurrentArticle(articleId, articleTitle);
+    return () => setCurrentArticle(null, null);
+  }, [articleId, articleTitle, setCurrentArticle]);
 
-    return () => clearTimeout(typingTimeoutRef.current);
-  }, [scratchpadText, scratchpadOpen, activeScratchpadId, articleId]);
-
-  // Multilateral Resizing Logic
-  const isResizing = useRef<string | null>(null);
-  const lastMousePos = useRef({ x: 0, y: 0 });
-
-  const startResize = useCallback((e: React.MouseEvent, direction: string) => {
-    e.preventDefault();
-    e.stopPropagation();
-    isResizing.current = direction;
-    lastMousePos.current = { x: e.clientX, y: e.clientY };
-    document.body.style.cursor = direction.includes('left') || direction.includes('right') ? 'col-resize' : 'row-resize';
-    document.body.style.userSelect = 'none';
-  }, []);
-
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    if (!isResizing.current) return;
-    const direction = isResizing.current;
-    const dx = e.clientX - lastMousePos.current.x;
-    const dy = e.clientY - lastMousePos.current.y;
-    lastMousePos.current = { x: e.clientX, y: e.clientY };
-
-    setScratchpadSize(prev => {
-      let newW = prev.width;
-      let newH = prev.height;
-
-      if (direction === 'right') newW += dx;
-      if (direction === 'left')  newW -= dx;
-      if (direction === 'bottom') newH += dy;
-      if (direction === 'top')    newH -= dy;
-
-      return {
-        width: Math.max(320, Math.min(newW, window.innerWidth - 40)),
-        height: Math.max(200, Math.min(newH, window.innerHeight - 40))
-      };
-    });
-  }, []);
-
-  const stopResize = useCallback(() => {
-    isResizing.current = null;
-    document.body.style.cursor = '';
-    document.body.style.userSelect = '';
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', stopResize);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', stopResize);
-    };
-  }, [handleMouseMove, stopResize]);
-
-  const handleAddGeneralNote = async (note: string) => {
-    try {
-      const saved = await createAnnotationAction({
-        articleId,
-        selectedText: '',
-        paragraphIndex: -1,
-        startOffset: -1,
-        endOffset: -1,
-        color: 'blue', // Or default
-        note,
-      });
-      setAnnotations(prev => [saved, ...prev]);
-      setActiveScratchpadId(saved.id);
-      lastSavedText.current = note;
-      import('sonner').then(({ toast }) => toast.success('Đã lưu ghi chú toàn bài'));
-    } catch {
-      import('sonner').then(({ toast }) => toast.error('Lưu ghi chú thất bại'));
-    }
-  };
-
-  const handleDeleteScratchpad = async () => {
-    if (!activeScratchpadId) return;
-    if (!confirm('Bạn có chắc chắn muốn xóa ghi chú này không?')) return;
-    
-    try {
-      const idToDelete = activeScratchpadId;
-      // Reset local state first for instant feedback
-      setActiveScratchpadId(null);
-      setScratchpadText('');
-      lastSavedText.current = '';
-      setAnnotations(prev => prev.filter(a => a.id !== idToDelete));
-      
-      await deleteAnnotationAction(idToDelete);
-      import('sonner').then(({ toast }) => toast.success('Đã xóa ghi chú'));
-    } catch {
-      import('sonner').then(({ toast }) => toast.error('Xóa ghi chú thất bại'));
-    }
-  };
-
+  // Resizing and Interaction logic removed as parts were moved to global components, 
+  // but we keep the interaction hook for Like/Bookmark functionality.
   const interaction = useInteractionOptional();
   
   const liked = interaction?.liked ?? false;
@@ -412,138 +278,16 @@ export default function ArticleContent({
           </div>
         </div>
       )}
-
-
-
-      {/* Notes & Scratchpad toggle buttons (only logged-in, non-gated) */}
-      {session && !isGated && (
-        <>
-          <div className="fixed bottom-24 right-6 z-50 flex flex-col gap-3">
-            <button
-              onClick={() => setScratchpadOpen(prev => !prev)}
-              className="flex items-center justify-center w-12 h-12 bg-white dark:bg-slate-800 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-zinc-300 rounded-full shadow-xl hover:bg-zinc-50 dark:hover:bg-slate-700 transition-all hover:scale-105 active:scale-95 group"
-              title="Mở sổ tay nổi"
-            >
-              <PenLine className="w-5 h-5 group-hover:text-primary transition-colors" />
-            </button>
-
-            <button
-              onClick={() => setNotesPanelOpen(true)}
-              className="flex items-center justify-center w-12 h-12 bg-zinc-800/90 dark:bg-white/10 backdrop-blur-xl border border-white/10 text-white rounded-full shadow-2xl hover:bg-zinc-700/90 transition-all hover:scale-105 active:scale-95"
-              title="Xem ghi chú & highlight"
-            >
-              <div className="relative flex items-center justify-center">
-                <BookMarked className="w-5 h-5 text-primary" />
-                {annotations.length > 0 && (
-                  <span className="absolute -top-1.5 -right-2 bg-primary text-white text-[10px] font-black rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center shadow-sm">
-                    {annotations.length}
-                  </span>
-                )}
-              </div>
-            </button>
-          </div>
-
-          {/* Draggable Scratchpad Widget */}
-          <AnimatePresence>
-            {scratchpadOpen && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                drag={!isResizing.current}
-                dragMomentum={false}
-                style={{ width: scratchpadSize.width, height: scratchpadSize.height }}
-                className="fixed bottom-40 right-24 z-[130] bg-white dark:bg-slate-800 rounded-2xl shadow-[0_12px_40px_-10px_rgba(0,0,0,0.2)] dark:shadow-[0_12px_40px_-10px_rgba(0,0,0,0.5)] border border-zinc-200/50 dark:border-white/10 overflow-hidden flex flex-col"
-              >
-                {/* Edge Resize Handles */}
-                <div className="absolute top-0 left-0 right-0 h-1 cursor-row-resize z-50 hover:bg-primary/20 transition-colors" onMouseDown={e => startResize(e, 'top')} />
-                <div className="absolute bottom-0 left-0 right-0 h-1 cursor-row-resize z-50 hover:bg-primary/20 transition-colors" onMouseDown={e => startResize(e, 'bottom')} />
-                <div className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize z-50 hover:bg-primary/20 transition-colors" onMouseDown={e => startResize(e, 'left')} />
-                <div className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize z-50 hover:bg-primary/20 transition-colors" onMouseDown={e => startResize(e, 'right')} />
-
-                {/* Drag Handle Top Bar */}
-                <div className="h-10 bg-zinc-50 dark:bg-slate-900 border-b border-zinc-100 dark:border-white/5 flex items-center justify-between px-3 cursor-grab active:cursor-grabbing shrink-0">
-                  <div className="flex items-center gap-2 text-zinc-400">
-                    <GripHorizontal className="w-4 h-4" />
-                    <span className="text-[11px] font-semibold uppercase tracking-wider">Sổ tay nháp</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {activeScratchpadId && (
-                      <button 
-                        onClick={handleDeleteScratchpad}
-                        className="p-1.5 hover:bg-red-500/10 rounded-md text-zinc-400 hover:text-red-500 transition-colors"
-                        title="Xóa ghi chú"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                    <button 
-                      onClick={() => setScratchpadOpen(false)}
-                      className="p-1.5 hover:bg-black/5 dark:hover:bg-white/10 rounded-md text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
-                      title="Đóng sổ"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Editor Body */}
-                <div className="p-4 flex flex-col relative flex-1 min-h-0 w-full overflow-hidden">
-                  <textarea
-                    autoFocus
-                    value={scratchpadText}
-                    onChange={e => setScratchpadText(e.target.value)}
-                    placeholder="Ghi chú nhanh ý tưởng (hỗ trợ Markdown)..."
-                    className="w-full h-full bg-transparent text-[16px] text-zinc-800 dark:text-zinc-100 placeholder:text-zinc-400 outline-none resize-none leading-relaxed custom-scrollbar pb-6"
-                  />
-                  
-                  <div className="absolute bottom-3 left-4 flex items-center h-5 pointer-events-none">
-                    {saveStatus === 'saving' && (
-                       <span className="text-[10px] font-medium text-zinc-400 italic flex items-center gap-1 animate-pulse">
-                         <div className="w-1 h-1 bg-zinc-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                         <div className="w-1 h-1 bg-zinc-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                         <div className="w-1 h-1 bg-zinc-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                         Đang lưu...
-                       </span>
-                    )}
-                    {saveStatus === 'saved' && (
-                       <span className="text-[10px] font-bold text-emerald-500/80 flex items-center gap-1">
-                         <Check className="w-2.5 h-2.5" /> Đã lưu đồng bộ
-                       </span>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <ArticleNotesPanel
-            isOpen={notesPanelOpen}
-            onClose={() => setNotesPanelOpen(false)}
-            articleTitle={articleTitle}
-            annotations={annotations}
-            onAddGeneralNote={handleAddGeneralNote}
-            onAnnotationDeleted={id => setAnnotations(prev => prev.filter(a => a.id !== id))}
-            onScrollToAnnotation={id => {
-              setNotesPanelOpen(false);
-              setTimeout(() => {
-                const el = document.querySelector(`[data-annotation-id="${id}"]`);
-                el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              }, 300);
-            }}
-          />
-        </>
-      )}
-
-      {/* Bookmark toast */}
-      {bookmarkToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 bg-zinc-800 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold rounded-2xl shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
-          <Bookmark className="w-4 h-4 fill-current" />
-          {bookmarkToast}
-        </div>
-          )}
-        </div>
-      </ArticleAnnotationLayer>
     </div>
-  );
+  </ArticleAnnotationLayer>
+
+  {/* Bookmark toast */}
+  {bookmarkToast && (
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2.5 bg-zinc-800 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold rounded-2xl shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-200">
+      <Bookmark className="w-4 h-4 fill-current" />
+      {bookmarkToast}
+    </div>
+  )}
+</div>
+);
 }

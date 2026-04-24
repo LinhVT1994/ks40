@@ -67,8 +67,8 @@ export default function GlobalTimer() {
     
     // Keyboard shortcut 'T'
     const handleKeyDown = (e: KeyboardEvent) => {
-      const tag = (e.target as HTMLElement)?.tagName;
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || e.metaKey || e.ctrlKey) return;
+      const target = e.target as HTMLElement;
+      if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA' || target?.isContentEditable || e.metaKey || e.ctrlKey) return;
       if (e.key === 't' || e.key === 'T') handleToggle();
     };
 
