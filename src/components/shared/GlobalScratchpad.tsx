@@ -148,9 +148,63 @@ export default function GlobalScratchpad() {
     };
   }, [handleMouseMove, stopResize]);
 
+  // Image Upload Logic for Scratchpad
+  const uploadScratchpadImage = async (file: File): Promise<string> => {
+    // We import compressImage dynamically or assume it's small enough to just use
+    const { compressImage } = await import('@/lib/compress-image');
+    const compressed = await compressImage(file, 1200, 1200);
+    const ext = compressed.type === 'image/webp' ? 'webp' : 'jpg';
+    const compressedFile = new File([compressed], `note-image.${ext}`, { type: compressed.type });
+
+    const form = new FormData();
+    form.append('file', compressedFile);
+
+    // Use comment-image route as it's accessible to members
+    const res = await fetch('/api/upload/comment-image', { method: 'POST', body: form });
+    if (!res.ok) {
+      const { error } = await res.json();
+      throw new Error(error ?? 'Upload thất bại');
+    }
+    const { url } = await res.json();
+    return url as string;
+  };
+
+  // Smart Paste Handler
+  const handlePaste = async (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const items = e.clipboardData.items;
+
+    // Check for images first
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.indexOf('image') !== -1) {
+        const file = items[i].getAsFile();
+        if (file) {
+          setSaveStatus('saving');
+          try {
+            const url = await uploadScratchpadImage(file);
+            const imgHtml = `<img src="${url}" alt="image" style="max-width:100%; border-radius:12px; margin: 12px 0; border: 1px solid rgba(0,0,0,0.05);" />`;
+            document.execCommand('insertHTML', false, imgHtml);
+            syncHtmlToMarkdown();
+            setSaveStatus('saved');
+          } catch (err) {
+            console.error('Paste upload failed:', err);
+            setSaveStatus('idle');
+          }
+        }
+        return; // Handled image, exit
+      }
+    }
+
+    // Fallback to plain text paste to avoid messy HTML styles
+    const text = e.clipboardData.getData('text/plain');
+    document.execCommand('insertText', false, text);
+    syncHtmlToMarkdown();
+  };
+
   // Markdown Bridge
   const htmlToMarkdown = (html: string) => {
     return html
+      .replace(/<img.*?src=["'](.*?)["'].*?>/g, '![]($1)')
       .replace(/<div><br><\/div>/g, '\n').replace(/<div>/g, '\n').replace(/<\/div>/g, '')
       .replace(/<br>/g, '\n').replace(/<b>(.*?)<\/b>/g, '**$1**').replace(/<strong>(.*?)<\/strong>/g, '**$1**')
       .replace(/<i>(.*?)<\/i>/g, '*$1*').replace(/<em>(.*?)<\/em>/g, '*$1*').replace(/<h3>(.*?)<\/h3>/g, '### $1\n')
@@ -165,8 +219,10 @@ export default function GlobalScratchpad() {
   };
 
   const markdownToHtml = (md: string) => {
-    return md.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/### (.*?)\n/g, '<h3>$1</h3>')
-             .replace(/> (.*?)\n/g, '<blockquote>$1</blockquote>').replace(/\n/g, '<br>');
+    return md
+      .replace(/!\[\]\((.*?)\)/g, '<img src="$1" style="max-width:100%; border-radius:12px; margin: 12px 0; border: 1px solid rgba(0,0,0,0.05);" />')
+      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/### (.*?)\n/g, '<h3>$1</h3>')
+      .replace(/> (.*?)\n/g, '<blockquote>$1</blockquote>').replace(/\n/g, '<br>');
   };
 
   // Commands
@@ -263,7 +319,7 @@ export default function GlobalScratchpad() {
 
           <div className="flex-1 relative bg-[#fdfdfc] dark:bg-slate-900/50 overflow-hidden" onMouseDown={e => e.stopPropagation()}>
             <div
-              ref={editorRef} contentEditable suppressContentEditableWarning onInput={syncHtmlToMarkdown} onKeyDown={handleEditorKeyDown}
+              ref={editorRef} contentEditable suppressContentEditableWarning onInput={syncHtmlToMarkdown} onKeyDown={handleEditorKeyDown} onPaste={handlePaste}
               className="w-full h-full p-6 pt-4 outline-none leading-relaxed text-[15px] text-zinc-800 dark:text-zinc-100 overflow-y-auto custom-scrollbar prose prose-sm prose-zinc dark:prose-invert max-w-none"
             />
             <div className="absolute bottom-4 right-5 pointer-events-none">
