@@ -155,7 +155,6 @@ export default function ArticleContent({
         initialAnnotations={initialAnnotations}
         authorAnnotations={authorAnnotations}
         isAuthor={isAuthor}
-        onAnnotationsChange={setAnnotations}
       >
         <div data-article-content>
           {overview && (
