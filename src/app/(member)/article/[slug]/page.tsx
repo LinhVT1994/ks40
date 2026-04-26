@@ -10,7 +10,7 @@ import ArticleContent from '@/features/member/components/ArticleContent';
 import ArticleComments from '@/features/member/components/ArticleComments';
 import ArticleRating from '@/features/member/components/ArticleRating';
 import { getArticleRatingSummaryAction } from '@/features/articles/actions/rating';
-import { getArticleAnnotationsAction } from '@/features/articles/actions/annotation';
+import { getArticleAnnotationsAction, getArticleAuthorAnnotationsAction } from '@/features/articles/actions/annotation';
 import AuthorCard from '@/features/member/components/AuthorCard';
 import RelatedArticles from '@/features/member/components/RelatedArticles';
 import ArticleNavigation from '@/features/member/components/ArticleNavigation';
@@ -86,7 +86,7 @@ export default async function ArticleDetailPage({ params }: Props) {
 
   const seriesId = article?.seriesId ?? null;
 
-  const [comments, { articles }, authorInfo, navigation, seriesCtx, userInteraction, ratingSummary, initialAnnotations] = await Promise.all([
+  const [comments, { articles }, authorInfo, navigation, seriesCtx, userInteraction, ratingSummary, initialAnnotations, authorAnnotations] = await Promise.all([
     !isGated ? getCommentsAction(data.id) : Promise.resolve([]),
     getArticlesAction({ limit: 20 }),
     authorId ? getAuthorInfoStaticAction(authorId, userId) : Promise.resolve(null),
@@ -95,7 +95,10 @@ export default async function ArticleDetailPage({ params }: Props) {
     !isGated && userId && article ? getArticleUserInteractionAction(article.id, userId) : Promise.resolve({ isLiked: false, isBookmarked: false }),
     !isGated ? getArticleRatingSummaryAction(data.id) : Promise.resolve(null),
     !isGated && userId ? getArticleAnnotationsAction(data.id) : Promise.resolve([]),
+    !isGated ? getArticleAuthorAnnotationsAction(data.id) : Promise.resolve([]),
   ]);
+
+  const isAuthor = !!userId && userId === (article?.authorId ?? authorId);
 
   const articleWithInteraction = article
     ? { ...article, isLiked: userInteraction.isLiked, isBookmarked: userInteraction.isBookmarked }
@@ -248,6 +251,8 @@ export default async function ArticleDetailPage({ params }: Props) {
                 audience={data.audience}
                 articleTitle={data.title}
                 initialAnnotations={initialAnnotations}
+                authorAnnotations={authorAnnotations}
+                isAuthor={isAuthor}
               />
             </div>
 

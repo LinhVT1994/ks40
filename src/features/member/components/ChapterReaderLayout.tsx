@@ -11,6 +11,7 @@ import TextSelectionToolbar from './notes/TextSelectionToolbar';
 import ChapterNotesPanel from './notes/ChapterNotesPanel';
 import InlineNoteEditor from './notes/InlineNoteEditor';
 import NotePopover from './notes/NotePopover';
+import HighlightActionToolbar from './notes/HighlightActionToolbar';
 
 interface ChapterReaderLayoutProps {
   book: any;
@@ -32,6 +33,9 @@ export default function ChapterReaderLayout({
   const [notesOpen, setNotesOpen] = useState(false);
   const [activeNoteSelection, setActiveNoteSelection] = useState<{ text: string; range: Range; rect: DOMRect; tempMark?: HTMLElement } | null>(null);
   const [activePopover, setActivePopover] = useState<{ rect: DOMRect; content: string } | null>(null);
+  const [hoveredHighlight, setHoveredHighlight] = useState<{ element: HTMLElement; rect: DOMRect } | null>(null);
+  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isHoveringRef = useRef(false);
 
   // ── Global Event Handlers ─────────────────────────────────────
   useEffect(() => {
@@ -48,9 +52,48 @@ export default function ChapterReaderLayout({
     };
     document.addEventListener('click', handleNoteClick);
 
+    // ── Highlight Hover Handling ──────────────────────────────
+    const handleMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      const highlight = target.closest('.ks-highlight') as HTMLElement;
+      const toolbar = target.closest('[data-highlight-toolbar]');
+      
+      if (highlight || toolbar) {
+        isHoveringRef.current = true;
+        if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+        if (highlight) {
+          setHoveredHighlight({
+            element: highlight,
+            rect: highlight.getBoundingClientRect()
+          });
+        }
+      }
+    };
+
+    const handleMouseOut = (e: MouseEvent) => {
+      const related = e.relatedTarget as HTMLElement;
+      if (related?.closest('.ks-highlight') || related?.closest('[data-highlight-toolbar]')) {
+        return;
+      }
+
+      isHoveringRef.current = false;
+      if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = setTimeout(() => {
+        if (!isHoveringRef.current) {
+          setHoveredHighlight(null);
+        }
+      }, 400); // Optimized delay: 400ms
+    };
+
+    document.addEventListener('mouseover', handleMouseOver);
+    document.addEventListener('mouseout', handleMouseOut);
+
     return () => {
       window.removeEventListener('toggle-chapter-notes', handleToggleNotes);
       document.removeEventListener('click', handleNoteClick);
+      document.removeEventListener('mouseover', handleMouseOver);
+      document.removeEventListener('mouseout', handleMouseOut);
+      if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
     };
   }, []);
 
@@ -88,42 +131,28 @@ export default function ChapterReaderLayout({
         onHighlight={(text, range, color) => {
           const mark = document.createElement('mark');
           mark.className = 'ks-highlight animate-in fade-in duration-500';
-          mark.style.backgroundColor = color;
-          mark.title = 'Click để xóa highlight';
           
-          // Hover delete button
-          const deleteBtn = document.createElement('span');
-          deleteBtn.className = 'ks-highlight-delete';
-          deleteBtn.innerHTML = '×';
-          deleteBtn.onclick = (e) => {
-            e.stopPropagation();
-            const p = mark.parentNode;
-            if (p) {
-              while (mark.firstChild && mark.firstChild !== deleteBtn) {
-                p.insertBefore(mark.firstChild, mark);
-              }
-              p.removeChild(mark);
-            }
-          };
+          // Map hex back to color ID for CSS variables
+          const colorObj = [
+            { id: 'yellow', color: '#fef08a' },
+            { id: 'green',  color: '#bbf7d0' },
+            { id: 'blue',   color: '#bfdbfe' },
+            { id: 'pink',   color: '#fbcfe8' },
+          ].find(c => c.color === color);
           
-          // Click highlight to remove (backward compatibility)
-          mark.onclick = () => {
-            const p = mark.parentNode;
-            if (p) {
-              while (mark.firstChild && mark.firstChild !== deleteBtn) {
-                p.insertBefore(mark.firstChild, mark);
-              }
-              p.removeChild(mark);
-            }
-          };
-
+          if (colorObj) {
+            mark.dataset.color = colorObj.id;
+          } else {
+            mark.style.backgroundColor = color; // Fallback
+          }
+          
+          mark.title = 'Click để xem tùy chọn';
+          
           try {
             range.surroundContents(mark);
-            mark.appendChild(deleteBtn);
           } catch (e) {
             const fragment = range.extractContents();
             mark.appendChild(fragment);
-            mark.appendChild(deleteBtn);
             range.insertNode(mark);
           }
           window.getSelection()?.removeAllRanges();
@@ -148,6 +177,41 @@ export default function ChapterReaderLayout({
         onClose={() => setNotesOpen(false)}
         chapterTitle={currentChapter.title}
       />
+
+      {/* Highlight Action Toolbar */}
+      {hoveredHighlight && (
+        <HighlightActionToolbar 
+          isVisible={!!hoveredHighlight}
+          element={hoveredHighlight.element}
+          rect={hoveredHighlight.rect}
+          onDelete={() => {
+            const el = hoveredHighlight.element;
+            const p = el.parentNode;
+            if (p) {
+              while (el.firstChild) p.insertBefore(el.firstChild, el);
+              p.removeChild(el);
+              setHoveredHighlight(null);
+            }
+          }}
+          onMouseEnter={() => {
+            isHoveringRef.current = true;
+            if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+          }}
+          onMouseLeave={() => {
+            isHoveringRef.current = false;
+            if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+            hoverTimeoutRef.current = setTimeout(() => {
+              if (!isHoveringRef.current) setHoveredHighlight(null);
+            }, 400);
+          }}
+          onChangeColor={(colorId) => {
+            if (hoveredHighlight.element) {
+              hoveredHighlight.element.dataset.color = colorId;
+              hoveredHighlight.element.style.backgroundColor = ''; // Remove inline style to use CSS variable opacity
+            }
+          }}
+        />
+      )}
 
       <AnimatePresence>
         {activePopover && (

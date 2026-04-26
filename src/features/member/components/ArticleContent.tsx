@@ -29,6 +29,8 @@ interface ArticleContentProps {
   audience?: string;
   articleTitle?: string;
   initialAnnotations?: ArticleAnnotation[];
+  authorAnnotations?: ArticleAnnotation[];
+  isAuthor?: boolean;
 }
 
 import { useNotes } from '@/context/NotesContext';
@@ -39,12 +41,13 @@ export default function ArticleContent({
   isGated = false, isPreview = false, audience,
   articleTitle = '',
   initialAnnotations = [],
+  authorAnnotations = [],
+  isAuthor = false,
 }: ArticleContentProps) {
   const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const { setCurrentArticle } = useNotes();
-  const [annotations, setAnnotations] = useState<ArticleAnnotation[]>(initialAnnotations);
 
   // Sync Global Context with current Article
   useEffect(() => {
@@ -150,6 +153,8 @@ export default function ArticleContent({
       <ArticleAnnotationLayer
         articleId={articleId}
         initialAnnotations={initialAnnotations}
+        authorAnnotations={authorAnnotations}
+        isAuthor={isAuthor}
         onAnnotationsChange={setAnnotations}
       >
         <div data-article-content>

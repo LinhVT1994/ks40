@@ -38,6 +38,26 @@ function normalizeWithMap(s: string): { norm: string; map: number[] } {
   return { norm, map };
 }
 
+// Strip Markdown syntax for clean previews
+function stripMarkdown(md: string | null | undefined): string {
+  if (!md) return '';
+  return md
+    .replace(/^#+\s+/gm, '') // Headings
+    .replace(/\*\*(.*?)\*\*/g, '$1') // Bold
+    .replace(/__(.*?)__/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1') // Italic
+    .replace(/_(.*?)_/g, '$1')
+    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Links
+    .replace(/!\[.*?\]\(.*?\)/g, '') // Images
+    .replace(/^>\s+/gm, '') // Blockquotes
+    .replace(/`{1,3}(.*?)`{1,3}/g, '$1') // Code
+    .replace(/^\s*[-*+]\s+/gm, '') // Lists
+    .replace(/^\s*\d+\.\s+/gm, '') // Ordered lists
+    .replace(/<[^>]*>?/gm, '') // Strip HTML tags
+    .replace(/\n+/g, ' ') // Newlines to spaces
+    .trim();
+}
+
 // Split query into tokens; each token must match (AND semantics).
 function tokenize(q: string): string[] {
   const n = normalizeText(q).trim();
@@ -599,7 +619,7 @@ function NoteCard({
           }`}>
             <StickyNote className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${tokens.accent}`} />
             <HighlightText
-              text={annotation.note}
+              text={stripMarkdown(annotation.note)}
               tokens={highlightTokens}
               className={hasHighlight ? 'line-clamp-2' : 'line-clamp-3'}
             />
@@ -659,7 +679,7 @@ function NoteDetail({
       </div>
 
       {/* Detail Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-8 space-y-8">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
         {/* The Citation */}
         <div className="relative">
           <div className="absolute -left-4 top-0 bottom-0 w-1.5 bg-primary/20 rounded-full" />
@@ -670,15 +690,15 @@ function NoteDetail({
 
         {/* The Personal Note */}
         {note.note && (
-          <div className="space-y-4">
-            <div className="prose prose-sm dark:prose-invert max-w-none">
+          <div className="space-y-3">
+            <div className="prose prose-sm prose-compact dark:prose-invert max-w-none">
               <MarkdownViewer content={note.note} />
             </div>
           </div>
         )}
 
          {/* Meta Info */}
-         <div className="pt-8 space-y-4">
+         <div className="pt-6 space-y-4">
             <button
               onClick={() => onNavigate(note)}
               className="w-full p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 space-y-3 text-left hover:border-primary/30 transition-colors group/source"

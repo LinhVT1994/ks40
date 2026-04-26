@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Save, Quote, FileEdit } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { FileEdit } from 'lucide-react';
 
 interface InlineNoteEditorProps {
   selection: { rect: DOMRect };
@@ -19,8 +19,7 @@ export default function InlineNoteEditor({ selection, initialValue = '', onSave,
     textareaRef.current?.focus();
   }, []);
 
-  // Calculate if we should show above or below
-  const showAbove = selection.rect.bottom + 240 > window.innerHeight;
+  const showAbove = selection.rect.bottom + 180 > window.innerHeight;
 
   return (
     <motion.div
@@ -30,30 +29,25 @@ export default function InlineNoteEditor({ selection, initialValue = '', onSave,
       className="fixed z-[101] w-[300px] bg-white dark:bg-[#202020] rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] border border-zinc-200 dark:border-white/10 overflow-hidden"
       style={{
         left: `calc(${selection.rect.left + selection.rect.width / 2}px)`,
-        top: showAbove ? selection.rect.top - 240 : selection.rect.bottom + 8,
+        top: showAbove ? selection.rect.top - 180 : selection.rect.bottom + 8,
         transform: 'translateX(-50%)',
       }}
     >
-      {/* Header */}
       <div className="px-4 py-3 border-b border-zinc-100 dark:border-white/5 flex items-center gap-2">
         <FileEdit className="w-3.5 h-3.5 text-zinc-400" />
-        <p className="text-[12px] font-semibold text-zinc-600 dark:text-zinc-300">
-          Viết ghi chú
-        </p>
+        <p className="text-[12px] font-semibold text-zinc-600 dark:text-zinc-300">Viết ghi chú</p>
       </div>
-      
-      {/* Input Section */}
+
       <div className="p-4">
         <textarea
           ref={textareaRef}
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder="Nhập nội dung ghi chú ở đây..."
-          className="w-full h-20 bg-transparent text-[14px] text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 resize-none outline-none font-medium leading-relaxed custom-scrollbar"
+          className="w-full h-20 bg-transparent text-[14px] text-zinc-800 dark:text-zinc-200 placeholder:text-zinc-400 resize-none outline-none font-medium leading-snug custom-scrollbar"
         />
       </div>
-      
-      {/* Footer Actions */}
+
       <div className="px-4 pb-4 flex items-center justify-end gap-2">
         <button
           onClick={onCancel}

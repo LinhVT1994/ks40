@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, GripHorizontal, Trash2, Bold, List, 
   Heading as HeadingIcon, Quote as QuoteIcon, 
-  Check, Edit2, Plus 
+  Check, Edit2, Italic, ListOrdered, Link, Minus, Save
 } from 'lucide-react';
 import { 
   type ArticleAnnotation, 
@@ -74,44 +74,37 @@ export default function GlobalScratchpad() {
     }
   };
 
-  // Background Auto-Save
-  useEffect(() => {
-    if (!isScratchpadOpen) return;
+  const handleSave = async () => {
     const currentText = scratchpadText.trim();
-    if (currentText === lastSavedText.current) return;
+    if (!currentText || currentText === lastSavedText.current) return;
     
-    if (saveStatus !== 'idle') setSaveStatus('idle');
-    clearTimeout(typingTimeoutRef.current);
-    
-    typingTimeoutRef.current = setTimeout(async () => {
-      if (!currentText) return;
-      setSaveStatus('saving');
-      try {
-        if (localActiveNoteId) {
-          await updateAnnotationAction(localActiveNoteId, { note: currentText });
-          lastSavedText.current = currentText;
-          setSaveStatus('saved');
-        } else {
-          const saved = await createAnnotationAction({
-            articleId: currentArticleId || 'global', // Use 'global' mark if no article
-            selectedText: '',
-            paragraphIndex: -1,
-            startOffset: -1,
-            endOffset: -1,
-            color: 'blue',
-            note: currentText,
-          });
-          setLocalActiveNoteId(saved.id);
-          lastSavedText.current = currentText;
-          setSaveStatus('saved');
-        }
-      } catch {
-        setSaveStatus('idle');
+    setSaveStatus('saving');
+    try {
+      if (localActiveNoteId) {
+        await updateAnnotationAction(localActiveNoteId, { note: currentText });
+        lastSavedText.current = currentText;
+        setSaveStatus('saved');
+      } else {
+        const saved = await createAnnotationAction({
+          articleId: currentArticleId || 'global',
+          selectedText: '',
+          paragraphIndex: -1,
+          startOffset: -1,
+          endOffset: -1,
+          color: 'blue',
+          note: currentText,
+        });
+        setLocalActiveNoteId(saved.id);
+        lastSavedText.current = currentText;
+        setSaveStatus('saved');
       }
-    }, 2500);
-
-    return () => clearTimeout(typingTimeoutRef.current);
-  }, [scratchpadText, isScratchpadOpen, localActiveNoteId, currentArticleId]);
+      setTimeout(() => setSaveStatus('idle'), 2000);
+    } catch (err) {
+      console.error('Save failed:', err);
+      setSaveStatus('idle');
+      import('sonner').then(({ toast }) => toast.error('Lưu ghi chú thất bại'));
+    }
+  };
 
   // Resizing Logic
   const startResize = useCallback((e: React.MouseEvent, direction: string) => {
@@ -206,8 +199,21 @@ export default function GlobalScratchpad() {
     return html
       .replace(/<img.*?src=["'](.*?)["'].*?>/g, '![]($1)')
       .replace(/<div><br><\/div>/g, '\n').replace(/<div>/g, '\n').replace(/<\/div>/g, '')
-      .replace(/<br>/g, '\n').replace(/<b>(.*?)<\/b>/g, '**$1**').replace(/<strong>(.*?)<\/strong>/g, '**$1**')
-      .replace(/<i>(.*?)<\/i>/g, '*$1*').replace(/<em>(.*?)<\/em>/g, '*$1*').replace(/<h3>(.*?)<\/h3>/g, '### $1\n')
+      .replace(/<br>/g, '\n')
+      .replace(/<b.*?>([\s\S]*?)<\/b>/gi, '**$1**').replace(/<strong.*?>([\s\S]*?)<\/strong>/gi, '**$1**')
+      .replace(/<i.*?>([\s\S]*?)<\/i>/gi, '*$1*').replace(/<em.*?>([\s\S]*?)<\/em>/gi, '*$1*')
+      .replace(/<ol.*?>([\s\S]*?)<\/ol>/gi, (_, content) => {
+        let i = 1;
+        return content.replace(/<li.*?>([\s\S]*?)<\/li>/gi, () => `${i++}. $1\n`);
+      })
+      .replace(/<ul.*?>([\s\S]*?)<\/ul>/gi, (_, content) => {
+        return content.replace(/<li.*?>([\s\S]*?)<\/li>/gi, '- $1\n');
+      })
+      .replace(/<li.*?>([\s\S]*?)<\/li>/gi, '- $1\n')
+      .replace(/<hr.*?>/gi, '\n---\n')
+      .replace(/<a.*?href=["'](.*?)["'].*?>(.*?)<\/a>/gi, '[$2]($1)')
+      .replace(/<h3.*?>([\s\S]*?)<\/h3>/gi, '### $1\n')
+      .replace(/<[^>]*>?/gm, '') // Final strip of any remaining HTML tags
       .replace(/&nbsp;/g, ' ').replace(/\n\n+/g, '\n\n').trim();
   };
 
@@ -227,7 +233,12 @@ export default function GlobalScratchpad() {
 
   // Commands
   const handleCommand = (command: string, value?: string) => {
-    document.execCommand(command, false, value);
+    if (command === 'createLink') {
+      const url = prompt('Nhập URL:');
+      if (url) document.execCommand(command, false, url);
+    } else {
+      document.execCommand(command, false, value);
+    }
     editorRef.current?.focus();
     syncHtmlToMarkdown();
   };
@@ -256,6 +267,18 @@ export default function GlobalScratchpad() {
       }
     }
   }, [isScratchpadOpen]);
+
+  const handleClose = () => {
+    const currentText = scratchpadText.trim();
+    const isChanged = currentText !== lastSavedText.current;
+    
+    if (isChanged && currentText !== '') {
+      if (!confirm('Ghi chú chưa được lưu. Bạn có chắc chắn muốn đóng không?')) {
+        return;
+      }
+    }
+    closeScratchpad();
+  };
 
   const handleDelete = async () => {
     if (!localActiveNoteId || !confirm('Xóa ghi chú này?')) return;
@@ -292,35 +315,46 @@ export default function GlobalScratchpad() {
              />
              <div className="flex items-center gap-1.5">
                 <button 
-                  onClick={() => { 
-                    setScratchpadTitle(''); 
-                    setScratchpadText(''); 
-                    setLocalActiveNoteId(null); 
-                    openScratchpad(null);
-                    if (editorRef.current) editorRef.current.innerHTML = ''; 
-                    const timeStr = new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-                    setScratchpadTitle(`Ghi chú ${timeStr}`);
-                  }} 
-                  className="p-1.5 hover:bg-primary/10 rounded-lg text-zinc-400 hover:text-primary"
-                  title="Ghi chú mới"
+                  onClick={handleSave}
+                  disabled={saveStatus === 'saving' || !scratchpadText.trim() || scratchpadText.trim() === lastSavedText.current}
+                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-all ${
+                    saveStatus === 'saved' 
+                      ? 'bg-emerald-500/10 text-emerald-500' 
+                      : 'bg-primary text-white hover:shadow-lg hover:shadow-primary/20 disabled:opacity-40 disabled:grayscale'
+                  }`}
                 >
-                  <Plus className="w-4 h-4" />
+                  {saveStatus === 'saving' ? (
+                    <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : saveStatus === 'saved' ? (
+                    <Check className="w-3 h-3" />
+                  ) : (
+                    <Save className="w-3 h-3" />
+                  )}
+                  <span>{saveStatus === 'saved' ? 'Đã lưu' : 'Lưu lại'}</span>
                 </button>
                {localActiveNoteId && <button onClick={handleDelete} className="p-1.5 hover:bg-red-500/10 rounded-lg text-zinc-400 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>}
-               <button onClick={closeScratchpad} className="p-1.5 hover:bg-black/10 rounded-lg text-zinc-400"><X className="w-4 h-4" /></button>
+               <button onClick={handleClose} className="p-1.5 hover:bg-black/10 rounded-lg text-zinc-400"><X className="w-4 h-4" /></button>
              </div>
           </div>
 
           <div className="flex items-center gap-0.5 px-3 py-1.5 bg-zinc-50/30 dark:bg-white/2 border-b border-zinc-100 dark:border-white/5 shrink-0 overflow-x-auto no-scrollbar">
-            <button onClick={() => handleCommand('bold')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500"><Bold className="w-3.5 h-3.5" /></button>
-            <button onClick={() => handleCommand('formatBlock', '<h3>')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500"><HeadingIcon className="w-3.5 h-3.5" /></button>
-            <button onClick={() => handleCommand('formatBlock', '<blockquote>')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500"><QuoteIcon className="w-3.5 h-3.5" /></button>
+            <button onClick={() => handleCommand('bold')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="In đậm (Ctrl+B)"><Bold className="w-3.5 h-3.5" /></button>
+            <button onClick={() => handleCommand('italic')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="In nghiêng (Ctrl+I)"><Italic className="w-3.5 h-3.5" /></button>
+            <div className="w-px h-3 bg-zinc-200 dark:bg-white/10 mx-1" />
+            <button onClick={() => handleCommand('formatBlock', '<h3>')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="Tiêu đề"><HeadingIcon className="w-3.5 h-3.5" /></button>
+            <button onClick={() => handleCommand('formatBlock', '<blockquote>')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="Trích dẫn"><QuoteIcon className="w-3.5 h-3.5" /></button>
+            <div className="w-px h-3 bg-zinc-200 dark:bg-white/10 mx-1" />
+            <button onClick={() => handleCommand('insertUnorderedList')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="Danh sách dấu chấm"><List className="w-3.5 h-3.5" /></button>
+            <button onClick={() => handleCommand('insertOrderedList')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="Danh sách số"><ListOrdered className="w-3.5 h-3.5" /></button>
+            <div className="w-px h-3 bg-zinc-200 dark:bg-white/10 mx-1" />
+            <button onClick={() => handleCommand('createLink')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="Chèn liên kết"><Link className="w-3.5 h-3.5" /></button>
+            <button onClick={() => handleCommand('insertHorizontalRule')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="Đường kẻ ngang"><Minus className="w-3.5 h-3.5" /></button>
           </div>
 
           <div className="flex-1 relative bg-[#fdfdfc] dark:bg-slate-900/50 overflow-hidden" onMouseDown={e => e.stopPropagation()}>
             <div
               ref={editorRef} contentEditable suppressContentEditableWarning onInput={syncHtmlToMarkdown} onKeyDown={handleEditorKeyDown} onPaste={handlePaste}
-              className="w-full h-full p-6 pt-4 outline-none leading-relaxed text-[15px] text-zinc-800 dark:text-zinc-100 overflow-y-auto custom-scrollbar prose prose-sm prose-zinc dark:prose-invert max-w-none"
+              className="w-full h-full p-6 pt-4 outline-none leading-snug text-[15px] text-zinc-800 dark:text-zinc-100 overflow-y-auto custom-scrollbar prose prose-sm prose-zinc dark:prose-invert max-w-none"
             />
             <div className="absolute bottom-4 right-5 pointer-events-none">
               <AnimatePresence>

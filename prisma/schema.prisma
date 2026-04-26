@@ -429,6 +429,7 @@ model ArticleAnnotation {
   endOffset      Int
   color          String   @default("yellow")
   note           String?
+  isPublic       Boolean  @default(false)
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -436,6 +437,7 @@ model ArticleAnnotation {
   article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
 
   @@index([userId, articleId])
+  @@index([articleId, isPublic])
 }
 
 model BookReadHistory {
