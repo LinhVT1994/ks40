@@ -19,6 +19,9 @@ import { cn } from '@/lib/utils';
 
 const MONO_FONT = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
 
+const REMARK_PLUGINS = [remarkGfm];
+const REHYPE_PLUGINS = [rehypeRaw];
+
 const CODE_THEME_MAP: Record<string, { [key: string]: React.CSSProperties }> = {
   classic: vscDarkPlus,
   dracula,
@@ -215,7 +218,7 @@ export default function MarkdownViewer({
         "prose-blockquote:border-l-0 prose-blockquote:py-6 prose-blockquote:px-0 prose-blockquote:italic prose-blockquote:text-zinc-600 dark:prose-blockquote:text-slate-400 prose-blockquote:font-medium prose-blockquote:relative prose-blockquote:before:content-['\\201C'] prose-blockquote:before:absolute prose-blockquote:before:top-0 prose-blockquote:before:-left-4 prose-blockquote:before:text-5xl prose-blockquote:before:text-primary/10 prose-blockquote:after:content-['\\201D'] prose-blockquote:after:absolute prose-blockquote:after:bottom-0 prose-blockquote:after:-right-4 prose-blockquote:after:text-5xl prose-blockquote:after:text-primary/10"
       )}>
         <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
+          remarkPlugins={REMARK_PLUGINS}
           allowedElements={['p','strong','em','a','code','br','ul','ol','li','blockquote']}
           unwrapDisallowed
           components={{
@@ -229,6 +232,80 @@ export default function MarkdownViewer({
       </div>
     );
   }
+
+  const memoizedComponents = React.useMemo(() => ({
+    li: ({ children }: any) => <li data-annotation-target>{children}</li>,
+    blockquote: ({ children }: any) => (
+      <blockquote className={cn(
+        "not-prose border-none bg-transparent py-8 px-0 my-10 relative group text-zinc-600 dark:text-slate-400 italic font-medium leading-relaxed text-xl lg:text-2xl",
+        PROSE_WIDTH
+      )}>
+        <span className="absolute top-0 -left-10 text-6xl text-primary/10 font-serif pointer-events-none group-hover:text-primary/20 transition-colors select-none">
+          &ldquo;
+        </span>
+        {children}
+      </blockquote>
+    ),
+    code: CodeBlock as any,
+    pre: ({ children }: any) => <>{children}</>,
+    p: ({ node, children, ...props }: any) => {
+      const isImageOnly = node?.children?.length === 1 && node.children[0]?.tagName === 'img';
+      if (isImageOnly) return <>{children}</>;
+      return <div data-annotation-target className={`mb-8 last:mb-0 text-zinc-700 dark:text-slate-400 text-lg lg:text-xl leading-[1.85] ${PROSE_WIDTH}`} {...props}>{children}</div>;
+    },
+    table: ({ children }: any) => {
+      const tableEl = <table className="w-full min-w-max text-base text-left border-collapse">{children}</table>;
+      return (
+        <div className={`relative my-12 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-slate-900/50 shadow-md dark:shadow-none not-prose animate-in fade-in zoom-in-95 duration-700 group/table ${WIDE_WIDTH}`}>
+          <button
+            onClick={() => setTableLightbox(tableEl)}
+            className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-zinc-100 dark:bg-white/10 text-zinc-400 hover:text-zinc-700 dark:hover:text-white opacity-0 group-hover/table:opacity-100 transition-all"
+            title="Phóng to"
+          >
+            <ZoomIn className="w-3.5 h-3.5" />
+          </button>
+          <div className="overflow-x-auto">{tableEl}</div>
+        </div>
+      );
+    },
+    thead: ({ children }: any) => (
+      <thead className="bg-zinc-50/30 dark:bg-white/[0.03] border-b border-zinc-200 dark:border-white/10">{children}</thead>
+    ),
+    th: ({ children }: any) => (
+      <th className="px-5 py-3 text-sm font-bold text-zinc-500 dark:text-slate-500">{children}</th>
+    ),
+    td: ({ children }: any) => (
+      <td data-annotation-target className="px-5 py-3 text-zinc-600 dark:text-slate-400 border-b border-zinc-100 dark:border-white/5 group-last:border-0">{children}</td>
+    ),
+    tr: ({ children }: any) => (
+      <tr className="group transition-colors hover:bg-zinc-50/50 dark:hover:bg-white/[0.02]">{children}</tr>
+    ),
+    img: ({ src, alt, ...props }: any) => src ? (
+      <div className={`my-12 group relative ${WIDE_WIDTH}`}>
+        <div className="relative cursor-zoom-in" onClick={() => setLightbox({ src, alt: alt ?? '' })}>
+          <img
+            src={src} alt={alt ?? ''} loading="lazy"
+            className="w-full h-auto rounded-2xl border border-zinc-200 dark:border-white/10 shadow-2xl transition-all duration-700 hover:scale-[1.02] hover:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)]"
+            {...props}
+          />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="bg-black/40 backdrop-blur-sm rounded-full p-3">
+              <ZoomIn className="w-5 h-5 text-white" />
+            </div>
+          </div>
+        </div>
+        {alt && (
+          <p className="mt-4 text-center text-xs font-bold text-zinc-400 uppercase tracking-[0.2em] opacity-60 group-hover:opacity-100 transition-opacity">
+            {alt}
+          </p>
+        )}
+      </div>
+    ) : null,
+    h1: ({ children }: any) => { const id = slugify(String(children)); return <h1 id={id} data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h1>; },
+    h2: ({ children }: any) => { const id = slugify(String(children)); return <h2 id={id} data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h2>; },
+    h3: ({ children }: any) => { const id = slugify(String(children)); return <h3 id={id} data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h3>; },
+    h4: ({ children }: any) => <h4 data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h4>,
+  }), []);
 
   return (
     <>
@@ -250,81 +327,9 @@ export default function MarkdownViewer({
         prose-hr:hidden
       `}>
         <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
-          rehypePlugins={[rehypeRaw]}
-          components={{
-            li: ({ children }: any) => <li data-annotation-target>{children}</li>,
-            blockquote: ({ children }: any) => (
-              <blockquote className={cn(
-                "not-prose border-none bg-transparent py-8 px-0 my-10 relative group text-zinc-600 dark:text-slate-400 italic font-medium leading-relaxed text-xl lg:text-2xl",
-                PROSE_WIDTH
-              )}>
-                <span className="absolute top-0 -left-10 text-6xl text-primary/10 font-serif pointer-events-none group-hover:text-primary/20 transition-colors select-none">
-                  &ldquo;
-                </span>
-                {children}
-              </blockquote>
-            ),
-            code: CodeBlock as any,
-            pre: ({ children }: any) => <>{children}</>,
-            p: ({ node, children, ...props }: any) => {
-              const isImageOnly = node?.children?.length === 1 && node.children[0]?.tagName === 'img';
-              if (isImageOnly) return <>{children}</>;
-              return <div data-annotation-target className={`mb-8 last:mb-0 text-zinc-700 dark:text-slate-400 text-lg lg:text-xl leading-[1.85] ${PROSE_WIDTH}`} {...props}>{children}</div>;
-            },
-            table: ({ children }: any) => {
-              const tableEl = <table className="w-full min-w-max text-base text-left border-collapse">{children}</table>;
-              return (
-                <div className={`relative my-12 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-slate-900/50 shadow-md dark:shadow-none not-prose animate-in fade-in zoom-in-95 duration-700 group/table ${WIDE_WIDTH}`}>
-                  <button
-                    onClick={() => setTableLightbox(tableEl)}
-                    className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-zinc-100 dark:bg-white/10 text-zinc-400 hover:text-zinc-700 dark:hover:text-white opacity-0 group-hover/table:opacity-100 transition-all"
-                    title="Phóng to"
-                  >
-                    <ZoomIn className="w-3.5 h-3.5" />
-                  </button>
-                  <div className="overflow-x-auto">{tableEl}</div>
-                </div>
-              );
-            },
-            thead: ({ children }: any) => (
-              <thead className="bg-zinc-50/30 dark:bg-white/[0.03] border-b border-zinc-200 dark:border-white/10">{children}</thead>
-            ),
-            th: ({ children }: any) => (
-              <th className="px-5 py-3 text-sm font-bold text-zinc-500 dark:text-slate-500">{children}</th>
-            ),
-            td: ({ children }: any) => (
-              <td data-annotation-target className="px-5 py-3 text-zinc-600 dark:text-slate-400 border-b border-zinc-100 dark:border-white/5 group-last:border-0">{children}</td>
-            ),
-            tr: ({ children }: any) => (
-              <tr className="group transition-colors hover:bg-zinc-50/50 dark:hover:bg-white/[0.02]">{children}</tr>
-            ),
-            img: ({ src, alt, ...props }: any) => src ? (
-              <div className={`my-12 group relative ${WIDE_WIDTH}`}>
-                <div className="relative cursor-zoom-in" onClick={() => setLightbox({ src, alt: alt ?? '' })}>
-                  <img
-                    src={src} alt={alt ?? ''} loading="lazy"
-                    className="w-full h-auto rounded-2xl border border-zinc-200 dark:border-white/10 shadow-2xl transition-all duration-700 hover:scale-[1.02] hover:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.2)] dark:hover:shadow-[0_32px_64px_-12px_rgba(0,0,0,0.5)]"
-                    {...props}
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                    <div className="bg-black/40 backdrop-blur-sm rounded-full p-3">
-                      <ZoomIn className="w-5 h-5 text-white" />
-                    </div>
-                  </div>
-                </div>
-                {alt && (
-                  <p className="mt-4 text-center text-xs font-bold text-zinc-400 uppercase tracking-[0.2em] opacity-60 group-hover:opacity-100 transition-opacity">
-                    {alt}
-                  </p>
-                )}
-              </div>
-            ) : null,
-            h1: ({ children }: any) => { const id = slugify(String(children)); return <h1 id={id} data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h1>; },
-            h2: ({ children }: any) => { const id = slugify(String(children)); return <h2 id={id} data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h2>; },
-            h3: ({ children }: any) => { const id = slugify(String(children)); return <h3 id={id} data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h3>; },
-            h4: ({ children }: any) => <h4 data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h4>,
-          }}
+          remarkPlugins={REMARK_PLUGINS}
+          rehypePlugins={REHYPE_PLUGINS}
+          components={memoizedComponents}
         >
           {content}
         </ReactMarkdown>

@@ -137,28 +137,11 @@ export default function ArticleContent({
     };
   }, [articleId]);
 
-  return (
-    <div ref={contentRef} className="w-full min-w-0 max-w-none">
-      {/* Reading progress bar — fixed top */}
-      <div aria-hidden="true" className="fixed top-0 left-0 right-0 z-[60] h-[2px] bg-transparent pointer-events-none">
-        <div
-          className="h-full bg-gradient-to-r from-primary via-indigo-500 to-primary transition-[width] duration-300 ease-out relative shadow-[0_0_4px_rgba(59,130,246,0.3)]"
-          style={{ width: `${Math.min(100, readProgress * 100)}%` }}
-        >
-          {/* Subtle Leading Glow */}
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-full bg-white blur-[2px] opacity-40" />
-          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-full bg-white shadow-[0_0_5px_#fff] opacity-60" />
-        </div>
-      </div>
-      <ArticleAnnotationLayer
-        articleId={articleId}
-        initialAnnotations={initialAnnotations}
-        authorAnnotations={authorAnnotations}
-        isAuthor={isAuthor}
-      >
-        <div data-article-content>
-          {overview && (
-            <div className="w-full max-w-[720px] mx-auto px-4 md:px-0">
+
+  const innerContent = (
+    <div data-article-content>
+      {overview && (
+        <div className="w-full max-w-[720px] mx-auto px-4 md:px-0">
           <div className="relative overflow-hidden px-0 py-2 mb-8 group">
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-1">
@@ -209,17 +192,18 @@ export default function ArticleContent({
         </div>
       )}
 
-          {/* Content — markdown */}
-          {!isGated ? (
-            <div className="relative">
-              <MarkdownViewer content={content} />
-            </div>
-          ) : (
-            // Gated: Integrated design (No Card)
-            <div className="relative max-w-[816px] mx-auto">
-              <div className="pb-64">
-                <MarkdownViewer content={content} />
-              </div>
+      {/* Content — markdown */}
+      {!isGated ? (
+        <div className="relative">
+          <div className="text-[10px] text-zinc-400 absolute -top-6 right-0">Debug: {content.length} chars | {Date.now()}</div>
+          <MarkdownViewer content={content} />
+        </div>
+      ) : (
+        // Gated: Integrated design (No Card)
+        <div className="relative max-w-[816px] mx-auto">
+          <div className="pb-64">
+            <MarkdownViewer content={content} />
+          </div>
 
           {/* Premium Progressive Blur Overlay — Gradual transition */}
           <div className="absolute inset-x-0 bottom-0 h-[600px] flex flex-col items-center justify-center pointer-events-none overflow-hidden">
@@ -283,7 +267,34 @@ export default function ArticleContent({
         </div>
       )}
     </div>
-  </ArticleAnnotationLayer>
+  );
+
+  return (
+    <div ref={contentRef} className="w-full min-w-0 max-w-none">
+      {/* Reading progress bar — fixed top */}
+      <div aria-hidden="true" className="fixed top-0 left-0 right-0 z-[60] h-[2px] bg-transparent pointer-events-none">
+        <div
+          className="h-full bg-gradient-to-r from-primary via-indigo-500 to-primary transition-[width] duration-300 ease-out relative shadow-[0_0_4px_rgba(59,130,246,0.3)]"
+          style={{ width: `${Math.min(100, readProgress * 100)}%` }}
+        >
+          {/* Subtle Leading Glow */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-full bg-white blur-[2px] opacity-40" />
+          <div className="absolute right-0 top-1/2 -translate-y-1/2 w-0.5 h-full bg-white shadow-[0_0_5px_#fff] opacity-60" />
+        </div>
+      </div>
+      
+      {isPreview ? (
+        innerContent
+      ) : (
+        <ArticleAnnotationLayer
+          articleId={articleId}
+          initialAnnotations={initialAnnotations}
+          authorAnnotations={authorAnnotations}
+          isAuthor={isAuthor}
+        >
+          {innerContent}
+        </ArticleAnnotationLayer>
+      )}
 
   {/* Bookmark toast */}
   {bookmarkToast && (

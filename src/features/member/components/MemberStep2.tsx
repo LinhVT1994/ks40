@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useDeferredValue } from 'react';
 import {
   Bold, Italic, Heading1, Heading2, Heading3,
   Link2, Code, Image as ImageIcon, Minus, List, ListOrdered,
@@ -351,6 +351,10 @@ export default function MemberStep2({
               </div>
             </div>
 
+            <div className="flex justify-between items-center px-4 py-2 bg-zinc-100 dark:bg-white/5 border-b border-zinc-200 dark:border-white/5 text-[10px] text-zinc-500 uppercase font-black tracking-widest">
+              <span>Editor</span>
+              <span>Len: {content.length} | {Date.now()}</span>
+            </div>
             <textarea
               ref={textareaRef}
               value={content}
@@ -363,7 +367,7 @@ export default function MemberStep2({
         )}
         {(viewMode === 'preview' || viewMode === 'split') && (
           <div className={`flex-1 overflow-y-auto bg-white dark:bg-[#0c0c0c] scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-white/10 ${viewMode === 'split' ? 'w-1/2' : ''}`}>
-             <div className="max-w-[1400px] mx-auto px-6 py-12 md:py-20">
+              <div className="max-w-[1400px] mx-auto px-6 py-12 md:py-20">
                 <main className="max-w-4xl mx-auto">
                    <ArticleHero article={mockArticle} />
                    <div className="mt-12">

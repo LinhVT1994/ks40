@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useTransition, useEffect } from 'react';
+import React, { useState, useTransition, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import MemberStep1 from './MemberStep1';
@@ -44,6 +44,18 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
   // Autosave status
   const [savingStatus, setSavingStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [currentId, setCurrentId] = useState<string | undefined>(editArticle?.id);
+  // Mirror currentId in a ref so the autosave effect can read the latest value
+  // without re-running every time it changes (avoids a wasteful second save and
+  // an extra Next.js router.refresh that resets scroll on step 1).
+  const currentIdRef = useRef(currentId);
+  useEffect(() => {
+    currentIdRef.current = currentId;
+  }, [currentId]);
+
+  // Step 1 scroll container — captured before each autosave so we can restore
+  // the scroll position after the server action triggers an automatic
+  // route revalidation (which otherwise jolts the page back to the top).
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const isEdit = !!editArticle;
 
@@ -71,20 +83,27 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
     if (!title || !topicId) return;
 
     const timer = setTimeout(async () => {
+      // Snapshot scroll position before the server action — Next.js auto
+      // revalidates the current route after a server action which can reset
+      // scroll to the top of the step-1 scroll container.
+      const scrollEl = scrollContainerRef.current;
+      const savedScrollTop = scrollEl?.scrollTop ?? 0;
+
       setSavingStatus('saving');
       const readTime = Math.max(1, Math.ceil(content.split(/\s+/).length / 200));
-      
+
       const data = {
-        title, slug, summary, overview, objectives, 
+        title, slug, summary, overview, objectives,
         content, cover: cover || undefined, coverPosition,
         thumbnail: thumbnail || undefined, thumbnailPosition,
         topicId, tags, readTime
       };
 
       try {
-        if (currentId) {
+        const id = currentIdRef.current;
+        if (id) {
           // Update existing draft
-          await updateMemberArticleAction(currentId, data);
+          await updateMemberArticleAction(id, data);
         } else {
           // Create new draft
           const result = await createMemberArticleAction(data);
@@ -95,6 +114,20 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
           }
         }
         setSavingStatus('saved');
+
+        // Restore scroll across the next two animation frames so it survives
+        // both React's commit and any deferred layout effects from the
+        // implicit router.refresh.
+        if (scrollEl && savedScrollTop > 0) {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => {
+              if (scrollEl.scrollTop !== savedScrollTop) {
+                scrollEl.scrollTop = savedScrollTop;
+              }
+            });
+          });
+        }
+
         // Reset to idle after a show period
         setTimeout(() => setSavingStatus('idle'), 3000);
       } catch (err) {
@@ -104,7 +137,7 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
     }, 2000);
 
     return () => clearTimeout(timer);
-  }, [title, slug, topicId, content, summary, overview, objectives, tags, cover, thumbnail, currentId]);
+  }, [title, slug, topicId, content, summary, overview, objectives, tags, cover, thumbnail]);
 
   const handlePublish = () => {
     setError(null);
@@ -266,7 +299,7 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
       )}
 
       {/* Main Content Area */}
-      <div className={`flex-1 ${step !== 1 ? 'overflow-hidden' : 'overflow-y-auto'}`}>
+      <div ref={scrollContainerRef} className={`flex-1 ${step !== 1 ? 'overflow-hidden' : 'overflow-y-auto'}`}>
         <div className={`${step !== 1 ? 'w-full h-full flex flex-col' : 'max-w-4xl mx-auto py-12 px-6'}`}>
           {/* Rejection Feedback Banner - Only show in Step 1 */}
           {step === 1 && editArticle?.status === 'REJECTED' && editArticle?.rejectionReason && (
