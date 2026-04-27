@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { Bell, FileText, MessageSquare, Heart, Zap, CheckCheck, X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import type { Notification } from '@prisma/client';
@@ -109,6 +110,7 @@ export default function NotificationBell() {
   const { notifications, unreadCount, isLoading, markRead, markAllRead } = useNotifications(userId);
   const [open, setOpen] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
@@ -116,7 +118,11 @@ export default function NotificationBell() {
   // Close on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
+      // Check if click is outside both the button container AND the portal dropdown
+      const isOutsideButton = panelRef.current && !panelRef.current.contains(e.target as Node);
+      const isOutsideDropdown = dropdownRef.current && !dropdownRef.current.contains(e.target as Node);
+      
+      if (isOutsideButton && isOutsideDropdown) {
         setOpen(false);
       }
     };
@@ -141,9 +147,12 @@ export default function NotificationBell() {
         <BellIcon count={unreadCount} />
       </button>
 
-      {/* Dropdown panel */}
-      {open && (
-        <div className="absolute right-0 mt-2 w-80 sm:w-96 origin-top-right bg-white dark:bg-slate-900 border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[70] overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      {/* Dropdown panel - use Portal to escape stacking context */}
+      {open && mounted && createPortal(
+        <div 
+          ref={dropdownRef}
+          className="fixed right-4 top-16 w-[calc(100vw-32px)] sm:w-96 origin-top-right border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[99999] overflow-hidden animate-in fade-in zoom-in-95 duration-150 ks-force-opaque"
+        >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-200 dark:border-white/5">
             <div className="flex items-center gap-2">
@@ -208,7 +217,8 @@ export default function NotificationBell() {
               </a>
             </div>
           )}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

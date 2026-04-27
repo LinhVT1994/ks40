@@ -105,7 +105,7 @@ export default function MemberStep1({
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-transparent p-6 md:p-12 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-white/5">
+    <div className="w-full bg-transparent">
       <div className="max-w-4xl mx-auto space-y-12 pb-20">
         
         {/* Section: Media */}

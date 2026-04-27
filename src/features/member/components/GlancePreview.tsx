@@ -25,6 +25,7 @@ export function GlanceTrigger({ article, children, className }: GlanceTriggerPro
   const [previewData, setPreviewData] = useState<ArticlePreview | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [coords, setCoords] = useState({ x: 0, y: 0 });
+  const [isTouch, setIsTouch] = useState(false);
   
   // Refs to avoid stale closures in setTimeout
   const isHoveringRef = useRef(false);
@@ -37,18 +38,15 @@ export function GlanceTrigger({ article, children, className }: GlanceTriggerPro
   useEffect(() => { isHoveringRef.current = isHovering; }, [isHovering]);
   useEffect(() => { isPopoverHoveredRef.current = isPopoverHovered; }, [isPopoverHovered]);
 
-  const handleMouseEnter = (e: React.MouseEvent) => {
-    setIsHovering(true);
-    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+  const triggerPreview = (x: number, y: number, delay: number = PREVIEW_DELAY) => {
+    if (showPreview) return;
     
-    if (showPreview) return; // Already showing
-
-    // Capture exact mouse position for side-placement
-    const mouseX = e.clientX;
-    const mouseY = e.clientY;
+    // Hard disable on mobile/tablet/small laptops to prevent accidental triggers
+    const isMobileUA = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (typeof window !== 'undefined' && (window.innerWidth < 2000 || isMobileUA)) return;
 
     timerRef.current = setTimeout(async () => {
-      setCoords({ x: mouseX, y: mouseY });
+      setCoords({ x, y });
       setShowPreview(true);
       
       if (!previewData) {
@@ -62,20 +60,33 @@ export function GlanceTrigger({ article, children, className }: GlanceTriggerPro
           setIsLoading(false);
         }
       }
-    }, PREVIEW_DELAY);
+    }, delay);
+  };
+
+  const handleMouseEnter = (e: React.MouseEvent) => {
+    setIsHovering(true);
+    setIsTouch(false);
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+    triggerPreview(e.clientX, e.clientY);
   };
 
   const handleMouseLeave = () => {
     setIsHovering(false);
     if (timerRef.current) clearTimeout(timerRef.current);
 
-    // Give some time to move mouse into the popover
     closeTimerRef.current = setTimeout(() => {
-      // Use Ref to get the latest value, avoiding stale closure
       if (!isPopoverHoveredRef.current) {
         setShowPreview(false);
       }
     }, 100);
+  };
+
+  const handleTouchStart = () => {
+    // Disabled on mobile as requested
+  };
+
+  const handleTouchEnd = () => {
+    // Disabled on mobile as requested
   };
 
   const handlePopoverEnter = () => {
@@ -85,9 +96,7 @@ export function GlanceTrigger({ article, children, className }: GlanceTriggerPro
 
   const handlePopoverLeave = () => {
     setIsPopoverHovered(false);
-    // Soft exit from popover to allow moving back to trigger
     closeTimerRef.current = setTimeout(() => {
-      // Use Ref to get latest state
       if (!isHoveringRef.current) {
         setShowPreview(false);
       }
@@ -100,6 +109,8 @@ export function GlanceTrigger({ article, children, className }: GlanceTriggerPro
       className={cn("relative group/glance", className)}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
     >
       {children}
 
@@ -110,6 +121,7 @@ export function GlanceTrigger({ article, children, className }: GlanceTriggerPro
             data={previewData} 
             isLoading={isLoading} 
             coords={coords}
+            isTouch={isTouch}
             onMouseEnter={handlePopoverEnter}
             onMouseLeave={handlePopoverLeave}
           />
@@ -124,6 +136,7 @@ function GlancePopover({
   data, 
   isLoading, 
   coords,
+  isTouch,
   onMouseEnter,
   onMouseLeave
 }: { 
@@ -131,11 +144,26 @@ function GlancePopover({
   data: ArticlePreview | null; 
   isLoading: boolean;
   coords: { x: number; y: number };
+  isTouch?: boolean;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 }) {
   const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const checkMobile = () => {
+      const isSmallScreen = window.innerWidth < 2000;
+      const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      setIsMobileDevice(isSmallScreen || isMobileUA);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  if (!mounted || isMobileDevice) return null;
 
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -150,15 +178,26 @@ function GlancePopover({
     });
   };
 
-  const POPOVER_WIDTH = 520;
-  const POPOVER_HEIGHT = 480; // Approximate max height
-  const isTooLeft = coords.x < window.innerWidth / 2;
-  
-  // Calculate final coordinates to keep popover in viewport
-  let finalX = isTooLeft ? coords.x + 30 : coords.x - POPOVER_WIDTH - 30;
-  let finalY = coords.y - 120; // Offset slightly up from cursor
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
-  // Boundary clamping for vertical
+  const isMobile = windowWidth < 640;
+  const POPOVER_WIDTH = isMobile ? Math.min(windowWidth - 32, 400) : 520;
+  const POPOVER_HEIGHT = 480; 
+  
+  const isTooLeft = coords.x < windowWidth / 2;
+  
+  // Mobile: Center, Desktop: Side-placed
+  let finalX = isMobile 
+    ? (windowWidth - POPOVER_WIDTH) / 2 
+    : (isTooLeft ? coords.x + 30 : coords.x - POPOVER_WIDTH - 30);
+    
+  let finalY = isMobile ? coords.y - 300 : coords.y - 120; 
+
   if (finalY < 20) finalY = 20;
   if (typeof window !== 'undefined' && finalY + POPOVER_HEIGHT > window.innerHeight) {
     finalY = Math.max(20, window.innerHeight - POPOVER_HEIGHT - 20);
@@ -168,20 +207,24 @@ function GlancePopover({
     <motion.div
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      initial={{ opacity: 1, scale: 0.9, x: isTooLeft ? -20 : 20 }}
-      animate={{ opacity: 1, scale: 1, x: 0 }}
-      exit={{ opacity: 0, scale: 0.9, x: isTooLeft ? -20 : 20 }}
+      initial={{ opacity: 0, scale: 0.9, y: isMobile ? 20 : 0, x: isMobile ? 0 : (isTooLeft ? -20 : 20) }}
+      animate={{ opacity: 1, scale: 1, y: 0, x: 0 }}
+      exit={{ opacity: 0, scale: 0.9, y: isMobile ? 20 : 0 }}
       transition={{ type: "spring", damping: 25, stiffness: 300 }}
       style={{ 
         left: finalX, 
         top: finalY,
-        transformOrigin: isTooLeft ? 'left center' : 'right center'
+        transformOrigin: isMobile ? 'bottom center' : (isTooLeft ? 'left center' : 'right center')
       }}
       className={cn(
-        "fixed z-[10000] w-[520px] pointer-events-auto"
+        "fixed z-[10000] pointer-events-auto",
+        isMobile ? "w-screen px-4 left-0" : ""
       )}
+      onClick={(e) => isTouch && e.stopPropagation()}
     >
-      <div className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-3xl border border-zinc-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_128px_-16px_rgba(0,0,0,0.3)] overflow-hidden ring-1 ring-black/5 dark:ring-white/5 group/popover">
+      <div 
+        style={{ width: isMobile ? '100%' : POPOVER_WIDTH }}
+        className="bg-white/80 dark:bg-slate-900/90 backdrop-blur-3xl border border-zinc-200 dark:border-white/10 rounded-[32px] shadow-[0_32px_128px_-16px_rgba(0,0,0,0.3)] overflow-hidden ring-1 ring-black/5 dark:ring-white/5 group/popover">
         
         {/* Dynamic Hero Section */}
         <div className="h-48 relative overflow-hidden">

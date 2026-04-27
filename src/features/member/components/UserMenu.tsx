@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useTransition } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useSession } from "next-auth/react";
@@ -14,12 +15,16 @@ export default function UserMenu() {
   const { theme, setTheme } = useTheme();
   const { data: session } = useSession();
   const menuRef = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     const handleClickOutside = (e: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+      const isOutsideButton = menuRef.current && !menuRef.current.contains(e.target as Node);
+      const isOutsideDropdown = dropdownRef.current && !dropdownRef.current.contains(e.target as Node);
+      
+      if (isOutsideButton && isOutsideDropdown) {
         setIsOpen(false);
       }
     };
@@ -78,8 +83,11 @@ export default function UserMenu() {
         <Avatar src={user?.image} name={user?.name} size={40} className="border-2 border-primary/30 shadow-sm transition-transform group-hover:scale-105" />
       </button>
 
-      {isOpen && (
-        <div className="absolute right-0 mt-3 w-56 origin-top-right bg-white dark:bg-slate-900 border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[60] py-2 overflow-hidden animate-in fade-in zoom-in duration-200">
+      {isOpen && mounted && createPortal(
+        <div 
+          ref={dropdownRef}
+          className="fixed right-4 top-16 w-56 origin-top-right border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[99999] py-2 overflow-hidden animate-in fade-in zoom-in duration-200 ks-force-opaque"
+        >
           <div className="px-4 py-3 border-b border-zinc-200 dark:border-white/5">
             <p className="text-sm font-bold text-primary truncate">{user?.name}</p>
             <p className="text-xs text-zinc-500 dark:text-slate-400 truncate">{user?.email}</p>
@@ -135,7 +143,8 @@ export default function UserMenu() {
               {isPending ? 'Đang đăng xuất...' : 'Đăng xuất'}
             </button>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

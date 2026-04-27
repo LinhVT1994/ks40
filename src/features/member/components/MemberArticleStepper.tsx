@@ -115,17 +115,16 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
         }
         setSavingStatus('saved');
 
-        // Restore scroll across the next two animation frames so it survives
-        // both React's commit and any deferred layout effects from the
-        // implicit router.refresh.
+        // Restore scroll across multiple frames to ensure it sticks during revalidation
         if (scrollEl && savedScrollTop > 0) {
-          requestAnimationFrame(() => {
-            requestAnimationFrame(() => {
-              if (scrollEl.scrollTop !== savedScrollTop) {
-                scrollEl.scrollTop = savedScrollTop;
-              }
-            });
-          });
+          const restore = () => {
+            if (scrollEl.scrollTop !== savedScrollTop) {
+              scrollEl.scrollTop = savedScrollTop;
+            }
+          };
+          requestAnimationFrame(restore);
+          setTimeout(restore, 0);
+          setTimeout(restore, 50); // Fallback for slower RSC patches
         }
 
         // Reset to idle after a show period
@@ -299,8 +298,8 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
       )}
 
       {/* Main Content Area */}
-      <div ref={scrollContainerRef} className={`flex-1 ${step !== 1 ? 'overflow-hidden' : 'overflow-y-auto'}`}>
-        <div className={`${step !== 1 ? 'w-full h-full flex flex-col' : 'max-w-4xl mx-auto py-12 px-6'}`}>
+      <div ref={scrollContainerRef} className={`flex-1 ${step !== 1 ? 'overflow-hidden' : 'overflow-y-auto scroll-smooth'}`}>
+        <div className={`${step !== 1 ? 'w-full h-full flex flex-col' : 'max-w-4xl mx-auto py-12 px-4 md:px-12'}`}>
           {/* Rejection Feedback Banner - Only show in Step 1 */}
           {step === 1 && editArticle?.status === 'REJECTED' && editArticle?.rejectionReason && (
             <div className="mb-8 p-6 bg-rose-50 dark:bg-rose-500/5 border border-rose-100 dark:border-rose-500/10 rounded-3xl animate-in fade-in slide-in-from-top-4 duration-500">

@@ -195,7 +195,6 @@ export default function ArticleContent({
       {/* Content — markdown */}
       {!isGated ? (
         <div className="relative">
-          <div className="text-[10px] text-zinc-400 absolute -top-6 right-0">Debug: {content.length} chars | {Date.now()}</div>
           <MarkdownViewer content={content} />
         </div>
       ) : (

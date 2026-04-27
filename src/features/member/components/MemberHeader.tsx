@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
 import { Search, X } from 'lucide-react';
+import AnnouncementBanner from '@/components/AnnouncementBanner';
+import type { SiteAnnouncement } from '@/features/admin/actions/config';
 import UserMenu from './UserMenu';
 import HeaderSearch from './HeaderSearch';
 import NotificationBell from '@/features/notifications/components/NotificationBell';
@@ -12,17 +14,37 @@ import EyeTracker from '@/components/shared/EyeTracker';
 
 import { usePathname } from 'next/navigation';
 
-export default function MemberHeader() {
+export default function MemberHeader({ announcement }: { announcement?: SiteAnnouncement | null }) {
   const { data: session } = useSession();
   const isLoggedIn = !!session?.user;
   const pathname = usePathname();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollYRef = useRef(0);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      const currentScrollY = window.scrollY;
+      const isMobile = window.innerWidth < 768;
+      
+      // Background change threshold
+      setIsScrolled(currentScrollY > 20);
+
+      // Hide/Show logic (Mobile only)
+      if (isMobile) {
+        if (currentScrollY > lastScrollYRef.current && currentScrollY > 50) {
+          setIsVisible(false);
+        } else if (currentScrollY < lastScrollYRef.current) {
+          setIsVisible(true);
+        }
+      } else {
+        setIsVisible(true);
+      }
+      
+      lastScrollYRef.current = currentScrollY;
     };
+    
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -34,11 +56,17 @@ export default function MemberHeader() {
   }
 
   return (
-    <>
-      <header className={`sticky top-0 z-50 w-full transition-[background-color,border-color] duration-300 ${
+    <div 
+      style={{ zIndex: 50000 }}
+      className={`fixed top-0 left-0 right-0 w-full transition-transform duration-300 bg-white md:bg-transparent dark:bg-slate-950 md:dark:bg-transparent ${
+        isVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}
+    >
+      {announcement && <AnnouncementBanner announcement={announcement} />}
+      <header className={`w-full transition-[background-color,border-color] duration-500 ${
         isScrolled
-          ? 'bg-white/80 dark:bg-slate-950/60 backdrop-blur-sm md:backdrop-blur-md border-b border-zinc-200 dark:border-white/5 shadow-sm'
-          : 'bg-transparent border-transparent'
+          ? 'bg-white md:bg-white/80 dark:bg-slate-950 md:dark:bg-slate-950/60 md:backdrop-blur-md border-b border-zinc-200 dark:border-white/5 shadow-lg md:shadow-sm'
+          : 'bg-white md:bg-transparent dark:bg-slate-950 md:dark:bg-transparent border-b border-transparent'
       }`}>
         <div className="max-w-[1600px] mx-auto w-full flex items-center justify-between py-3 px-4 md:px-8 gap-3">
           {/* Logo */}
@@ -59,7 +87,7 @@ export default function MemberHeader() {
             </Link>
             
             {/* Desktop Navigation */}
-            <nav data-focus-hide className="hidden lg:flex items-center gap-8 ml-10">
+            <nav className="hidden lg:flex items-center gap-8 ml-10">
               <Link
                 href={isLoggedIn ? "/" : "/explore"}
                 className="text-sm font-bold text-zinc-600 dark:text-slate-400 hover:text-primary transition-colors flex items-center gap-2 group/nav"
@@ -78,12 +106,12 @@ export default function MemberHeader() {
           </div>
 
           {/* Search — ẩn trên mobile, hiện từ md */}
-          <div data-focus-hide className="hidden md:flex flex-1 justify-center">
+          <div className="hidden md:flex flex-1 justify-center">
             <HeaderSearch />
           </div>
 
           {/* Right actions */}
-          <div data-focus-hide className="flex items-center gap-1 shrink-0">
+          <div className="flex items-center gap-1 shrink-0">
             {/* Search icon — chỉ hiện trên mobile */}
             <button
               className="md:hidden p-2 rounded-full text-zinc-500 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
@@ -103,7 +131,7 @@ export default function MemberHeader() {
           </div>
         )}
       </header>
-    </>
+    </div>
   );
 }
 

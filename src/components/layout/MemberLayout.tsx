@@ -1,7 +1,6 @@
 import * as React from "react";
 import MemberHeader from "@/features/member/components/MemberHeader";
 import MemberFooter from "@/features/member/components/MemberFooter";
-import AnnouncementBanner from "@/components/AnnouncementBanner";
 import CodeThemeSync from "@/components/shared/CodeThemeSync";
 import { getAnnouncementAction } from "@/features/admin/actions/config";
 import { auth } from "@/auth";
@@ -25,13 +24,12 @@ export default async function MemberLayout({
   }
 
   return (
-    <div className="flex bg-background-light dark:bg-background-dark font-display text-zinc-800 dark:text-slate-100 min-h-screen relative">
+    <div className="flex flex-col bg-background-light dark:bg-background-dark font-display text-zinc-800 dark:text-slate-100 min-h-screen relative">
       <CodeThemeSync codeTheme={codeTheme} />
 
-      <main className="flex-1 flex flex-col relative z-10 w-full">
-        {announcement && <AnnouncementBanner announcement={announcement} />}
-        <MemberHeader />
+      <MemberHeader announcement={announcement} />
 
+      <main className="flex-1 flex flex-col relative z-10 w-full pt-16">
         {/* Main Content Dashboard */}
         <div data-focus-container className="w-full flex-1">
           {children}

@@ -35,9 +35,9 @@ const HEX_TO_NAME: Record<string, string> = {
 };
 const NAME_TO_HEX: Record<string, string> = {
   yellow: '#fef08a',
-  green:  '#bbf7d0',
-  blue:   '#bfdbfe',
-  pink:   '#fbcfe8',
+  green: '#bbf7d0',
+  blue: '#bfdbfe',
+  pink: '#fbcfe8',
 };
 
 function colorToHex(color: string): string {
@@ -53,11 +53,6 @@ function getBlockElements(container: Element): Element[] {
   // Use the explicit data attribute for 100% stability across renders
   return Array.from(container.querySelectorAll('[data-annotation-target]'));
 }
-
-
-
-
-
 
 
 function captureSelectionPosition(
@@ -103,8 +98,8 @@ function createMarkElement(
   } else {
     mark.className = `ks-highlight${annotation.note ? ' ks-highlight-note' : ''}`;
   }
-  mark.dataset.color = annotation.color || 'yellow';
   mark.dataset.annotationId = annotation.id;
+  mark.dataset.color = annotation.color || 'yellow';
   if (annotation.note) mark.dataset.note = annotation.note;
   return mark;
 }
@@ -211,7 +206,8 @@ function applyHighlightToDOM(
       let bestCandidate: { block: Element; index: number; offset: number } | null = null;
       let minDistance = Infinity;
 
-      blocks.forEach((candidate, idx) => {
+      let idx = 0;
+      for (const candidate of blocks) {
         const text = candidate.textContent || '';
         const offset = text.indexOf(needle);
         if (offset !== -1) {
@@ -221,14 +217,15 @@ function applyHighlightToDOM(
             bestCandidate = { block: candidate, index: idx, offset };
           }
         }
-      });
+        idx++;
+      }
 
       if (bestCandidate) {
         located = locateOffsetsInBlock(bestCandidate.block, bestCandidate.offset, bestCandidate.offset + needle.length);
         if (located) {
-          console.debug('[hl] recovered via selectedText search', annotation.id, { 
-            originalIndex: annotation.paragraphIndex, 
-            newIndex: bestCandidate.index 
+          console.debug('[hl] recovered via selectedText search', annotation.id, {
+            originalIndex: annotation.paragraphIndex,
+            newIndex: bestCandidate.index
           });
         }
       }
@@ -303,9 +300,18 @@ export default function ArticleAnnotationLayer({
   const containerRef = useRef<HTMLDivElement>(null);
   // Never mix public annotations into personal state — they are rendered separately
   const [annotations, setAnnotations] = useState<ArticleAnnotation[]>(
-    initialAnnotations.filter(a => !a.isPublic)
+    (initialAnnotations || []).filter(a => !a.isPublic)
   );
-  const [publicAnnotations, setPublicAnnotations] = useState<ArticleAnnotation[]>(initialAuthorAnnotations);
+  const [publicAnnotations, setPublicAnnotations] = useState<ArticleAnnotation[]>(initialAuthorAnnotations || []);
+
+  // Synchronize state with props when articleId changes (crucial for navigation)
+  useEffect(() => {
+    setAnnotations((initialAnnotations || []).filter(a => !a.isPublic));
+    setPublicAnnotations(initialAuthorAnnotations || []);
+    setActivePopover(null);
+    setPendingSelection(null);
+    setPendingPublicSelection(null);
+  }, [articleId, initialAnnotations, initialAuthorAnnotations]);
   const [pendingSelection, setPendingSelection] = useState<{
     text: string;
     range: Range;
@@ -376,7 +382,7 @@ export default function ArticleAnnotationLayer({
     }
     setAnnotations(prev => prev.filter(a => a.id !== id));
     setPublicAnnotations(prev => prev.filter(a => a.id !== id));
-    try { await deleteAnnotationAction(id); } catch {}
+    try { await deleteAnnotationAction(id); } catch { }
   }, []);
 
   const handleNoteClickFromDOM = useCallback((id: string, rect: DOMRect, isAuthorNote = false) => {
@@ -408,7 +414,7 @@ export default function ArticleAnnotationLayer({
         applyHighlightToDOM(ann, container, true);
       }
     }
-  }, [annotations, publicAnnotations]);
+  }, [articleId, annotations, publicAnnotations]);
 
 
   // Unified Interaction Handler (Event Delegation)
@@ -576,7 +582,7 @@ export default function ArticleAnnotationLayer({
         color: colorId,
         isPublic: true,
       }).then(saved => {
-        marks.forEach(m => { 
+        marks.forEach(m => {
           m.dataset.annotationId = saved.id;
           m.dataset.color = colorId;
         });
@@ -678,7 +684,7 @@ export default function ArticleAnnotationLayer({
         el.dataset.annotationId = saved.id;
         el.dataset.note = noteContent;
       });
-      
+
       if (isPublicSelected) {
         setPublicAnnotations(prev => [...prev, saved]);
       } else {
@@ -716,14 +722,15 @@ export default function ArticleAnnotationLayer({
     const id = el.dataset.annotationId!;
     removeMarkFromDOM(el);
     setAnnotations(prev => prev.filter(a => a.id !== id));
-    try { await deleteAnnotationAction(id); } catch {}
+    setPublicAnnotations(prev => prev.filter(a => a.id !== id));
+    try { await deleteAnnotationAction(id); } catch { }
   }, []);
 
   const handleUpdateNote = useCallback(async (id: string, note: string, isPublicUpdate: boolean) => {
     try {
       const updated = await updateAnnotationAction(id, { note, isPublic: isPublicUpdate });
       const wasPublic = publicAnnotations.some(a => a.id === id);
-      
+
       if (wasPublic && !isPublicUpdate) {
         // Moved from public to private
         setPublicAnnotations(prev => prev.filter(a => a.id !== id));
@@ -752,15 +759,15 @@ export default function ArticleAnnotationLayer({
           }
         }
       }
-    } catch {}
+    } catch { }
     setActivePopover(null);
     setIsEditingExistingNote(false);
-  }, [publicAnnotations]);
+  }, [publicAnnotations, annotations]);
 
   const activeAnnotation = activePopover
     ? (activePopover.isAuthorNote
-        ? publicAnnotations.find(a => a.id === activePopover.annotationId)
-        : annotations.find(a => a.id === activePopover.annotationId))
+      ? publicAnnotations.find(a => a.id === activePopover.annotationId)
+      : annotations.find(a => a.id === activePopover.annotationId))
     : null;
 
   const memoizedChildren = useMemo(() => children, [articleId]);
@@ -786,7 +793,7 @@ export default function ArticleAnnotationLayer({
           isVisible={!!hoveredHighlight}
           element={hoveredHighlight.element}
           rect={hoveredHighlight.rect}
-          hideColors={hoveredHighlight.isAuthorMark}
+          hideColors={hoveredHighlight.isAuthorMark && !isAuthor}
           onDelete={() => handleDeleteFromDOM(hoveredHighlight.id, hoveredHighlight.element)}
           onMouseEnter={() => {
             isHoveringRef.current = true;
@@ -802,10 +809,15 @@ export default function ArticleAnnotationLayer({
           onChangeColor={async (colorId) => {
             try {
               const updated = await updateAnnotationAction(hoveredHighlight.id, { color: colorId });
-              setAnnotations(prev => prev.map(a => a.id === hoveredHighlight.id ? updated : a));
+              const isPublicAnn = publicAnnotations.some(a => a.id === hoveredHighlight.id);
+              if (isPublicAnn) {
+                setPublicAnnotations(prev => prev.map(a => a.id === hoveredHighlight.id ? updated : a));
+              } else {
+                setAnnotations(prev => prev.map(a => a.id === hoveredHighlight.id ? updated : a));
+              }
               const container = containerRef.current?.querySelector(CONTENT_SELECTOR) ?? containerRef.current;
               if (container) {
-                const segments = container.querySelectorAll(`mark.ks-highlight[data-annotation-id="${hoveredHighlight.id}"]`);
+                const segments = container.querySelectorAll(`mark[data-annotation-id="${hoveredHighlight.id}"]`);
                 segments.forEach(s => {
                   (s as HTMLElement).dataset.color = colorId;
                   (s as HTMLElement).style.backgroundColor = '';
@@ -890,28 +902,25 @@ export default function ArticleAnnotationLayer({
             }}
           >
             <div className="relative group">
-              <div className={`relative bg-white dark:bg-[#0f172a] px-4 py-3 rounded-xl shadow-lg border max-w-[260px] ${
-                hoveredNote.isAuthorNote
-                  ? 'border-violet-300 dark:border-violet-500/50'
-                  : 'border-zinc-200 dark:border-white/10'
-              }`}>
+              <div className={`relative bg-white dark:bg-[#0f172a] px-4 py-3 rounded-xl shadow-lg border max-w-[260px] ${hoveredNote.isAuthorNote
+                ? 'border-violet-300 dark:border-violet-500/50'
+                : 'border-zinc-200 dark:border-white/10'
+                }`}>
                 <p className="text-[13px] leading-relaxed text-slate-700 dark:text-slate-200 font-medium line-clamp-5">
                   {hoveredNote.content}
                 </p>
 
-                <div className={`mt-2 flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.15em] ${
-                  hoveredNote.isAuthorNote ? 'text-violet-500' : 'text-blue-500/80'
-                }`}>
+                <div className={`mt-2 flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.15em] ${hoveredNote.isAuthorNote ? 'text-violet-500' : 'text-blue-500/80'
+                  }`}>
                   <div className="w-1 h-1 rounded-full bg-current" />
                   <span>{hoveredNote.isAuthorNote ? 'Ghi chú của tác giả' : 'Ghi chú'}</span>
                 </div>
               </div>
 
-              <div className={`absolute left-1/2 -bottom-1 -translate-x-1/2 w-2 h-2 bg-white dark:bg-[#0f172a] rotate-45 border-r border-b ${
-                hoveredNote.isAuthorNote
-                  ? 'border-violet-300 dark:border-violet-500/50'
-                  : 'border-zinc-200 dark:border-white/10'
-              }`} />
+              <div className={`absolute left-1/2 -bottom-1 -translate-x-1/2 w-2 h-2 bg-white dark:bg-[#0f172a] rotate-45 border-r border-b ${hoveredNote.isAuthorNote
+                ? 'border-violet-300 dark:border-violet-500/50'
+                : 'border-zinc-200 dark:border-white/10'
+                }`} />
             </div>
           </motion.div>
         )}

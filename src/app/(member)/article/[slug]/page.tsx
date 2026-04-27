@@ -200,7 +200,7 @@ export default async function ArticleDetailPage({ params }: Props) {
         initialIsFollowing={authorInfo?.isFollowing ?? false}
         initialFollowerCount={authorInfo?.followerCount ?? 0}
       >
-        <div data-focus-wrapper className="relative max-w-[820px] 2xl:max-w-[960px] mx-auto">
+        <div data-focus-wrapper className="relative w-full max-w-[820px] 2xl:max-w-[960px] mx-auto min-w-0 overflow-hidden md:overflow-visible">
           {/* Desktop Hanging Sidebars (Left: TOC, Right: Interaction) */}
           {!isGated && (
             <>

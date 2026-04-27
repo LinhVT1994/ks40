@@ -54,7 +54,7 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
             {article.title}
           </h1>
 
-          <div className="flex flex-wrap items-center gap-x-10 gap-y-6 text-zinc-500 dark:text-slate-500 text-sm animate-in fade-in duration-500 delay-75">
+          <div className="flex flex-wrap items-center gap-x-6 md:gap-x-10 gap-y-6 text-zinc-500 dark:text-slate-500 text-sm animate-in fade-in duration-500 delay-75">
             <Link href={`/profile/${article.author.username || article.authorId}`} className="flex items-center gap-3.5 hover:text-primary transition-colors group/author">
               <div className="relative">
                 <Avatar src={article.author.image} name={article.author.name} size={44} />

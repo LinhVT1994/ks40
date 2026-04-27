@@ -353,7 +353,6 @@ export default function MemberStep2({
 
             <div className="flex justify-between items-center px-4 py-2 bg-zinc-100 dark:bg-white/5 border-b border-zinc-200 dark:border-white/5 text-[10px] text-zinc-500 uppercase font-black tracking-widest">
               <span>Editor</span>
-              <span>Len: {content.length} | {Date.now()}</span>
             </div>
             <textarea
               ref={textareaRef}
