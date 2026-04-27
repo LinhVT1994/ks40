@@ -104,7 +104,7 @@ export default function ProductivityHub() {
 
   return (
     <div 
-      className="fixed bottom-8 right-8 z-[9999]" 
+      className="fixed bottom-8 right-8 z-[100]" 
       ref={hubRef}
     >
       {/* Categorized Compact Panel */}

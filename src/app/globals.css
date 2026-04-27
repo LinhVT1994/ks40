@@ -257,23 +257,26 @@ html.focus-mode [data-focus-prose] {
 }
 
 /* Map data-color attributes to RGB variables for highlights */
-.ks-highlight[data-color="yellow"] { --hl-color: 254, 240, 138; } /* Yellow 200 */
-.ks-highlight[data-color="green"]  { --hl-color: 187, 247, 208; } /* Green 200 */
-.ks-highlight[data-color="blue"]   { --hl-color: 191, 219, 254; } /* Blue 200 */
-.ks-highlight[data-color="pink"]   { --hl-color: 251, 207, 232; } /* Pink 200 */
+.ks-highlight[data-color="yellow"] { --hl-color: 254, 240, 138; --hl-border: 202, 138, 4; }
+.ks-highlight[data-color="green"]  { --hl-color: 187, 247, 208; --hl-border: 22, 163, 74; }
+.ks-highlight[data-color="blue"]   { --hl-color: 191, 219, 254; --hl-border: 37, 99, 235; }
+.ks-highlight[data-color="pink"]   { --hl-color: 251, 207, 232; --hl-border: 219, 39, 119; }
 
 /* Styles for highlights that have notes attached */
+.ks-highlight.ks-highlight-note,
 .ks-highlight-note {
-  background-color: rgba(var(--hl-color), 0.05) !important;
-  border-bottom: 1.5px solid rgba(var(--hl-color), 0.8) !important;
+  background-color: transparent !important;
+  border-bottom: 1.5px solid rgba(var(--hl-border, var(--hl-color)), 0.8) !important;
+  text-decoration: none !important;
   border-radius: 0 !important;
   padding-bottom: 0 !important;
 }
 
+.dark .ks-highlight.ks-highlight-note,
 .dark .ks-highlight-note {
-  background-color: rgba(var(--hl-color), 0.1) !important;
-  border-bottom: 1.5px solid rgba(var(--hl-color), 0.9) !important;
-  color: #f8fafc !important;
+  background-color: transparent !important;
+  border-bottom: 1.5px solid rgba(var(--hl-color), 0.7) !important;
+  color: inherit !important;
 }
 
 @keyframes ks-highlight-pulse {
@@ -325,6 +328,35 @@ html.focus-mode [data-focus-prose] {
 .ks-highlight:hover {
   background-color: rgba(var(--hl-color), 0.65);
 }
+
+/* KS Note Card — sidebar list cards.
+   Light mode: pure white background with subtle border (accent strip handles color).
+   Dark mode: tinted to mirror the in-article highlight palette. */
+.ks-note-card {
+  background-color: #ffffff;
+  border-color: rgba(24, 24, 27, 0.08);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  transition: all 0.3s ease;
+}
+.ks-note-card:hover {
+  border-color: rgba(24, 24, 27, 0.15);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+}
+
+.dark .ks-note-card {
+  --hl-color: 113, 113, 122;
+  background-color: rgba(var(--hl-color), 0.04);
+  border-color: rgba(var(--hl-color), 0.18);
+}
+.dark .ks-note-card:hover {
+  background-color: rgba(var(--hl-color), 0.08);
+  border-color: rgba(var(--hl-color), 0.35);
+}
+
+.dark .ks-note-card[data-color="yellow"] { --hl-color: 253, 224, 71;  }
+.dark .ks-note-card[data-color="blue"]   { --hl-color: 147, 197, 253; }
+.dark .ks-note-card[data-color="green"]  { --hl-color: 134, 239, 172; }
+.dark .ks-note-card[data-color="pink"]   { --hl-color: 249, 168, 212; }
 
 .focus-toc-line {
   display: block;
@@ -595,19 +627,7 @@ pre span {
   white-space: normal !important;
 }
 
-/* Inline Annotations (Tooltip Triggers) */
-.ks-highlight-note {
-  background-color: transparent !important;
-  text-decoration: underline;
-  text-decoration-style: dashed;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
-  text-decoration-color: rgba(var(--hl-color), 0.9);
-}
-
-.dark .ks-highlight-note {
-  text-decoration-color: rgba(var(--hl-color), 0.7);
-}
+/* Consolidated Note Styles moved to top section */
 
 .ks-highlight-note:hover {
   background-color: rgba(var(--hl-color), 0.15) !important;
@@ -630,10 +650,10 @@ pre span {
   -webkit-box-decoration-break: clone !important;
 }
 
-.ks-author-highlight[data-color="yellow"] { --hl-color: 254, 240, 138; }
-.ks-author-highlight[data-color="blue"]   { --hl-color: 191, 219, 254; }
-.ks-author-highlight[data-color="green"]  { --hl-color: 187, 247, 208; }
-.ks-author-highlight[data-color="pink"]   { --hl-color: 251, 207, 232; }
+.ks-author-highlight[data-color="yellow"] { --hl-color: 254, 240, 138; --hl-border: 202, 138, 4; }
+.ks-author-highlight[data-color="blue"]   { --hl-color: 191, 219, 254; --hl-border: 37, 99, 235; }
+.ks-author-highlight[data-color="green"]  { --hl-color: 187, 247, 208; --hl-border: 22, 163, 74; }
+.ks-author-highlight[data-color="pink"]   { --hl-color: 251, 207, 232; --hl-border: 219, 39, 119; }
 
 .ks-author-highlight:hover {
   background-color: rgba(139, 92, 246, 0.28);
@@ -654,16 +674,18 @@ pre span {
   background-color: rgba(167, 139, 250, 0.25);
 }
 
+.ks-author-highlight.ks-author-note,
 .ks-author-note {
   background-color: transparent !important;
-  border-bottom: 1.5px solid rgba(var(--hl-color), 0.8) !important;
+  border-bottom: 1.5px solid rgba(var(--hl-border, var(--hl-color)), 1) !important;
   border-radius: 0 !important;
   padding-bottom: 0 !important;
 }
 
+.dark .ks-author-highlight.ks-author-note,
 .dark .ks-author-note {
   background-color: transparent !important;
-  border-bottom: 1.5px solid rgba(var(--hl-color), 0.9) !important;
+  border-bottom: 1.5px solid rgba(var(--hl-color), 0.8) !important;
 }
 
 .ks-author-note:hover {
@@ -915,26 +937,45 @@ blockquote:hover div:last-child::after {
 
 
 /* Compact Prose for Notes */
+.prose-compact {
+  font-family: var(--font-sans), system-ui, -apple-system, sans-serif !important;
+}
 .prose-compact p {
-  margin-top: 0.5em !important;
-  margin-bottom: 0.5em !important;
-  line-height: 1.5 !important;
+  margin-top: 0.1em !important;
+  margin-bottom: 0.1em !important;
+  line-height: 1.4 !important;
 }
 .prose-compact ul, .prose-compact ol {
-  margin-top: 0.5em !important;
-  margin-bottom: 0.5em !important;
+  margin-top: 0.1em !important;
+  margin-bottom: 0.1em !important;
+  padding-left: 1.1em !important;
+}
+.prose-compact p + ul, .prose-compact p + ol {
+  margin-top: 0 !important;
 }
 .prose-compact li {
-  margin-top: 0.25em !important;
-  margin-bottom: 0.25em !important;
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 .prose-compact h1, .prose-compact h2, .prose-compact h3 {
-  margin-top: 1em !important;
-  margin-bottom: 0.5em !important;
+  margin-top: 0.4em !important;
+  margin-bottom: 0.15em !important;
 }
 .prose-compact blockquote {
+  margin-top: 0.5em !important;
+  margin-bottom: 0.5em !important;
+  padding-top: 0.15em !important;
+  padding-bottom: 0.15em !important;
+}
+.prose-compact hr {
   margin-top: 0.75em !important;
   margin-bottom: 0.75em !important;
-  padding-top: 0.25em !important;
-  padding-bottom: 0.25em !important;
+}
+.prose-compact a {
+  text-decoration: underline !important;
+  text-underline-offset: 2px !important;
+  color: #3b82f6 !important;
+}
+.dark .prose-compact a {
+  color: #60a5fa !important;
 }

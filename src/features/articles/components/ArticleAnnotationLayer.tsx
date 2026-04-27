@@ -205,26 +205,41 @@ function applyHighlightToDOM(
   // 2. Fallback: positional index is stale (block list changed since save).
   //    Locate the annotation by its stored selectedText across all blocks.
   if (!located && annotation.selectedText) {
-    const needle = annotation.selectedText;
-    for (const candidate of blocks) {
-      const text = candidate.textContent || '';
-      const idx = text.indexOf(needle);
-      if (idx !== -1) {
-        located = locateOffsetsInBlock(candidate, idx, idx + needle.length);
+    const needle = annotation.selectedText.trim();
+    if (needle.length > 0) {
+      // Search all blocks for the needle
+      let bestCandidate: { block: Element; index: number; offset: number } | null = null;
+      let minDistance = Infinity;
+
+      blocks.forEach((candidate, idx) => {
+        const text = candidate.textContent || '';
+        const offset = text.indexOf(needle);
+        if (offset !== -1) {
+          const distance = Math.abs(idx - annotation.paragraphIndex);
+          if (distance < minDistance) {
+            minDistance = distance;
+            bestCandidate = { block: candidate, index: idx, offset };
+          }
+        }
+      });
+
+      if (bestCandidate) {
+        located = locateOffsetsInBlock(bestCandidate.block, bestCandidate.offset, bestCandidate.offset + needle.length);
         if (located) {
-          console.debug('[hl] recovered via selectedText', annotation.id, { newBlock: candidate.tagName });
-          break;
+          console.debug('[hl] recovered via selectedText search', annotation.id, { 
+            originalIndex: annotation.paragraphIndex, 
+            newIndex: bestCandidate.index 
+          });
         }
       }
     }
   }
 
   if (!located) {
-    console.error('[hl] FAILED to locate annotation:', annotation.id, {
+    console.warn('[hl] SKIPPING annotation - could not locate text in DOM:', annotation.id, {
       paragraphIndex: annotation.paragraphIndex,
       blocksCount: blocks.length,
       selectedText: annotation.selectedText?.slice(0, 50),
-      reason: annotation.paragraphIndex >= blocks.length ? 'Index out of bounds' : 'Offsets not found in block'
     });
     return;
   }

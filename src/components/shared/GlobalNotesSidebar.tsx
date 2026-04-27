@@ -2,12 +2,15 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, FileEdit, Trash2, Search, BookOpen, ChevronLeft, ChevronDown, Pencil, StickyNote, Highlighter, SearchX, ExternalLink, Plus, CheckSquare, Square, Check } from 'lucide-react';
+import { X, FileEdit, Trash2, Search, BookOpen, ChevronLeft, ChevronDown, Pencil, StickyNote, Highlighter, SearchX, ExternalLink, Plus, CheckSquare, Square, Check, Bold, Italic, List, ListOrdered, Heading as HeadingIcon, Quote as QuoteIcon, Link as LinkIcon, Minus, MousePointer2 } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { vi } from 'date-fns/locale';
 import type { ArticleAnnotation } from '@/features/articles/actions/annotation';
 import { deleteAnnotationAction, deleteBulkAnnotationsAction, getAllUserAnnotationsAction, updateAnnotationAction } from '@/features/articles/actions/annotation';
 import MarkdownViewer from '@/components/shared/MarkdownViewer';
 import { useNotes } from '@/context/NotesContext';
 import { useRouter } from 'next/navigation';
+import { htmlToMarkdown, markdownToHtml } from '@/lib/markdown-editor';
 
 type FilterType = 'Tất cả' | 'Ghi chú' | 'Highlight';
 
@@ -261,18 +264,24 @@ export default function GlobalNotesSidebar() {
       toggleSelected(ann.id);
       return;
     }
-    if (ann.articleId === currentArticleId) {
-      setScrollToNoteId(ann.id);
+    
+    // Nếu là ghi chú tự do (không có selectedText) thì mở xem chi tiết
+    // Nếu là ghi chú inline (có selectedText) thì dẫn về bài viết gốc
+    if (!ann.selectedText) {
+      setSelectedNote(ann);
+    } else {
+      handleNavigateToSource(ann);
     }
-    setSelectedNote(ann);
   };
 
   const handleNavigateToSource = (ann: ArticleAnnotation) => {
-    if (ann.articleId === currentArticleId) {
-      setScrollToNoteId(ann.id);
-    } else if (ann.article?.slug) {
+    if (ann.articleId !== currentArticleId && ann.article?.slug) {
       closeSidebar();
       router.push(`/article/${ann.article.slug}?noteId=${ann.id}`);
+    } else if (ann.articleId === currentArticleId) {
+      setScrollToNoteId(ann.id);
+      // Trên màn hình nhỏ, tự đóng sidebar để người dùng xem bài viết
+      if (window.innerWidth < 1024) closeSidebar();
     }
   };
 
@@ -492,6 +501,10 @@ export default function GlobalNotesSidebar() {
                             isCurrentArticle={ann.articleId === currentArticleId}
                             isSelectMode={isSelectMode}
                             isSelected={selectedIds.has(ann.id)}
+                            onNavigateToSource={(e) => {
+                              e.stopPropagation();
+                              handleNavigateToSource(ann);
+                            }}
                           />
                         ))}
 
@@ -554,6 +567,9 @@ export default function GlobalNotesSidebar() {
                 <NoteDetail 
                   note={selectedNote} 
                   onBack={() => setSelectedNote(null)} 
+                  onUpdate={(updatedNote) => {
+                    setAnnotations(prev => prev.map(ann => ann.id === updatedNote.id ? { ...ann, ...updatedNote } : ann));
+                  }}
                   onDelete={handleDelete}
                   onNavigate={handleNavigateToSource}
                 />
@@ -566,11 +582,12 @@ export default function GlobalNotesSidebar() {
   );
 }
 
+// Background, border, and hover color now live in `.ks-note-card` (globals.css)
+// driven by CSS vars, so the card tint mirrors the in-article highlight palette
+// (yellow highlight ↔ yellow card). The tokens here cover only the bits that
+// stay in Tailwind: text colors, the stripe, and the hover glow.
 type ColorTokens = {
-  bg: string;
-  border: string;
   stripe: string;
-  shadow: string;
   title: string;
   accent: string;
   glow: string;
@@ -578,45 +595,37 @@ type ColorTokens = {
 
 const COLOR_TOKENS: Record<string, ColorTokens> = {
   blue: {
-    bg: 'bg-gradient-to-br from-blue-50/90 to-blue-100/40 dark:from-blue-500/[0.035] dark:to-sky-500/[0.015]',
-    border: 'border-blue-200/60 dark:border-blue-500/10 hover:border-blue-300/50 dark:hover:border-blue-400/20',
-    stripe: 'bg-gradient-to-b from-blue-400 to-sky-400 dark:from-blue-400/70 dark:to-sky-400/70',
-    shadow: 'hover:shadow-blue-200/30 dark:hover:shadow-blue-500/5',
-    title: 'text-blue-900/80 dark:text-slate-300',
-    accent: 'text-blue-600 dark:text-blue-300/80',
-    glow: 'bg-blue-400',
+    stripe: 'bg-blue-500 dark:bg-blue-400',
+    title: 'text-zinc-900 dark:text-slate-100',
+    accent: 'text-blue-600 dark:text-blue-400',
+    glow: 'bg-blue-400 dark:bg-blue-500',
   },
   green: {
-    bg: 'bg-gradient-to-br from-emerald-50/90 to-emerald-100/40 dark:from-emerald-500/[0.035] dark:to-teal-500/[0.015]',
-    border: 'border-emerald-200/60 dark:border-emerald-500/10 hover:border-emerald-300/50 dark:hover:border-emerald-400/20',
-    stripe: 'bg-gradient-to-b from-emerald-400 to-teal-400 dark:from-emerald-400/70 dark:to-teal-400/70',
-    shadow: 'hover:shadow-emerald-200/30 dark:hover:shadow-emerald-500/5',
-    title: 'text-emerald-900/80 dark:text-slate-300',
-    accent: 'text-emerald-600 dark:text-emerald-300/80',
-    glow: 'bg-emerald-400',
+    stripe: 'bg-emerald-500 dark:bg-emerald-400',
+    title: 'text-zinc-900 dark:text-slate-100',
+    accent: 'text-emerald-600 dark:text-emerald-400',
+    glow: 'bg-emerald-400 dark:bg-emerald-500',
   },
   pink: {
-    bg: 'bg-gradient-to-br from-rose-50/90 to-rose-100/40 dark:from-rose-500/[0.035] dark:to-pink-500/[0.015]',
-    border: 'border-rose-200/60 dark:border-rose-500/10 hover:border-rose-300/50 dark:hover:border-rose-400/20',
-    stripe: 'bg-gradient-to-b from-rose-400 to-pink-400 dark:from-rose-400/70 dark:to-pink-400/70',
-    shadow: 'hover:shadow-rose-200/30 dark:hover:shadow-rose-500/5',
-    title: 'text-rose-900/80 dark:text-slate-300',
-    accent: 'text-rose-600 dark:text-rose-300/80',
-    glow: 'bg-rose-400',
+    stripe: 'bg-rose-500 dark:bg-rose-400',
+    title: 'text-zinc-900 dark:text-slate-100',
+    accent: 'text-rose-600 dark:text-rose-400',
+    glow: 'bg-rose-400 dark:bg-rose-500',
   },
   yellow: {
-    bg: 'bg-gradient-to-br from-amber-50/95 to-amber-100/40 dark:from-amber-500/[0.035] dark:to-orange-500/[0.015]',
-    border: 'border-amber-200/60 dark:border-amber-500/10 hover:border-amber-300/50 dark:hover:border-amber-400/20',
-    stripe: 'bg-gradient-to-b from-amber-400 to-orange-400 dark:from-amber-400/70 dark:to-orange-400/70',
-    shadow: 'hover:shadow-amber-200/30 dark:hover:shadow-amber-500/5',
-    title: 'text-amber-900/80 dark:text-slate-300',
-    accent: 'text-amber-700 dark:text-amber-300/80',
-    glow: 'bg-amber-400',
+    stripe: 'bg-amber-500 dark:bg-amber-400',
+    title: 'text-zinc-900 dark:text-slate-100',
+    accent: 'text-amber-600 dark:text-amber-400',
+    glow: 'bg-amber-400 dark:bg-amber-500',
   },
 };
 
+const VALID_COLORS = new Set(Object.keys(COLOR_TOKENS));
+const normalizeColor = (color: string): string =>
+  VALID_COLORS.has(color) ? color : 'yellow';
+
 const getColorTokens = (color: string): ColorTokens =>
-  COLOR_TOKENS[color] ?? COLOR_TOKENS.yellow;
+  COLOR_TOKENS[normalizeColor(color)];
 
 function NoteCard({
   annotation,
@@ -627,6 +636,7 @@ function NoteCard({
   isCurrentArticle,
   isSelectMode,
   isSelected,
+  onNavigateToSource,
 }: {
   annotation: ArticleAnnotation;
   highlightTokens: string[];
@@ -636,6 +646,7 @@ function NoteCard({
   isCurrentArticle: boolean;
   isSelectMode: boolean;
   isSelected: boolean;
+  onNavigateToSource: (e: React.MouseEvent) => void;
 }) {
   const hasNote = !!annotation.note;
   const hasHighlight = !!annotation.selectedText;
@@ -647,12 +658,7 @@ function NoteCard({
       ? 'Ghi chú'
       : 'Highlight';
 
-  const TypeIcon = hasNote ? StickyNote : Highlighter;
-
-  const shortDate = new Date(annotation.createdAt).toLocaleDateString('vi-VN', {
-    day: 'numeric',
-    month: 'short',
-  });
+  const timeAgo = formatDistanceToNow(new Date(annotation.createdAt), { addSuffix: true, locale: vi });
 
   return (
     <motion.div
@@ -661,13 +667,14 @@ function NoteCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, x: -20 }}
       onClick={onClick}
-      className={`group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-[1px] hover:shadow-md ${tokens.bg} ${tokens.shadow} ${
+      data-color={normalizeColor(annotation.color)}
+      className={`group relative rounded-xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-[1px] ${
         isSelectMode && isSelected
-          ? 'border-2 border-primary/60 shadow-md shadow-primary/10 ring-2 ring-primary/20'
+          ? 'border-2 border-primary ring-2 ring-primary/20 bg-primary/[0.04] dark:bg-primary/[0.08]'
           : isCurrentArticle
-            ? 'border border-primary/30 shadow-sm shadow-primary/5 ring-1 ring-primary/5'
-            : `border ${tokens.border}`
-      }`}
+            ? 'ks-note-card border border-primary/40 ring-1 ring-primary/10'
+            : 'ks-note-card border'
+      } hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(0,0,0,0.2)]`}
     >
 
       {/* Soft glow aura on hover */}
@@ -688,47 +695,35 @@ function NoteCard({
         </div>
       )}
 
-      <div className={`relative px-5 py-4 space-y-2.5 ${isSelectMode ? 'pr-12' : ''}`}>
+      <div className={`relative px-5 py-2.5 space-y-0.5 ${isSelectMode ? 'pr-12' : ''}`}>
         {/* Header row: article title + hover actions */}
         <div className="flex items-start justify-between gap-2">
-          <p className={`text-[12px] font-black uppercase tracking-[0.14em] line-clamp-1 flex-1 leading-snug ${tokens.title}`}>
-            <HighlightText
-              text={annotation.article?.title || 'Ghi chú khuyết danh'}
-              tokens={highlightTokens}
-            />
-          </p>
+          <div className="flex items-start gap-2 flex-1 min-w-0">
+            <div className={`w-2 h-2 rounded-full shrink-0 mt-1.5 ${tokens.stripe}`} title="Màu danh mục" />
+            <p className="text-[14px] font-bold line-clamp-1 flex-1 leading-tight text-black dark:text-white">
+              <HighlightText
+                text={annotation.article?.title || 'Ghi chú khuyết danh'}
+                tokens={highlightTokens}
+              />
+            </p>
+          </div>
 
-          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity -mr-1 -mt-1 shrink-0">
-            {hasNote && !isSelectMode && (
-              <>
-                <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    onEdit();
-                  }}
-                  title="Sửa ghi chú"
-                  className="p-1.5 rounded-md hover:bg-primary/10 text-zinc-400 hover:text-primary transition-colors active:scale-90"
-                >
-                  <Pencil className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={e => {
-                    e.stopPropagation();
-                    onDelete();
-                  }}
-                  title="Xóa"
-                  className="p-1.5 rounded-md hover:bg-red-500/10 text-zinc-400 hover:text-red-500 transition-colors active:scale-90"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </>
+          <div className="shrink-0 flex items-center">
+            {!isSelectMode && (
+              <button
+                onClick={onNavigateToSource}
+                title="Di chuyển đến vị trí này trong bài viết"
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-primary hover:bg-primary/10 transition-all opacity-0 group-hover:opacity-100"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </button>
             )}
           </div>
         </div>
 
         {/* Body: quote + note preview */}
         {hasHighlight && (
-          <p className="text-[14.5px] font-serif italic text-zinc-800 dark:text-slate-200 leading-relaxed line-clamp-3">
+          <p className="text-[1rem] font-serif text-zinc-800 dark:text-slate-200 leading-relaxed line-clamp-3">
             <span className={`mr-0.5 ${tokens.accent} opacity-60`}>"</span>
             <HighlightText text={annotation.selectedText} tokens={highlightTokens} />
             <span className={`ml-0.5 ${tokens.accent} opacity-60`}>"</span>
@@ -736,12 +731,11 @@ function NoteCard({
         )}
 
         {hasNote && (
-          <div className={`flex items-start gap-2 text-[13.5px] leading-relaxed ${
+          <div className={`text-[1rem] leading-relaxed ${
             hasHighlight
-              ? `text-zinc-600 dark:text-slate-400 pt-2 border-t border-dashed border-current/10`
+              ? `text-zinc-600 dark:text-slate-400 pt-1.5 border-t border-dashed border-current/10`
               : 'text-zinc-800 dark:text-slate-200'
           }`}>
-            <StickyNote className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${tokens.accent}`} />
             <HighlightText
               text={stripMarkdown(annotation.note)}
               tokens={highlightTokens}
@@ -751,10 +745,10 @@ function NoteCard({
         )}
 
         {/* Footer meta: type · date · (đang đọc) */}
-        <div className={`flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.16em] pt-1 ${tokens.accent} opacity-70`}>
+        <div className="flex items-center gap-1.5 text-[10px] font-bold pt-1 text-zinc-400 dark:text-zinc-500">
           <span>{typeLabel}</span>
           <span className="opacity-50">·</span>
-          <span className="normal-case tracking-wider">{shortDate}</span>
+          <span className="normal-case tracking-wider">{timeAgo}</span>
           {isCurrentArticle && (
             <>
               <span className="opacity-50">·</span>
@@ -768,86 +762,344 @@ function NoteCard({
 }
 
 function NoteDetail({ 
-  note, 
+  note: initialNote, 
   onBack, 
+  onUpdate,
   onDelete,
   onNavigate
 }: { 
   note: ArticleAnnotation; 
   onBack: () => void; 
+  onUpdate: (updated: Partial<ArticleAnnotation>) => void;
   onDelete: (id: string) => void;
   onNavigate: (ann: ArticleAnnotation) => void;
 }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [noteContent, setNoteContent] = useState('');
+  const [noteTitle, setNoteTitle] = useState('');
+  const [isPublic, setIsPublic] = useState(initialNote.isPublic || false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isLinkMode, setIsLinkMode] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
+  
+  const editorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let title = '';
+    let body = initialNote.note || '';
+
+    if (body.startsWith('# ')) {
+      const lines = body.split('\n');
+      title = lines[0].replace('# ', '');
+      body = lines.slice(1).join('\n').trim();
+    } else {
+      title = 'Ghi chú';
+    }
+
+    setNoteTitle(title);
+    setNoteContent(body);
+  }, [initialNote.id, initialNote.note]);
+
+  const handleSave = async () => {
+    // If editing, sync HTML back to markdown first
+    let finalNote = noteContent;
+    if (isEditing && editorRef.current) {
+      const bodyMd = htmlToMarkdown(editorRef.current.innerHTML);
+      finalNote = `# ${noteTitle.trim() || 'Ghi chú'}\n\n${bodyMd}`;
+    }
+
+    if (finalNote === initialNote.note && isPublic === initialNote.isPublic) {
+      setIsEditing(false);
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      await updateAnnotationAction(initialNote.id, {
+        note: finalNote,
+        isPublic: isPublic
+      });
+      
+      onUpdate({
+        id: initialNote.id,
+        note: finalNote,
+        isPublic: isPublic
+      });
+
+      setIsEditing(false);
+      // No need to setNoteContent here as the useEffect will handle it
+      import('sonner').then(({ toast }) => toast.success('Đã cập nhật ghi chú'));
+    } catch (error) {
+      console.error('Failed to save note:', error);
+      import('sonner').then(({ toast }) => toast.error('Lưu ghi chú thất bại'));
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCommand = (command: string, value?: string) => {
+    if (command === 'createLink') {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0 || selection.toString().length === 0) {
+        import('sonner').then(({ toast }) => toast.error('Vui lòng chọn văn bản trước khi chèn link'));
+        return;
+      }
+      setIsLinkMode(true);
+      return;
+    }
+    document.execCommand(command, false, value);
+    editorRef.current?.focus();
+  };
+
+  const confirmLink = () => {
+    if (linkUrl) {
+      let url = linkUrl.trim();
+      if (!/^https?:\/\//i.test(url) && !url.startsWith('mailto:') && !url.startsWith('#')) {
+        url = 'https://' + url;
+      }
+      document.execCommand('createLink', false, url);
+    }
+    setIsLinkMode(false);
+    setLinkUrl('');
+    editorRef.current?.focus();
+  };
+
+  const handleEditorKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      const selection = window.getSelection();
+      if (!selection?.rangeCount) return;
+      const target = selection.anchorNode?.parentElement;
+      const block = target?.closest('h3, blockquote');
+      if (block?.tagName === 'H3') {
+        e.preventDefault(); document.execCommand('insertHTML', false, '<div><br></div>');
+      }
+    }
+    if (e.key === 'Backspace') {
+      const selection = window.getSelection();
+      if (!selection?.rangeCount) return;
+      const range = selection.getRangeAt(0);
+      const li = selection.anchorNode?.parentElement?.closest('li');
+      if (li && range.startOffset === 0) {
+        if (li.textContent === '' || li.innerHTML === '<br>') {
+          e.preventDefault();
+          document.execCommand('outdent', false);
+        }
+      }
+    }
+  };
+
+  const tokens = getColorTokens(initialNote.color);
+
   return (
-    <motion.div 
+    <motion.div
       key="detail"
       initial={{ x: 20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       exit={{ x: 20, opacity: 0 }}
-      className="flex flex-col h-full bg-white dark:bg-slate-900"
+      className="flex flex-col h-full bg-white dark:bg-slate-900 overflow-hidden"
     >
-      {/* Detail Header */}
-      <div className="px-5 py-3.5 border-b border-zinc-200/60 dark:border-white/5 flex items-center gap-3 bg-white dark:bg-slate-900/50">
-        <button
-          onClick={onBack}
-          className="p-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-slate-200 transition-all active:scale-90"
-        >
-          <ChevronLeft className="w-5 h-5" />
-        </button>
-        <div className="min-w-0">
-          <h2 className="text-[15px] font-black text-zinc-800 dark:text-white uppercase tracking-wider leading-none">Chi tiết</h2>
-          <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest mt-1 block">
-             Lưu {new Date(note.createdAt).toLocaleDateString('vi-VN')}
-          </span>
+      {/* Header */}
+      <div className="px-5 py-3 border-b border-zinc-100 dark:border-white/5 flex items-center justify-between bg-white/60 dark:bg-slate-900/50 backdrop-blur-md shrink-0">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onBack}
+            className="p-1.5 -ml-1.5 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-slate-200 transition-all active:scale-90"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <div className="flex items-center gap-2 flex-1 ml-2">
+            {!initialNote.selectedText && (
+              <input
+                type="text"
+                value={noteTitle}
+                onChange={e => setNoteTitle(e.target.value)}
+                placeholder="Nhập tiêu đề..."
+                className="bg-transparent border-none outline-none text-[15px] font-bold text-zinc-800 dark:text-slate-200 placeholder:text-zinc-400/70 w-full"
+              />
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Detail Content */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
-        {/* The Citation */}
-        <div className="relative">
-          <div className="absolute -left-4 top-0 bottom-0 w-1.5 bg-primary/20 rounded-full" />
-          <p className="text-lg font-serif italic text-zinc-600 dark:text-slate-400 leading-relaxed">
-            "{note.selectedText || 'Ghi chú tự do không có nội dung trích dẫn.'}"
-          </p>
-        </div>
 
-        {/* The Personal Note */}
-        {note.note && (
-          <div className="space-y-3">
-            <div className="prose prose-sm prose-compact dark:prose-invert max-w-none">
-              <MarkdownViewer content={note.note} />
+      <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
+        {/* Source Citation */}
+        <div className="px-6 pt-6 pb-4">
+          <div className="relative group/source cursor-pointer" onClick={() => onNavigate(initialNote)}>
+            <div className="absolute -left-4 top-0 bottom-0 w-1 bg-primary/20 rounded-full group-hover/source:bg-primary/40 transition-colors" />
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-2">Trích dẫn từ bài viết</p>
+            <p className="text-[13px] font-serif italic text-zinc-600 dark:text-slate-400 leading-relaxed line-clamp-3 group-hover/source:text-zinc-800 dark:group-hover/source:text-slate-200 transition-colors">
+              "{initialNote.selectedText || 'Ghi chú tự do'}"
+            </p>
+            <div className="mt-3 flex items-center gap-2 text-[11px] font-bold text-primary opacity-70 group-hover/source:opacity-100 transition-opacity">
+              <BookOpen className="w-3.5 h-3.5" />
+              <span className="line-clamp-1">{initialNote.article?.title}</span>
+            </div>
+
+            <div className="mt-5 flex items-center gap-2">
+              {!isEditing && !initialNote.selectedText && (
+                <button
+                  onClick={() => setIsEditing(true)}
+                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:text-primary dark:hover:text-primary-light transition-all active:scale-90"
+                >
+                  {initialNote.note ? (
+                    <>
+                      <Pencil className="w-3 h-3" />
+                      <span className="text-[9px] font-black uppercase tracking-wider">Chỉnh sửa</span>
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="w-3 h-3" />
+                      <span className="text-[9px] font-black uppercase tracking-wider">Thêm ghi chú</span>
+                    </>
+                  )}
+                </button>
+              )}
+              {initialNote.authorId && (
+                <div 
+                  onClick={() => setIsPublic(!isPublic)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full cursor-pointer transition-all ${
+                    isPublic 
+                      ? 'bg-violet-500/15 text-violet-400 ring-1 ring-violet-500/30' 
+                      : 'bg-zinc-100 dark:bg-white/5 text-zinc-400'
+                  }`}
+                >
+                  {isPublic ? <CheckSquare className="w-3 h-3" /> : <StickyNote className="w-3 h-3" />}
+                  <span className="text-[9px] font-black uppercase tracking-wider">
+                    {isPublic ? 'Công khai' : 'Cá nhân'}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
-        )}
+        </div>
 
-         {/* Meta Info */}
-         <div className="pt-6 space-y-4">
-            <button
-              onClick={() => onNavigate(note)}
-              className="w-full p-4 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 space-y-3 text-left hover:border-primary/30 transition-colors group/source"
-            >
-               <div className="flex items-center gap-2">
-                 <BookOpen className="w-4 h-4 text-zinc-400 group-hover/source:text-primary transition-colors" />
-                 <span className="text-[11px] font-black uppercase tracking-wider text-zinc-500">Nguồn bài viết</span>
-               </div>
-               <p className="text-sm font-bold text-zinc-800 dark:text-slate-200 group-hover/source:text-primary transition-colors">
-                 {note.article?.title || `Bản tin Premium #${note.articleId.slice(-4)}`}
-               </p>
-            </button>
-         </div>
-      </div>
+        <div className="h-px bg-zinc-100 dark:bg-white/5 mx-6 my-2" />
 
-      {/* Detail Actions */}
-      <div className="p-6 border-t border-zinc-200/60 dark:border-white/5 bg-zinc-50/50 dark:bg-slate-900/80 flex items-center justify-center">
-        <button
-          onClick={() => onDelete(note.id)}
-          className="flex items-center gap-2 px-6 py-2.5 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-xl font-bold text-sm transition-all active:scale-95 group"
-        >
-          <Trash2 className="w-4 h-4" />
-          Xóa ghi chú này
-        </button>
-      </div>
+        {/* Note Content Area */}
+        {(noteContent || isEditing) && (
+          <div className="flex-1 p-6 pt-4 flex flex-col min-h-[200px]">
+            {!isEditing ? (
+              <div className="flex-1 group/note">
+                <div className="prose prose-compact prose-zinc dark:prose-invert max-w-none text-[1rem] leading-relaxed text-zinc-800 dark:text-slate-200 font-normal font-sans">
+                  {noteContent && (
+                    <MarkdownViewer content={noteContent} compact variant="note" />
+                  )}
+                </div>
+              </div>
+            ) : (
+            <div className="flex-1 flex flex-col">
+              <div className="flex items-center h-10 mb-2 shrink-0 overflow-hidden">
+                <AnimatePresence mode="wait">
+                  {isLinkMode ? (
+                    <motion.div 
+                      key="link-input"
+                      initial={{ y: 10, opacity: 0 }}
+                      animate={{ y: 0, opacity: 1 }}
+                      exit={{ y: -10, opacity: 0 }}
+                      className="flex-1 flex items-center gap-2"
+                    >
+                      <LinkIcon className="w-3.5 h-3.5 text-primary shrink-0" />
+                      <input
+                        autoFocus
+                        type="text"
+                        placeholder="Dán hoặc nhập URL..."
+                        value={linkUrl}
+                        onChange={e => setLinkUrl(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') confirmLink();
+                          if (e.key === 'Escape') setIsLinkMode(false);
+                        }}
+                        className="flex-1 bg-transparent border-none outline-none text-[12px] font-normal text-zinc-700 dark:text-slate-300 placeholder:text-zinc-400"
+                      />
+                      <div className="flex items-center gap-1">
+                        <button onClick={() => setIsLinkMode(false)} className="px-2 py-1 text-[11px] font-bold text-slate-500 hover:text-slate-700 dark:hover:text-white transition-colors">Hủy</button>
+                        <button onClick={confirmLink} className="px-3 py-1 bg-primary text-white text-[11px] font-bold rounded-lg shadow-sm shadow-primary/20 transition-all active:scale-95">Áp dụng</button>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div 
+                      key="toolbar-buttons"
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      className="flex items-center gap-0.5 w-full overflow-x-auto no-scrollbar"
+                    >
+                      <button onClick={() => handleCommand('bold')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors"><Bold className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => handleCommand('italic')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors"><Italic className="w-3.5 h-3.5" /></button>
+                      <div className="w-px h-3 bg-zinc-200 dark:bg-white/10 mx-1" />
+                      <button onClick={() => handleCommand('formatBlock', '<h3>')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors"><HeadingIcon className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => handleCommand('formatBlock', '<blockquote>')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors"><QuoteIcon className="w-3.5 h-3.5" /></button>
+                      <div className="w-px h-3 bg-zinc-200 dark:bg-white/10 mx-1" />
+                      <button onClick={() => handleCommand('insertUnorderedList')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors"><List className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => handleCommand('insertOrderedList')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors"><ListOrdered className="w-3.5 h-3.5" /></button>
+                      <div className="w-px h-3 bg-zinc-200 dark:bg-white/10 mx-1" />
+                      <button onClick={() => handleCommand('createLink')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors"><LinkIcon className="w-3.5 h-3.5" /></button>
+                      <button onClick={() => handleCommand('insertHorizontalRule')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors"><Minus className="w-3.5 h-3.5" /></button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+              <div
+                ref={editorRef}
+                contentEditable
+                suppressContentEditableWarning
+                onKeyDown={handleEditorKeyDown}
+                dangerouslySetInnerHTML={{ __html: markdownToHtml(noteContent) }}
+                className="flex-1 w-full outline-none leading-relaxed text-[1rem] text-zinc-800 dark:text-slate-200 prose prose-compact prose-zinc dark:prose-invert max-w-none font-normal font-sans"
+              />
+              
+              <div className="flex items-center justify-between pt-4 mt-4 border-t border-zinc-100 dark:border-white/5">
+                <div className="text-[10px] text-slate-400 font-medium italic">
+                  {isPublic ? 'Mọi người đều sẽ thấy' : 'Chỉ bạn mới thấy'}
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      setIsEditing(false);
+                      setNoteContent(initialNote.note || '');
+                    }}
+                    className="px-3 py-1.5 text-[12px] font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    onClick={handleSave}
+                    disabled={isSaving}
+                    className={`flex items-center gap-1.5 px-4 py-1.5 text-[12px] font-bold rounded-xl disabled:opacity-50 transition-all ${
+                      isPublic 
+                        ? 'bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/20' 
+                        : 'bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-slate-100 text-white dark:text-black shadow-lg shadow-black/10'
+                    }`}
+                  >
+                    {isSaving ? (
+                      <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white dark:border-black/30 dark:border-t-black rounded-full animate-spin" />
+                    ) : (
+                      <Check className="w-3.5 h-3.5" />
+                    )}
+                    Lưu lại
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+
+      {!isEditing && (
+        <div className="p-6 border-t border-zinc-200/60 dark:border-white/5 bg-zinc-50/50 dark:bg-slate-900/80 flex items-center justify-between gap-4">
+          <button
+            onClick={() => onDelete(initialNote.id)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-zinc-400 hover:bg-red-500/10 hover:text-red-500 transition-all font-bold text-[11px]"
+          >
+            <Trash2 className="w-3.5 h-3.5" />
+            Xóa
+          </button>
+          <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+            {new Date(initialNote.createdAt).toLocaleDateString('vi-VN')}
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }

@@ -15,6 +15,7 @@ import {
   getAnnotationAction 
 } from '@/features/articles/actions/annotation';
 import { useNotes } from '@/context/NotesContext';
+import { htmlToMarkdown, markdownToHtml } from '@/lib/markdown-editor';
 
 export default function GlobalScratchpad() {
   const { 
@@ -67,6 +68,7 @@ export default function GlobalScratchpad() {
       lastSavedText.current = data.note || '';
       
       if (editorRef.current) {
+        // Only put the BODY into the editor, excluding the title line
         editorRef.current.innerHTML = markdownToHtml(body);
       }
     } catch (err) {
@@ -194,53 +196,51 @@ export default function GlobalScratchpad() {
     syncHtmlToMarkdown();
   };
 
-  // Markdown Bridge
-  const htmlToMarkdown = (html: string) => {
-    return html
-      .replace(/<img.*?src=["'](.*?)["'].*?>/g, '![]($1)')
-      .replace(/<div><br><\/div>/g, '\n').replace(/<div>/g, '\n').replace(/<\/div>/g, '')
-      .replace(/<br>/g, '\n')
-      .replace(/<b.*?>([\s\S]*?)<\/b>/gi, '**$1**').replace(/<strong.*?>([\s\S]*?)<\/strong>/gi, '**$1**')
-      .replace(/<i.*?>([\s\S]*?)<\/i>/gi, '*$1*').replace(/<em.*?>([\s\S]*?)<\/em>/gi, '*$1*')
-      .replace(/<ol.*?>([\s\S]*?)<\/ol>/gi, (_, content) => {
-        let i = 1;
-        return content.replace(/<li.*?>([\s\S]*?)<\/li>/gi, () => `${i++}. $1\n`);
-      })
-      .replace(/<ul.*?>([\s\S]*?)<\/ul>/gi, (_, content) => {
-        return content.replace(/<li.*?>([\s\S]*?)<\/li>/gi, '- $1\n');
-      })
-      .replace(/<li.*?>([\s\S]*?)<\/li>/gi, '- $1\n')
-      .replace(/<hr.*?>/gi, '\n---\n')
-      .replace(/<a.*?href=["'](.*?)["'].*?>(.*?)<\/a>/gi, '[$2]($1)')
-      .replace(/<h3.*?>([\s\S]*?)<\/h3>/gi, '### $1\n')
-      .replace(/<[^>]*>?/gm, '') // Final strip of any remaining HTML tags
-      .replace(/&nbsp;/g, ' ').replace(/\n\n+/g, '\n\n').trim();
-  };
+  // Markdown Bridge logic moved to @/lib/markdown-editor
 
   const syncHtmlToMarkdown = () => {
     if (!editorRef.current) return;
     const bodyMd = htmlToMarkdown(editorRef.current.innerHTML);
     const title = scratchpadTitle.trim() || 'Ghi chú mới';
+    
+    // We store the full markdown (Title + Body) in scratchpadText for saving,
+    // but the editor only deals with the Body.
     setScratchpadText(`# ${title}\n\n${bodyMd}`);
   };
 
-  const markdownToHtml = (md: string) => {
-    return md
-      .replace(/!\[\]\((.*?)\)/g, '<img src="$1" style="max-width:100%; border-radius:12px; margin: 12px 0; border: 1px solid rgba(0,0,0,0.05);" />')
-      .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>').replace(/### (.*?)\n/g, '<h3>$1</h3>')
-      .replace(/> (.*?)\n/g, '<blockquote>$1</blockquote>').replace(/\n/g, '<br>');
-  };
+  // markdownToHtml moved to @/lib/markdown-editor
 
-  // Commands
+  const [isLinkMode, setIsLinkMode] = useState(false);
+  const [linkUrl, setLinkUrl] = useState('');
+
   const handleCommand = (command: string, value?: string) => {
     if (command === 'createLink') {
-      const url = prompt('Nhập URL:');
-      if (url) document.execCommand(command, false, url);
-    } else {
-      document.execCommand(command, false, value);
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0 || selection.toString().length === 0) {
+        import('sonner').then(({ toast }) => toast.error('Vui lòng chọn văn bản trước khi chèn link'));
+        return;
+      }
+      setIsLinkMode(true);
+      return;
     }
+    document.execCommand(command, false, value);
     editorRef.current?.focus();
     syncHtmlToMarkdown();
+  };
+
+  const confirmLink = () => {
+    if (linkUrl) {
+      // Basic URL validation/prefixing
+      let url = linkUrl.trim();
+      if (!/^https?:\/\//i.test(url) && !url.startsWith('mailto:') && !url.startsWith('#')) {
+        url = 'https://' + url;
+      }
+      document.execCommand('createLink', false, url);
+      syncHtmlToMarkdown();
+    }
+    setIsLinkMode(false);
+    setLinkUrl('');
+    editorRef.current?.focus();
   };
 
   // Keyboard Fixes
@@ -253,6 +253,22 @@ export default function GlobalScratchpad() {
       if (block?.tagName === 'H3') {
         e.preventDefault(); document.execCommand('insertHTML', false, '<div><br></div>');
         setTimeout(syncHtmlToMarkdown, 0);
+      }
+    }
+
+    if (e.key === 'Backspace') {
+      const selection = window.getSelection();
+      if (!selection?.rangeCount) return;
+      const range = selection.getRangeAt(0);
+      const li = selection.anchorNode?.parentElement?.closest('li');
+      
+      if (li && range.startOffset === 0) {
+        // If the list item is empty, outdent it on Backspace
+        if (li.textContent === '' || li.innerHTML === '<br>') {
+          e.preventDefault();
+          document.execCommand('outdent', false);
+          setTimeout(syncHtmlToMarkdown, 0);
+        }
       }
     }
   };
@@ -297,7 +313,7 @@ export default function GlobalScratchpad() {
            initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
            drag={!isResizing.current} dragMomentum={false} onMouseDown={e => e.stopPropagation()}
            style={{ width: scratchpadSize.width, height: scratchpadSize.height }}
-           className="fixed bottom-12 right-12 z-[9995] bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-zinc-200/50 dark:border-white/10 overflow-hidden flex flex-col"
+           className="fixed bottom-12 right-12 z-[9995] bg-white dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-zinc-200 dark:border-white/10 overflow-hidden flex flex-col"
         >
           {/* Edge Resize Handles */}
           <div className="absolute top-0 left-0 right-0 h-1 cursor-row-resize z-50" onMouseDown={e => startResize(e, 'top')} />
@@ -305,65 +321,137 @@ export default function GlobalScratchpad() {
           <div className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize z-50" onMouseDown={e => startResize(e, 'left')} />
           <div className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize z-50" onMouseDown={e => startResize(e, 'right')} />
 
-          {/* Header */}
-          <div className="h-12 bg-zinc-50 dark:bg-slate-900 border-b border-zinc-100 dark:border-white/5 flex items-center gap-3 px-4 cursor-grab active:cursor-grabbing shrink-0">
-             <GripHorizontal className="w-3.5 h-3.5 text-zinc-400" />
-             <input
-                type="text" value={scratchpadTitle}
-                onChange={e => { setScratchpadTitle(e.target.value); syncHtmlToMarkdown(); }}
-                className="flex-1 bg-transparent border-none outline-none text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-slate-500"
-             />
+          {/* Header - Mirroring InlineNoteEditor */}
+          <div className="px-4 py-3 border-b border-zinc-100 dark:border-white/5 flex items-center justify-between bg-white/40 dark:bg-slate-900/50 cursor-grab active:cursor-grabbing shrink-0">
+             <div className="flex items-center gap-2 flex-1">
+               <Edit2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+               <input
+                 type="text"
+                 value={scratchpadTitle}
+                 onChange={e => {
+                   setScratchpadTitle(e.target.value);
+                   setTimeout(syncHtmlToMarkdown, 0);
+                 }}
+                 placeholder="Tên ghi chú..."
+                 className="flex-1 bg-transparent border-none outline-none text-[12px] font-normal text-slate-600 dark:text-slate-200 placeholder:text-slate-400"
+               />
+             </div>
              <div className="flex items-center gap-1.5">
-                <button 
-                  onClick={handleSave}
-                  disabled={saveStatus === 'saving' || !scratchpadText.trim() || scratchpadText.trim() === lastSavedText.current}
-                  className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider transition-all ${
-                    saveStatus === 'saved' 
-                      ? 'bg-emerald-500/10 text-emerald-500' 
-                      : 'bg-primary text-white hover:shadow-lg hover:shadow-primary/20 disabled:opacity-40 disabled:grayscale'
-                  }`}
-                >
-                  {saveStatus === 'saving' ? (
-                    <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : saveStatus === 'saved' ? (
-                    <Check className="w-3 h-3" />
-                  ) : (
-                    <Save className="w-3 h-3" />
-                  )}
-                  <span>{saveStatus === 'saved' ? 'Đã lưu' : 'Lưu lại'}</span>
-                </button>
-               {localActiveNoteId && <button onClick={handleDelete} className="p-1.5 hover:bg-red-500/10 rounded-lg text-zinc-400 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>}
-               <button onClick={handleClose} className="p-1.5 hover:bg-black/10 rounded-lg text-zinc-400"><X className="w-4 h-4" /></button>
+               {localActiveNoteId && (
+                 <button 
+                   onClick={handleDelete} 
+                   className="p-1.5 hover:bg-red-500/10 rounded-lg text-zinc-400 hover:text-red-500 transition-colors"
+                   title="Xóa ghi chú"
+                 >
+                   <Trash2 className="w-3.5 h-3.5" />
+                 </button>
+               )}
+               <button 
+                 onClick={handleClose} 
+                 className="p-1.5 hover:bg-black/10 dark:hover:bg-white/10 rounded-lg text-zinc-400 transition-colors"
+                 title="Đóng"
+               >
+                 <X className="w-4 h-4" />
+               </button>
              </div>
           </div>
 
-          <div className="flex items-center gap-0.5 px-3 py-1.5 bg-zinc-50/30 dark:bg-white/2 border-b border-zinc-100 dark:border-white/5 shrink-0 overflow-x-auto no-scrollbar">
-            <button onClick={() => handleCommand('bold')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="In đậm (Ctrl+B)"><Bold className="w-3.5 h-3.5" /></button>
-            <button onClick={() => handleCommand('italic')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="In nghiêng (Ctrl+I)"><Italic className="w-3.5 h-3.5" /></button>
-            <div className="w-px h-3 bg-zinc-200 dark:bg-white/10 mx-1" />
-            <button onClick={() => handleCommand('formatBlock', '<h3>')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="Tiêu đề"><HeadingIcon className="w-3.5 h-3.5" /></button>
-            <button onClick={() => handleCommand('formatBlock', '<blockquote>')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="Trích dẫn"><QuoteIcon className="w-3.5 h-3.5" /></button>
-            <div className="w-px h-3 bg-zinc-200 dark:bg-white/10 mx-1" />
-            <button onClick={() => handleCommand('insertUnorderedList')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="Danh sách dấu chấm"><List className="w-3.5 h-3.5" /></button>
-            <button onClick={() => handleCommand('insertOrderedList')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="Danh sách số"><ListOrdered className="w-3.5 h-3.5" /></button>
-            <div className="w-px h-3 bg-zinc-200 dark:bg-white/10 mx-1" />
-            <button onClick={() => handleCommand('createLink')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="Chèn liên kết"><Link className="w-3.5 h-3.5" /></button>
-            <button onClick={() => handleCommand('insertHorizontalRule')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500" title="Đường kẻ ngang"><Minus className="w-3.5 h-3.5" /></button>
+          {/* Editor Toolbar */}
+          <div className="flex items-center h-10 px-3 bg-zinc-50/50 dark:bg-white/2 border-b border-zinc-100 dark:border-white/5 shrink-0 overflow-hidden">
+            <AnimatePresence mode="wait">
+              {isLinkMode ? (
+                <motion.div 
+                  key="link-input"
+                  initial={{ y: 10, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -10, opacity: 0 }}
+                  className="flex-1 flex items-center gap-2"
+                >
+                  <Link className="w-3.5 h-3.5 text-primary shrink-0" />
+                  <input
+                    autoFocus
+                    type="text"
+                    placeholder="Dán hoặc nhập URL..."
+                    value={linkUrl}
+                    onChange={e => setLinkUrl(e.target.value)}
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') confirmLink();
+                      if (e.key === 'Escape') setIsLinkMode(false);
+                    }}
+                    className="flex-1 bg-transparent border-none outline-none text-[12px] text-zinc-700 dark:text-slate-300 placeholder:text-zinc-400 font-medium"
+                  />
+                  <div className="flex items-center gap-1">
+                    <button 
+                      onClick={() => setIsLinkMode(false)}
+                      className="px-2 py-1 text-[11px] font-bold text-slate-500 hover:text-slate-700 dark:hover:text-white transition-colors"
+                    >
+                      Hủy
+                    </button>
+                    <button 
+                      onClick={confirmLink}
+                      className="px-3 py-1 bg-primary text-white text-[11px] font-bold rounded-lg shadow-sm shadow-primary/20 transition-all active:scale-95"
+                    >
+                      Áp dụng
+                    </button>
+                  </div>
+                </motion.div>
+              ) : (
+                <motion.div 
+                  key="toolbar-buttons"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex items-center gap-0.5 w-full overflow-x-auto no-scrollbar"
+                >
+                  <button onClick={() => handleCommand('bold')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors" title="In đậm (Ctrl+B)"><Bold className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => handleCommand('italic')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors" title="In nghiêng (Ctrl+I)"><Italic className="w-3.5 h-3.5" /></button>
+                  <div className="w-px h-3 bg-zinc-200 dark:bg-white/10 mx-1" />
+                  <button onClick={() => handleCommand('formatBlock', '<h3>')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors" title="Tiêu đề"><HeadingIcon className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => handleCommand('formatBlock', '<blockquote>')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors" title="Trích dẫn"><QuoteIcon className="w-3.5 h-3.5" /></button>
+                  <div className="w-px h-3 bg-zinc-200 dark:bg-white/10 mx-1" />
+                  <button onClick={() => handleCommand('insertUnorderedList')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors" title="Danh sách dấu chấm"><List className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => handleCommand('insertOrderedList')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors" title="Danh sách số"><ListOrdered className="w-3.5 h-3.5" /></button>
+                  <div className="w-px h-3 bg-zinc-200 dark:bg-white/10 mx-1" />
+                  <button onClick={() => handleCommand('createLink')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors" title="Chèn liên kết"><Link className="w-3.5 h-3.5" /></button>
+                  <button onClick={() => handleCommand('insertHorizontalRule')} className="p-2 rounded-lg hover:bg-white dark:hover:bg-white/10 text-zinc-500 transition-colors" title="Đường kẻ ngang"><Minus className="w-3.5 h-3.5" /></button>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
 
-          <div className="flex-1 relative bg-[#fdfdfc] dark:bg-slate-900/50 overflow-hidden" onMouseDown={e => e.stopPropagation()}>
+          {/* Editor Area */}
+          <div className="flex-1 relative bg-transparent overflow-hidden" onMouseDown={e => e.stopPropagation()}>
             <div
               ref={editorRef} contentEditable suppressContentEditableWarning onInput={syncHtmlToMarkdown} onKeyDown={handleEditorKeyDown} onPaste={handlePaste}
-              className="w-full h-full p-6 pt-4 outline-none leading-snug text-[15px] text-zinc-800 dark:text-slate-200 overflow-y-auto custom-scrollbar prose prose-sm prose-zinc dark:prose-invert max-w-none"
+              className="w-full h-full p-6 pt-4 outline-none leading-relaxed text-[1rem] text-zinc-800 dark:text-slate-200 overflow-y-auto custom-scrollbar prose prose-compact prose-zinc dark:prose-invert max-w-none font-normal font-sans"
             />
-            <div className="absolute bottom-4 right-5 pointer-events-none">
-              <AnimatePresence>
-                {saveStatus !== 'idle' && (
-                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-[10px] font-bold px-2 py-1 rounded-full border bg-white/50 backdrop-blur-sm shadow-sm">
-                    {saveStatus === 'saving' ? 'Đang lưu...' : '✓ Đã lưu'}
-                  </motion.div>
+          </div>
+
+          {/* Footer - Mirroring InlineNoteEditor */}
+          <div className="px-5 pb-5 pt-2 flex items-center justify-between shrink-0">
+            <div className="text-[10px] text-slate-400 font-medium italic">
+              Chỉ bạn mới thấy
+            </div>
+            
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleClose}
+                className="px-3 py-1.5 text-[12px] font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleSave}
+                disabled={saveStatus === 'saving' || !scratchpadText.trim() || scratchpadText.trim() === lastSavedText.current}
+                className="flex items-center gap-1.5 px-4 py-1.5 text-[12px] font-bold rounded-xl bg-slate-900 hover:bg-black dark:bg-white dark:hover:bg-slate-100 text-white dark:text-black shadow-lg shadow-black/10 transition-all active:scale-[0.98] disabled:opacity-40"
+              >
+                {saveStatus === 'saving' ? (
+                  <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white dark:border-black/30 dark:border-t-black rounded-full animate-spin" />
+                ) : (
+                  <Save className="w-3.5 h-3.5" />
                 )}
-              </AnimatePresence>
+                <span>{saveStatus === 'saved' ? 'Đã lưu' : 'Lưu lại'}</span>
+              </button>
             </div>
           </div>
         </motion.div>

@@ -191,20 +191,29 @@ function TableLightbox({ children, onClose }: { children: React.ReactNode; onClo
   );
 }
 
-export default function MarkdownViewer({ content, compact = false }: { content: string; compact?: boolean }) {
+export default function MarkdownViewer({ 
+  content, 
+  compact = false,
+  variant = 'article'
+}: { 
+  content: string; 
+  compact?: boolean;
+  variant?: 'article' | 'note';
+}) {
   const [lightbox, setLightbox] = React.useState<{ src: string; alt: string } | null>(null);
   const [tableLightbox, setTableLightbox] = React.useState<React.ReactNode | null>(null);
 
   if (compact) {
     return (
-      <div className="prose prose-xl prose-slate max-w-none dark:text-slate-400
-        prose-p:m-0 prose-p:leading-relaxed
-        prose-strong:text-zinc-900 dark:prose-strong:text-slate-200 prose-strong:font-bold
-        prose-em:italic
-        prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline
-        prose-code:text-[0.85em] prose-code:bg-zinc-100 dark:prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
-        prose-blockquote:border-l-0 prose-blockquote:py-6 prose-blockquote:px-0 prose-blockquote:italic prose-blockquote:text-zinc-600 dark:prose-blockquote:text-slate-400 prose-blockquote:font-medium prose-blockquote:relative prose-blockquote:before:content-['\201C'] prose-blockquote:before:absolute prose-blockquote:before:top-0 prose-blockquote:before:-left-4 prose-blockquote:before:text-5xl prose-blockquote:before:text-primary/10 prose-blockquote:after:content-['\201D'] prose-blockquote:after:absolute prose-blockquote:after:bottom-0 prose-blockquote:after:-right-4 prose-blockquote:after:text-5xl prose-blockquote:after:text-primary/10
-      ">
+      <div className={cn(
+        variant === 'note' ? "prose prose-slate max-w-none dark:text-slate-400" : "prose prose-xl prose-slate max-w-none dark:text-slate-400",
+        variant === 'note' ? "prose-compact" : "prose-p:m-0 prose-p:leading-relaxed",
+        "prose-strong:text-zinc-900 dark:prose-strong:text-slate-200 prose-strong:font-bold",
+        "prose-em:italic",
+        "prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline",
+        "prose-code:text-[0.85em] prose-code:bg-zinc-100 dark:prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:before:content-none prose-code:after:content-none",
+        "prose-blockquote:border-l-0 prose-blockquote:py-6 prose-blockquote:px-0 prose-blockquote:italic prose-blockquote:text-zinc-600 dark:prose-blockquote:text-slate-400 prose-blockquote:font-medium prose-blockquote:relative prose-blockquote:before:content-['\\201C'] prose-blockquote:before:absolute prose-blockquote:before:top-0 prose-blockquote:before:-left-4 prose-blockquote:before:text-5xl prose-blockquote:before:text-primary/10 prose-blockquote:after:content-['\\201D'] prose-blockquote:after:absolute prose-blockquote:after:bottom-0 prose-blockquote:after:-right-4 prose-blockquote:after:text-5xl prose-blockquote:after:text-primary/10"
+      )}>
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           allowedElements={['p','strong','em','a','code','br','ul','ol','li','blockquote']}
