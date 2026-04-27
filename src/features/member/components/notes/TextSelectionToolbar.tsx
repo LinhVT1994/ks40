@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Highlighter, FileEdit, X, Check, Eraser, Users } from 'lucide-react';
+import { Highlighter, FileEdit, X, Check, Eraser, Users, Shield, Globe } from 'lucide-react';
 
 interface TextSelectionToolbarProps {
   onAddNote: (text: string, range: Range) => void;
@@ -10,7 +10,7 @@ interface TextSelectionToolbarProps {
   onRemoveHighlight: (range: Range) => void;
   isAuthor?: boolean;
   onAddPublicNote?: (text: string, range: Range) => void;
-  onPublicHighlight?: (text: string, range: Range) => void;
+  onPublicHighlight?: (text: string, range: Range, color: string) => void;
 }
 
 const HIGHLIGHT_COLORS = [
@@ -35,8 +35,18 @@ export default function TextSelectionToolbar({
     isHighlighted: boolean;
   } | null>(null);
   const [activeColor, setActiveColor] = useState(HIGHLIGHT_COLORS[0]);
-  const [isPublicMode, setIsPublicMode] = useState(false);
+  const [isPublicMode, setIsPublicMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('ks_public_mode') === 'true';
+    }
+    return false;
+  });
   const toolbarRef = useRef<HTMLDivElement>(null);
+
+  // Persist public mode
+  useEffect(() => {
+    localStorage.setItem('ks_public_mode', isPublicMode.toString());
+  }, [isPublicMode]);
 
   const handleSelection = useCallback(() => {
     const sel = window.getSelection();
@@ -45,14 +55,50 @@ export default function TextSelectionToolbar({
       return;
     }
 
-    const text = sel.toString().trim();
+    let range = sel.getRangeAt(0).cloneRange();
+    const originalText = range.toString();
+    
+    // Trim range logic
+    const leadingMatch = originalText.match(/^\s+/);
+    const trailingMatch = originalText.match(/\s+$/);
+    
+    if (leadingMatch || trailingMatch) {
+      try {
+        const leadingCount = leadingMatch ? leadingMatch[0].length : 0;
+        const trailingCount = trailingMatch ? trailingMatch[0].length : 0;
+        
+        // Very basic trimming - only works if start/end are text nodes and have room
+        // This covers 99% of user selection cases
+        if (leadingCount > 0 && range.startContainer.nodeType === Node.TEXT_NODE) {
+          range.setStart(range.startContainer, range.startOffset + leadingCount);
+        }
+        if (trailingCount > 0 && range.endContainer.nodeType === Node.TEXT_NODE) {
+          range.setEnd(range.endContainer, range.endOffset - trailingCount);
+        }
+      } catch (e) {
+        // Fallback to original range if trimming fails
+        range = sel.getRangeAt(0).cloneRange();
+      }
+    }
+
+    const text = range.toString().trim();
     if (!text) {
       setSelection(null);
       return;
     }
 
-    const range = sel.getRangeAt(0).cloneRange();
     const rect = range.getBoundingClientRect();
+
+    // Prevent highlighting in blockquotes, pre, or code tags
+    const isInsideExcluded = !!(
+      range.startContainer.parentElement?.closest('blockquote, pre, code') ||
+      range.endContainer.parentElement?.closest('blockquote, pre, code')
+    );
+
+    if (isInsideExcluded) {
+      setSelection(null);
+      return;
+    }
 
     const isHighlighted = !!(
       range.startContainer.parentElement?.closest('.ks-highlight') ||
@@ -67,11 +113,6 @@ export default function TextSelectionToolbar({
     return () => document.removeEventListener('mouseup', handleSelection);
   }, [handleSelection]);
 
-  // Reset public mode when selection clears
-  useEffect(() => {
-    if (!selection) setIsPublicMode(false);
-  }, [selection]);
-
   if (!selection) return null;
 
   const canPublic = isAuthor && (onPublicHighlight || onAddPublicNote);
@@ -84,121 +125,107 @@ export default function TextSelectionToolbar({
         initial={{ opacity: 0, scale: 0.9, y: 10 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 10 }}
-        className={`fixed z-[100] flex items-center gap-1 p-1 backdrop-blur-xl border rounded-full shadow-2xl transition-colors duration-200 ${
-          isPublicMode
-            ? 'bg-violet-950/90 border-violet-500/40'
-            : 'bg-zinc-800/90 border-white/10'
+        className={`fixed z-[100] flex items-center gap-1 p-1 backdrop-blur-xl border rounded-full shadow-2xl transition-all duration-300 ${
+          isPublicMode 
+            ? 'bg-slate-900/95 border-violet-500/30' 
+            : 'bg-slate-900/95 border-white/10'
         }`}
         style={{
           left: selection.rect.left + selection.rect.width / 2,
-          top: selection.rect.top - 54,
+          top: selection.rect.top - 58,
           transform: 'translateX(-50%)',
         }}
       >
-        {/* Color Picker — hidden in public mode (author marks are always violet) */}
-        {!isPublicMode && (
-          <>
-            <div className="flex items-center gap-1.5 px-2">
-              {HIGHLIGHT_COLORS.map((c) => (
-                <button
-                  key={c.id}
-                  onClick={() => setActiveColor(c)}
-                  className={`w-5 h-5 rounded-full border-2 transition-all hover:scale-110 flex items-center justify-center ${
-                    activeColor.id === c.id ? 'border-white scale-110 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100'
-                  }`}
-                  style={{ backgroundColor: c.color }}
-                  title={c.label}
-                >
-                  {activeColor.id === c.id && <Check className="w-3 h-3 text-zinc-800" />}
-                </button>
-              ))}
-            </div>
-            <div className="w-px h-4 bg-white/10 mx-1" />
-          </>
-        )}
+        {/* Section 1: Colors */}
+        <div className="flex items-center gap-1 px-1.5 mr-1">
+          {HIGHLIGHT_COLORS.map((c) => (
+            <button
+              key={c.id}
+              onClick={() => setActiveColor(c)}
+              className={`w-5 h-5 rounded-full border-2 transition-all hover:scale-110 flex items-center justify-center ${
+                activeColor.id === c.id ? 'border-white scale-110' : 'border-transparent opacity-40 hover:opacity-100'
+              }`}
+              style={{ backgroundColor: c.color }}
+            >
+              {activeColor.id === c.id && <Check className="w-3 h-3 text-slate-900" />}
+            </button>
+          ))}
+        </div>
 
-        {/* Highlight */}
-        <button
-          onClick={() => {
-            if (isPublicMode && onPublicHighlight) {
-              onPublicHighlight(selection.text, selection.range);
-            } else {
-              onHighlight(selection.text, selection.range, activeColor.color);
-            }
-          }}
-          className={`flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-full transition-colors group ${
-            isPublicMode
-              ? 'text-violet-200 hover:bg-violet-500/30'
-              : 'text-white hover:bg-white/10'
-          }`}
-        >
-          <Highlighter
-            className="w-3.5 h-3.5"
-            style={isPublicMode ? undefined : { color: activeColor.color }}
-          />
-          <span>Highlight</span>
-        </button>
-
-        {/* Remove highlight (personal mode only) */}
-        {!isPublicMode && selection.isHighlighted && (
+        {/* Section 2: Actions */}
+        <div className="flex items-center gap-0.5 border-l border-white/10 pl-1">
           <button
             onClick={() => {
-              onRemoveHighlight(selection.range);
-              setSelection(null);
+              if (isPublicMode && onPublicHighlight) {
+                onPublicHighlight(selection.text, selection.range, activeColor.id);
+              } else {
+                onHighlight(selection.text, selection.range, activeColor.color);
+              }
             }}
-            className="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/10 rounded-full transition-colors group"
-            title="Xóa Highlight"
+            className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-full transition-all ${
+              isPublicMode ? 'text-violet-200 hover:bg-violet-500/20' : 'text-white hover:bg-white/10'
+            }`}
           >
-            <Eraser className="w-3.5 h-3.5" />
-            <span>Xóa</span>
+            <Highlighter className="w-3.5 h-3.5" style={{ color: activeColor.color }} />
+            <span>Highlight</span>
           </button>
-        )}
 
-        <div className={`w-px h-4 mx-1 ${isPublicMode ? 'bg-violet-500/30' : 'bg-white/10'}`} />
+          <button
+            onClick={() => {
+              if (isPublicMode && onAddPublicNote) {
+                onAddPublicNote(selection.text, selection.range);
+              } else {
+                onAddNote(selection.text, selection.range);
+              }
+            }}
+            className={`flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-full transition-all ${
+              isPublicMode ? 'text-violet-200 hover:bg-violet-500/20' : 'text-white hover:bg-white/10'
+            }`}
+          >
+            <FileEdit className={`w-3.5 h-3.5 ${isPublicMode ? 'text-violet-400' : 'text-slate-400'}`} />
+            <span>Ghi chú</span>
+          </button>
+          
+          {selection.isHighlighted && !isPublicMode && (
+             <button
+               onClick={() => {
+                 onRemoveHighlight(selection.range);
+                 setSelection(null);
+               }}
+               className="p-1.5 text-red-400 hover:bg-red-500/10 rounded-full transition-colors ml-1"
+             >
+               <Eraser className="w-3.5 h-3.5" />
+             </button>
+          )}
+        </div>
 
-        {/* Note */}
-        <button
-          onClick={() => {
-            if (isPublicMode && onAddPublicNote) {
-              onAddPublicNote(selection.text, selection.range);
-            } else {
-              onAddNote(selection.text, selection.range);
-            }
-          }}
-          className={`flex items-center gap-2 px-3 py-1.5 text-xs font-semibold rounded-full transition-colors group ${
-            isPublicMode
-              ? 'text-violet-200 hover:bg-violet-500/30'
-              : 'text-white hover:bg-white/10'
-          }`}
-        >
-          <FileEdit className={`w-3.5 h-3.5 ${isPublicMode ? 'text-violet-400' : 'text-primary'}`} />
-          <span>Ghi chú</span>
-        </button>
-
-        {/* Public mode toggle (author only) */}
-        {canPublic && (
-          <>
-            <div className={`w-px h-4 mx-1 ${isPublicMode ? 'bg-violet-500/30' : 'bg-white/10'}`} />
-            <button
-              onClick={() => setIsPublicMode(v => !v)}
-              title={isPublicMode ? 'Đang ở chế độ công khai — nhấn để chuyển về cá nhân' : 'Chuyển sang chế độ công khai (hiện với tất cả độc giả)'}
-              className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-full transition-all ${
-                isPublicMode
-                  ? 'bg-violet-500/40 text-violet-200 ring-1 ring-violet-400/50'
-                  : 'text-white/40 hover:text-violet-300 hover:bg-violet-500/15'
-              }`}
-            >
-              <Users className="w-3.5 h-3.5" />
-              {isPublicMode && <span>Công khai</span>}
-            </button>
-          </>
+        {/* Section 3: Unified Visibility Toggle (Author Only) */}
+        {isAuthor && (
+          <button
+            onClick={() => setIsPublicMode(!isPublicMode)}
+            className={`flex items-center gap-2 px-3 py-1.5 ml-1 rounded-full text-[10px] font-bold transition-all border-l border-white/10 ${
+              isPublicMode 
+                ? 'bg-violet-500/30 text-violet-200 ring-1 ring-violet-500/40' 
+                : 'bg-white/5 text-slate-300 hover:bg-white/10'
+            }`}
+          >
+            {isPublicMode ? (
+              <>
+                <Globe className="w-3 h-3 text-violet-400" />
+                <span>CÔNG KHAI</span>
+              </>
+            ) : (
+              <>
+                <Shield className="w-3 h-3 text-blue-400" />
+                <span>CÁ NHÂN</span>
+              </>
+            )}
+          </button>
         )}
 
         <button
           onClick={() => setSelection(null)}
-          className={`ml-1 p-1.5 rounded-full transition-colors ${
-            isPublicMode ? 'text-violet-300/50 hover:text-violet-200' : 'text-white/40 hover:text-white'
-          }`}
+          className="ml-1 p-1 text-slate-500 hover:text-white transition-colors"
         >
           <X className="w-3.5 h-3.5" />
         </button>

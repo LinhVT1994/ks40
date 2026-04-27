@@ -50,19 +50,19 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
             </Link>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-5xl font-black text-zinc-900 dark:text-zinc-100 font-display leading-[1.15] tracking-tight text-left animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <h1 className="text-4xl sm:text-5xl lg:text-5xl font-black text-zinc-900 dark:text-slate-200 font-display leading-[1.15] tracking-tight text-left animate-in fade-in slide-in-from-bottom-2 duration-500">
             {article.title}
           </h1>
 
-          <div className="flex flex-wrap items-center gap-x-10 gap-y-6 text-zinc-500 dark:text-zinc-500 text-sm animate-in fade-in duration-500 delay-75">
+          <div className="flex flex-wrap items-center gap-x-10 gap-y-6 text-zinc-500 dark:text-slate-500 text-sm animate-in fade-in duration-500 delay-75">
             <Link href={`/profile/${article.author.username || article.authorId}`} className="flex items-center gap-3.5 hover:text-primary transition-colors group/author">
               <div className="relative">
                 <Avatar src={article.author.image} name={article.author.name} size={44} />
                 <div className="absolute inset-0 rounded-full border-2 border-primary/20 scale-110 opacity-0 group-hover/author:opacity-100 transition-all duration-300" />
               </div>
               <div className="flex flex-col -space-y-0.5">
-                <span className="text-[10px] uppercase tracking-[0.15em] font-black text-zinc-400 dark:text-zinc-500 mb-0.5">Tác giả</span>
-                <span className="text-base font-bold text-zinc-900 dark:text-zinc-100 group-hover/author:text-primary transition-colors">{article.author.name}</span>
+                <span className="text-[10px] uppercase tracking-[0.15em] font-black text-zinc-400 dark:text-slate-500 mb-0.5">Tác giả</span>
+                <span className="text-base font-bold text-zinc-900 dark:text-slate-200 group-hover/author:text-primary transition-colors">{article.author.name}</span>
               </div>
             </Link>
 
@@ -92,22 +92,22 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
               </button>
             )}
 
-            <div className="h-10 w-px bg-zinc-200 dark:bg-white/10 hidden sm:block" />
+            <div className="h-10 w-px bg-zinc-200 dark:bg-slate-800 hidden sm:block" />
 
             <div className="flex flex-row sm:flex-col gap-6 sm:gap-0 sm:-space-y-0.5">
               {date && (
                 <div className="flex flex-col -space-y-0.5">
-                  <span className="text-[10px] uppercase tracking-[0.15em] font-black text-zinc-400 dark:text-zinc-500 mb-0.5">Xuất bản</span>
-                  <span className="font-bold text-zinc-800 dark:text-zinc-200 text-sm">{date}</span>
+                  <span className="text-[10px] uppercase tracking-[0.15em] font-black text-zinc-400 dark:text-slate-500 mb-0.5">Xuất bản</span>
+                  <span className="font-bold text-zinc-800 dark:text-slate-300 text-sm">{date}</span>
                 </div>
               )}
             </div>
 
-            <div className="h-10 w-px bg-zinc-200 dark:bg-white/10 hidden sm:block" />
+            <div className="h-10 w-px bg-zinc-200 dark:bg-slate-800 hidden sm:block" />
 
             <div className="flex flex-col -space-y-0.5">
-              <span className="text-[10px] uppercase tracking-[0.15em] font-black text-zinc-400 dark:text-zinc-500 mb-0.5">Thời lượng</span>
-              <div className="flex items-center gap-1.5 font-bold text-zinc-800 dark:text-zinc-200 text-sm">
+              <span className="text-[10px] uppercase tracking-[0.15em] font-black text-zinc-400 dark:text-slate-500 mb-0.5">Thời lượng</span>
+              <div className="flex items-center gap-1.5 font-bold text-zinc-800 dark:text-slate-300 text-sm">
                 <Clock className="w-3.5 h-3.5" />
                 <span>{article.readTime} phút đọc</span>
               </div>

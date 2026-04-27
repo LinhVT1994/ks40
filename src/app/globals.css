@@ -81,12 +81,14 @@
 
 @layer base {
   body {
-    @apply bg-background-light dark:bg-background-dark text-zinc-800 dark:text-zinc-300 antialiased transition-colors duration-300 font-sans;
+    @apply bg-background-light dark:bg-background-dark text-zinc-800 dark:text-slate-400 antialiased transition-colors duration-300 font-sans;
   }
 
+
   h1, h2, h3, h4, h5, h6 {
-    @apply font-display font-bold tracking-tight text-zinc-900 dark:text-zinc-100;
+    @apply font-display font-bold tracking-tight text-zinc-900 dark:text-slate-200;
   }
+
 
   .dark {
     /* Preserve Original Dark Mode Colors */
@@ -241,12 +243,12 @@ html.focus-mode [data-focus-prose] {
 /* KS Highlight Data-Color Mappings (Monochromatic Silver/Graphite) */
 .ks-highlight {
   --hl-color: 113, 113, 122; /* Graphite / Zinc 500 */
-  background-color: rgba(var(--hl-color), 0.5);
+  background-color: rgba(var(--hl-color), 0.7);
   color: inherit;
   text-decoration: none;
-  border-radius: 4px;
-  padding: 0 2px;
-  margin: 0 -2px;
+  border-radius: 2px;
+  padding: 0;
+  margin: 0;
   transition: all 0.2s ease;
   cursor: pointer;
   position: relative;
@@ -255,15 +257,29 @@ html.focus-mode [data-focus-prose] {
 }
 
 /* Map data-color attributes to RGB variables for highlights */
-.ks-highlight[data-color="yellow"] { --hl-color: 250, 204, 21;  } /* Yellow 400 */
-.ks-highlight[data-color="blue"]   { --hl-color: 96, 165, 250;  } /* Blue 400 */
-.ks-highlight[data-color="green"]  { --hl-color: 74, 222, 128;  } /* Green 400 */
-.ks-highlight[data-color="pink"]   { --hl-color: 244, 114, 182; } /* Pink 400 */
+.ks-highlight[data-color="yellow"] { --hl-color: 254, 240, 138; } /* Yellow 200 */
+.ks-highlight[data-color="green"]  { --hl-color: 187, 247, 208; } /* Green 200 */
+.ks-highlight[data-color="blue"]   { --hl-color: 191, 219, 254; } /* Blue 200 */
+.ks-highlight[data-color="pink"]   { --hl-color: 251, 207, 232; } /* Pink 200 */
+
+/* Styles for highlights that have notes attached */
+.ks-highlight-note {
+  background-color: rgba(var(--hl-color), 0.05) !important;
+  border-bottom: 1.5px solid rgba(var(--hl-color), 0.8) !important;
+  border-radius: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.dark .ks-highlight-note {
+  background-color: rgba(var(--hl-color), 0.1) !important;
+  border-bottom: 1.5px solid rgba(var(--hl-color), 0.9) !important;
+  color: #f8fafc !important;
+}
 
 @keyframes ks-highlight-pulse {
-  0% { box-shadow: 0 0 0 0 rgba(var(--hl-color), 0.7); }
-  50% { box-shadow: 0 0 12px 6px rgba(var(--hl-color), 0.4); }
-  100% { box-shadow: 0 0 0 0 rgba(var(--hl-color), 0); }
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
 }
 
 .ks-highlight-pulse {
@@ -296,13 +312,15 @@ html.focus-mode [data-focus-prose] {
 
 /* Dark mode overrides */
 .dark .ks-highlight[data-color="yellow"] { --hl-color: 253, 224, 71;  } /* Yellow 300 */
-.dark .ks-highlight[data-color="blue"]   { --hl-color: 147, 197, 253; } /* Blue 300 */
-.dark .ks-highlight[data-color="green"]  { --hl-color: 134, 239, 172; } /* Green 300 */
-.dark .ks-highlight[data-color="pink"]   { --hl-color: 249, 168, 212; } /* Pink 300 */
-
 .dark .ks-highlight {
-  background-color: rgba(var(--hl-color), 0.55);
+  background-color: rgba(var(--hl-color), 0.25) !important;
+  color: #f8fafc !important; /* Force Slate 50 for readability */
 }
+
+.dark .ks-highlight[data-color="yellow"] { --hl-color: 234, 179, 8; }   /* Yellow 500 */
+.dark .ks-highlight[data-color="green"]  { --hl-color: 34, 197, 94; }   /* Green 500 */
+.dark .ks-highlight[data-color="blue"]   { --hl-color: 59, 130, 246; }  /* Blue 500 */
+.dark .ks-highlight[data-color="pink"]   { --hl-color: 236, 72, 153; }  /* Pink 500 */
 
 .ks-highlight:hover {
   background-color: rgba(var(--hl-color), 0.65);
@@ -597,46 +615,59 @@ pre span {
 
 /* ─── Author Annotations (Public, visible to all readers) ────────── */
 .ks-author-highlight {
-  background-color: rgba(139, 92, 246, 0.15);
-  color: inherit;
-  text-decoration: none;
-  border-radius: 3px;
-  padding: 0 2px;
-  margin: 0 -2px;
-  border-bottom: 2px solid rgba(124, 58, 237, 0.6);
-  transition: all 0.2s ease;
-  cursor: pointer;
-  position: relative;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
+  --hl-color: 139, 92, 246; /* Default Violet */
+  background-color: rgba(var(--hl-color), 0.7) !important;
+  color: inherit !important;
+  text-decoration: none !important;
+  border-bottom: none !important;
+  border-radius: 4px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  transition: all 0.2s ease !important;
+  cursor: pointer !important;
+  position: relative !important;
+  box-decoration-break: clone !important;
+  -webkit-box-decoration-break: clone !important;
 }
+
+.ks-author-highlight[data-color="yellow"] { --hl-color: 254, 240, 138; }
+.ks-author-highlight[data-color="blue"]   { --hl-color: 191, 219, 254; }
+.ks-author-highlight[data-color="green"]  { --hl-color: 187, 247, 208; }
+.ks-author-highlight[data-color="pink"]   { --hl-color: 251, 207, 232; }
 
 .ks-author-highlight:hover {
   background-color: rgba(139, 92, 246, 0.28);
-  border-bottom-color: rgba(124, 58, 237, 1);
 }
 
 .dark .ks-author-highlight {
-  background-color: rgba(167, 139, 250, 0.12);
-  border-bottom-color: rgba(167, 139, 250, 0.5);
+  background-color: rgba(var(--hl-color), 0.25) !important;
+  color: #f8fafc !important;
+  border-bottom: none !important;
 }
 
+.dark .ks-author-highlight[data-color="yellow"] { --hl-color: 234, 179, 8; }
+.dark .ks-author-highlight[data-color="blue"]   { --hl-color: 59, 130, 246; }
+.dark .ks-author-highlight[data-color="green"]  { --hl-color: 34, 197, 94; }
+.dark .ks-author-highlight[data-color="pink"]   { --hl-color: 236, 72, 153; }
+
 .dark .ks-author-highlight:hover {
-  background-color: rgba(167, 139, 250, 0.22);
-  border-bottom-color: rgba(167, 139, 250, 0.85);
+  background-color: rgba(167, 139, 250, 0.25);
 }
 
 .ks-author-note {
   background-color: transparent !important;
-  border-bottom: 2px dashed rgba(124, 58, 237, 0.7);
+  border-bottom: 1.5px solid rgba(var(--hl-color), 0.8) !important;
+  border-radius: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 .dark .ks-author-note {
-  border-bottom-color: rgba(167, 139, 250, 0.55);
+  background-color: transparent !important;
+  border-bottom: 1.5px solid rgba(var(--hl-color), 0.9) !important;
 }
 
 .ks-author-note:hover {
-  background-color: rgba(139, 92, 246, 0.12) !important;
+  background-color: rgba(var(--hl-color), 0.1) !important;
 }
 
 /* ─── Blockquote closing quote mark ─────────────────────────────── */

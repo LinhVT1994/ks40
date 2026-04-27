@@ -52,7 +52,7 @@ export default function MemberFooter() {
 
           {/* Column 2: Product */}
           <div className="lg:col-span-3 space-y-6">
-            <h4 className="font-bold text-zinc-800 dark:text-white text-[11px] uppercase tracking-[0.2em]">Sản phẩm</h4>
+            <h4 className="font-bold text-zinc-800 dark:text-slate-200 text-[11px] uppercase tracking-[0.2em]">Sản phẩm</h4>
             <ul className="space-y-4">
               <FooterLink href="/" label="Bài viết mới" />
               <FooterLink href="/search" label="Tìm kiếm bài viết" />
@@ -63,7 +63,7 @@ export default function MemberFooter() {
 
           {/* Column 3: Newsletter & Support */}
           <div className="lg:col-span-4 space-y-6">
-            <h4 className="font-bold text-zinc-800 dark:text-white text-[11px] uppercase tracking-[0.2em]">Đăng ký nhận tin</h4>
+            <h4 className="font-bold text-zinc-800 dark:text-slate-200 text-[11px] uppercase tracking-[0.2em]">Đăng ký nhận tin</h4>
             <p className="text-zinc-500 dark:text-slate-400 text-sm">
               Cập nhật kiến thức và tài liệu mới nhất mỗi tuần.
             </p>
@@ -135,7 +135,7 @@ function SocialLink({ href, icon, label }: { href: string; icon: React.ReactNode
     <Link
       href={href}
       aria-label={label}
-      className="w-10 h-10 rounded-xl bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 flex items-center justify-center text-zinc-500 hover:text-primary hover:border-primary/30 transition-all hover:-translate-y-1 shadow-sm"
+      className="w-10 h-10 rounded-xl bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 flex items-center justify-center text-zinc-500 hover:text-primary hover:border-primary/30 transition-all hover:-translate-y-1 shadow-sm dark:text-slate-400"
     >
       {icon}
     </Link>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useSession } from 'next-auth/react';
 import { useSearchParams } from 'next/navigation';
@@ -21,8 +21,8 @@ interface Props {
   initialAnnotations: ArticleAnnotation[];
   authorAnnotations?: ArticleAnnotation[];
   isAuthor?: boolean;
-  children: React.ReactNode;
   onAnnotationsChange?: (annotations: ArticleAnnotation[]) => void;
+  children: React.ReactNode;
 }
 
 const CONTENT_SELECTOR = '[data-article-content]';
@@ -49,28 +49,16 @@ function colorToName(color: string): string {
   return color;
 }
 
-function getLeafBlocks(parent: Element): Element[] {
-  const PASS_THROUGH_TAGS = new Set(['UL', 'OL', 'TABLE', 'TBODY', 'THEAD', 'TR']);
-  const blocks: Element[] = [];
-  for (const child of Array.from(parent.children)) {
-    if (PASS_THROUGH_TAGS.has(child.tagName)) {
-      blocks.push(...getLeafBlocks(child));
-    } else {
-      if (child.textContent?.trim()) {
-        blocks.push(child);
-      }
-    }
-  }
-  return blocks;
+function getBlockElements(container: Element): Element[] {
+  // Use the explicit data attribute for 100% stability across renders
+  return Array.from(container.querySelectorAll('[data-annotation-target]'));
 }
 
-function getBlockElements(container: Element): Element[] {
-  const proseScopes = Array.from(container.querySelectorAll('.prose'));
-  if (proseScopes.length === 0) {
-    proseScopes.push(container);
-  }
-  return proseScopes.flatMap(scope => getLeafBlocks(scope));
-}
+
+
+
+
+
 
 function captureSelectionPosition(
   range: Range,
@@ -162,46 +150,93 @@ function wrapRangeWithMarks(
   return marks;
 }
 
-function applyHighlightToDOM(
-  annotation: { id: string; paragraphIndex: number; startOffset: number; endOffset: number; color: string; note?: string | null },
-  container: Element,
-  isAuthorMark = false,
-) {
-  if (annotation.paragraphIndex === -1) return;
-
-  const blocks = getBlockElements(container);
-  const block = blocks[annotation.paragraphIndex];
-  if (!block) return;
-
+// Walk text nodes inside `block` and find text-node positions corresponding
+// to (startOffset, endOffset) measured against the block's full textContent.
+// Returns null if the offsets fall outside the block's text length.
+function locateOffsetsInBlock(
+  block: Element,
+  startOffset: number,
+  endOffset: number,
+): { startNode: Text; startNodeOffset: number; endNode: Text; endNodeOffset: number } | null {
   const tw = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
   let charCount = 0;
-  let startNode: Text | null = null, endNode: Text | null = null;
-  let startNodeOffset = 0, endNodeOffset = 0;
-
+  let startNode: Text | null = null;
+  let endNode: Text | null = null;
+  let startNodeOffset = 0;
+  let endNodeOffset = 0;
   let textNode: Node | null;
   while ((textNode = tw.nextNode())) {
     const t = textNode as Text;
     const len = t.length;
-    if (!startNode && charCount + len > annotation.startOffset) {
+    if (!startNode && charCount + len > startOffset) {
       startNode = t;
-      startNodeOffset = annotation.startOffset - charCount;
+      startNodeOffset = startOffset - charCount;
     }
-    if (startNode && charCount + len >= annotation.endOffset) {
+    if (startNode && charCount + len >= endOffset) {
       endNode = t;
-      endNodeOffset = annotation.endOffset - charCount;
-      break;
+      endNodeOffset = endOffset - charCount;
+      return { startNode, startNodeOffset, endNode, endNodeOffset };
     }
     charCount += len;
   }
-  if (!startNode || !endNode) return;
+  return null;
+}
+
+function applyHighlightToDOM(
+  annotation: { id: string; selectedText?: string; paragraphIndex: number; startOffset: number; endOffset: number; color: string; note?: string | null },
+  container: Element,
+  isAuthorMark = false,
+) {
+  const blocks = getBlockElements(container);
+
+  // 1. Try positional lookup first (fast path for fresh annotations).
+  let located:
+    | { startNode: Text; startNodeOffset: number; endNode: Text; endNodeOffset: number }
+    | null = null;
+
+  if (annotation.paragraphIndex >= 0 && annotation.paragraphIndex < blocks.length) {
+    located = locateOffsetsInBlock(
+      blocks[annotation.paragraphIndex],
+      annotation.startOffset,
+      annotation.endOffset,
+    );
+  }
+
+  // 2. Fallback: positional index is stale (block list changed since save).
+  //    Locate the annotation by its stored selectedText across all blocks.
+  if (!located && annotation.selectedText) {
+    const needle = annotation.selectedText;
+    for (const candidate of blocks) {
+      const text = candidate.textContent || '';
+      const idx = text.indexOf(needle);
+      if (idx !== -1) {
+        located = locateOffsetsInBlock(candidate, idx, idx + needle.length);
+        if (located) {
+          console.debug('[hl] recovered via selectedText', annotation.id, { newBlock: candidate.tagName });
+          break;
+        }
+      }
+    }
+  }
+
+  if (!located) {
+    console.error('[hl] FAILED to locate annotation:', annotation.id, {
+      paragraphIndex: annotation.paragraphIndex,
+      blocksCount: blocks.length,
+      selectedText: annotation.selectedText?.slice(0, 50),
+      reason: annotation.paragraphIndex >= blocks.length ? 'Index out of bounds' : 'Offsets not found in block'
+    });
+    return;
+  }
 
   try {
     const range = document.createRange();
-    range.setStart(startNode, startNodeOffset);
-    range.setEnd(endNode, endNodeOffset);
-    wrapRangeWithMarks(range, annotation, isAuthorMark);
-  } catch {
-    // ignore
+    range.setStart(located.startNode, located.startNodeOffset);
+    range.setEnd(located.endNode, located.endNodeOffset);
+    const inserted = wrapRangeWithMarks(range, annotation, isAuthorMark);
+    console.debug('[hl] inserted', annotation.id, 'marks:', inserted.length);
+  } catch (e) {
+    console.error('[hl] wrap failed', annotation.id, e);
   }
 }
 
@@ -334,8 +369,11 @@ export default function ArticleAnnotationLayer({
     setIsEditingExistingNote(false);
   }, []);
 
-  // Re-apply saved annotations to DOM (both personal and author public)
-  useEffect(() => {
+  // Re-apply saved annotations to DOM (both personal and author public).
+  // useLayoutEffect runs synchronously after DOM commit but before paint, so
+  // if React reconciles away a manually-inserted <mark>, we restore it before
+  // the user ever sees the gap (no flash).
+  useLayoutEffect(() => {
     const container = containerRef.current?.querySelector(CONTENT_SELECTOR) ?? containerRef.current;
     if (!container) return;
 
@@ -350,13 +388,13 @@ export default function ArticleAnnotationLayer({
         applyHighlightToDOM(ann, container, false);
       }
     }
-
     for (const ann of publicAnnotations) {
       if (!existingIds.has(ann.id)) {
         applyHighlightToDOM(ann, container, true);
       }
     }
   }, [annotations, publicAnnotations]);
+
 
   // Unified Interaction Handler (Event Delegation)
   useEffect(() => {
@@ -470,6 +508,7 @@ export default function ArticleAnnotationLayer({
 
       const colorName = colorToName(colorHex);
       const marks = wrapRangeWithMarks(range, { id: 'pending', color: colorName });
+      console.debug('[hl] handleHighlight wrapped', { count: marks.length, pos });
       if (marks.length === 0) return;
 
       window.getSelection()?.removeAllRanges();
@@ -480,6 +519,8 @@ export default function ArticleAnnotationLayer({
         ...pos,
         color: colorName,
       }).then(saved => {
+        const stillInDOM = marks.filter(m => m.isConnected).length;
+        console.debug('[hl] handleHighlight saved', saved.id, 'marksStillInDOM:', stillInDOM, '/', marks.length);
         marks.forEach(m => { m.dataset.annotationId = saved.id; });
         setAnnotations(prev => [...prev, saved]);
         toast.success('Đã lưu highlight');
@@ -497,7 +538,7 @@ export default function ArticleAnnotationLayer({
     setPendingSelection({ text, range, rect });
   }, []);
 
-  const handlePublicHighlight = useCallback(async (text: string, range: Range) => {
+  const handlePublicHighlight = useCallback(async (text: string, range: Range, colorId: string = 'yellow') => {
     import('sonner').then(({ toast }) => {
       if (!session?.user?.id) return;
       const container = containerRef.current?.querySelector(CONTENT_SELECTOR) ?? containerRef.current;
@@ -509,7 +550,7 @@ export default function ArticleAnnotationLayer({
         return;
       }
 
-      const marks = wrapRangeWithMarks(range, { id: 'pending-public', color: 'yellow' }, true);
+      const marks = wrapRangeWithMarks(range, { id: 'pending-public', color: colorId }, true);
       if (marks.length === 0) return;
       window.getSelection()?.removeAllRanges();
 
@@ -517,10 +558,13 @@ export default function ArticleAnnotationLayer({
         articleId,
         selectedText: text.trim(),
         ...pos,
-        color: 'yellow',
+        color: colorId,
         isPublic: true,
       }).then(saved => {
-        marks.forEach(m => { m.dataset.annotationId = saved.id; });
+        marks.forEach(m => { 
+          m.dataset.annotationId = saved.id;
+          m.dataset.color = colorId;
+        });
         setPublicAnnotations(prev => [...prev, saved]);
         toast.success('Đã lưu highlight công khai');
       }).catch(err => {
@@ -537,7 +581,7 @@ export default function ArticleAnnotationLayer({
     setPendingPublicSelection({ text, range, rect });
   }, []);
 
-  const handleSaveNote = useCallback(async (noteContent: string) => {
+  const handleSaveNote = useCallback(async (noteContent: string, isPublicSelected: boolean = false) => {
     if (!pendingSelection || !session?.user?.id) return;
     const container = containerRef.current?.querySelector(CONTENT_SELECTOR) ?? containerRef.current;
     if (!container) return;
@@ -554,20 +598,32 @@ export default function ArticleAnnotationLayer({
         ...pos,
         color: 'yellow',
         note: noteContent,
+        isPublic: isPublicSelected,
       });
+
       allTempMarks.forEach(m => {
         const el = m as HTMLElement;
-        el.className = 'ks-highlight ks-highlight-note';
+        if (isPublicSelected) {
+          el.className = 'ks-author-highlight ks-author-note';
+          el.dataset.isAuthor = 'true';
+        } else {
+          el.className = 'ks-highlight ks-highlight-note';
+        }
         el.dataset.color = 'yellow';
         el.dataset.annotationId = saved.id;
         el.dataset.note = noteContent;
         el.onclick = (e) => {
           e.stopPropagation();
-          handleNoteClickFromDOM(saved.id, el.getBoundingClientRect());
+          handleNoteClickFromDOM(saved.id, el.getBoundingClientRect(), isPublicSelected);
         };
       });
-      setAnnotations(prev => [...prev, saved]);
-      import('sonner').then(({ toast }) => toast.success('Đã lưu ghi chú'));
+
+      if (isPublicSelected) {
+        setPublicAnnotations(prev => [...prev, saved]);
+      } else {
+        setAnnotations(prev => [...prev, saved]);
+      }
+      import('sonner').then(({ toast }) => toast.success(isPublicSelected ? 'Đã lưu ghi chú công khai' : 'Đã lưu ghi chú'));
     } catch {
       allTempMarks.forEach(m => removeMarkFromDOM(m as HTMLElement));
       import('sonner').then(({ toast }) => toast.error('Lưu ghi chú thất bại'));
@@ -575,7 +631,7 @@ export default function ArticleAnnotationLayer({
     setPendingSelection(null);
   }, [pendingSelection, session, articleId, handleNoteClickFromDOM]);
 
-  const handleSavePublicNote = useCallback(async (noteContent: string) => {
+  const handleSavePublicNote = useCallback(async (noteContent: string, isPublicSelected: boolean = true) => {
     if (!pendingPublicSelection || !session?.user?.id) return;
     const container = containerRef.current?.querySelector(CONTENT_SELECTOR) ?? containerRef.current;
     if (!container) return;
@@ -592,18 +648,28 @@ export default function ArticleAnnotationLayer({
         ...pos,
         color: 'yellow',
         note: noteContent,
-        isPublic: true,
+        isPublic: isPublicSelected,
       });
       allTempMarks.forEach(m => {
         const el = m as HTMLElement;
-        el.className = 'ks-author-highlight ks-author-note';
+        if (isPublicSelected) {
+          el.className = 'ks-author-highlight ks-author-note';
+          el.dataset.isAuthor = 'true';
+        } else {
+          el.className = 'ks-highlight ks-highlight-note';
+          delete el.dataset.isAuthor;
+        }
         el.dataset.color = 'yellow';
         el.dataset.annotationId = saved.id;
         el.dataset.note = noteContent;
-        el.dataset.isAuthor = 'true';
       });
-      setPublicAnnotations(prev => [...prev, saved]);
-      import('sonner').then(({ toast }) => toast.success('Đã lưu ghi chú công khai'));
+      
+      if (isPublicSelected) {
+        setPublicAnnotations(prev => [...prev, saved]);
+      } else {
+        setAnnotations(prev => [...prev, saved]);
+      }
+      import('sonner').then(({ toast }) => toast.success(isPublicSelected ? 'Đã lưu ghi chú công khai' : 'Đã lưu ghi chú'));
     } catch {
       allTempMarks.forEach(m => removeMarkFromDOM(m as HTMLElement));
       import('sonner').then(({ toast }) => toast.error('Lưu ghi chú thất bại'));
@@ -638,19 +704,38 @@ export default function ArticleAnnotationLayer({
     try { await deleteAnnotationAction(id); } catch {}
   }, []);
 
-  const handleUpdateNote = useCallback(async (id: string, note: string) => {
+  const handleUpdateNote = useCallback(async (id: string, note: string, isPublicUpdate: boolean) => {
     try {
-      const updated = await updateAnnotationAction(id, { note });
-      const isPublicAnn = publicAnnotations.some(a => a.id === id);
-      if (isPublicAnn) {
+      const updated = await updateAnnotationAction(id, { note, isPublic: isPublicUpdate });
+      const wasPublic = publicAnnotations.some(a => a.id === id);
+      
+      if (wasPublic && !isPublicUpdate) {
+        // Moved from public to private
+        setPublicAnnotations(prev => prev.filter(a => a.id !== id));
+        setAnnotations(prev => [...prev, updated]);
+      } else if (!wasPublic && isPublicUpdate) {
+        // Moved from private to public
+        setAnnotations(prev => prev.filter(a => a.id !== id));
+        setPublicAnnotations(prev => [...prev, updated]);
+      } else if (isPublicUpdate) {
         setPublicAnnotations(prev => prev.map(a => a.id === id ? updated : a));
       } else {
         setAnnotations(prev => prev.map(a => a.id === id ? updated : a));
       }
+
       const container = containerRef.current?.querySelector(CONTENT_SELECTOR) ?? containerRef.current;
       if (container) {
         const mark = container.querySelector(`[data-annotation-id="${id}"]`) as HTMLElement | null;
-        if (mark) mark.dataset.note = note;
+        if (mark) {
+          mark.dataset.note = note;
+          if (isPublicUpdate) {
+            mark.className = 'ks-author-highlight ks-author-note';
+            mark.dataset.isAuthor = 'true';
+          } else {
+            mark.className = 'ks-highlight ks-highlight-note';
+            delete mark.dataset.isAuthor;
+          }
+        }
       }
     } catch {}
     setActivePopover(null);
@@ -663,8 +748,10 @@ export default function ArticleAnnotationLayer({
         : annotations.find(a => a.id === activePopover.annotationId))
     : null;
 
+  const memoizedChildren = useMemo(() => children, [articleId]);
+
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="relative min-w-0 w-full">
       {session && (
         <TextSelectionToolbar
           onHighlight={handleHighlight}
@@ -676,7 +763,7 @@ export default function ArticleAnnotationLayer({
         />
       )}
 
-      {children}
+      {memoizedChildren}
 
       {/* Highlight Action Toolbar */}
       {hoveredHighlight && (
@@ -716,13 +803,14 @@ export default function ArticleAnnotationLayer({
         />
       )}
 
-      {/* Personal note editor */}
       <AnimatePresence>
         {pendingSelection && (
           <InlineNoteEditor
             selection={pendingSelection}
             onSave={handleSaveNote}
             onCancel={handleCancelNote}
+            isAuthor={isAuthor}
+            initialPublic={false}
           />
         )}
       </AnimatePresence>
@@ -734,6 +822,8 @@ export default function ArticleAnnotationLayer({
             selection={pendingPublicSelection}
             onSave={handleSavePublicNote}
             onCancel={handleCancelPublicNote}
+            isAuthor={isAuthor}
+            initialPublic={true}
           />
         )}
       </AnimatePresence>
@@ -745,8 +835,10 @@ export default function ArticleAnnotationLayer({
               key="edit-existing-note"
               selection={{ rect: activePopover.rect }}
               initialValue={activeAnnotation.note}
-              onSave={(newNote) => handleUpdateNote(activeAnnotation.id, newNote)}
+              initialPublic={activePopover.isAuthorNote}
+              onSave={(newNote, isPublicNew) => handleUpdateNote(activeAnnotation.id, newNote, isPublicNew)}
               onCancel={() => setIsEditingExistingNote(false)}
+              isAuthor={isAuthor}
             />
           ) : (
             <NotePopover
@@ -778,8 +870,8 @@ export default function ArticleAnnotationLayer({
             className="fixed z-[60] pointer-events-none"
             style={{
               left: hoveredNote.rect.left + hoveredNote.rect.width / 2,
-              top: hoveredNote.rect.top - 14,
-              transform: 'translateX(-50%) translateY(-100%)',
+              bottom: `calc(100vh - ${hoveredNote.rect.top}px + 10px)`,
+              transform: 'translateX(-50%)',
             }}
           >
             <div className="relative group">

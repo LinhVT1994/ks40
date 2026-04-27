@@ -72,7 +72,7 @@ export default function LoginForm() {
       )}
 
       <div>
-        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-zinc-400 px-1" htmlFor="email">Email</label>
+        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-slate-500 px-1" htmlFor="email">Email</label>
         <input
           className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700"
           id="email"
@@ -88,7 +88,7 @@ export default function LoginForm() {
 
       <div>
         <div className="flex justify-between items-center mb-2 px-1">
-          <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400" htmlFor="password">Mật khẩu</label>
+          <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-slate-500" htmlFor="password">Mật khẩu</label>
           <Link href="/forgot-password" alt-target="true" className="text-[10px] font-black uppercase tracking-wider text-primary hover:text-primary/80 transition-colors">Quên mật khẩu?</Link>
         </div>
         <div className="relative">
@@ -124,7 +124,7 @@ export default function LoginForm() {
             <polyline points="20 6 9 17 4 12" />
           </svg>
         </div>
-        <label htmlFor="remember" className="text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-primary transition-colors cursor-pointer select-none">
+        <label htmlFor="remember" className="text-[11px] font-bold text-zinc-500 dark:text-slate-500 hover:text-primary transition-colors cursor-pointer select-none">
           Ghi nhớ đăng nhập
         </label>
       </div>

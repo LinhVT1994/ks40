@@ -34,7 +34,7 @@ export default function ForgotPasswordForm() {
         </div>
         <div className="space-y-2">
           <h3 className="text-2xl font-black text-zinc-900 dark:text-white font-display">Kiểm tra hộp thư</h3>
-          <p className="text-sm text-zinc-500 dark:text-zinc-400 font-medium">
+          <p className="text-sm text-zinc-500 dark:text-slate-500 font-medium">
             Chúng tôi đã gửi một liên kết khôi phục mật khẩu đến <br />
             <span className="font-black text-zinc-900 dark:text-white">{submittedEmail}</span>
           </p>
@@ -57,8 +57,8 @@ export default function ForgotPasswordForm() {
       )}
 
       <div>
-        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-zinc-400 px-1" htmlFor="email">Địa chỉ Email</label>
-        <p className="text-[11px] font-medium text-zinc-400 dark:text-zinc-500 mb-4 px-1 leading-relaxed">
+        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-slate-500 px-1" htmlFor="email">Địa chỉ Email</label>
+        <p className="text-[11px] font-medium text-zinc-400 dark:text-slate-500 mb-4 px-1 leading-relaxed">
           Nhập địa chỉ email liên kết với tài khoản của bạn, chúng tôi sẽ gửi liên kết để đặt lại mật khẩu.
         </p>
         <input

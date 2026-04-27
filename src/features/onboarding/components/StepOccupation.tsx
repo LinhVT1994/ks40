@@ -72,7 +72,7 @@ export default function StepOccupation({ value, onChange, onNext, onSkip, isPend
                 </span>
                 {description && (
                   <span className={`block text-[10px] font-medium leading-normal ${
-                    isActive ? 'text-white/50 dark:text-zinc-400' : 'text-zinc-500 dark:text-slate-500'
+                    isActive ? 'text-white/50 dark:text-slate-500' : 'text-zinc-500 dark:text-slate-500'
                   }`}>
                     {description}
                   </span>

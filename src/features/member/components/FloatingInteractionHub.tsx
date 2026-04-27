@@ -72,7 +72,7 @@ export default function FloatingInteractionHub() {
             <Link href={`/profile/${author.username || author.id}`} className="text-[16px] font-bold text-zinc-900 dark:text-white leading-tight hover:text-primary transition-colors">
               {author.name}
             </Link>
-            <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 text-xs font-semibold whitespace-nowrap opacity-0 scale-95 group-hover/name:opacity-100 group-hover/name:scale-100 transition-all duration-200 shadow-lg origin-bottom">
+            <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-zinc-900 dark:bg-slate-100 text-white dark:text-zinc-900 text-xs font-semibold whitespace-nowrap opacity-0 scale-95 group-hover/name:opacity-100 group-hover/name:scale-100 transition-all duration-200 shadow-lg origin-bottom">
               Xem trang cá nhân
               <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-zinc-900 dark:border-t-zinc-100" />
             </div>

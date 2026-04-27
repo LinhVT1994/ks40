@@ -105,20 +105,20 @@ export default function ShareMenu({ title, url, trigger, align = 'right', classN
 
       {open && (
         <div
-          className={`absolute ${alignClass} top-full mt-2 z-50 w-56 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900 shadow-2xl p-1.5 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-150`}
+          className={`absolute ${alignClass} top-full mt-2 z-50 w-56 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-2xl p-1.5 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-150`}
           role="menu"
         >
-          <div className="px-3 py-2 flex items-center gap-2 text-[10px] font-black text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em]">
+          <div className="px-3 py-2 flex items-center gap-2 text-[10px] font-black text-zinc-400 dark:text-slate-500 uppercase tracking-[0.2em]">
             <Share2 className="w-3 h-3" /> Chia sẻ
           </div>
           <div className="flex flex-col">
             {items.map(item => {
               const content = (
                 <>
-                  <span className="w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-zinc-300 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                  <span className="w-7 h-7 flex items-center justify-center rounded-lg bg-zinc-100 dark:bg-white/5 text-zinc-700 dark:text-slate-400 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                     {item.icon}
                   </span>
-                  <span className="text-[13px] font-semibold text-zinc-700 dark:text-zinc-200">{item.label}</span>
+                  <span className="text-[13px] font-semibold text-zinc-700 dark:text-slate-300">{item.label}</span>
                 </>
               );
               const cls = 'group flex items-center gap-3 px-2.5 py-2 rounded-xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-colors';

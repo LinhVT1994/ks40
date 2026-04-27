@@ -21,7 +21,7 @@ export default function SocialLogin() {
     <button
       onClick={handleGoogle}
       disabled={isPending}
-      className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white dark:bg-white/[0.03] border border-zinc-200 dark:border-white/5 rounded-xl text-sm font-bold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/[0.08] hover:border-zinc-300 dark:hover:border-white/10 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed group"
+      className="w-full flex items-center justify-center gap-3 px-4 py-3 bg-white dark:bg-white/[0.03] border border-zinc-200 dark:border-white/5 rounded-xl text-sm font-bold text-zinc-700 dark:text-slate-400 hover:bg-zinc-50 dark:hover:bg-white/[0.08] hover:border-zinc-300 dark:hover:border-white/10 transition-all cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed group"
     >
       {isPending ? (
         <Loader2 className="w-5 h-5 animate-spin text-zinc-500" />

@@ -36,7 +36,7 @@ export default function Breadcrumbs({ items, className = '' }: BreadcrumbsProps)
               {item.label}
             </Link>
           ) : (
-            <span className="text-zinc-400 dark:text-zinc-500 whitespace-nowrap truncate max-w-[150px] sm:max-w-[300px]">
+            <span className="text-zinc-400 dark:text-slate-500 whitespace-nowrap truncate max-w-[150px] sm:max-w-[300px]">
               {item.label}
             </span>
           )}

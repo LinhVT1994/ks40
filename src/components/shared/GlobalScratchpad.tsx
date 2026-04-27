@@ -311,7 +311,7 @@ export default function GlobalScratchpad() {
              <input
                 type="text" value={scratchpadTitle}
                 onChange={e => { setScratchpadTitle(e.target.value); syncHtmlToMarkdown(); }}
-                className="flex-1 bg-transparent border-none outline-none text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400"
+                className="flex-1 bg-transparent border-none outline-none text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-slate-500"
              />
              <div className="flex items-center gap-1.5">
                 <button 
@@ -354,7 +354,7 @@ export default function GlobalScratchpad() {
           <div className="flex-1 relative bg-[#fdfdfc] dark:bg-slate-900/50 overflow-hidden" onMouseDown={e => e.stopPropagation()}>
             <div
               ref={editorRef} contentEditable suppressContentEditableWarning onInput={syncHtmlToMarkdown} onKeyDown={handleEditorKeyDown} onPaste={handlePaste}
-              className="w-full h-full p-6 pt-4 outline-none leading-snug text-[15px] text-zinc-800 dark:text-zinc-100 overflow-y-auto custom-scrollbar prose prose-sm prose-zinc dark:prose-invert max-w-none"
+              className="w-full h-full p-6 pt-4 outline-none leading-snug text-[15px] text-zinc-800 dark:text-slate-200 overflow-y-auto custom-scrollbar prose prose-sm prose-zinc dark:prose-invert max-w-none"
             />
             <div className="absolute bottom-4 right-5 pointer-events-none">
               <AnimatePresence>

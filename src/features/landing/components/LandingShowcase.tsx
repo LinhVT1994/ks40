@@ -87,7 +87,7 @@ export default function LandingShowcase() {
             >
               <div className="aspect-[16/10] rounded-[1.5rem] bg-zinc-100 dark:bg-white/5 overflow-hidden mb-8 group-hover:shadow-2xl transition-all duration-500 relative">
                 <div className="w-full h-full bg-gradient-to-br from-primary/10 to-accent-purple/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-700">
-                   <div className="p-1 px-3 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md text-[10px] font-black text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">Article Preview</div>
+                   <div className="p-1 px-3 rounded-full bg-white/20 dark:bg-white/10 backdrop-blur-md text-[10px] font-black text-zinc-500 dark:text-slate-500 uppercase tracking-widest">Article Preview</div>
                 </div>
                 {/* Visual Gradient Mask for the image area */}
                 <div className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-10 dark:opacity-20 group-hover:opacity-30 transition-opacity duration-700`} />

@@ -162,10 +162,10 @@ export default function ArticleContent({
           <div className="relative overflow-hidden px-0 py-2 mb-8 group">
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-1">
-                  <h2 className="font-bold text-2xl md:text-3xl text-zinc-900 dark:text-zinc-100">Tóm tắt nhanh</h2>
+                  <h2 data-annotation-target className="font-bold text-2xl md:text-3xl text-zinc-900 dark:text-slate-200">Tóm tắt nhanh</h2>
                 </div>
                   
-                <div className="text-zinc-800 dark:text-zinc-200 text-lg md:text-xl font-medium tracking-tight opacity-95">
+                <div className="text-zinc-800 dark:text-slate-400 text-lg md:text-xl font-medium tracking-tight">
                   <MarkdownViewer content={overview} compact />
                 </div>
               </div>
@@ -181,14 +181,14 @@ export default function ArticleContent({
             
               <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <h2 className="font-bold text-2xl md:text-3xl text-zinc-900 dark:text-zinc-100">Mục tiêu bài đọc</h2>
-                <p className="text-zinc-600 dark:text-zinc-400 text-lg md:text-xl font-medium">Sau khi đọc xong bài này, bạn sẽ:</p>
+                <h2 data-annotation-target className="font-bold text-2xl md:text-3xl text-zinc-900 dark:text-slate-200">Mục tiêu bài đọc</h2>
+                <p data-annotation-target className="text-zinc-600 dark:text-slate-500 text-lg md:text-xl font-medium">Sau khi đọc xong bài này, bạn sẽ:</p>
               </div>
 
                 <div className="max-w-none 
                   [&_ul]:list-none [&_ul]:p-0 [&_ul]:m-0 [&_ul]:space-y-4
                   [&_li]:relative [&_li]:pl-6
-                  [&_li]:text-zinc-700 dark:[&_li]:text-zinc-300
+                  [&_li]:text-zinc-700 dark:[&_li]:text-slate-400
                   [&_li]:text-lg md:[&_li]:text-xl font-medium tracking-tight
                   [&_li]:before:content-[''] [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:top-[0.65em]
                   [&_li]:before:w-1.5 [&_li]:before:h-1.5 [&_li]:before:rounded-full [&_li]:before:bg-primary
@@ -239,10 +239,10 @@ export default function ArticleContent({
             <div className="relative z-10 flex flex-col items-center text-center space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-1000 pointer-events-auto">
               {/* Text Content */}
               <div className="max-w-[420px] space-y-4">
-                <h3 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-zinc-100 tracking-tight leading-tight">
+                <h3 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-slate-200 tracking-tight leading-tight">
                   {!session ? 'Đăng nhập để đọc tiếp' : audience === 'PREMIUM' ? 'Mở khóa Premium' : 'Gia nhập Hội viên'}
                 </h3>
-                <p className="text-zinc-600 dark:text-zinc-400 leading-relaxed font-medium text-base sm:text-lg">
+                <p className="text-zinc-600 dark:text-slate-500 leading-relaxed font-medium text-base sm:text-lg">
                   {!session 
                     ? 'Tham gia cùng cộng đồng để tiếp tục khám phá các phân tích chuyên sâu và kinh nghiệm thực chiến.'
                     : audience === 'PREMIUM' 
@@ -264,7 +264,7 @@ export default function ArticleContent({
                     </a>
                     <a
                       href="/register"
-                      className="w-full h-14 flex items-center justify-center bg-transparent text-zinc-500 dark:text-zinc-400 font-bold rounded-2xl border border-zinc-300 dark:border-white/10 hover:border-zinc-500 hover:text-zinc-700 dark:hover:text-white transition-all active:scale-95 text-sm"
+                      className="w-full h-14 flex items-center justify-center bg-transparent text-zinc-500 dark:text-slate-400 font-bold rounded-2xl border border-zinc-300 dark:border-white/10 hover:border-zinc-500 hover:text-zinc-700 dark:hover:text-white transition-all active:scale-95 text-sm"
                     >
                       Đăng ký miễn phí
                     </a>

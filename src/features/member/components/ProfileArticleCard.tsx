@@ -57,7 +57,7 @@ export default function ProfileArticleCard({
           
           <div className="absolute top-3 left-3">
             <span
-              className="backdrop-blur-md max-md:backdrop-blur-sm bg-white/80 dark:bg-zinc-900/80 text-[10px] font-black uppercase px-3 py-1 rounded-md tracking-widest shadow-sm border border-white/20 dark:border-white/5"
+              className="backdrop-blur-md max-md:backdrop-blur-sm bg-white/80 dark:bg-slate-900/80 text-[10px] font-black uppercase px-3 py-1 rounded-md tracking-widest shadow-sm border border-white/20 dark:border-white/5"
               style={{ color: article.topic.color ?? '#3B82F6' }}
             >
               {article.topic.label}

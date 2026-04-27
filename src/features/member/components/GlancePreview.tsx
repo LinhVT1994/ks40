@@ -216,7 +216,7 @@ function GlancePopover({
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/20 dark:bg-black/20 backdrop-blur-md rounded-lg border border-white/20 text-[10px] font-bold text-zinc-600 dark:text-zinc-300">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/20 dark:bg-black/20 backdrop-blur-md rounded-lg border border-white/20 text-[10px] font-bold text-zinc-600 dark:text-slate-400">
                 <Clock className="w-3.5 h-3.5" />
                 {article.readTime} Phút Đọc 
               </div>
@@ -242,7 +242,7 @@ function GlancePopover({
                       <div className="h-2.5 bg-zinc-100 dark:bg-white/5 rounded-full w-[95%]" />
                    </div>
                  ) : data?.objectives ? (
-                   <div className="text-zinc-600 dark:text-zinc-400 text-[13px] leading-relaxed space-y-2">
+                   <div className="text-zinc-600 dark:text-slate-500 text-[13px] leading-relaxed space-y-2">
                       {data.objectives.split('\n').slice(0, 3).map((obj, i) => (
                         <div key={i} className="flex gap-2">
                            <div className="w-1.5 h-1.5 rounded-full bg-primary/40 mt-1.5 shrink-0" />
@@ -251,7 +251,7 @@ function GlancePopover({
                       ))}
                    </div>
                  ) : (
-                   <div className="text-zinc-400 dark:text-zinc-500 text-[13px] leading-relaxed italic pr-4">
+                   <div className="text-zinc-400 dark:text-slate-500 text-[13px] leading-relaxed italic pr-4">
                       Bài viết tập trung vào việc làm chủ các khái niệm {article.topic.label} chuyên sâu...
                    </div>
                  )}
@@ -263,7 +263,7 @@ function GlancePopover({
                <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-slate-500">
                   <Zap className="w-3.5 h-3.5" /> Tổng quan nội dung
                </div>
-               <div className="text-zinc-600 dark:text-zinc-300 text-[13px] leading-relaxed line-clamp-5">
+               <div className="text-zinc-600 dark:text-slate-400 text-[13px] leading-relaxed line-clamp-5">
                   {article.summary || "Thông tin tóm tắt cốt lõi cho bài viết này đang được cập nhật..."}
                </div>
             </div>

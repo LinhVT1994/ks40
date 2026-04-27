@@ -246,7 +246,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
                   rel="noopener noreferrer"
                   title={label}
                   className={cn(
-                    "group relative p-3 rounded-full text-zinc-400 bg-white/80 dark:bg-zinc-900/60 backdrop-blur-md border border-zinc-200 dark:border-white/5 transition-all duration-300 hover:-translate-x-1 hover:shadow-xl dark:hover:shadow-primary/5 shadow-zinc-200/50",
+                    "group relative p-3 rounded-full text-zinc-400 bg-white/80 dark:bg-slate-900/60 backdrop-blur-md border border-zinc-200 dark:border-white/5 transition-all duration-300 hover:-translate-x-1 hover:shadow-xl dark:hover:shadow-primary/5 shadow-zinc-200/50",
                     colors[key]
                   )}
                 >

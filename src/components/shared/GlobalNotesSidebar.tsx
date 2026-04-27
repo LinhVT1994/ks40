@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, FileEdit, Trash2, Search, BookOpen, ChevronLeft, ChevronDown, Pencil, StickyNote, Highlighter, SearchX, ExternalLink, Plus } from 'lucide-react';
+import { X, FileEdit, Trash2, Search, BookOpen, ChevronLeft, ChevronDown, Pencil, StickyNote, Highlighter, SearchX, ExternalLink, Plus, CheckSquare, Square, Check } from 'lucide-react';
 import type { ArticleAnnotation } from '@/features/articles/actions/annotation';
-import { deleteAnnotationAction, getAllUserAnnotationsAction, updateAnnotationAction } from '@/features/articles/actions/annotation';
+import { deleteAnnotationAction, deleteBulkAnnotationsAction, getAllUserAnnotationsAction, updateAnnotationAction } from '@/features/articles/actions/annotation';
 import MarkdownViewer from '@/components/shared/MarkdownViewer';
 import { useNotes } from '@/context/NotesContext';
 import { useRouter } from 'next/navigation';
@@ -119,7 +119,21 @@ function HighlightText({
 
 export default function GlobalNotesSidebar() {
   const router = useRouter();
-  const { isSidebarOpen, closeSidebar, currentArticleId, currentArticleTitle, openScratchpad, setScrollToNoteId } = useNotes();
+  const {
+    isSidebarOpen,
+    closeSidebar,
+    currentArticleId,
+    currentArticleTitle,
+    openScratchpad,
+    setScrollToNoteId,
+    isSelectMode,
+    selectedIds,
+    enterSelectMode,
+    exitSelectMode,
+    toggleSelected,
+    selectAll,
+    clearSelection,
+  } = useNotes();
   const [annotations, setAnnotations] = useState<ArticleAnnotation[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -213,7 +227,40 @@ export default function GlobalNotesSidebar() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+
+    const selectedSet = new Set(ids);
+    const selectedItems = annotations.filter(a => selectedSet.has(a.id));
+    const noteCount = selectedItems.filter(a => !!a.note).length;
+    const highlightCount = selectedItems.length - noteCount;
+
+    const breakdown =
+      noteCount && highlightCount
+        ? `${noteCount} ghi chú và ${highlightCount} highlight`
+        : noteCount
+          ? `${noteCount} ghi chú`
+          : `${highlightCount} highlight`;
+
+    if (!confirm(`Bạn có chắc muốn xóa ${breakdown}? Hành động này không thể hoàn tác.`)) return;
+
+    try {
+      const { deletedIds } = await deleteBulkAnnotationsAction(ids);
+      const deletedSet = new Set(deletedIds);
+      setAnnotations(prev => prev.filter(ann => !deletedSet.has(ann.id)));
+      if (selectedNote && deletedSet.has(selectedNote.id)) setSelectedNote(null);
+      exitSelectMode();
+    } catch {
+      // toast error
+    }
+  };
+
   const handleCardClick = (ann: ArticleAnnotation) => {
+    if (isSelectMode) {
+      toggleSelected(ann.id);
+      return;
+    }
     if (ann.articleId === currentArticleId) {
       setScrollToNoteId(ann.id);
     }
@@ -318,14 +365,34 @@ export default function GlobalNotesSidebar() {
                   {/* Header */}
                   <div className="px-5 py-3.5 border-b border-zinc-200/40 dark:border-white/5 flex items-center justify-between bg-white/40 dark:bg-slate-900/50">
                     <div className="min-w-0">
-                      <h2 className="text-lg font-black text-zinc-800 dark:text-white leading-tight">Ghi chú & Highlight</h2>
+                      <h2 className="text-lg font-black text-zinc-800 dark:text-white leading-tight">
+                        {isSelectMode
+                          ? selectedIds.size > 0
+                            ? `Đã chọn ${selectedIds.size}`
+                            : 'Chọn mục'
+                          : 'Ghi chú & Highlight'}
+                      </h2>
                     </div>
-                    <button
-                      onClick={closeSidebar}
-                      className="shrink-0 p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-xl text-zinc-400 hover:text-zinc-600 dark:hover:text-slate-200 transition-all duration-300"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      {filtered.length > 0 && (
+                        <button
+                          onClick={() => (isSelectMode ? exitSelectMode() : enterSelectMode())}
+                          className={`shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all duration-300 ${
+                            isSelectMode
+                              ? 'bg-primary/10 text-primary hover:bg-primary/15'
+                              : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-slate-200 hover:bg-zinc-100 dark:hover:bg-white/10'
+                          }`}
+                        >
+                          {isSelectMode ? 'Huỷ' : 'Chọn'}
+                        </button>
+                      )}
+                      <button
+                        onClick={closeSidebar}
+                        className="shrink-0 p-2 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-xl text-zinc-400 hover:text-zinc-600 dark:hover:text-slate-200 transition-all duration-300"
+                      >
+                        <X className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
 
                   {/* Search & Actions Area */}
@@ -346,7 +413,7 @@ export default function GlobalNotesSidebar() {
                             <X className="w-3.5 h-3.5" />
                           </button>
                         ) : (
-                          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-zinc-400 dark:text-zinc-500 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded px-1.5 py-0.5 pointer-events-none select-none">
+                          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-zinc-400 dark:text-slate-500 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded px-1.5 py-0.5 pointer-events-none select-none">
                             /
                           </kbd>
                         )}
@@ -409,17 +476,27 @@ export default function GlobalNotesSidebar() {
                       <>
                         {debouncedQuery && (
                           <div className="flex items-center justify-between px-1 pb-1">
-                            <span className="text-[10px] font-bold text-zinc-500 dark:text-zinc-400">{filtered.length} kết quả</span>
+                            <span className="text-[10px] font-bold text-zinc-500 dark:text-slate-500">{filtered.length} kết quả</span>
                             <button onClick={() => setSearchQuery('')} className="text-[10px] font-bold text-primary hover:underline">Xóa lọc</button>
                           </div>
                         )}
 
                         {paginated.map(ann => (
-                          <NoteCard key={ann.id} annotation={ann} highlightTokens={searchTokens} onClick={() => handleCardClick(ann)} onEdit={() => { closeSidebar(); openScratchpad(ann.id); }} onDelete={() => handleDelete(ann.id)} isCurrentArticle={ann.articleId === currentArticleId} />
+                          <NoteCard
+                            key={ann.id}
+                            annotation={ann}
+                            highlightTokens={searchTokens}
+                            onClick={() => handleCardClick(ann)}
+                            onEdit={() => { closeSidebar(); openScratchpad(ann.id); }}
+                            onDelete={() => handleDelete(ann.id)}
+                            isCurrentArticle={ann.articleId === currentArticleId}
+                            isSelectMode={isSelectMode}
+                            isSelected={selectedIds.has(ann.id)}
+                          />
                         ))}
 
                         {hasMore && (
-                          <button onClick={() => setVisibleCount(prev => prev + PAGE_SIZE)} className="group/more w-full mt-2 py-3 rounded-2xl border border-dashed border-zinc-200 dark:border-white/10 hover:border-primary/40 dark:hover:border-primary/40 hover:bg-primary/[0.03] transition-all flex items-center justify-center gap-2 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-primary">
+                          <button onClick={() => setVisibleCount(prev => prev + PAGE_SIZE)} className="group/more w-full mt-2 py-3 rounded-2xl border border-dashed border-zinc-200 dark:border-white/10 hover:border-primary/40 dark:hover:border-primary/40 hover:bg-primary/[0.03] transition-all flex items-center justify-center gap-2 text-[11px] font-bold text-zinc-500 dark:text-slate-500 hover:text-primary">
                             <ChevronDown className="w-3.5 h-3.5 group-hover/more:translate-y-0.5 transition-transform" />
                             <span>Xem thêm</span>
                             <span className="px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 group-hover/more:bg-primary/10 text-[9px] tracking-wider">{remaining}</span>
@@ -438,13 +515,39 @@ export default function GlobalNotesSidebar() {
                   </div>
 
                   <footer className="shrink-0 p-4 border-t border-zinc-200/40 dark:border-white/5 bg-white/60 dark:bg-slate-900/50 backdrop-blur-xl">
-                    <button 
-                      onClick={() => { closeSidebar(); openScratchpad(); }}
-                      className="group/new w-full py-2.5 rounded-xl border border-dashed border-zinc-200 dark:border-white/10 hover:border-primary/40 dark:hover:border-primary/40 hover:bg-primary/[0.03] transition-all flex items-center justify-center gap-2.5 text-[11px] font-bold text-zinc-500 dark:text-zinc-400 hover:text-primary"
-                    >
-                      <Plus className="w-3.5 h-3.5 transition-transform group-hover/new:rotate-90" />
-                      <span>Viết ghi chú mới</span>
-                    </button>
+                    {isSelectMode ? (
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => {
+                            const allFilteredIds = filtered.map(a => a.id);
+                            const allSelected = allFilteredIds.length > 0 && allFilteredIds.every(id => selectedIds.has(id));
+                            if (allSelected) clearSelection();
+                            else selectAll(allFilteredIds);
+                          }}
+                          className="shrink-0 px-3 py-2.5 rounded-xl text-[11px] font-bold text-zinc-600 dark:text-slate-300 hover:text-primary hover:bg-primary/5 border border-zinc-200 dark:border-white/10 hover:border-primary/30 transition-all"
+                        >
+                          {filtered.length > 0 && filtered.every(a => selectedIds.has(a.id))
+                            ? 'Bỏ chọn'
+                            : 'Chọn tất cả'}
+                        </button>
+                        <button
+                          onClick={handleBulkDelete}
+                          disabled={selectedIds.size === 0}
+                          className="flex-1 py-2.5 rounded-xl bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white font-bold text-[11px] transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-red-500/10 disabled:hover:text-red-500"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Xoá{selectedIds.size > 0 ? ` ${selectedIds.size} mục` : ''}</span>
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => { closeSidebar(); openScratchpad(); }}
+                        className="group/new w-full py-2.5 rounded-xl border border-dashed border-zinc-200 dark:border-white/10 hover:border-primary/40 dark:hover:border-primary/40 hover:bg-primary/[0.03] transition-all flex items-center justify-center gap-2.5 text-[11px] font-bold text-zinc-500 dark:text-slate-500 hover:text-primary"
+                      >
+                        <Plus className="w-3.5 h-3.5 transition-transform group-hover/new:rotate-90" />
+                        <span>Viết ghi chú mới</span>
+                      </button>
+                    )}
                   </footer>
                 </motion.div>
               ) : (
@@ -479,7 +582,7 @@ const COLOR_TOKENS: Record<string, ColorTokens> = {
     border: 'border-blue-200/60 dark:border-blue-500/10 hover:border-blue-300/50 dark:hover:border-blue-400/20',
     stripe: 'bg-gradient-to-b from-blue-400 to-sky-400 dark:from-blue-400/70 dark:to-sky-400/70',
     shadow: 'hover:shadow-blue-200/30 dark:hover:shadow-blue-500/5',
-    title: 'text-blue-900/80 dark:text-zinc-300',
+    title: 'text-blue-900/80 dark:text-slate-300',
     accent: 'text-blue-600 dark:text-blue-300/80',
     glow: 'bg-blue-400',
   },
@@ -488,7 +591,7 @@ const COLOR_TOKENS: Record<string, ColorTokens> = {
     border: 'border-emerald-200/60 dark:border-emerald-500/10 hover:border-emerald-300/50 dark:hover:border-emerald-400/20',
     stripe: 'bg-gradient-to-b from-emerald-400 to-teal-400 dark:from-emerald-400/70 dark:to-teal-400/70',
     shadow: 'hover:shadow-emerald-200/30 dark:hover:shadow-emerald-500/5',
-    title: 'text-emerald-900/80 dark:text-zinc-300',
+    title: 'text-emerald-900/80 dark:text-slate-300',
     accent: 'text-emerald-600 dark:text-emerald-300/80',
     glow: 'bg-emerald-400',
   },
@@ -497,7 +600,7 @@ const COLOR_TOKENS: Record<string, ColorTokens> = {
     border: 'border-rose-200/60 dark:border-rose-500/10 hover:border-rose-300/50 dark:hover:border-rose-400/20',
     stripe: 'bg-gradient-to-b from-rose-400 to-pink-400 dark:from-rose-400/70 dark:to-pink-400/70',
     shadow: 'hover:shadow-rose-200/30 dark:hover:shadow-rose-500/5',
-    title: 'text-rose-900/80 dark:text-zinc-300',
+    title: 'text-rose-900/80 dark:text-slate-300',
     accent: 'text-rose-600 dark:text-rose-300/80',
     glow: 'bg-rose-400',
   },
@@ -506,7 +609,7 @@ const COLOR_TOKENS: Record<string, ColorTokens> = {
     border: 'border-amber-200/60 dark:border-amber-500/10 hover:border-amber-300/50 dark:hover:border-amber-400/20',
     stripe: 'bg-gradient-to-b from-amber-400 to-orange-400 dark:from-amber-400/70 dark:to-orange-400/70',
     shadow: 'hover:shadow-amber-200/30 dark:hover:shadow-amber-500/5',
-    title: 'text-amber-900/80 dark:text-zinc-300',
+    title: 'text-amber-900/80 dark:text-slate-300',
     accent: 'text-amber-700 dark:text-amber-300/80',
     glow: 'bg-amber-400',
   },
@@ -522,6 +625,8 @@ function NoteCard({
   onEdit,
   onDelete,
   isCurrentArticle,
+  isSelectMode,
+  isSelected,
 }: {
   annotation: ArticleAnnotation;
   highlightTokens: string[];
@@ -529,6 +634,8 @@ function NoteCard({
   onEdit: () => void;
   onDelete: () => void;
   isCurrentArticle: boolean;
+  isSelectMode: boolean;
+  isSelected: boolean;
 }) {
   const hasNote = !!annotation.note;
   const hasHighlight = !!annotation.selectedText;
@@ -555,16 +662,33 @@ function NoteCard({
       exit={{ opacity: 0, x: -20 }}
       onClick={onClick}
       className={`group relative rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:-translate-y-[1px] hover:shadow-md ${tokens.bg} ${tokens.shadow} ${
-        isCurrentArticle
-          ? 'border border-primary/30 shadow-sm shadow-primary/5 ring-1 ring-primary/5'
-          : `border ${tokens.border}`
+        isSelectMode && isSelected
+          ? 'border-2 border-primary/60 shadow-md shadow-primary/10 ring-2 ring-primary/20'
+          : isCurrentArticle
+            ? 'border border-primary/30 shadow-sm shadow-primary/5 ring-1 ring-primary/5'
+            : `border ${tokens.border}`
       }`}
     >
 
       {/* Soft glow aura on hover */}
       <div className={`absolute -left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full blur-2xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 ${tokens.glow}`} />
 
-      <div className="relative px-5 py-4 space-y-2.5">
+      {/* Selection checkbox */}
+      {isSelectMode && (
+        <div className="absolute top-3 right-3 z-10">
+          <div
+            className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
+              isSelected
+                ? 'bg-primary border-primary'
+                : 'bg-white/70 dark:bg-slate-900/70 border-zinc-300 dark:border-white/20'
+            }`}
+          >
+            {isSelected && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
+          </div>
+        </div>
+      )}
+
+      <div className={`relative px-5 py-4 space-y-2.5 ${isSelectMode ? 'pr-12' : ''}`}>
         {/* Header row: article title + hover actions */}
         <div className="flex items-start justify-between gap-2">
           <p className={`text-[12px] font-black uppercase tracking-[0.14em] line-clamp-1 flex-1 leading-snug ${tokens.title}`}>
@@ -575,7 +699,7 @@ function NoteCard({
           </p>
 
           <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity -mr-1 -mt-1 shrink-0">
-            {hasNote && (
+            {hasNote && !isSelectMode && (
               <>
                 <button
                   onClick={e => {
@@ -604,7 +728,7 @@ function NoteCard({
 
         {/* Body: quote + note preview */}
         {hasHighlight && (
-          <p className="text-[14.5px] font-serif italic text-zinc-800 dark:text-zinc-100 leading-relaxed line-clamp-3">
+          <p className="text-[14.5px] font-serif italic text-zinc-800 dark:text-slate-200 leading-relaxed line-clamp-3">
             <span className={`mr-0.5 ${tokens.accent} opacity-60`}>"</span>
             <HighlightText text={annotation.selectedText} tokens={highlightTokens} />
             <span className={`ml-0.5 ${tokens.accent} opacity-60`}>"</span>
@@ -614,8 +738,8 @@ function NoteCard({
         {hasNote && (
           <div className={`flex items-start gap-2 text-[13.5px] leading-relaxed ${
             hasHighlight
-              ? `text-zinc-600 dark:text-zinc-400 pt-2 border-t border-dashed border-current/10`
-              : 'text-zinc-800 dark:text-zinc-100'
+              ? `text-zinc-600 dark:text-slate-400 pt-2 border-t border-dashed border-current/10`
+              : 'text-zinc-800 dark:text-slate-200'
           }`}>
             <StickyNote className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${tokens.accent}`} />
             <HighlightText
@@ -683,7 +807,7 @@ function NoteDetail({
         {/* The Citation */}
         <div className="relative">
           <div className="absolute -left-4 top-0 bottom-0 w-1.5 bg-primary/20 rounded-full" />
-          <p className="text-lg font-serif italic text-zinc-600 dark:text-zinc-300 leading-relaxed">
+          <p className="text-lg font-serif italic text-zinc-600 dark:text-slate-400 leading-relaxed">
             "{note.selectedText || 'Ghi chú tự do không có nội dung trích dẫn.'}"
           </p>
         </div>

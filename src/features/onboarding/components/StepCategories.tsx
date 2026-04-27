@@ -118,7 +118,7 @@ export default function StepCategories({ value, onChange, onBack, onComplete, on
                   >
                     <Check className="w-3 h-3" />
                   </button>
-                  <ChevronRight className={`w-3.5 h-3.5 text-zinc-400 dark:text-zinc-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                  <ChevronRight className={`w-3.5 h-3.5 text-zinc-400 dark:text-slate-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                 </div>
               </div>
 

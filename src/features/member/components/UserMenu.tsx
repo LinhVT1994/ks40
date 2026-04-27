@@ -82,7 +82,7 @@ export default function UserMenu() {
         <div className="absolute right-0 mt-3 w-56 origin-top-right bg-white dark:bg-slate-900 border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[60] py-2 overflow-hidden animate-in fade-in zoom-in duration-200">
           <div className="px-4 py-3 border-b border-zinc-200 dark:border-white/5">
             <p className="text-sm font-bold text-primary truncate">{user?.name}</p>
-            <p className="text-xs text-zinc-500 truncate">{user?.email}</p>
+            <p className="text-xs text-zinc-500 dark:text-slate-400 truncate">{user?.email}</p>
           </div>
 
           <div className="p-2 space-y-1">
@@ -97,7 +97,7 @@ export default function UserMenu() {
             )}
               <a
                 href="/me"
-                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-700 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-colors"
+                className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-700 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-slate-800 rounded-xl transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 <User className="w-4 h-4" /> Trang cá nhân

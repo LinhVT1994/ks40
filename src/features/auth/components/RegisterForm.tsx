@@ -49,7 +49,7 @@ export default function RegisterForm() {
         </div>
         <form onSubmit={handleContinue} className="space-y-4">
           <div>
-            <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-zinc-400 px-1" htmlFor="step1-email">Địa chỉ Email</label>
+            <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-slate-500 px-1" htmlFor="step1-email">Địa chỉ Email</label>
             <input
               className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700 font-medium"
               id="step1-email"
@@ -87,23 +87,23 @@ export default function RegisterForm() {
       )}
 
       <div>
-        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-zinc-400 px-1">Email</label>
-        <input className="w-full bg-zinc-100 dark:bg-white/5 border border-zinc-100 dark:border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-400 dark:text-zinc-500 cursor-not-allowed outline-none font-medium" type="email" value={email} disabled />
+        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-slate-500 px-1">Email</label>
+        <input className="w-full bg-zinc-100 dark:bg-white/5 border border-zinc-100 dark:border-white/5 rounded-xl px-4 py-3 text-sm text-zinc-400 dark:text-slate-500 cursor-not-allowed outline-none font-medium" type="email" value={email} disabled />
       </div>
 
       <div>
-        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-zinc-400 px-1" htmlFor="username">Username</label>
+        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-slate-500 px-1" htmlFor="username">Username</label>
         <input className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700 font-medium" id="username" name="username" placeholder="john_doe" type="text" required disabled={isPending} />
-        <p className="mt-1.5 px-1 text-[10px] text-zinc-400 dark:text-zinc-500 font-medium italic">Sử dụng chữ cái, số, dấu chấm hoặc gạch dưới. Đây sẽ là định danh hồ sơ của bạn.</p>
+        <p className="mt-1.5 px-1 text-[10px] text-zinc-400 dark:text-slate-500 font-medium italic">Sử dụng chữ cái, số, dấu chấm hoặc gạch dưới. Đây sẽ là định danh hồ sơ của bạn.</p>
       </div>
 
       <div>
-        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-zinc-400 px-1" htmlFor="name">Tên hiển thị</label>
+        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-slate-500 px-1" htmlFor="name">Tên hiển thị</label>
         <input className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700 font-medium" id="name" name="name" placeholder="Ví dụ: Anh Quân" type="text" required disabled={isPending} />
       </div>
 
       <div>
-        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-zinc-400 px-1" htmlFor="password">Mật khẩu</label>
+        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-slate-500 px-1" htmlFor="password">Mật khẩu</label>
         <div className="relative">
           <input className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 pr-10 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700 font-medium" id="password" name="password" placeholder="••••••••" type={showPassword ? 'text' : 'password'} required disabled={isPending} />
           <button type="button" onClick={() => setShowPassword(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-primary transition-colors p-1">
@@ -113,7 +113,7 @@ export default function RegisterForm() {
       </div>
 
       <div>
-        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-zinc-400 px-1" htmlFor="confirm">Xác nhận mật khẩu</label>
+        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-slate-500 px-1" htmlFor="confirm">Xác nhận mật khẩu</label>
         <input className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700 font-medium" id="confirm" name="confirm" placeholder="••••••••" type="password" required disabled={isPending} />
       </div>
 

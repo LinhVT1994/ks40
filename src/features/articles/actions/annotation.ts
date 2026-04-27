@@ -150,3 +150,40 @@ export async function deleteAnnotationAction(id: string): Promise<void> {
   revalidateTag(`article-annotations:${annotation.articleId}:${userId}`, 'default');
   if (annotation.isPublic) revalidateTag(`article-author-annotations:${annotation.articleId}`, 'default');
 }
+
+export async function deleteBulkAnnotationsAction(ids: string[]): Promise<{
+  deletedIds: string[];
+  failedIds: string[];
+}> {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) throw new Error('Unauthenticated');
+
+  if (ids.length === 0) return { deletedIds: [], failedIds: [] };
+
+  const owned = await db.articleAnnotation.findMany({
+    where: { id: { in: ids }, userId },
+    select: { id: true, articleId: true, isPublic: true },
+  });
+
+  const ownedIds = owned.map(a => a.id);
+  const ownedSet = new Set(ownedIds);
+  const failedIds = ids.filter(id => !ownedSet.has(id));
+
+  if (ownedIds.length === 0) return { deletedIds: [], failedIds };
+
+  await db.articleAnnotation.deleteMany({
+    where: { id: { in: ownedIds }, userId },
+  });
+
+  const articleIds = new Set(owned.map(a => a.articleId));
+  const publicArticleIds = new Set(owned.filter(a => a.isPublic).map(a => a.articleId));
+  for (const articleId of articleIds) {
+    revalidateTag(`article-annotations:${articleId}:${userId}`, 'default');
+  }
+  for (const articleId of publicArticleIds) {
+    revalidateTag(`article-author-annotations:${articleId}`, 'default');
+  }
+
+  return { deletedIds: ownedIds, failedIds };
+}

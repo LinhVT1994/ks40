@@ -142,7 +142,7 @@ export default function ProfileTopics({ initialTopics, availableTopics }: Props)
       {isManagingTopics && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-300">
            <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm" onClick={() => setIsManagingTopics(false)} />
-           <div className="relative w-full max-w-3xl bg-white dark:bg-zinc-900 rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col h-[75vh] max-h-[700px] border border-zinc-200 dark:border-white/10">
+           <div className="relative w-full max-w-3xl bg-white dark:bg-slate-900 rounded-[32px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col h-[75vh] max-h-[700px] border border-zinc-200 dark:border-white/10">
               <div className="p-5 pb-3 border-b border-zinc-200/60 dark:border-white/5 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3">
                   <div>
@@ -163,16 +163,16 @@ export default function ProfileTopics({ initialTopics, availableTopics }: Props)
                     placeholder="Tìm kiếm chủ đề..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 text-xs bg-white dark:bg-zinc-800 border-zinc-200 dark:border-transparent focus:border-primary/30 rounded-xl outline-none transition-all placeholder:text-zinc-400"
+                    className="w-full pl-10 pr-4 py-2 text-xs bg-white dark:bg-slate-800 border-zinc-200 dark:border-transparent focus:border-primary/30 rounded-xl outline-none transition-all placeholder:text-zinc-400"
                   />
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto p-5 sm:p-7 custom-scrollbar bg-white dark:bg-zinc-900 space-y-8">
+              <div className="flex-1 overflow-y-auto p-5 sm:p-7 custom-scrollbar bg-white dark:bg-slate-900 space-y-8">
                 {filteredGroupsForDialog.length > 0 ? (
                   filteredGroupsForDialog.map(group => (
                     <div key={group.id} className="space-y-3">
-                      <div className="sticky top-[-2px] bg-white dark:bg-zinc-900 z-10 flex items-center justify-between border-b border-zinc-100 dark:border-white/5 py-2.5 -mx-2 px-2">
+                      <div className="sticky top-[-2px] bg-white dark:bg-slate-900 z-10 flex items-center justify-between border-b border-zinc-100 dark:border-white/5 py-2.5 -mx-2 px-2">
                         <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-white/40">{group.label}</h3>
                         <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-400">{group.children.length} topics</span>
                       </div>
@@ -186,7 +186,7 @@ export default function ProfileTopics({ initialTopics, availableTopics }: Props)
                             className={`group flex items-center justify-between p-3 px-4 rounded-xl border transition-all text-left active:scale-[0.98] ${
                               topic.isFollowed
                                 ? 'bg-primary/5 dark:bg-primary/10 border-primary/30 dark:shadow-md dark:shadow-primary/5'
-                                : 'border-zinc-200/60 dark:border-white/5 bg-zinc-50/50 dark:bg-zinc-800/20 hover:border-primary/30 hover:bg-white dark:hover:bg-white/[0.02]'
+                                : 'border-zinc-200/60 dark:border-white/5 bg-zinc-50/50 dark:bg-slate-800/20 hover:border-primary/30 hover:bg-white dark:hover:bg-white/[0.02]'
                             }`}
                           >
                             <div className="flex-1 min-w-0 pr-3">
@@ -207,16 +207,16 @@ export default function ProfileTopics({ initialTopics, availableTopics }: Props)
                 )}
               </div>
 
-              <div className="p-5 bg-zinc-50/80 dark:bg-zinc-900 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between shrink-0">
+              <div className="p-5 bg-zinc-50/80 dark:bg-slate-900 border-t border-zinc-100 dark:border-white/5 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-2.5">
                   <div className="flex -space-x-1.5">
                     {followedTopicsList.slice(0, 4).map(t => (
-                      <div key={t.id} className="w-6 h-6 rounded-full border-2 border-white dark:border-zinc-900 bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center text-xs shadow-sm" title={t.label}>
+                      <div key={t.id} className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-900 bg-zinc-100 dark:bg-slate-800 flex items-center justify-center text-xs shadow-sm" title={t.label}>
                         {t.emoji}
                       </div>
                     ))}
                     {followedTopicsList.length > 4 && (
-                      <div className="w-6 h-6 rounded-full border-2 border-white dark:border-zinc-900 bg-primary text-white flex items-center justify-center text-[9px] font-black shadow-sm">
+                      <div className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-900 bg-primary text-white flex items-center justify-center text-[9px] font-black shadow-sm">
                         +{followedTopicsList.length - 4}
                       </div>
                     )}

@@ -138,7 +138,7 @@ export default function SettingsProfile({ user }: { user: SocialUser }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 block">Tên hiển thị</label>
+          <label className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-slate-500 mb-2 block">Tên hiển thị</label>
           <input
             type="text"
             value={name}
@@ -147,7 +147,7 @@ export default function SettingsProfile({ user }: { user: SocialUser }) {
           />
         </div>
         <div className="space-y-2">
-          <label className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 mb-2 block">
+          <label className="text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-slate-500 mb-2 block">
             Username <span className="text-zinc-400 font-medium normal-case tracking-normal">(dùng làm URL profile)</span>
           </label>
           <div className="relative">

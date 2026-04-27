@@ -1,22 +1,58 @@
 'use client';
 
 import Image from 'next/image';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { Check, Copy, X, ZoomIn } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import {
+  vscDarkPlus,
+  dracula,
+  okaidia,
+  synthwave84,
+  nord,
+} from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { slugify } from '@/lib/slugify';
 import { cn } from '@/lib/utils';
 
 const MONO_FONT = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
+
+const CODE_THEME_MAP: Record<string, { [key: string]: React.CSSProperties }> = {
+  classic: vscDarkPlus,
+  dracula,
+  monokai: okaidia,
+  synthwave: synthwave84,
+  nord,
+};
+
+const DEFAULT_CODE_THEME = 'dracula';
+
+function useCodeTheme() {
+  const [themeId, setThemeId] = useState<string>(DEFAULT_CODE_THEME);
+
+  useEffect(() => {
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('ks-code-theme') : null;
+    if (stored && CODE_THEME_MAP[stored]) setThemeId(stored);
+
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail;
+      if (typeof detail === 'string' && CODE_THEME_MAP[detail]) setThemeId(detail);
+    };
+    window.addEventListener('code-theme-changed', handler);
+    return () => window.removeEventListener('code-theme-changed', handler);
+  }, []);
+
+  return CODE_THEME_MAP[themeId] ?? CODE_THEME_MAP[DEFAULT_CODE_THEME];
+}
 
 const CodeBlock = React.memo(({ node, inline, className, children, ...props }: any) => {
   const content = Array.isArray(children) ? children.join('') : String(children);
   const match = /language-(\w+)/.exec(className || '');
   const [copied, setCopied] = useState(false);
   const lang = match ? match[1] : 'text';
+  const codeTheme = useCodeTheme();
 
   const handleCopy = () => {
     navigator.clipboard.writeText(content.replace(/\n$/, ''));
@@ -30,7 +66,7 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
     return (
       <div
         className={`relative my-10 rounded-xl overflow-hidden group not-prose border w-full transform-gpu isolation-isolate
-          border-zinc-200 bg-zinc-50/50 dark:border-white/10 dark:bg-black/40
+          border-zinc-200 dark:border-white/10
           ${PROSE_WIDTH}`}
       >
         {/* Copy Button */}
@@ -47,7 +83,7 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
         {/* Language Badge */}
         {match && (
           <div className="absolute bottom-3 right-4 z-10 opacity-40 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 dark:text-zinc-500">{lang}</span>
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 dark:text-slate-500">{lang}</span>
           </div>
         )}
 
@@ -55,14 +91,13 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
           scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-white/10 scrollbar-track-transparent">
           {match ? (
             <SyntaxHighlighter
-              style={{}}
+              style={codeTheme}
               language={lang}
               PreTag="div"
               className="syntax-highlighter"
               customStyle={{
                 margin: 0,
                 padding: '1.25rem 1.5rem',
-                background: 'transparent',
                 fontSize: 'inherit',
                 lineHeight: 'inherit',
                 fontFamily: MONO_FONT,
@@ -74,7 +109,7 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
               {content.replace(/\n$/, '')}
             </SyntaxHighlighter>
           ) : (
-            <pre style={{ fontFamily: MONO_FONT }} className="px-6 py-5 text-sm leading-relaxed whitespace-pre text-zinc-700 dark:text-zinc-300">
+            <pre style={{ fontFamily: MONO_FONT }} className="px-6 py-5 text-sm leading-relaxed whitespace-pre text-zinc-700 bg-zinc-50/50 dark:bg-black/40 dark:text-slate-400">
               {content}
             </pre>
           )}
@@ -84,7 +119,7 @@ const CodeBlock = React.memo(({ node, inline, className, children, ...props }: a
   }
 
   return (
-    <code className="bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-zinc-200 px-1.5 py-0.5 rounded-md text-[0.85em] font-mono before:content-none after:content-none border border-zinc-200 dark:border-transparent break-words" {...props}>
+    <code className="bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-slate-400 px-1.5 py-0.5 rounded-md text-[0.85em] font-mono before:content-none after:content-none border border-zinc-200 dark:border-transparent break-words" {...props}>
       {content}
     </code>
   );
@@ -147,10 +182,10 @@ function TableLightbox({ children, onClose }: { children: React.ReactNode; onClo
       onClick={onClose}
     >
       <div
-        className="relative max-w-[95vw] max-h-[90vh] overflow-auto rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 shadow-2xl animate-in zoom-in-95 duration-200"
+        className="relative max-w-[95vw] max-h-[90vh] overflow-auto rounded-2xl bg-white dark:bg-slate-900 border border-zinc-200 dark:border-white/10 shadow-2xl animate-in zoom-in-95 duration-200"
         onClick={e => e.stopPropagation()}
       >
-<div className="overflow-x-auto rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900">{children}</div>
+<div className="overflow-x-auto rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-slate-900">{children}</div>
       </div>
     </div>
   );
@@ -162,15 +197,24 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
 
   if (compact) {
     return (
-      <div className="prose prose-xl prose-zinc dark:prose-invert max-w-none
+      <div className="prose prose-xl prose-slate max-w-none dark:text-slate-400
         prose-p:m-0 prose-p:leading-relaxed
-        prose-strong:text-zinc-900 dark:prose-strong:text-zinc-100 prose-strong:font-bold
+        prose-strong:text-zinc-900 dark:prose-strong:text-slate-200 prose-strong:font-bold
         prose-em:italic
         prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline
         prose-code:text-[0.85em] prose-code:bg-zinc-100 dark:prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:before:content-none prose-code:after:content-none
-        prose-blockquote:border-l-0 prose-blockquote:py-6 prose-blockquote:px-0 prose-blockquote:italic prose-blockquote:text-zinc-600 dark:prose-blockquote:text-zinc-400 prose-blockquote:font-medium prose-blockquote:relative prose-blockquote:before:content-['\201C'] prose-blockquote:before:absolute prose-blockquote:before:top-0 prose-blockquote:before:-left-4 prose-blockquote:before:text-5xl prose-blockquote:before:text-primary/10 prose-blockquote:after:content-['\201D'] prose-blockquote:after:absolute prose-blockquote:after:bottom-0 prose-blockquote:after:-right-4 prose-blockquote:after:text-5xl prose-blockquote:after:text-primary/10
+        prose-blockquote:border-l-0 prose-blockquote:py-6 prose-blockquote:px-0 prose-blockquote:italic prose-blockquote:text-zinc-600 dark:prose-blockquote:text-slate-400 prose-blockquote:font-medium prose-blockquote:relative prose-blockquote:before:content-['\201C'] prose-blockquote:before:absolute prose-blockquote:before:top-0 prose-blockquote:before:-left-4 prose-blockquote:before:text-5xl prose-blockquote:before:text-primary/10 prose-blockquote:after:content-['\201D'] prose-blockquote:after:absolute prose-blockquote:after:bottom-0 prose-blockquote:after:-right-4 prose-blockquote:after:text-5xl prose-blockquote:after:text-primary/10
       ">
-        <ReactMarkdown remarkPlugins={[remarkGfm]} allowedElements={['p','strong','em','a','code','br','ul','ol','li','blockquote']} unwrapDisallowed>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          allowedElements={['p','strong','em','a','code','br','ul','ol','li','blockquote']}
+          unwrapDisallowed
+          components={{
+            p: ({ children }: any) => <p data-annotation-target>{children}</p>,
+            li: ({ children }: any) => <li data-annotation-target>{children}</li>,
+            blockquote: ({ children }: any) => <blockquote>{children}</blockquote>,
+          }}
+        >
           {content}
         </ReactMarkdown>
       </div>
@@ -182,9 +226,9 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
     {lightbox && <ImageLightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
     {tableLightbox && <TableLightbox onClose={() => setTableLightbox(null)}>{tableLightbox}</TableLightbox>}
     <div className="w-full min-w-0 break-words">
-      <div className={`prose prose-xl prose-zinc dark:prose-invert max-w-none w-full min-w-0
+      <div className={`prose prose-xl prose-slate max-w-none w-full min-w-0 dark:text-slate-400
         prose-headings:font-display prose-headings:font-bold prose-headings:tracking-tight
-        prose-headings:text-zinc-900 dark:prose-headings:text-zinc-100
+        prose-headings:text-zinc-900 dark:prose-headings:text-slate-200
         prose-h1:text-page sm:prose-h1:text-4xl lg:prose-h1:text-4xl prose-h1:mt-10 prose-h1:mb-8
         prose-h2:text-2xl sm:prose-h2:text-3xl lg:prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-6
         prose-h3:text-xl sm:prose-h3:text-2xl lg:prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-5
@@ -192,17 +236,18 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
         prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline prose-a:underline-offset-4
         prose-ul:list-disc prose-ul:pl-8 prose-ul:space-y-4 prose-ul:max-w-[720px] prose-ul:mx-auto prose-ul:mb-8
         prose-ol:list-decimal prose-ol:pl-8 prose-ol:space-y-4 prose-ol:max-w-[720px] prose-ol:mx-auto
-        prose-li:text-zinc-700 dark:prose-li:text-zinc-300 prose-li:marker:text-primary prose-li:leading-relaxed prose-li:text-lg lg:prose-li:text-xl
-        prose-strong:text-zinc-900 dark:prose-strong:text-zinc-100 prose-strong:font-bold
+        prose-li:text-zinc-700 dark:prose-li:text-slate-400 prose-li:marker:text-primary prose-li:leading-relaxed prose-li:text-lg lg:prose-li:text-xl
+        prose-strong:text-zinc-900 dark:prose-strong:text-slate-200 prose-strong:font-bold
         prose-hr:hidden
       `}>
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           rehypePlugins={[rehypeRaw]}
           components={{
+            li: ({ children }: any) => <li data-annotation-target>{children}</li>,
             blockquote: ({ children }: any) => (
               <blockquote className={cn(
-                "not-prose border-none bg-transparent py-8 px-0 my-10 relative group text-zinc-600 dark:text-zinc-400 italic font-medium leading-relaxed text-xl lg:text-2xl",
+                "not-prose border-none bg-transparent py-8 px-0 my-10 relative group text-zinc-600 dark:text-slate-400 italic font-medium leading-relaxed text-xl lg:text-2xl",
                 PROSE_WIDTH
               )}>
                 <span className="absolute top-0 -left-10 text-6xl text-primary/10 font-serif pointer-events-none group-hover:text-primary/20 transition-colors select-none">
@@ -216,12 +261,12 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
             p: ({ node, children, ...props }: any) => {
               const isImageOnly = node?.children?.length === 1 && node.children[0]?.tagName === 'img';
               if (isImageOnly) return <>{children}</>;
-              return <div className={`mb-8 last:mb-0 text-zinc-700 dark:text-zinc-200 text-lg lg:text-xl leading-[1.85] ${PROSE_WIDTH}`} {...props}>{children}</div>;
+              return <div data-annotation-target className={`mb-8 last:mb-0 text-zinc-700 dark:text-slate-400 text-lg lg:text-xl leading-[1.85] ${PROSE_WIDTH}`} {...props}>{children}</div>;
             },
             table: ({ children }: any) => {
               const tableEl = <table className="w-full min-w-max text-base text-left border-collapse">{children}</table>;
               return (
-                <div className={`relative my-12 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900/50 shadow-md dark:shadow-none not-prose animate-in fade-in zoom-in-95 duration-700 group/table ${WIDE_WIDTH}`}>
+                <div className={`relative my-12 rounded-xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-slate-900/50 shadow-md dark:shadow-none not-prose animate-in fade-in zoom-in-95 duration-700 group/table ${WIDE_WIDTH}`}>
                   <button
                     onClick={() => setTableLightbox(tableEl)}
                     className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-zinc-100 dark:bg-white/10 text-zinc-400 hover:text-zinc-700 dark:hover:text-white opacity-0 group-hover/table:opacity-100 transition-all"
@@ -237,10 +282,10 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
               <thead className="bg-zinc-50/30 dark:bg-white/[0.03] border-b border-zinc-200 dark:border-white/10">{children}</thead>
             ),
             th: ({ children }: any) => (
-              <th className="px-5 py-3 text-sm font-bold text-zinc-500 dark:text-zinc-400">{children}</th>
+              <th className="px-5 py-3 text-sm font-bold text-zinc-500 dark:text-slate-500">{children}</th>
             ),
             td: ({ children }: any) => (
-              <td className="px-5 py-3 text-zinc-600 dark:text-zinc-300 border-b border-zinc-100 dark:border-white/5 group-last:border-0">{children}</td>
+              <td data-annotation-target className="px-5 py-3 text-zinc-600 dark:text-slate-400 border-b border-zinc-100 dark:border-white/5 group-last:border-0">{children}</td>
             ),
             tr: ({ children }: any) => (
               <tr className="group transition-colors hover:bg-zinc-50/50 dark:hover:bg-white/[0.02]">{children}</tr>
@@ -266,10 +311,10 @@ export default function MarkdownViewer({ content, compact = false }: { content: 
                 )}
               </div>
             ) : null,
-            h1: ({ children }: any) => { const id = slugify(String(children)); return <h1 id={id} className={`${PROSE_WIDTH}`}>{children}</h1>; },
-            h2: ({ children }: any) => { const id = slugify(String(children)); return <h2 id={id} className={`${PROSE_WIDTH}`}>{children}</h2>; },
-            h3: ({ children }: any) => { const id = slugify(String(children)); return <h3 id={id} className={`${PROSE_WIDTH}`}>{children}</h3>; },
-            h4: ({ children }: any) => <h4 className={`${PROSE_WIDTH}`}>{children}</h4>,
+            h1: ({ children }: any) => { const id = slugify(String(children)); return <h1 id={id} data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h1>; },
+            h2: ({ children }: any) => { const id = slugify(String(children)); return <h2 id={id} data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h2>; },
+            h3: ({ children }: any) => { const id = slugify(String(children)); return <h3 id={id} data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h3>; },
+            h4: ({ children }: any) => <h4 data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h4>,
           }}
         >
           {content}

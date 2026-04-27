@@ -72,7 +72,7 @@ export default function OnboardingWizard({ userName }: { userName?: string }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md rounded-[2.5rem] shadow-2xl shadow-primary/5"
+            className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-white/80 dark:bg-slate-950/80 backdrop-blur-md rounded-[2.5rem] shadow-2xl shadow-primary/5"
           >
             <div className="relative">
               <div className="w-16 h-16 border-4 border-primary/10 border-t-primary rounded-full animate-spin" />

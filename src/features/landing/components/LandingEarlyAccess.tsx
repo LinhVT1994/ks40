@@ -18,7 +18,7 @@ export default function LandingEarlyAccess() {
            initial={{ opacity: 0, scale: 0.95 }}
            whileInView={{ opacity: 1, scale: 1 }}
            viewport={{ once: true }}
-           className="bg-white dark:bg-zinc-950 border border-zinc-200 dark:border-white/10 rounded-[3rem] p-12 md:p-20 text-center shadow-xl shadow-zinc-200/50 dark:shadow-2xl dark:shadow-black relative overflow-hidden"
+           className="bg-white dark:bg-slate-950 border border-zinc-200 dark:border-white/10 rounded-[3rem] p-12 md:p-20 text-center shadow-xl shadow-zinc-200/50 dark:shadow-2xl dark:shadow-black relative overflow-hidden"
         >
            {/* Decorative elements — hidden on mobile */}
            <div className="hidden md:block absolute -top-24 -right-24 w-64 h-64 bg-primary/10 dark:bg-primary/20 rounded-full blur-[60px]" />
@@ -39,7 +39,7 @@ export default function LandingEarlyAccess() {
                 TRỞ THÀNH <br /> <span className="bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">EARLY ADOPTER</span>
               </h2>
 
-              <p className="text-zinc-600 dark:text-zinc-400 text-lg md:text-xl max-w-2xl mx-auto mb-16 leading-relaxed">
+              <p className="text-zinc-600 dark:text-slate-500 text-lg md:text-xl max-w-2xl mx-auto mb-16 leading-relaxed">
                 Chúng tôi tin vào sức mạnh của những người tiên phong. Gia nhập Lenote trong giai đoạn khởi đầu để nhận được các quyền lợi không bao giờ lặp lại.
               </p>
 
@@ -66,7 +66,7 @@ export default function LandingEarlyAccess() {
                         </motion.div>
                         <div className="text-center">
                            <h4 className="text-zinc-800 dark:text-white font-bold mb-2">{item.title}</h4>
-                           <p className="text-xs text-zinc-500 dark:text-zinc-400">{item.desc}</p>
+                           <p className="text-xs text-zinc-500 dark:text-slate-500">{item.desc}</p>
                         </div>
                      </motion.div>
                  ))}
@@ -95,7 +95,7 @@ export default function LandingEarlyAccess() {
                 <div className="absolute -inset-1 bg-primary/20 blur-xl opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500 rounded-3xl -z-10" />
               </motion.div>
 
-              <p className="mt-8 text-zinc-400 dark:text-zinc-500 text-xs font-medium italic">
+              <p className="mt-8 text-zinc-400 dark:text-slate-500 text-xs font-medium italic">
                 Cơ hội chỉ dành cho 10,000 thành viên đầu tiên. Còn lại 8,421 suất.
               </p>
            </div>

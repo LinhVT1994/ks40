@@ -586,7 +586,7 @@ function RatingsDashboard({ data: initialData }: { data: AuthorRatingStats | nul
       <div className="space-y-4">
         <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Nhận xét mới nhất</h4>
         {initialData.ratings.filter(r => r.review).slice(0, 10).map(r => (
-          <div key={`${r.userId}-${r.createdAt}`} className="flex gap-4 p-5 rounded-[2rem] bg-white dark:bg-zinc-900/40 border border-zinc-100 dark:border-white/5 transition-all hover:bg-zinc-50 dark:hover:bg-white/[0.02]">
+          <div key={`${r.userId}-${r.createdAt}`} className="flex gap-4 p-5 rounded-[2rem] bg-white dark:bg-slate-900/40 border border-zinc-100 dark:border-white/5 transition-all hover:bg-zinc-50 dark:hover:bg-white/[0.02]">
             <div className="relative w-10 h-10 shrink-0">
                <Image src={r.user.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(r.user.name)}&size=32`} alt={r.user.name} fill unoptimized sizes="40px" className="rounded-full object-cover" />
             </div>
@@ -665,7 +665,7 @@ export default function ProfileClient({
               <Image src={user.avatarUrl} alt={user.name ?? ''} fill unoptimized priority sizes="80px" className="object-cover rounded-full transition-transform duration-500 group-hover:scale-110" />
             </div>
             {isOwner && (
-               <Link href="/settings" className="absolute -bottom-1 -right-1 p-1.5 bg-white dark:bg-zinc-800 rounded-full shadow-lg border border-zinc-100 dark:border-white/10 text-zinc-500 hover:text-primary transition-all duration-300 hover:scale-110" title="Cài đặt">
+               <Link href="/settings" className="absolute -bottom-1 -right-1 p-1.5 bg-white dark:bg-slate-800 rounded-full shadow-lg border border-zinc-100 dark:border-white/10 text-zinc-500 hover:text-primary transition-all duration-300 hover:scale-110" title="Cài đặt">
                   <Settings className="w-3.5 h-3.5" />
                </Link>
             )}
@@ -738,7 +738,7 @@ export default function ProfileClient({
               const url = (user as any)[key];
               if (!url) return null;
               return (
-                <a key={key} href={url} target="_blank" rel="noopener noreferrer" title={label} className="group p-3 rounded-full text-zinc-400 bg-white dark:bg-zinc-900/60 backdrop-blur-md border border-zinc-100 dark:border-white/5 transition-all hover:-translate-x-1 hover:text-primary hover:border-primary/20 shadow-sm">
+                <a key={key} href={url} target="_blank" rel="noopener noreferrer" title={label} className="group p-3 rounded-full text-zinc-400 bg-white dark:bg-slate-900/60 backdrop-blur-md border border-zinc-100 dark:border-white/5 transition-all hover:-translate-x-1 hover:text-primary hover:border-primary/20 shadow-sm">
                   <Icon className="w-4 h-4 transition-transform group-hover:scale-110" />
                 </a>
               );
