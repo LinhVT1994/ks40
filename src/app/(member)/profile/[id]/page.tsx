@@ -108,7 +108,13 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
 
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-40">
         <PublicProfileClient
-          user={{ ...user, avatarUrl, totalViews, totalLikes }}
+          user={{
+            ...user,
+            avatarUrl,
+            totalViews,
+            totalLikes,
+            _count: (user as any)._count || { articles: 0 },
+          } as any}
           articles={articles as any}
           followers={followersArr}
           isFollowing={authorInfo?.isFollowing ?? false}
