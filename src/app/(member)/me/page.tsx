@@ -81,7 +81,8 @@ export default async function PersonalDashboardPage() {
             avatarUrl,
             totalViews,
             totalLikes,
-          }}
+            _count: (user as any)._count || { articles: 0 }
+          } as any}
           articles={articles as any}
           totalArticles={totalArticles}
           totalArticlePages={totalArticlePages}
