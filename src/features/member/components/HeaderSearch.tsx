@@ -32,9 +32,14 @@ export default function HeaderSearch() {
   const search = (q: string) => {
     if (!q.trim()) { setResults([]); setOpen(false); return; }
     startTransition(async () => {
-      const { articles } = await getArticlesAction({ search: q, limit: 5 });
-      setResults(articles);
-      setOpen(true);
+      try {
+        const result = await getArticlesAction({ search: q, limit: 5, isQuickSearch: true });
+        setResults(result?.articles || []);
+        setOpen(true);
+      } catch (error) {
+        console.error('Search failed:', error);
+        setResults([]);
+      }
     });
   };
 

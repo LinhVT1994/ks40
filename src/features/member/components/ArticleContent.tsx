@@ -145,7 +145,7 @@ export default function ArticleContent({
           <div className="relative overflow-hidden px-0 py-2 mb-8 group">
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-1">
-                  <h2 data-annotation-target className="font-bold text-2xl md:text-3xl text-zinc-900 dark:text-slate-200">Tóm tắt nhanh</h2>
+                  <h2 id="overview" data-annotation-target className="font-bold text-2xl md:text-3xl text-zinc-900 dark:text-slate-200">Tóm tắt nhanh</h2>
                 </div>
                   
                 <div className="text-zinc-800 dark:text-slate-400 text-lg md:text-xl font-medium tracking-tight">
@@ -164,7 +164,7 @@ export default function ArticleContent({
             
               <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-2">
-                <h2 data-annotation-target className="font-bold text-2xl md:text-3xl text-zinc-900 dark:text-slate-200">Mục tiêu bài đọc</h2>
+                <h2 id="objectives" data-annotation-target className="font-bold text-2xl md:text-3xl text-zinc-900 dark:text-slate-200">Mục tiêu bài đọc</h2>
                 <p data-annotation-target className="text-zinc-600 dark:text-slate-500 text-lg md:text-xl font-medium">Sau khi đọc xong bài này, bạn sẽ:</p>
               </div>
 

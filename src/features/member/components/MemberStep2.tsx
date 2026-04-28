@@ -150,7 +150,10 @@ export default function MemberStep2({
       cursorPos = lineStart + syntax.length + (end - lineStart);
     }
     setContent(newContent);
-    setTimeout(() => { textarea.focus(); textarea.setSelectionRange(cursorPos, cursorPos); }, 0);
+    setTimeout(() => { 
+      textarea.focus({ preventScroll: true }); 
+      textarea.setSelectionRange(cursorPos, cursorPos); 
+    }, 0);
   }, [content, setContent]);
   
   const readTime = Math.max(1, Math.ceil(content.split(/\s+/).length / 200));
@@ -210,7 +213,7 @@ export default function MemberStep2({
       <div className="flex items-center justify-end px-4 py-1.5 border-b border-zinc-300 dark:border-white/5 bg-transparent shrink-0">
         <div className="flex items-center bg-zinc-100 dark:bg-white/5 rounded-xl p-0.5 gap-0.5 shrink-0">
           {(['editor', 'split', 'preview'] as ViewMode[]).map((mode) => (
-             <button key={mode} onClick={() => setViewMode(mode)}
+             <button type="button" key={mode} onClick={() => setViewMode(mode)}
                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
                  viewMode === mode ? 'bg-white dark:bg-slate-700 text-zinc-800 dark:text-white shadow-sm' : 'text-zinc-500'
                }`}>
@@ -237,11 +240,12 @@ export default function MemberStep2({
           <button
             onClick={handleInsertVideo}
             disabled={!videoUrl.trim()}
+            type="button"
             className="px-3 py-1.5 text-xs font-bold bg-zinc-800 dark:bg-primary text-white rounded-lg hover:opacity-90 transition-all disabled:opacity-40"
           >
             Chèn
           </button>
-          <button onClick={() => setVideoPromptOpen(false)} className="text-zinc-500 hover:text-zinc-600 dark:hover:text-white p-1">✕</button>
+          <button type="button" onClick={() => setVideoPromptOpen(false)} className="text-zinc-500 hover:text-zinc-600 dark:hover:text-white p-1">✕</button>
         </div>
       )}
 
@@ -256,6 +260,7 @@ export default function MemberStep2({
             >
                 <div className={`flex flex-col ${summaryOpen && metadataHeight ? 'flex-1 min-h-0' : ''}`}>
                    <button
+                     type="button"
                      onClick={() => { setSummaryOpen(v => !v); setMetadataHeight(null); }}
                      className="w-full flex items-center gap-2 px-4 py-1.5 text-left text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-primary transition-colors shrink-0"
                    >
@@ -280,6 +285,7 @@ export default function MemberStep2({
 
                 <div className={`flex flex-col ${objOpen && metadataHeight ? 'flex-1 min-h-0' : ''}`}>
                    <button
+                     type="button"
                      onClick={() => { setObjOpen(v => !v); setMetadataHeight(null); }}
                      className="w-full flex items-center gap-2 px-4 py-1.5 text-left text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-emerald-500 transition-colors shrink-0"
                    >
@@ -339,7 +345,7 @@ export default function MemberStep2({
                   };
 
                   return (
-                    <button key={i} onClick={handleClick} disabled={isImageBtn && uploadingImage}
+                    <button type="button" key={i} onClick={handleClick} disabled={isImageBtn && uploadingImage}
                       className={`p-1.5 rounded-lg hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors disabled:opacity-50 ${isVideoBtn && videoPromptOpen ? 'bg-primary/10 text-primary' : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-white'}`}>
                       {isImageBtn && uploadingImage
                          ? <Loader2 className="w-3.5 h-3.5 animate-spin" />

@@ -20,14 +20,14 @@ export function parseHeadings(content: string): { level: number; text: string; i
     if (line.startsWith('```')) { inCodeBlock = !inCodeBlock; continue; }
     if (inCodeBlock) continue;
 
+    const m1 = line.match(/^# (.+)/);
     const m2 = line.match(/^## (.+)/);
-    const m3 = line.match(/^### (.+)/);
-    if (m2) {
+    if (m1) {
+      const text = m1[1].trim();
+      headings.push({ level: 1, text, id: slugify(text) });
+    } else if (m2) {
       const text = m2[1].trim();
       headings.push({ level: 2, text, id: slugify(text) });
-    } else if (m3) {
-      const text = m3[1].trim();
-      headings.push({ level: 3, text, id: slugify(text) });
     }
   }
 

@@ -50,6 +50,7 @@ export type GetArticlesOptions = {
   page?: number;
   limit?: number;
   timeframe?: 'today' | 'week' | 'month' | 'year' | 'all';
+  isQuickSearch?: boolean;
 };
 
 // ── Helpers ────────────────────────────────────────────────────
@@ -102,9 +103,10 @@ const _getRankedDiscoveryIds = unstable_cache(
 // ── Actions ────────────────────────────────────────────────────
 
 export async function getArticlesAction(options: GetArticlesOptions = {}) {
-  const session  = await auth();
-  const role     = (session?.user as { role?: string })?.role;
-  const userId   = session?.user?.id;
+  const isQuick = options.isQuickSearch ?? false;
+  const session = !isQuick ? await auth() : null;
+  const role    = (session?.user as { role?: string })?.role;
+  const userId  = session?.user?.id;
   const { topicId, search, page = 1, limit = 12, timeframe = 'all' } = options;
   const activeSearch = search?.trim();
   const activeTag    = options.tag?.trim();
@@ -178,7 +180,7 @@ export async function getArticlesAction(options: GetArticlesOptions = {}) {
       OR: [
         { title:   { contains: activeSearch, mode: 'insensitive' } },
         { summary: { contains: activeSearch, mode: 'insensitive' } },
-        { content: { contains: activeSearch, mode: 'insensitive' } },
+        ...(!isQuick ? [{ content: { contains: activeSearch, mode: 'insensitive' as const } }] : []),
       ],
     }),
   };

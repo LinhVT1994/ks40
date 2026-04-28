@@ -47,11 +47,11 @@ export default function TableOfContents({ headings }: { headings: Heading[] }) {
                 const top = el.getBoundingClientRect().top + window.scrollY - 90;
                 window.scrollTo({ top, behavior: 'smooth' });
               }}
-              className={`text-[13px] leading-snug line-clamp-2 transition-all duration-150 rounded-lg cursor-pointer ${
-                level === 3 ? 'py-1.5 pl-6 pr-2' : 'py-2 px-3'
+              className={`text-[13px] leading-snug line-clamp-2 transition-all duration-150 rounded-lg cursor-pointer py-2 px-3 ${
+                level === 1 ? 'font-bold' : ''
               } ${
                 isActive
-                  ? 'bg-primary/10 text-primary font-medium'
+                  ? 'bg-primary/10 text-primary font-bold'
                   : 'text-zinc-600 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-800 dark:hover:text-white'
               }`}
             >

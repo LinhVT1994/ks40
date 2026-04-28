@@ -105,7 +105,19 @@ export default async function ArticleDetailPage({ params }: Props) {
     : null;
 
   const related  = articles.filter(a => a.id !== data.id && a.topic?.id === data.topic?.id).slice(0, 7);
-  const headings = isGated ? [] : parseHeadings(data.content);
+  const contentHeadings = isGated ? [] : parseHeadings(data.content);
+  const headings = [];
+  
+  if (!isGated && article) {
+    if (article.overview) {
+      headings.push({ level: 2, text: 'Tóm tắt nhanh', id: 'overview' });
+    }
+    if (article.objectives) {
+      headings.push({ level: 2, text: 'Mục tiêu bài đọc', id: 'objectives' });
+    }
+  }
+  
+  headings.push(...contentHeadings);
 
   const heroArticle = articleWithInteraction ?? {
     ...preview!,

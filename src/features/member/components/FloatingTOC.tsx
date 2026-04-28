@@ -259,11 +259,11 @@ export default function FloatingTOC({
                     e.preventDefault();
                     handleHeadingClick(id);
                   }}
-                  className={`block relative py-1.5 transition-all duration-300 cursor-pointer group z-10 ${
-                    level === 3 ? (isLeft ? 'pl-4' : 'pr-4') : 'pl-0'
-                  }`}
+                  className={`block relative py-1.5 transition-all duration-300 cursor-pointer group z-10 pl-0`}
                 >
-                  <div className={`text-[13px] leading-relaxed transition-colors duration-300 px-4 font-medium ${
+                  <div className={`text-[13px] leading-relaxed transition-colors duration-300 px-4 ${
+                    level === 1 ? 'font-bold' : 'font-medium'
+                  } ${
                     isActive
                       ? 'text-primary'
                       : 'text-zinc-500 dark:text-slate-500 hover:text-zinc-800 dark:hover:text-white'

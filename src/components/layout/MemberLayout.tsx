@@ -31,7 +31,7 @@ export default async function MemberLayout({
 
       <main className="flex-1 flex flex-col relative z-10 w-full pt-16">
         {/* Main Content Dashboard */}
-        <div data-focus-container className="w-full flex-1">
+        <div data-focus-container className="w-full flex-1 flex flex-col">
           {children}
         </div>
 

@@ -49,11 +49,6 @@ export default function MemberHeader({ announcement }: { announcement?: SiteAnno
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Hide header on write pages to allow the immersive editor to take full height
-  // Moved after hooks to prevent "Rendered fewer hooks than expected" error
-  if (pathname.startsWith('/write')) {
-    return null;
-  }
 
   return (
     <div 
