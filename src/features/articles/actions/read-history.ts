@@ -8,27 +8,30 @@ export async function upsertReadHistoryAction(articleId: string, progress: numbe
   const userId  = session?.user?.id;
   if (!userId) return;
 
-  // Chỉ tăng progress, không bao giờ ghi đè lùi
-  const existing = await db.readHistory.findUnique({
-    where: { userId_articleId: { userId, articleId } },
-  });
-
-  if (!existing) {
-    await db.readHistory.create({ data: { userId, articleId, progress } });
-    return;
-  }
-
-  if (progress > existing.progress) {
-    await db.readHistory.update({
+  try {
+    const existing = await db.readHistory.findUnique({
       where: { userId_articleId: { userId, articleId } },
-      data:  { progress, readAt: new Date() },
     });
-  } else {
-    // Chỉ refresh readAt để bài lên đầu lịch sử
-    await db.readHistory.update({
-      where: { userId_articleId: { userId, articleId } },
-      data:  { readAt: new Date() },
-    });
+
+    if (!existing) {
+      await db.readHistory.create({ data: { userId, articleId, progress } });
+      return;
+    }
+
+    if (progress > existing.progress) {
+      await db.readHistory.update({
+        where: { userId_articleId: { userId, articleId } },
+        data:  { progress, readAt: new Date() },
+      });
+    } else {
+      // Chỉ refresh readAt để bài lên đầu lịch sử
+      await db.readHistory.update({
+        where: { userId_articleId: { userId, articleId } },
+        data:  { readAt: new Date() },
+      });
+    }
+  } catch (error) {
+    console.warn('[ReadHistory] Failed to upsert read history:', error);
   }
 }
 
@@ -37,21 +40,26 @@ export async function markArticleOpenedAction(articleId: string): Promise<{ prog
   const userId  = session?.user?.id;
   if (!userId) return { progress: 0 };
 
-  const existing = await db.readHistory.findUnique({
-    where: { userId_articleId: { userId, articleId } },
-  });
+  try {
+    const existing = await db.readHistory.findUnique({
+      where: { userId_articleId: { userId, articleId } },
+    });
 
-  if (!existing) {
-    await db.readHistory.create({ data: { userId, articleId, progress: 0.02 } });
+    if (!existing) {
+      await db.readHistory.create({ data: { userId, articleId, progress: 0.02 } });
+      return { progress: 0.02 };
+    }
+
+    // Chỉ refresh readAt, KHÔNG đụng vào progress
+    await db.readHistory.update({
+      where: { userId_articleId: { userId, articleId } },
+      data:  { readAt: new Date() },
+    });
+    return { progress: existing.progress };
+  } catch (error) {
+    console.warn('[ReadHistory] Failed to mark article opened:', error);
     return { progress: 0.02 };
   }
-
-  // Chỉ refresh readAt, KHÔNG đụng vào progress
-  await db.readHistory.update({
-    where: { userId_articleId: { userId, articleId } },
-    data:  { readAt: new Date() },
-  });
-  return { progress: existing.progress };
 }
 
 export async function getReadHistoryAction() {

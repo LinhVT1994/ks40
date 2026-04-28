@@ -28,6 +28,7 @@ export default function GlobalScratchpad() {
   const [scratchpadSize, setScratchpadSize] = useState({ width: 440, height: 480 });
   const [localActiveNoteId, setLocalActiveNoteId] = useState<string | null>(null);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
+  const [isMobile, setIsMobile] = useState(false);
   
   const editorRef = useRef<HTMLDivElement>(null);
   const lastSavedText = useRef('');
@@ -42,6 +43,13 @@ export default function GlobalScratchpad() {
       loadExistingNote(activeNoteId);
     }
   }, [activeNoteId]);
+
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+    const onResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   const loadExistingNote = async (id: string) => {
     try {
@@ -311,15 +319,25 @@ export default function GlobalScratchpad() {
       {isScratchpadOpen && (
         <motion.div
            initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
-           drag={!isResizing.current} dragMomentum={false} onMouseDown={e => e.stopPropagation()}
-           style={{ width: scratchpadSize.width, height: scratchpadSize.height }}
-           className="fixed bottom-12 right-12 z-[9995] bg-white dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-zinc-200 dark:border-white/10 overflow-hidden flex flex-col"
+           drag={!isMobile && !isResizing.current} dragMomentum={false} onMouseDown={e => e.stopPropagation()}
+           style={{ 
+             width: isMobile ? '100%' : scratchpadSize.width, 
+             height: isMobile ? '100dvh' : scratchpadSize.height,
+             zIndex: 100000
+           }}
+           className={`fixed bg-white dark:bg-slate-900/95 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] border border-zinc-200 dark:border-white/10 overflow-hidden flex flex-col ${
+             isMobile ? 'inset-0 rounded-none' : 'bottom-12 right-12 rounded-2xl'
+           }`}
         >
-          {/* Edge Resize Handles */}
-          <div className="absolute top-0 left-0 right-0 h-1 cursor-row-resize z-50" onMouseDown={e => startResize(e, 'top')} />
-          <div className="absolute bottom-0 left-0 right-0 h-1 cursor-row-resize z-50" onMouseDown={e => startResize(e, 'bottom')} />
-          <div className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize z-50" onMouseDown={e => startResize(e, 'left')} />
-          <div className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize z-50" onMouseDown={e => startResize(e, 'right')} />
+          {/* Edge Resize Handles (Hidden on Mobile) */}
+          {!isMobile && (
+            <>
+              <div className="absolute top-0 left-0 right-0 h-1 cursor-row-resize z-50" onMouseDown={e => startResize(e, 'top')} />
+              <div className="absolute bottom-0 left-0 right-0 h-1 cursor-row-resize z-50" onMouseDown={e => startResize(e, 'bottom')} />
+              <div className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize z-50" onMouseDown={e => startResize(e, 'left')} />
+              <div className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize z-50" onMouseDown={e => startResize(e, 'right')} />
+            </>
+          )}
 
           {/* Header - Mirroring InlineNoteEditor */}
           <div className="px-4 py-3 border-b border-zinc-100 dark:border-white/5 flex items-center justify-between bg-white/40 dark:bg-slate-900/50 cursor-grab active:cursor-grabbing shrink-0">

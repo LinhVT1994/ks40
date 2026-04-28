@@ -83,10 +83,10 @@ export default function UserMenu() {
         <Avatar src={user?.image} name={user?.name} size={40} className="border-2 border-primary/30 shadow-sm transition-transform group-hover:scale-105" />
       </button>
 
-      {isOpen && mounted && createPortal(
+      {isOpen && mounted && (
         <div 
           ref={dropdownRef}
-          className="fixed right-4 top-16 w-56 origin-top-right border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[99999] py-2 overflow-hidden animate-in fade-in zoom-in duration-200 ks-force-opaque"
+          className="absolute right-0 top-[calc(100%+8px)] w-56 origin-top-right border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[99999] py-2 overflow-hidden animate-in fade-in zoom-in duration-200 bg-white dark:bg-slate-900"
         >
           <div className="px-4 py-3 border-b border-zinc-200 dark:border-white/5">
             <p className="text-sm font-bold text-primary truncate">{user?.name}</p>
@@ -143,8 +143,7 @@ export default function UserMenu() {
               {isPending ? 'Đang đăng xuất...' : 'Đăng xuất'}
             </button>
           </div>
-        </div>,
-        document.body
+        </div>
       )}
     </div>
   );

@@ -147,11 +147,11 @@ export default function NotificationBell() {
         <BellIcon count={unreadCount} />
       </button>
 
-      {/* Dropdown panel - use Portal to escape stacking context */}
-      {open && mounted && createPortal(
+      {/* Dropdown panel */}
+      {open && mounted && (
         <div 
           ref={dropdownRef}
-          className="fixed right-4 top-16 w-[calc(100vw-32px)] sm:w-96 origin-top-right border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[99999] overflow-hidden animate-in fade-in zoom-in-95 duration-150 ks-force-opaque"
+          className="absolute right-0 top-[calc(100%+8px)] w-[calc(100vw-32px)] sm:w-96 origin-top-right border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[99999] overflow-hidden animate-in fade-in zoom-in-95 duration-150 bg-white dark:bg-slate-900"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-200 dark:border-white/5">
@@ -217,8 +217,7 @@ export default function NotificationBell() {
               </a>
             </div>
           )}
-        </div>,
-        document.body
+        </div>
       )}
     </div>
   );

@@ -341,7 +341,8 @@ export default function GlobalNotesSidebar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeSidebar}
-            className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm z-[200]"
+            style={{ zIndex: 99998 }}
+            className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm"
           />
 
           <motion.div
@@ -349,15 +350,16 @@ export default function GlobalNotesSidebar() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            style={{ width: panelWidth }}
-            className="fixed top-0 right-0 h-full bg-white/95 dark:bg-slate-900 border-l border-zinc-200/50 dark:border-white/10 z-[210] shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl"
+            style={{ width: panelWidth, maxWidth: '100vw', zIndex: 99999 }}
+            className="fixed top-0 right-0 h-[100dvh] bg-white/95 dark:bg-slate-900 border-l border-zinc-200/50 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl"
           >
             {/* Resize handle */}
             <div
               onMouseDown={startResizing}
               onDoubleClick={() => setPanelWidth(420)}
               title="Kéo để thay đổi kích thước · Double-click để reset"
-              className="group/resize absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize z-[220] flex items-center justify-center hover:bg-primary/10 transition-colors"
+              style={{ zIndex: 100000 }}
+              className="group/resize hidden sm:flex absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize items-center justify-center hover:bg-primary/10 transition-colors"
             >
               <div className="w-[2px] h-12 rounded-full bg-zinc-300/0 group-hover/resize:bg-primary/60 dark:group-hover/resize:bg-primary/70 transition-colors" />
             </div>
@@ -415,7 +417,7 @@ export default function GlobalNotesSidebar() {
                           placeholder="Tìm ghi chú, trích dẫn, hoặc bài viết..."
                           value={searchQuery}
                           onChange={e => setSearchQuery(e.target.value)}
-                          className="w-full bg-white/60 dark:bg-black/20 border border-zinc-200/50 dark:border-transparent focus:border-primary/40 dark:focus:border-primary/50 text-[13px] text-zinc-800 dark:text-slate-200 rounded-xl pl-10 pr-10 py-2.5 outline-none transition-all placeholder:text-zinc-400 shadow-sm shadow-zinc-200/20"
+                          className="w-full bg-white/60 dark:bg-black/20 border border-zinc-200/50 dark:border-transparent focus:border-primary/40 dark:focus:border-primary/50 text-base sm:text-[13px] text-zinc-800 dark:text-slate-200 rounded-xl pl-10 pr-10 py-2.5 outline-none transition-all placeholder:text-zinc-400 shadow-sm shadow-zinc-200/20"
                         />
                         {searchQuery ? (
                           <button onClick={() => setSearchQuery('')} title="Xoá (Esc)" className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-zinc-500 hover:text-zinc-600 dark:hover:text-slate-200 bg-white dark:bg-white/10 rounded-md shadow-sm">

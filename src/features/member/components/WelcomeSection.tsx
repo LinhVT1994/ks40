@@ -33,7 +33,7 @@ export default function WelcomeSection({ name }: { name?: string }) {
       <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-zinc-800 dark:text-white leading-tight font-display">
         Xin chào <span className="animate-wave inline-block">👋</span>
         {name ? (
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-primary to-purple-600 animate-text-shimmer">
+          <span className="dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r dark:from-indigo-500 dark:via-primary dark:to-purple-600 dark:animate-text-shimmer">
             , {name}!
           </span>
         ) : '!'}

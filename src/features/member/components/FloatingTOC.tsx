@@ -100,9 +100,19 @@ export default function FloatingTOC({
 
   useEffect(() => {
     if (!isOpen) return;
+
+    // Add scroll lock for mobile
+    const originalStyle = window.getComputedStyle(document.body).overflow;
+    if (window.innerWidth < 1280) { // xl breakpoint
+      document.body.style.overflow = 'hidden';
+    }
+
     const handleKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsOpen(false); };
     document.addEventListener('keydown', handleKey);
-    return () => document.removeEventListener('keydown', handleKey);
+    return () => {
+      document.body.style.overflow = originalStyle;
+      document.removeEventListener('keydown', handleKey);
+    };
   }, [isOpen]);
 
   useEffect(() => {
@@ -162,12 +172,12 @@ export default function FloatingTOC({
   return (
     <>
       {/* Backdrop (Mobile & Tablet Drawer only) */}
-      {isOpen && (
-        <div 
-          className="fixed inset-0 z-[90] bg-zinc-800/10 dark:bg-slate-950/40 backdrop-blur-sm xl:hidden transition-opacity duration-300"
-          onClick={() => setIsOpen(false)}
-        />
-      )}
+      <div 
+        className={`fixed inset-0 z-[90] bg-zinc-800/10 dark:bg-slate-950/40 xl:hidden transition-all duration-300 ${
+          isOpen ? 'opacity-100 pointer-events-auto backdrop-blur-sm' : 'opacity-0 pointer-events-none'
+        }`}
+        onClick={() => setIsOpen(false)}
+      />
 
       {/* Floating Trigger (Mobile & Tablet only) */}
       <div
@@ -191,11 +201,11 @@ export default function FloatingTOC({
       {/* TOC Panel: Centered Modal on Mobile, Sticky Sidebar on Desktop */}
       <div
         className={`
-          fixed z-[100] transition-all duration-700 ease-[cubic-bezier(0.23,1,0.32,1)]
+          fixed z-[100] transition-[opacity,transform] duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]
           /* Centered Modal Mode (< xl) */
           left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
           w-[min(360px,90vw)] max-h-[70vh] rounded-2xl
-          bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl shadow-2xl
+          bg-white dark:bg-slate-900 shadow-2xl
           border border-zinc-200 dark:border-white/10
           pt-12 pb-6 flex flex-col
           /* Sidebar Mode (≥ xl) */
@@ -203,10 +213,10 @@ export default function FloatingTOC({
           xl:w-full xl:max-h-[calc(100vh-160px)] xl:rounded-none xl:bg-transparent xl:dark:bg-transparent
           xl:backdrop-blur-0 xl:shadow-none xl:border-0 xl:pt-0 xl:pb-0 xl:pointer-events-auto
           ${isOpen
-            ? 'opacity-100 scale-100 pointer-events-auto'
-            : 'opacity-0 scale-95 pointer-events-none'
+            ? 'opacity-100 pointer-events-auto'
+            : 'opacity-0 pointer-events-none'
           }
-          ${sidebarsVisible ? 'xl:!opacity-100 xl:!pointer-events-auto xl:!scale-100' : 'xl:opacity-0 xl:scale-100'}
+          ${sidebarsVisible ? 'xl:!opacity-100 xl:!pointer-events-auto' : 'xl:opacity-0'}
           ${focusActive ? 'xl:!opacity-0 xl:pointer-events-none' : ''}
           group
         `}

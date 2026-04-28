@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
@@ -122,22 +122,16 @@ function ArticleList({ articles: initialArticles, totalArticles, totalPages: ini
 
   if (totalArticles === 0)
     return (
-      <div className="py-20 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
+      <div className="w-full py-20 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
         <FileText className="w-10 h-10 text-zinc-200 dark:text-white/10 mx-auto mb-4" />
         <p className="text-zinc-500 font-medium">Bạn chưa đăng bài viết nào.</p>
         <Link href="/write" className="mt-4 inline-block text-sm font-bold text-primary hover:underline">Viết bài ngay</Link>
       </div>
     );
 
-  const gridCols = articles.length === 1 
-    ? 'grid-cols-1 w-full' 
-    : articles.length === 2 
-      ? 'grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto gap-10' 
-      : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8';
-
   return (
     <div>
-      <div className={cn("grid gap-8 transition-opacity duration-500", loading ? "opacity-50" : "opacity-100", gridCols)}>
+      <div className={cn("grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 transition-opacity duration-500", loading ? "opacity-50" : "opacity-100")}>
         {articles.map((a, i) => (
           <ProfileArticleCard key={a.id} article={a as any} index={i} />
         ))}
@@ -181,20 +175,14 @@ function ArticleList({ articles: initialArticles, totalArticles, totalPages: ini
 function BookmarkList({ bookmarks }: { bookmarks: Bookmark[] }) {
   if (bookmarks.length === 0)
     return (
-      <div className="py-20 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
+      <div className="w-full py-20 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
         <Bookmark className="w-10 h-10 text-zinc-200 dark:text-white/10 mx-auto mb-4" />
         <p className="text-zinc-500 font-medium">Danh sách lưu của bạn đang trống.</p>
       </div>
     );
 
-  const gridCols = bookmarks.length === 1 
-    ? 'grid-cols-1 w-full' 
-    : bookmarks.length === 2 
-      ? 'grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto gap-10' 
-      : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8';
-
   return (
-    <div className={cn("grid gap-8", gridCols)}>
+    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
       {bookmarks.map((b, i) => (
         <ProfileArticleCard key={b.id} article={b as any} index={i} />
       ))}
@@ -208,7 +196,7 @@ function HistoryList({ history }: { history: HistoryItem[] }) {
 
   if (history.length === 0)
     return (
-      <div className="py-16 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
+      <div className="w-full py-16 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
         <History className="w-10 h-10 text-zinc-200 dark:text-white/10 mx-auto mb-3" />
         <p className="text-zinc-500 text-sm font-medium">Chưa có lịch sử đọc.</p>
       </div>
@@ -220,9 +208,9 @@ function HistoryList({ history }: { history: HistoryItem[] }) {
           <Link 
             href={`/article/${article.slug}`} 
             style={{ animationDelay: `${i * 70}ms` }}
-            className="group relative flex items-center gap-5 p-4 bg-white/40 dark:bg-white/[0.02] backdrop-blur-md border border-zinc-200 dark:border-white/5 rounded-2xl hover:shadow-xl hover:shadow-primary/5 transition-all animate-in fade-in slide-in-from-left-4 fill-mode-both cursor-pointer"
+            className="group relative flex items-center gap-3 md:gap-5 p-3 md:p-4 bg-white/40 dark:bg-white/[0.02] backdrop-blur-md border border-zinc-200 dark:border-white/5 rounded-2xl hover:shadow-xl hover:shadow-primary/5 transition-all animate-in fade-in slide-in-from-left-4 fill-mode-both cursor-pointer"
           >
-            <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 relative">
+            <div className="w-14 h-14 md:w-16 md:h-16 rounded-xl overflow-hidden shrink-0 relative">
               <Image 
                 src={article.thumbnail || '/placeholder.jpg'} 
                 fill
@@ -237,9 +225,9 @@ function HistoryList({ history }: { history: HistoryItem[] }) {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-sm font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors line-clamp-1 mb-1">{article.title}</h3>
+              <h3 className="text-xs md:text-sm font-bold text-zinc-800 dark:text-white group-hover:text-primary transition-colors line-clamp-1 mb-1">{article.title}</h3>
               {article.summary && (
-                <p className="text-sm text-zinc-500 dark:text-slate-400 line-clamp-1 mb-2 leading-relaxed">
+                <p className="text-[10px] md:text-xs text-zinc-500 dark:text-slate-400 line-clamp-1 mb-1.5 md:mb-2 leading-relaxed">
                   {article.summary}
                 </p>
               )}
@@ -305,8 +293,8 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
 
   if (items.length === 0)
     return (
-      <div className="py-24 text-center">
-        <PenLine className="w-8 h-8 text-zinc-100 dark:text-white/5 mx-auto mb-4" />
+      <div className="w-full py-20 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
+        <PenLine className="w-10 h-10 text-zinc-200 dark:text-white/10 mx-auto mb-4" />
         <p className="text-zinc-500 text-sm font-bold tracking-tight">Cảm hứng đang chờ đợi bạn.</p>
         <Link href="/write" className="mt-8 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary hover:opacity-70 transition-all">
           <span>Khởi tạo bản thảo mới</span>
@@ -328,11 +316,11 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
             href={d.status === 'PENDING' ? '#' : `/write/${d.id}`}
             style={{ animationDelay: `${index * 80}ms` }}
             className={cn(
-              "group relative cursor-pointer bg-white/60 dark:bg-white/[0.02] backdrop-blur-xl border border-zinc-200 dark:border-white/5 rounded-[2rem] p-4 flex flex-col md:flex-row gap-6 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 fill-mode-both",
+              "group relative w-full cursor-pointer bg-white/60 dark:bg-white/[0.02] backdrop-blur-xl border border-zinc-200 dark:border-white/5 rounded-2xl md:rounded-[2rem] p-0 md:p-4 flex flex-col md:flex-row gap-0 md:gap-6 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 fill-mode-both overflow-hidden",
               d.status === 'PENDING' && "pointer-events-none opacity-80"
             )}
           >
-            <div className="w-full md:w-[240px] aspect-[16/10] md:aspect-square lg:aspect-[16/10] rounded-2xl overflow-hidden relative shrink-0">
+            <div className="w-full md:w-[240px] aspect-[16/9] md:aspect-square lg:aspect-[16/10] rounded-none md:rounded-2xl overflow-hidden relative shrink-0">
                {d.thumbnail ? (
                   <Image src={d.thumbnail} fill sizes="240px" className="object-cover transition-transform duration-700 group-hover:scale-110" alt={d.title || 'Draft'} />
                ) : (
@@ -351,20 +339,20 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
                </div>
             </div>
 
-            <div className="flex-1 flex flex-col py-2">
-              <h3 className="text-lg font-black text-zinc-800 dark:text-white group-hover:text-primary transition-colors leading-tight line-clamp-1 mb-3">
+            <div className="flex-1 flex flex-col p-4 md:p-0 md:py-2">
+              <h3 className="text-base md:text-lg font-black text-zinc-800 dark:text-white group-hover:text-primary transition-colors leading-tight line-clamp-1 mb-2 md:mb-3">
                 {d.title || 'Draft: Chưa có tiêu đề'}
               </h3>
-              <p className="text-xs text-zinc-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-6">
+              <p className="text-[11px] md:text-xs text-zinc-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4 md:mb-6">
                 {d.summary || 'Trình soạn thảo Zen đang lưu giữ những ý tưởng tuyệt vời nhất của bạn.'}
               </p>
 
               {d.status === 'REJECTED' && d.rejectionReason && (
-                <div className="mb-6 p-4 bg-rose-50/50 dark:bg-rose-500/5 border border-rose-100 dark:border-rose-500/10 rounded-2xl">
+                <div className="mb-4 md:mb-6 p-3 md:p-4 bg-rose-50/50 dark:bg-rose-500/5 border border-rose-100 dark:border-rose-500/10 rounded-xl md:rounded-2xl">
                   <div className="flex items-center gap-2 mb-1.5 text-[10px] font-black text-rose-500 uppercase tracking-widest">
-                    <AlertCircle className="w-3.5 h-3.5" /> Phản hồi từ Admin
+                    <AlertCircle className="w-3 md:w-3.5 h-3 md:h-3.5" /> Phản hồi từ Admin
                   </div>
-                  <p className="text-[11px] font-semibold text-rose-600 dark:text-rose-400 leading-normal italic line-clamp-2">
+                  <p className="text-[10px] md:text-[11px] font-semibold text-rose-600 dark:text-rose-400 leading-normal italic line-clamp-2">
                     &ldquo;{d.rejectionReason}&rdquo;
                   </p>
                 </div>
@@ -386,7 +374,7 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
               </div>
             </div>
 
-            <div className="flex flex-row md:flex-col items-center justify-center gap-2 md:pl-2">
+            <div className="flex flex-row md:flex-col items-center justify-center gap-2 p-4 pt-0 md:p-0 md:pl-2">
                <div className={cn(
                  "flex-1 md:flex-none flex items-center justify-center gap-2 px-6 md:px-4 py-3 rounded-[1.25rem] transition-all duration-300",
                  d.status === 'PENDING' ? "bg-zinc-100 dark:bg-white/5 text-zinc-400 cursor-not-allowed" : "bg-primary/10 hover:bg-primary text-primary hover:text-white"
@@ -434,7 +422,7 @@ function FollowerList({ followers, totalFollowers, totalPages, userId }: {
 
   if (totalFollowers === 0)
     return (
-      <div className="py-20 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
+      <div className="w-full py-20 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
         <Heart className="w-10 h-10 text-zinc-200 dark:text-white/10 mx-auto mb-4" />
         <p className="text-zinc-500 font-medium tracking-tight">Bạn chưa có người theo dõi nào.</p>
       </div>
@@ -444,8 +432,8 @@ function FollowerList({ followers, totalFollowers, totalPages, userId }: {
     <div>
       <div className={cn("space-y-2 transition-opacity duration-500", loading ? "opacity-50" : "opacity-100")}>
         {items.map((f, i) => (
-          <Link key={f.id} href={`/profile/${f.username ?? f.id}`} style={{ animationDelay: `${i * 50}ms` }} className="flex items-center gap-4 px-4 py-3 rounded-2xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-all animate-in fade-in slide-in-from-left-2 fill-mode-both cursor-pointer">
-            <div className="relative w-10 h-10 shrink-0">
+          <Link key={f.id} href={`/profile/${f.username ?? f.id}`} style={{ animationDelay: `${i * 50}ms` }} className="flex items-center gap-3 md:gap-4 px-3 md:px-4 py-2 md:py-3 rounded-2xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-all animate-in fade-in slide-in-from-left-2 fill-mode-both cursor-pointer">
+            <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0">
              <Image src={f.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name ?? 'User')}&background=e2e8f0&color=0f172a`} fill unoptimized sizes="40px" className="rounded-full object-cover border border-zinc-200 dark:border-white/10" alt={f.name ?? ''} />
             </div>
             <div className="flex-1 min-w-0">
@@ -510,7 +498,7 @@ function FollowingList({ following, totalFollowing, totalPages, userId, isOwner 
 
   if (totalFollowing === 0)
     return (
-      <div className="py-20 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
+      <div className="w-full py-20 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
         <UserCheck className="w-10 h-10 text-zinc-200 dark:text-white/10 mx-auto mb-4" />
         <p className="text-zinc-500 font-medium tracking-tight">{isOwner ? 'Bạn chưa theo dõi tác giả nào.' : 'Chưa theo dõi ai.'}</p>
       </div>
@@ -520,9 +508,9 @@ function FollowingList({ following, totalFollowing, totalPages, userId, isOwner 
     <div>
       <div className={cn("space-y-2 transition-opacity duration-500", loading ? "opacity-50" : "opacity-100")}>
         {items.map((f, i) => (
-          <Link key={f.id} href={`/profile/${f.username ?? f.id}`} style={{ animationDelay: `${i * 50}ms` }} className="group flex items-center justify-between gap-4 px-4 py-3 rounded-2xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-all animate-in fade-in slide-in-from-left-2 fill-mode-both cursor-pointer">
-            <div className="flex items-center gap-4 min-w-0 flex-1">
-              <div className="relative w-10 h-10 shrink-0">
+          <Link key={f.id} href={`/profile/${f.username ?? f.id}`} style={{ animationDelay: `${i * 50}ms` }} className="group flex items-center justify-between gap-3 md:gap-4 px-3 md:px-4 py-2 md:py-3 rounded-2xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-all animate-in fade-in slide-in-from-left-2 fill-mode-both cursor-pointer">
+            <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
+              <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0">
                <Image src={f.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name ?? 'User')}&background=e2e8f0&color=0f172a`} fill unoptimized sizes="40px" className="rounded-full object-cover border border-zinc-200 dark:border-white/10" alt={f.name ?? ''} />
               </div>
               <div className="flex-1 min-w-0">
@@ -555,31 +543,31 @@ function RatingsDashboard({ data: initialData }: { data: AuthorRatingStats | nul
   useEffect(() => setMounted(true), []);
   if (!initialData || initialData.totalCount === 0)
     return (
-      <div className="py-20 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
+      <div className="w-full py-20 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
         <Star className="w-10 h-10 text-zinc-200 dark:text-white/10 mx-auto mb-4" />
         <p className="text-zinc-500 font-medium tracking-tight">Chưa có đánh giá nào.</p>
       </div>
     );
 
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-2xl p-5 text-center transition-all hover:border-primary/20">
-          <p className="text-3xl font-black text-zinc-800 dark:text-white tracking-tighter">{initialData.averageScore.toFixed(1)}</p>
-          <div className="flex items-center justify-center gap-0.5 mt-2">
+    <div className="space-y-6 md:space-y-8">
+      <div className="grid grid-cols-3 gap-2 md:gap-4">
+        <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-xl md:rounded-2xl p-3 md:p-5 text-center transition-all hover:border-primary/20">
+          <p className="text-xl md:text-3xl font-black text-zinc-800 dark:text-white tracking-tighter">{initialData.averageScore.toFixed(1)}</p>
+          <div className="flex items-center justify-center md:gap-0.5 mt-1 md:mt-2">
             {[1, 2, 3, 4, 5].map(i => (
-              <Star key={i} className={cn("w-3.5 h-3.5", i <= Math.round(initialData.averageScore) ? "text-yellow-400 fill-yellow-400" : "text-zinc-300 dark:text-zinc-800")} />
+              <Star key={i} className={cn("w-2.5 h-2.5 md:w-3.5 md:h-3.5", i <= Math.round(initialData.averageScore) ? "text-yellow-400 fill-yellow-400" : "text-zinc-300 dark:text-zinc-800")} />
             ))}
           </div>
-          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-black mt-3">Điểm TB</p>
+          <p className="text-[8px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-black mt-2 md:mt-3">Điểm TB</p>
         </div>
-        <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-2xl p-5 text-center">
-          <p className="text-3xl font-black text-zinc-800 dark:text-white tracking-tighter">{initialData.totalCount}</p>
-          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-black mt-3">Đánh giá</p>
+        <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-xl md:rounded-2xl p-3 md:p-5 text-center">
+          <p className="text-xl md:text-3xl font-black text-zinc-800 dark:text-white tracking-tighter">{initialData.totalCount}</p>
+          <p className="text-[8px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-black mt-2 md:mt-3">Đánh giá</p>
         </div>
-        <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-2xl p-5 text-center">
-          <p className="text-3xl font-black text-zinc-800 dark:text-white tracking-tighter">{initialData.totalRatedArticles}</p>
-          <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-black mt-3">Bài viết</p>
+        <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-xl md:rounded-2xl p-3 md:p-5 text-center">
+          <p className="text-xl md:text-3xl font-black text-zinc-800 dark:text-white tracking-tighter">{initialData.totalRatedArticles}</p>
+          <p className="text-[8px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-black mt-2 md:mt-3">Bài viết</p>
         </div>
       </div>
 
@@ -631,6 +619,28 @@ export default function ProfileClient({
   const initialTab = (searchParams.get('tab') as Tab) || 'articles';
   const [tab, setTab] = useState<Tab>(initialTab);
 
+  const [isHeaderHidden, setIsHeaderHidden] = useState(false);
+  const lastScrollYRef = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const isMobile = window.innerWidth < 1024;
+      if (isMobile) {
+        if (currentScrollY > lastScrollYRef.current && currentScrollY > 50) {
+          setIsHeaderHidden(true);
+        } else if (currentScrollY < lastScrollYRef.current) {
+          setIsHeaderHidden(false);
+        }
+      } else {
+        setIsHeaderHidden(false);
+      }
+      lastScrollYRef.current = currentScrollY;
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
   useEffect(() => {
     const t = searchParams.get('tab') as Tab;
     if (t && ['articles', 'drafts', 'bookmarks', 'history', 'followers', 'following', 'ratings'].includes(t)) {
@@ -656,66 +666,111 @@ export default function ProfileClient({
   ] as const).filter(t => t.show);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 2xl:gap-16 items-start">
+    <div className="flex flex-col lg:flex-row gap-0 lg:gap-8 2xl:gap-16 items-start">
       {/* 1. Sidebar */}
-      <aside className="w-full lg:w-[280px] flex-shrink-0 lg:sticky lg:top-24 space-y-12 order-1">
-        <div className="relative px-2 flex flex-col items-start gap-4">
+      <aside className="w-full lg:w-[280px] flex-shrink-0 lg:sticky lg:top-24 space-y-4 lg:space-y-12 order-1">
+        <div className="relative px-2 flex flex-col items-center lg:items-start gap-4">
           <div className="relative shrink-0">
-            <div className="relative w-12 h-12 sm:w-16 sm:h-16 shadow-xl rounded-full overflow-hidden border-2 border-white dark:border-slate-800 bg-white dark:bg-slate-900 group">
-              <Image src={user.avatarUrl} alt={user.name ?? ''} fill unoptimized priority sizes="80px" className="object-cover rounded-full transition-transform duration-500 group-hover:scale-110" />
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 shadow-xl rounded-full overflow-hidden border-2 border-white dark:border-slate-800 bg-white dark:bg-slate-900 group">
+              <Image src={user.avatarUrl} alt={user.name ?? ''} fill unoptimized priority sizes="96px" className="object-cover rounded-full transition-transform duration-500 group-hover:scale-110" />
             </div>
-            {isOwner && (
-               <Link href="/settings" className="absolute -bottom-1 -right-1 p-1.5 bg-white dark:bg-slate-800 rounded-full shadow-lg border border-zinc-100 dark:border-white/10 text-zinc-500 hover:text-primary transition-all duration-300 hover:scale-110" title="Cài đặt">
-                  <Settings className="w-3.5 h-3.5" />
-               </Link>
-            )}
           </div>
 
           {/* Identity Info */}
-          <div className="w-full flex flex-col items-start text-left py-1">
+          <div className="w-full flex flex-col items-center lg:items-start text-center lg:text-left py-1">
             <h1 className="text-xl sm:text-2xl font-black text-zinc-800 dark:text-white tracking-tight leading-tight">{user.name}</h1>
             {user.username && <p className="text-[10px] font-bold text-primary tracking-widest uppercase opacity-80 mt-1">@{user.username}</p>}
             
-            <div className="mt-4 space-y-8 w-full">
-              {user.bio && (
-                <div className="relative group">
-                  <p className="text-xs sm:text-sm text-zinc-800 dark:text-slate-200 leading-relaxed font-signature font-medium italic">&ldquo;{user.bio}&rdquo;</p>
-                  <div className="mt-1.5 h-0.5 w-6 bg-primary/30 rounded-full" />
-                </div>
-              )}
-              <div className="flex flex-wrap items-center gap-4 text-zinc-500">
+            <div className="mt-4 flex flex-col gap-5 w-full">
+              <div className="flex flex-wrap justify-center lg:justify-start items-center gap-6 text-zinc-500">
                 {[
                   { label: 'Views', value: fmtViews(user.totalViews) },
                   { label: 'Likes', value: fmtViews(user.totalLikes) },
                   { label: 'Fans', value: fmtViews(totalFollowers) },
                 ].map(s => (
-                  <div key={s.label} className="flex flex-col items-start min-w-[40px]">
+                  <div key={s.label} className="flex flex-col items-center lg:items-start min-w-[40px]">
                     <span className="text-sm font-black text-zinc-800 dark:text-white leading-none tracking-tight">{s.value}</span>
                     <span className="text-[7px] font-bold text-zinc-500 uppercase tracking-tighter mt-1">{s.label}</span>
                   </div>
                 ))}
               </div>
+
+              {user.bio && (
+                <div className="relative group">
+                  <p className="text-xs sm:text-sm text-zinc-800 dark:text-slate-200 leading-relaxed font-medium">&ldquo;{user.bio}&rdquo;</p>
+                  <div className="mt-1.5 h-0.5 w-6 bg-primary/30 rounded-full mx-auto lg:mx-0" />
+                </div>
+              )}
+
+              {isOwner && (
+                <div className="mt-2 w-full flex flex-col gap-2">
+                  {canWrite && (
+                    <Link href="/write" className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-white text-[10px] font-black tracking-widest uppercase hover:bg-primary/90 transition-all shadow-md shadow-primary/20 hover:-translate-y-0.5">
+                      <PenLine className="w-3.5 h-3.5" />
+                      Viết bài mới
+                    </Link>
+                  )}
+                  <Link href="/settings" className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-zinc-200 dark:border-white/10 text-[10px] font-black tracking-widest uppercase text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all">
+                    <Settings className="w-3.5 h-3.5" />
+                    Cài đặt hồ sơ
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        <nav className="w-full space-y-1 px-2">
+        {/* Tab Navigation - Desktop */}
+        <nav className="hidden lg:flex flex-col gap-1 w-full">
           {tabDefs.map(({ key, icon: Icon, label, count }) => (
-            <button key={key} onClick={() => handleTabChange(key)} className={cn("w-full flex items-center justify-between px-4 py-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all duration-300", tab === key ? "bg-primary/5 text-primary" : "text-zinc-400 hover:bg-zinc-50 dark:hover:bg-white/5 hover:text-zinc-800 dark:hover:text-white")}>
+            <button 
+              key={key} 
+              onClick={() => handleTabChange(key)} 
+              className={cn(
+                "relative flex items-center justify-between px-4 py-3 rounded-xl text-[11px] w-full font-black uppercase tracking-wider transition-all duration-300 group",
+                tab === key 
+                  ? "bg-primary/5 text-primary" 
+                  : "text-zinc-400 hover:text-zinc-800 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-white/5"
+              )}
+            >
               <div className="flex items-center gap-3">
-                <Icon className={cn("w-3.5 h-3.5", tab === key ? "opacity-100" : "opacity-30")} />
+                <Icon className={cn("w-3.5 h-3.5 transition-all duration-300", tab === key ? "scale-110 drop-shadow-md" : "opacity-30 group-hover:scale-110")} />
                 <span>{label}</span>
               </div>
-              {count > 0 && <span className={cn("text-[8px] tabular-nums", tab === key ? "opacity-100" : "opacity-40")}>{count}</span>}
             </button>
           ))}
         </nav>
       </aside>
 
       {/* 2. Main Content & Social Dock Wrapper */}
-      <div className="flex-1 flex flex-col lg:flex-row items-start relative order-3 lg:order-2 h-full min-h-[600px]">
+      <div className="flex-1 w-full flex flex-col lg:flex-row items-start relative order-3 lg:order-2 h-full min-h-[600px]">
+        
+        {/* Tab Navigation - Mobile (Horizontal Scrollable) */}
+        <div className={cn(
+          "lg:hidden sticky z-[40] w-[calc(100%+3rem)] -mx-6 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-b border-zinc-200 dark:border-white/5 mb-8 shadow-sm transition-[top] duration-300",
+          isHeaderHidden ? "top-0" : "top-[64px]"
+        )}>
+          <nav className="flex items-center gap-6 overflow-x-auto no-scrollbar px-6 py-4 touch-pan-x">
+            {tabDefs.map(({ key, icon: Icon, label }) => (
+              <button 
+                key={key} 
+                onClick={() => handleTabChange(key)} 
+                className={cn(
+                  "relative flex flex-col items-center gap-1.5 min-w-max transition-all duration-300 group",
+                  tab === key ? "text-primary" : "text-zinc-400 hover:text-zinc-800 dark:hover:text-white"
+                )}
+              >
+                <div className="relative">
+                  <Icon className={cn("w-5 h-5 transition-transform duration-300", tab === key ? "scale-110 drop-shadow-md" : "group-hover:scale-110 opacity-70")} />
+                </div>
+                <span className="text-[9px] font-black uppercase tracking-widest mt-0.5">{label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+
         <main className="w-full animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150">
-          <div className="mb-10 flex items-center gap-6">
+          <div className="hidden lg:flex mb-10 items-center gap-6">
             <h2 className="text-lg font-black text-zinc-800 dark:text-white uppercase tracking-tight">{tabDefs.find(t => t.key === tab)?.label}</h2>
             <div className="h-[1px] flex-1 bg-gradient-to-r from-zinc-200 via-zinc-100 to-transparent dark:from-white/5 dark:via-white/[0.02]" />
           </div>
@@ -732,30 +787,34 @@ export default function ProfileClient({
         </main>
 
         {/* Right Column: Social Dock (Sticky centered on Desktop) */}
-        <div className="hidden lg:block lg:sticky lg:top-1/2 lg:-translate-y-1/2 lg:ml-[50px] flex-shrink-0 w-[48px] h-fit order-3">
-          <div className="flex flex-col items-center gap-4 animate-in fade-in slide-in-from-right-10 duration-1000 delay-300">
-            {SOCIAL_LINKS.map(({ key, icon: Icon, label }) => {
-              const url = (user as any)[key];
-              if (!url) return null;
-              return (
-                <a key={key} href={url} target="_blank" rel="noopener noreferrer" title={label} className="group p-3 rounded-full text-zinc-400 bg-white dark:bg-slate-900/60 backdrop-blur-md border border-zinc-100 dark:border-white/5 transition-all hover:-translate-x-1 hover:text-primary hover:border-primary/20 shadow-sm">
-                  <Icon className="w-4 h-4 transition-transform group-hover:scale-110" />
-                </a>
-              );
-            })}
+        {SOCIAL_LINKS.some(({ key }) => !!(user as any)[key]) && (
+          <div className="hidden lg:block lg:sticky lg:top-1/2 lg:-translate-y-1/2 lg:ml-[50px] flex-shrink-0 w-[48px] h-fit order-3">
+            <div className="flex flex-col items-center gap-4 animate-in fade-in slide-in-from-right-10 duration-1000 delay-300">
+              {SOCIAL_LINKS.map(({ key, icon: Icon, label }) => {
+                const url = (user as any)[key];
+                if (!url) return null;
+                return (
+                  <a key={key} href={url} target="_blank" rel="noopener noreferrer" title={label} className="group p-3 rounded-full text-zinc-400 bg-white dark:bg-slate-900/60 backdrop-blur-md border border-zinc-100 dark:border-white/5 transition-all hover:-translate-x-1 hover:text-primary hover:border-primary/20 shadow-sm">
+                    <Icon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                  </a>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Mobile Horizontal Version (keep at bottom of main wrapper) */}
-        <div className="lg:hidden w-full order-2 border-y border-zinc-100 dark:border-white/5 py-8 mt-12">
-          <div className="flex items-center justify-center gap-4">
-            {SOCIAL_LINKS.map(({ key, icon: Icon }) => {
-              const url = (user as any)[key];
-              if (!url) return null;
-              return <a key={key} href={url} target="_blank" rel="noopener noreferrer" className="p-3 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-500"><Icon className="w-4 h-4" /></a>;
-            })}
+        {SOCIAL_LINKS.some(({ key }) => !!(user as any)[key]) && (
+          <div className="lg:hidden w-full order-2 border-y border-zinc-100 dark:border-white/5 py-8 mt-12">
+            <div className="flex items-center justify-center gap-4">
+              {SOCIAL_LINKS.map(({ key, icon: Icon }) => {
+                const url = (user as any)[key];
+                if (!url) return null;
+                return <a key={key} href={url} target="_blank" rel="noopener noreferrer" className="p-3 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-500"><Icon className="w-4 h-4" /></a>;
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

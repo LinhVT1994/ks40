@@ -141,7 +141,7 @@ export default function ArticleContent({
   const innerContent = (
     <div data-article-content>
       {overview && (
-        <div className="w-full max-w-[720px] mx-auto px-4 md:px-0">
+        <div className="w-full max-w-[720px] mx-auto mb-8 md:mb-12 relative z-10">
           <div className="relative overflow-hidden px-0 py-2 mb-8 group">
               <div className="flex flex-col gap-3">
                 <div className="flex flex-col gap-1">
@@ -157,7 +157,7 @@ export default function ArticleContent({
       )}
 
       {objectives && (
-        <div className="w-full max-w-[720px] mx-auto px-4 md:px-0">
+        <div className="w-full max-w-[720px] mx-auto">
           <div className="relative overflow-hidden px-0 py-2 mb-12 group">
             {/* Background Decorative Pattern */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
@@ -187,7 +187,7 @@ export default function ArticleContent({
       )}
 
       {objectives && (
-        <div className="w-full max-w-[720px] mx-auto px-4 md:px-0 mb-12">
+        <div className="w-full max-w-[720px] mx-auto mb-12">
           <div className="w-full h-px bg-zinc-200 dark:bg-white/10" />
         </div>
       )}
