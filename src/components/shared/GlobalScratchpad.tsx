@@ -19,7 +19,7 @@ import { htmlToMarkdown, markdownToHtml } from '@/lib/markdown-editor';
 
 export default function GlobalScratchpad() {
   const { 
-    isScratchpadOpen, closeScratchpad, 
+    isScratchpadOpen, closeScratchpad, openScratchpad,
     currentArticleId, activeNoteId,
   } = useNotes();
 
@@ -32,7 +32,7 @@ export default function GlobalScratchpad() {
   
   const editorRef = useRef<HTMLDivElement>(null);
   const lastSavedText = useRef('');
-  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isResizing = useRef<string | null>(null);
   const lastMousePos = useRef({ x: 0, y: 0 });
 

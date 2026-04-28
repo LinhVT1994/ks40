@@ -957,7 +957,7 @@ function NoteDetail({
                   )}
                 </button>
               )}
-              {initialNote.authorId && (
+              {(initialNote as any).authorId && (
                 <div 
                   onClick={() => setIsPublic(!isPublic)}
                   className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full cursor-pointer transition-all ${
