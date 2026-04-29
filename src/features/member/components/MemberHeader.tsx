@@ -107,22 +107,24 @@ export default function MemberHeader({ announcement }: { announcement?: SiteAnno
             </nav>
           </div>
 
-          {/* Search — ẩn trên mobile, hiện từ md */}
-          <div className="hidden md:flex flex-1 justify-center">
-            <HeaderSearch />
-          </div>
+          <div className="flex items-center gap-4 shrink-0">
+            {/* Desktop Search */}
+            <div className="hidden md:block">
+              <HeaderSearch />
+            </div>
 
-          {/* Right actions */}
-          <div className="flex items-center gap-1 shrink-0">
-            {/* Search icon — chỉ hiện trên mobile */}
-            <button
-              className="md:hidden p-2 rounded-full text-zinc-500 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
-              onClick={() => setMobileSearchOpen(v => !v)}
-            >
-              {mobileSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
-            </button>
-            <NotificationBell />
-            <UserMenu />
+            {/* Icons */}
+            <div className="flex items-center gap-1">
+              {/* Search icon — chỉ hiện trên mobile */}
+              <button
+                className="md:hidden p-2 rounded-full text-zinc-500 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
+                onClick={() => setMobileSearchOpen(v => !v)}
+              >
+                {mobileSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+              </button>
+              <NotificationBell />
+              <UserMenu />
+            </div>
           </div>
         </div>
 

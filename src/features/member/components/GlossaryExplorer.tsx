@@ -1,21 +1,25 @@
 'use client';
 
 import React, { useState, useEffect, useTransition } from 'react';
-import { Search, ChevronDown, Hash } from 'lucide-react';
+import { Search, ChevronDown, Hash, Lightbulb } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDebounce } from '@/hooks/useDebounce';
+import GlossarySubmissionModal from './GlossarySubmissionModal';
+import type { TopicItem } from '@/features/admin/actions/topic';
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
 interface GlossaryExplorerProps {
   search?: string;
   letter?: string;
+  topics: TopicItem[];
 }
 
 export default function GlossaryExplorer({ 
   search: initialSearch = '', 
-  letter: initialLetter = '' 
+  letter: initialLetter = '',
+  topics
 }: GlossaryExplorerProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -24,6 +28,7 @@ export default function GlossaryExplorer({
   const [search, setSearch] = useState(initialSearch);
   const [isSearching, setIsSearching] = useState(!initialLetter);
   const [isAlphabetOpen, setIsAlphabetOpen] = useState(!!initialLetter);
+  const [isSubmissionOpen, setIsSubmissionOpen] = useState(false);
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -109,7 +114,7 @@ export default function GlossaryExplorer({
           </div>
 
           {/* Ultra-Compact Segmented Pill */}
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center gap-6">
             <div className="inline-flex items-center p-1 bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 rounded-full shadow-sm">
               <button
                 onClick={toggleSearch}
@@ -140,6 +145,18 @@ export default function GlossaryExplorer({
                   {initialLetter ? `Chữ: ${initialLetter}` : 'Bảng chữ'}
                 </span>
                 <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isAlphabetOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <div className="w-px h-4 bg-zinc-200 dark:bg-white/10 mx-1" />
+
+              <button
+                onClick={() => setIsSubmissionOpen(true)}
+                className="flex items-center gap-2 px-4 py-1.5 rounded-full transition-all duration-300 whitespace-nowrap text-amber-500 hover:bg-amber-500/5"
+              >
+                <Lightbulb className="w-3.5 h-3.5" />
+                <span className="text-[10px] font-bold uppercase tracking-wider">
+                  Đóng góp
+                </span>
               </button>
             </div>
 
@@ -228,6 +245,12 @@ export default function GlossaryExplorer({
           </div>
         </div>
       </section>
+
+      <GlossarySubmissionModal 
+        isOpen={isSubmissionOpen}
+        onClose={() => setIsSubmissionOpen(false)}
+        topics={topics}
+      />
     </div>
   );
 }

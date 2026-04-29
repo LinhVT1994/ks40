@@ -298,14 +298,14 @@ html.focus-mode [data-focus-prose] {
 /* Dark mode overrides */
 .dark .ks-highlight[data-color="yellow"] { --hl-color: 253, 224, 71;  } /* Yellow 300 */
 .dark .ks-highlight {
-  background-color: rgba(var(--hl-color), 0.25) !important;
+  background-color: rgba(var(--hl-color), 0.3) !important;
   color: #f8fafc !important; /* Force Slate 50 for readability */
 }
 
-.dark .ks-highlight[data-color="yellow"] { --hl-color: 234, 179, 8; }   /* Yellow 500 */
-.dark .ks-highlight[data-color="green"]  { --hl-color: 34, 197, 94; }   /* Green 500 */
-.dark .ks-highlight[data-color="blue"]   { --hl-color: 59, 130, 246; }  /* Blue 500 */
-.dark .ks-highlight[data-color="pink"]   { --hl-color: 236, 72, 153; }  /* Pink 500 */
+.dark .ks-highlight[data-color="yellow"] { --hl-color: 250, 204, 21; }   /* Yellow 400 */
+.dark .ks-highlight[data-color="green"]  { --hl-color: 74, 222, 128; }  /* Green 400 */
+.dark .ks-highlight[data-color="blue"]   { --hl-color: 96, 165, 250; }  /* Blue 400 */
+.dark .ks-highlight[data-color="pink"]   { --hl-color: 244, 114, 182; }  /* Pink 400 */
 
 .ks-highlight:hover {
   background-color: rgba(var(--hl-color), 0.65);
@@ -642,15 +642,15 @@ pre span {
 }
 
 .dark .ks-author-highlight {
-  background-color: rgba(var(--hl-color), 0.25) !important;
+  background-color: rgba(var(--hl-color), 0.3) !important;
   color: #f8fafc !important;
   border-bottom: none !important;
 }
 
-.dark .ks-author-highlight[data-color="yellow"] { --hl-color: 234, 179, 8; }
-.dark .ks-author-highlight[data-color="blue"]   { --hl-color: 59, 130, 246; }
-.dark .ks-author-highlight[data-color="green"]  { --hl-color: 34, 197, 94; }
-.dark .ks-author-highlight[data-color="pink"]   { --hl-color: 236, 72, 153; }
+.dark .ks-author-highlight[data-color="yellow"] { --hl-color: 250, 204, 21; }
+.dark .ks-author-highlight[data-color="blue"]   { --hl-color: 96, 165, 250; }
+.dark .ks-author-highlight[data-color="green"]  { --hl-color: 74, 222, 128; }
+.dark .ks-author-highlight[data-color="pink"]   { --hl-color: 244, 114, 182; }
 
 .dark .ks-author-highlight:hover {
   background-color: rgba(var(--hl-color), 0.4) !important;

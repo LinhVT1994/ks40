@@ -466,6 +466,7 @@ model GlossaryTerm {
   authorId   String?
   topic      Topic?   @relation(fields: [topicId], references: [id])
   author     User?    @relation(fields: [authorId], references: [id])
+  status     ArticleStatus @default(PUBLISHED)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   likes      GlossaryLike[]
@@ -549,6 +550,8 @@ enum NotificationType {
   ARTICLE_REJECTED
   ARTICLE_SUBMITTED
   RATING
+  GLOSSARY_SUBMITTED
+  GLOSSARY_APPROVED
 }
 
 enum ActivityType {

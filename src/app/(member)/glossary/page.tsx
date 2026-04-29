@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
-import { getGlossaryTermsAction } from '@/features/admin/actions/glossary';
+import { getGlossaryTermsAction, GlossaryTermSummary } from '@/features/admin/actions/glossary';
+import { getTopicTreeAction } from '@/features/admin/actions/topic';
 import { SITE_NAME } from '@/lib/seo';
 import GlossaryExplorer from '@/features/member/components/GlossaryExplorer';
 import GlossaryTermCard from '@/features/member/components/GlossaryTermCard';
@@ -26,14 +27,17 @@ export default async function GlossaryPage({
   const currentPage = Number(params.page) || 1;
   const limit = 24;
 
-  const { terms, total, totalPages } = await getGlossaryTermsAction({
-    search,
-    letter,
-    page: currentPage,
-    limit,
-  });
+  const [{ terms, total, totalPages }, topics] = await Promise.all([
+    getGlossaryTermsAction({
+      search,
+      letter,
+      page: currentPage,
+      limit,
+    }),
+    getTopicTreeAction()
+  ]);
 
-  const grouped = terms.reduce<Record<string, typeof terms>>((acc, t) => {
+  const grouped = terms.reduce<Record<string, GlossaryTermSummary[]>>((acc, t: GlossaryTermSummary) => {
     const first = t.term[0].toUpperCase();
     const key = ALPHABET.includes(first) ? first : '#';
     acc[key] = acc[key] ?? [];
@@ -45,7 +49,7 @@ export default async function GlossaryPage({
 
   return (
     <div className="min-h-screen transition-colors">
-      <GlossaryExplorer search={search} letter={letter} />
+      <GlossaryExplorer search={search} letter={letter} topics={topics} />
 
       <MemberContainer>
         <div className="max-w-4xl mx-auto pb-24 px-4">
@@ -68,7 +72,7 @@ export default async function GlossaryPage({
                     </h2>
                   </div>
                   <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
-                    {grouped[letterKey].map((t, i) => (
+                    {grouped[letterKey].map((t: GlossaryTermSummary, i: number) => (
                       <GlossaryTermCard
                         key={t.id}
                         term={t}

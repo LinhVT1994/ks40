@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, BookOpen, Clock, Share2, Sparkles } from 'lucide-react';
-import { getGlossaryTermBySlugAction, getGlossaryTermsAction } from '@/features/admin/actions/glossary';
+import { getGlossaryTermBySlugAction, getGlossaryTermsAction, GlossaryTermSummary } from '@/features/admin/actions/glossary';
 import { SITE_NAME } from '@/lib/seo';
 import MemberContainer from '@/components/layout/MemberContainer';
 import MarkdownViewer from '@/components/shared/MarkdownViewer';
@@ -75,7 +75,7 @@ export default async function GlossaryTermPage({ params, searchParams }: Props) 
     limit: 6,
   }) : { terms: [] };
 
-  const otherTerms = related.filter(t => t.id !== term.id).slice(0, 5);
+  const otherTerms = related.filter((t: GlossaryTermSummary) => t.id !== term.id).slice(0, 5);
 
   const topicColor = term.topic?.color ?? '#3b82f6';
 
@@ -105,12 +105,12 @@ export default async function GlossaryTermPage({ params, searchParams }: Props) 
         <div className="relative w-full max-w-[820px] mx-auto min-w-0 md:overflow-visible">
           {/* Hanging Interaction Sidebar */}
           <aside className="hidden lg:block absolute left-full top-0 h-full pointer-events-none">
-            <div className="sticky top-1/2 -translate-y-1/2 pl-12 xl:pl-14 2xl:pl-24 transition-all pointer-events-auto">
-              <FloatingInteractionHub className="!static !sticky-none" />
+            <div className="sticky top-[50vh] -translate-y-1/2 pl-12 xl:pl-14 2xl:pl-24 transition-all pointer-events-auto">
+              <FloatingInteractionHub className="!static" />
             </div>
           </aside>
 
-          <main className="w-full transition-colors">
+          <main className="w-full transition-colors min-h-[calc(100vh-120px)]">
             <header className="w-full pt-8 md:pt-12 pb-6 md:pb-8 px-6 md:px-12 space-y-8 md:space-y-10">
               <div className="flex items-center justify-between">
                 <Link
@@ -152,6 +152,28 @@ export default async function GlossaryTermPage({ params, searchParams }: Props) 
                       {term.shortDef}
                     </p>
                   </div>
+
+                  {/* Contributor Info */}
+                  {term.author && (
+                    <div className="flex items-center gap-3 pt-2 lg:hidden">
+                      <div className="flex -space-x-2">
+                        <img 
+                          src={term.author.image || '/default-avatar.png'} 
+                          alt={term.author.name} 
+                          className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 shadow-sm"
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-zinc-400 dark:text-slate-500 font-bold uppercase tracking-widest">Đóng góp bởi</span>
+                        <Link 
+                          href={`/profile/${term.author.username || term.author.id}`}
+                          className="text-xs font-bold text-zinc-800 dark:text-white hover:text-primary transition-colors"
+                        >
+                          {term.author.name}
+                        </Link>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </header>
@@ -192,7 +214,7 @@ export default async function GlossaryTermPage({ params, searchParams }: Props) 
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    {otherTerms.map((t, i) => (
+                    {otherTerms.map((t: GlossaryTermSummary, i: number) => (
                       <Link
                         key={t.id}
                         href={`/glossary/${t.slug}`}

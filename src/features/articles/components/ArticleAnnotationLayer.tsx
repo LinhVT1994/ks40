@@ -8,6 +8,8 @@ import TextSelectionToolbar from '@/features/member/components/notes/TextSelecti
 import InlineNoteEditor from '@/features/member/components/notes/InlineNoteEditor';
 import NotePopover from '@/features/member/components/notes/NotePopover';
 import HighlightActionToolbar from '@/features/member/components/notes/HighlightActionToolbar';
+import GlossarySubmissionModal from '@/features/member/components/GlossarySubmissionModal';
+import { getEnabledTopicTreeAction, type TopicItem } from '@/features/admin/actions/topic';
 import {
   createAnnotationAction,
   deleteAnnotationAction,
@@ -303,6 +305,9 @@ export default function ArticleAnnotationLayer({
     (initialAnnotations || []).filter(a => !a.isPublic)
   );
   const [publicAnnotations, setPublicAnnotations] = useState<ArticleAnnotation[]>(initialAuthorAnnotations || []);
+  const [topics, setTopics] = useState<TopicItem[]>([]);
+  const [isGlossaryModalOpen, setIsGlossaryModalOpen] = useState(false);
+  const [selectedTermForGlossary, setSelectedTermForGlossary] = useState('');
 
   // Synchronize state with props when articleId changes (crucial for navigation)
   useEffect(() => {
@@ -312,6 +317,10 @@ export default function ArticleAnnotationLayer({
     setPendingSelection(null);
     setPendingPublicSelection(null);
   }, [articleId, initialAnnotations, initialAuthorAnnotations]);
+
+  useEffect(() => {
+    getEnabledTopicTreeAction().then(setTopics);
+  }, []);
   const [pendingSelection, setPendingSelection] = useState<{
     text: string;
     range: Range;
@@ -552,6 +561,12 @@ export default function ArticleAnnotationLayer({
     });
   }, [session, articleId]);
 
+  const handleAddGlossary = useCallback((text: string, range: Range) => {
+    setSelectedTermForGlossary(text);
+    setIsGlossaryModalOpen(true);
+    window.getSelection()?.removeAllRanges();
+  }, []);
+
   const handleAddNote = useCallback((text: string, range: Range) => {
     const rect = range.getBoundingClientRect();
     wrapRangeWithMarks(range, { id: 'pending-note', color: 'yellow' });
@@ -782,10 +797,18 @@ export default function ArticleAnnotationLayer({
           isAuthor={isAuthor}
           onPublicHighlight={isAuthor ? handlePublicHighlight : undefined}
           onAddPublicNote={isAuthor ? handleAddPublicNote : undefined}
+          onAddGlossary={handleAddGlossary}
         />
       )}
 
       {memoizedChildren}
+
+      <GlossarySubmissionModal
+        isOpen={isGlossaryModalOpen}
+        onClose={() => setIsGlossaryModalOpen(false)}
+        topics={topics}
+        initialTerm={selectedTermForGlossary}
+      />
 
       {/* Highlight Action Toolbar */}
       {hoveredHighlight && (
