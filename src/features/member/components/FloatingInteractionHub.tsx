@@ -7,7 +7,13 @@ import Avatar from '@/components/shared/Avatar';
 import Link from 'next/link';
 import ShareMenu from '@/components/shared/ShareMenu';
 
-export default function FloatingInteractionHub() {
+export default function FloatingInteractionHub({ 
+  className,
+  hideAuthor = false 
+}: { 
+  className?: string;
+  hideAuthor?: boolean;
+}) {
   const interaction = useInteractionOptional();
   
   const liked = interaction?.liked ?? false;
@@ -49,68 +55,70 @@ export default function FloatingInteractionHub() {
     <div 
       className={`flex flex-col items-start gap-8 sticky top-40 h-fit py-4 transition-opacity duration-700 group/hub w-44 ${
         sidebarsVisible ? 'opacity-100' : 'opacity-0'
-      } ${focusActive ? 'pointer-events-none !opacity-0' : ''}`}
+      } ${focusActive ? 'pointer-events-none !opacity-0' : ''} ${className || ''}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       {/* Author Section (Minimalist Vertical) */}
-      <div className="flex flex-col items-start gap-4 group/author w-full">
-        <div className="flex flex-col items-start gap-3 w-full">
-          <Link 
-            href={`/profile/${author.username || author.id}`}
-            className="relative block shrink-0"
-          >
-            <div className="absolute inset-0 rounded-full bg-primary/20 blur-md opacity-0 group-hover/author:opacity-100 transition-opacity duration-300" />
-            <div className="relative rounded-full p-[1.5px] bg-white dark:bg-slate-800 ring-1 ring-zinc-200 dark:ring-white/10 group-hover/author:ring-primary/40 transition-all duration-300 shadow-sm">
-              <div className="rounded-full overflow-hidden w-11 h-11 bg-zinc-100 dark:bg-slate-900 border border-zinc-100 dark:border-white/5">
-                <Avatar src={author.image} name={author.name} size={44} className="w-full h-full object-cover" />
+      {!hideAuthor && (
+        <div className="flex flex-col items-start gap-4 group/author w-full">
+          <div className="flex flex-col items-start gap-3 w-full">
+            <Link 
+              href={`/profile/${author.username || author.id}`}
+              className="relative block shrink-0"
+            >
+              <div className="absolute inset-0 rounded-full bg-primary/20 blur-md opacity-0 group-hover/author:opacity-100 transition-opacity duration-300" />
+              <div className="relative rounded-full p-[1.5px] bg-white dark:bg-slate-800 ring-1 ring-zinc-200 dark:ring-white/10 group-hover/author:ring-primary/40 transition-all duration-300 shadow-sm">
+                <div className="rounded-full overflow-hidden w-11 h-11 bg-zinc-100 dark:bg-slate-900 border border-zinc-100 dark:border-white/5">
+                  <Avatar src={author.image} name={author.name} size={44} className="w-full h-full object-cover" />
+                </div>
+              </div>
+            </Link>
+            
+            <div className="relative group/name">
+              <Link href={`/profile/${author.username || author.id}`} className="text-[16px] font-bold text-zinc-900 dark:text-white leading-tight hover:text-primary transition-colors">
+                {author.name}
+              </Link>
+              <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-zinc-900 dark:bg-slate-100 text-white dark:text-zinc-900 text-xs font-semibold whitespace-nowrap opacity-0 scale-95 group-hover/name:opacity-100 group-hover/name:scale-100 transition-all duration-200 shadow-lg origin-bottom">
+                Xem trang cá nhân
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-zinc-900 dark:border-t-zinc-100" />
               </div>
             </div>
-          </Link>
-          
-          <div className="relative group/name">
-            <Link href={`/profile/${author.username || author.id}`} className="text-[16px] font-bold text-zinc-900 dark:text-white leading-tight hover:text-primary transition-colors">
-              {author.name}
-            </Link>
-            <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-zinc-900 dark:bg-slate-100 text-white dark:text-zinc-900 text-xs font-semibold whitespace-nowrap opacity-0 scale-95 group-hover/name:opacity-100 group-hover/name:scale-100 transition-all duration-200 shadow-lg origin-bottom">
-              Xem trang cá nhân
-              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-zinc-900 dark:border-t-zinc-100" />
+          </div>
+
+          {author.bio && (
+            <div className="w-full">
+              <p className="text-[13px] text-zinc-600 dark:text-slate-400 leading-[1.5] font-medium opacity-80 italic">
+                {author.bio}
+              </p>
             </div>
-          </div>
+          )}
+
+          <button
+            onClick={handleFollow}
+            disabled={followPending}
+            className={`group/follow flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-[13px] font-black transition-all duration-300 border shadow-sm ${
+              isFollowing
+                ? 'bg-zinc-100 dark:bg-white/10 text-zinc-500 border-zinc-200 dark:border-white/5 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 hover:border-red-200 dark:hover:border-red-500/20'
+                : 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-transparent hover:translate-y-[-1px] active:scale-95'
+            }`}
+          >
+            {isFollowing ? (
+              <>
+                <UserCheck className="w-3.5 h-3.5 group-hover/follow:hidden" />
+                <UserPlus className="w-3.5 h-3.5 hidden group-hover/follow:block rotate-45" />
+                <span className="group-hover/follow:hidden">Đang theo dõi</span>
+                <span className="hidden group-hover/follow:inline">Hủy theo dõi</span>
+              </>
+            ) : (
+              <>
+                <UserPlus className="w-3.5 h-3.5" />
+                <span>Theo dõi</span>
+              </>
+            )}
+          </button>
         </div>
-
-        {author.bio && (
-          <div className="w-full">
-            <p className="text-[13px] text-zinc-600 dark:text-slate-400 leading-[1.5] font-medium opacity-80 italic">
-              {author.bio}
-            </p>
-          </div>
-        )}
-
-      <button
-        onClick={handleFollow}
-        disabled={followPending}
-        className={`group/follow flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-[13px] font-black transition-all duration-300 border shadow-sm ${
-          isFollowing
-            ? 'bg-zinc-100 dark:bg-white/10 text-zinc-500 border-zinc-200 dark:border-white/5 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 hover:border-red-200 dark:hover:border-red-500/20'
-            : 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-transparent hover:translate-y-[-1px] active:scale-95'
-        }`}
-      >
-        {isFollowing ? (
-          <>
-            <UserCheck className="w-3.5 h-3.5 group-hover/follow:hidden" />
-            <UserPlus className="w-3.5 h-3.5 hidden group-hover/follow:block rotate-45" />
-            <span className="group-hover/follow:hidden">Đang theo dõi</span>
-            <span className="hidden group-hover/follow:inline">Hủy theo dõi</span>
-          </>
-        ) : (
-          <>
-            <UserPlus className="w-3.5 h-3.5" />
-            <span>Theo dõi</span>
-          </>
-        )}
-      </button>
-      </div>
+      )}
 
       <div className="flex flex-col items-start gap-6">
         {/* Like Button */}

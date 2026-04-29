@@ -69,8 +69,8 @@ export default function HeaderSearch() {
 
   return (
     <div ref={wrapperRef} className="flex items-center justify-center flex-1 px-4 max-w-2xl relative">
-      <div className={`relative flex items-center transition-all duration-500 ease-in-out bg-white/10 dark:bg-white/5 border border-zinc-300/20 dark:border-white/10 rounded-full overflow-visible ${
-        isExpanded ? 'w-full shadow-lg shadow-primary/5 ring-2 ring-primary/20' : 'w-[250px] hover:w-[270px] hover:bg-white/20 dark:hover:bg-white/10'
+      <div className={`relative flex items-center transition-all duration-500 ease-in-out bg-zinc-100/50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-full overflow-visible ${
+        isExpanded ? 'w-full shadow-lg shadow-primary/5 ring-2 ring-primary/20' : 'w-[250px] hover:w-[270px]'
       }`}>
         <div className="absolute left-3.5 pointer-events-none text-zinc-500">
           {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}

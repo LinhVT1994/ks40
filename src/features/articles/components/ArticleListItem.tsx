@@ -8,6 +8,8 @@ import { GlanceTrigger } from '@/features/member/components/GlancePreview';
 import { cn } from '@/lib/utils';
 import type { ArticleCard } from '@/features/articles/actions/article';
 
+import { useRouter } from 'next/navigation';
+
 interface ArticleListItemProps {
   article: ArticleCard;
   isBookmarked?: boolean;
@@ -45,20 +47,26 @@ export default function ArticleListItem({
   const renderText = (text: string) => (highlight ? highlight(text) : text);
 
   return (
-    <div className="block group">
+    <div className="block group relative">
       <GlanceTrigger article={article}>
         <div className="py-3 sm:py-4 relative hover:bg-white dark:hover:bg-white/[0.03] hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col rounded-2xl px-2 sm:px-3 -mx-1 border border-transparent hover:border-zinc-200/50 dark:hover:border-white/5 cursor-pointer">
           
+          {/* Main Link Overlay - Covers entire area */}
+          <Link 
+            href={`/article/${article.slug}`}
+            className="absolute inset-0 z-0 rounded-2xl"
+            aria-label={article.title}
+          />
+
           {/* Focus Indicator Bar */}
           <div className={cn(
-            "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 rounded-full scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-center",
+            "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 rounded-full scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-center z-10",
             article.audience === 'PREMIUM' ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'bg-primary'
           )} />
 
-          <div className="flex flex-row gap-3 sm:gap-4 items-start w-full">
-            {/* Thumbnail Link */}
-            <Link
-              href={`/article/${article.slug}`}
+          <div className="flex flex-row gap-3 sm:gap-4 items-start w-full relative z-10 pointer-events-none">
+            {/* Thumbnail */}
+            <div
               className={cn(
                 "w-24 sm:w-36 2xl:w-48 h-20 sm:h-28 2xl:h-32 shrink-0 relative rounded-xl overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 border transition-colors duration-500",
                 article.audience === 'PREMIUM' 
@@ -97,19 +105,19 @@ export default function ArticleListItem({
                   </span>
                 ))}
               </div>
-            </Link>
+            </div>
 
             {/* Content Area */}
             <div className="flex-1 min-w-0 flex flex-col pt-0.5 transition-transform duration-500 group-hover:translate-x-1">
               <div className="flex items-start justify-between gap-3 mb-1">
-                <Link href={`/article/${article.slug}`} className="flex-1">
+                <div className="flex-1">
                   <h4 className="text-[15px] sm:text-lg font-bold text-zinc-800 dark:text-white group-hover:text-primary dark:group-hover:text-primary transition-colors font-display line-clamp-2 leading-tight">
                     {renderText(article.title)}
                   </h4>
-                </Link>
+                </div>
                 
                 {/* Top-right Badges */}
-                <div className="shrink-0 hidden sm:flex items-center gap-2 mt-0.5">
+                <div className="shrink-0 hidden sm:flex items-center gap-2 mt-0.5 pointer-events-auto">
                   {article.audience === 'PREMIUM' && (
                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[9px] font-bold uppercase tracking-wider border border-amber-200 dark:border-amber-500/20">
                       <Star className="w-2.5 h-2.5 fill-current" /> Premium
@@ -130,14 +138,14 @@ export default function ArticleListItem({
                 </div>
               </div>
 
-              <Link href={`/article/${article.slug}`} className="mb-0 sm:mb-3">
+              <div className="mb-0 sm:mb-3">
                 <p className="text-xs sm:text-sm text-zinc-500 dark:text-slate-400 line-clamp-2 leading-relaxed opacity-80 group-hover:opacity-100 transition-opacity duration-500">
                   {article.summary && renderText(article.summary)}
                 </p>
-              </Link>
+              </div>
 
               {/* Desktop Stats */}
-              <div className="hidden sm:flex mt-auto items-end justify-between pt-0 gap-2">
+              <div className="hidden sm:flex mt-auto items-end justify-between pt-0 gap-2 pointer-events-auto">
                 <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-zinc-500 text-xs">
                   {/* Author Info Integrated into Stats */}
                   <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-4">
@@ -182,7 +190,11 @@ export default function ArticleListItem({
                   )}
                   {onBookmark && (
                     <button
-                      onClick={(e) => onBookmark(e, article.id)}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onBookmark(e, article.id);
+                      }}
                       className={cn(
                         "p-1.5 rounded-lg transition-all relative z-40",
                         isBookmarked 
@@ -200,7 +212,7 @@ export default function ArticleListItem({
           </div>
 
           {/* Mobile Stats (Full width footer) */}
-          <div className="flex sm:hidden mt-3 items-center justify-between pt-2.5 border-t border-zinc-100/80 dark:border-white/5 gap-2 w-full">
+          <div className="flex sm:hidden mt-3 items-center justify-between pt-2.5 border-t border-zinc-100/80 dark:border-white/5 gap-2 w-full relative z-10">
             <div className="flex items-center flex-wrap gap-x-3 gap-y-2 text-zinc-500 dark:text-slate-400 text-[11px] font-medium">
               <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-3">
                 <Link 
@@ -233,7 +245,7 @@ export default function ArticleListItem({
                 <span>{article.readTime}p</span>
               </span>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
+            <div className="flex items-center gap-2 shrink-0 pointer-events-auto">
               {article.publishedAt && (
                 <div className="flex items-center gap-1 text-[10px] text-zinc-400 font-medium">
                     <span>{formatDate(article.publishedAt)}</span>
@@ -241,7 +253,11 @@ export default function ArticleListItem({
               )}
               {onBookmark && (
                 <button
-                  onClick={(e) => onBookmark(e, article.id)}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onBookmark(e, article.id);
+                  }}
                   className={cn("p-1 rounded-lg transition-all relative z-40", isBookmarked ? 'text-primary' : 'text-zinc-300 dark:text-white/20')}
                 >
                   <Bookmark className={cn("w-4 h-4", isBookmarked ? 'fill-current' : '')} />

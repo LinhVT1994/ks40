@@ -43,7 +43,7 @@ export function GlanceTrigger({ article, children, className }: GlanceTriggerPro
     
     // Hard disable on mobile/tablet/small laptops to prevent accidental triggers
     const isMobileUA = typeof navigator !== 'undefined' && /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    if (typeof window !== 'undefined' && (window.innerWidth < 2000 || isMobileUA)) return;
+    if (typeof window !== 'undefined' && (window.innerWidth < 1024 || isMobileUA)) return;
 
     timerRef.current = setTimeout(async () => {
       setCoords({ x, y });
@@ -148,13 +148,16 @@ function GlancePopover({
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 }) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
   const [mounted, setMounted] = useState(false);
   const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
 
   useEffect(() => {
     setMounted(true);
     const checkMobile = () => {
-      const isSmallScreen = window.innerWidth < 2000;
+      const isSmallScreen = window.innerWidth < 1024;
       const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       setIsMobileDevice(isSmallScreen || isMobileUA);
     };
@@ -163,11 +166,14 @@ function GlancePopover({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   if (!mounted || isMobileDevice) return null;
-
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-
+  
   const handleReadNow = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -177,13 +183,6 @@ function GlancePopover({
       onMouseLeave(); // Close popover
     });
   };
-
-  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1200);
-  useEffect(() => {
-    const handleResize = () => setWindowWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   const isMobile = windowWidth < 640;
   const POPOVER_WIDTH = isMobile ? Math.min(windowWidth - 32, 400) : 520;

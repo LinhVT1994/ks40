@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Bell, FileText, MessageSquare, Heart, Zap, CheckCheck, X, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Bell, FileText, MessageSquare, Heart, Zap, CheckCheck, X, CheckCircle2, AlertCircle, Lightbulb, BookOpen } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -16,6 +16,8 @@ const TYPE_CFG: Record<string, { icon: React.ElementType; color: string; bg: str
   LIKE:          { icon: Heart,         color: 'text-pink-500',    bg: 'bg-pink-500/10'    },
   ARTICLE_APPROVED: { icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
   ARTICLE_REJECTED: { icon: AlertCircle, color: 'text-rose-500',    bg: 'bg-rose-500/10'    },
+  GLOSSARY_SUBMITTED: { icon: Lightbulb,  color: 'text-amber-500',   bg: 'bg-amber-500/10'   },
+  GLOSSARY_APPROVED:  { icon: CheckCircle2, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
 };
 
 function timeAgo(date: Date | string) {

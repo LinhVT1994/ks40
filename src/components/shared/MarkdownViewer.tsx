@@ -1,11 +1,13 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import { Check, Copy, X, ZoomIn } from 'lucide-react';
+import { GlossaryProvider, AutoGlossaryHighlight } from '@/features/member/components/GlossaryHighlighter';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import {
   vscDarkPlus,
@@ -206,35 +208,25 @@ export default function MarkdownViewer({
   const [lightbox, setLightbox] = React.useState<{ src: string; alt: string } | null>(null);
   const [tableLightbox, setTableLightbox] = React.useState<React.ReactNode | null>(null);
 
-  if (compact) {
-    return (
-      <div className={cn(
-        variant === 'note' ? "prose prose-slate max-w-none dark:text-slate-400" : "prose prose-xl prose-slate max-w-none dark:text-slate-400",
-        variant === 'note' ? "prose-compact" : "prose-p:m-0 prose-p:leading-relaxed",
-        "prose-strong:text-zinc-900 dark:prose-strong:text-slate-200 prose-strong:font-bold",
-        "prose-em:italic",
-        "prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline",
-        "prose-code:text-[0.85em] prose-code:bg-zinc-100 dark:prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:before:content-none prose-code:after:content-none",
-        "prose-blockquote:border-l-0 prose-blockquote:py-6 prose-blockquote:px-0 prose-blockquote:italic prose-blockquote:text-zinc-600 dark:prose-blockquote:text-slate-400 prose-blockquote:font-medium prose-blockquote:relative prose-blockquote:before:content-['\\201C'] prose-blockquote:before:absolute prose-blockquote:before:top-0 prose-blockquote:before:-left-4 prose-blockquote:before:text-5xl prose-blockquote:before:text-primary/10 prose-blockquote:after:content-['\\201D'] prose-blockquote:after:absolute prose-blockquote:after:bottom-0 prose-blockquote:after:-right-4 prose-blockquote:after:text-5xl prose-blockquote:after:text-primary/10"
-      )}>
-        <ReactMarkdown
-          remarkPlugins={REMARK_PLUGINS}
-          allowedElements={['p','strong','em','a','code','br','ul','ol','li','blockquote']}
-          unwrapDisallowed
-          components={{
-            p: ({ children }: any) => <p data-annotation-target>{children}</p>,
-            li: ({ children }: any) => <li data-annotation-target>{children}</li>,
-            blockquote: ({ children }: any) => <blockquote>{children}</blockquote>,
-          }}
-        >
-          {content}
-        </ReactMarkdown>
-      </div>
-    );
-  }
-
   const memoizedComponents = React.useMemo(() => ({
-    li: ({ children }: any) => <li data-annotation-target>{children}</li>,
+    a: ({ href, children, ...props }: any) => {
+      if (href?.startsWith('glossary:')) {
+        const slug = href.slice('glossary:'.length);
+        return (
+          <span className="group/gloss relative inline-block">
+            <Link
+              href={`/glossary/${slug}`}
+              className="text-primary font-semibold underline decoration-dotted underline-offset-4 decoration-primary/50 hover:decoration-solid cursor-help"
+              {...props}
+            >
+              {children}
+            </Link>
+          </span>
+        );
+      }
+      return <a href={href} target={href?.startsWith('http') ? '_blank' : undefined} rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined} {...props}>{children}</a>;
+    },
+    li: ({ children }: any) => <li data-annotation-target><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></li>,
     blockquote: ({ children }: any) => (
       <blockquote className={cn(
         "not-prose border-none bg-transparent py-8 px-0 my-10 relative group text-zinc-600 dark:text-slate-400 italic font-medium leading-relaxed text-xl lg:text-2xl",
@@ -243,7 +235,7 @@ export default function MarkdownViewer({
         <span className="absolute top-0 -left-10 text-6xl text-primary/10 font-serif pointer-events-none group-hover:text-primary/20 transition-colors select-none">
           &ldquo;
         </span>
-        {children}
+        <AutoGlossaryHighlight>{children}</AutoGlossaryHighlight>
       </blockquote>
     ),
     code: CodeBlock as any,
@@ -251,7 +243,11 @@ export default function MarkdownViewer({
     p: ({ node, children, ...props }: any) => {
       const isImageOnly = node?.children?.length === 1 && node.children[0]?.tagName === 'img';
       if (isImageOnly) return <>{children}</>;
-      return <div data-annotation-target className={`mb-8 last:mb-0 text-zinc-700 dark:text-slate-400 text-lg lg:text-xl leading-[1.85] ${PROSE_WIDTH}`} {...props}>{children}</div>;
+      return (
+        <div data-annotation-target className={`mb-8 last:mb-0 text-zinc-700 dark:text-slate-400 text-lg lg:text-xl leading-[1.85] ${PROSE_WIDTH}`} {...props}>
+          <AutoGlossaryHighlight>{children}</AutoGlossaryHighlight>
+        </div>
+      );
     },
     table: ({ children }: any) => {
       const tableEl = <table className="w-full min-w-max text-base text-left border-collapse">{children}</table>;
@@ -275,7 +271,9 @@ export default function MarkdownViewer({
       <th className="px-5 py-3 text-sm font-bold text-zinc-500 dark:text-slate-500">{children}</th>
     ),
     td: ({ children }: any) => (
-      <td data-annotation-target className="px-5 py-3 text-zinc-600 dark:text-slate-400 border-b border-zinc-100 dark:border-white/5 group-last:border-0">{children}</td>
+      <td data-annotation-target className="px-5 py-3 text-zinc-600 dark:text-slate-400 border-b border-zinc-100 dark:border-white/5 group-last:border-0">
+        <AutoGlossaryHighlight>{children}</AutoGlossaryHighlight>
+      </td>
     ),
     tr: ({ children }: any) => (
       <tr className="group transition-colors hover:bg-zinc-50/50 dark:hover:bg-white/[0.02]">{children}</tr>
@@ -301,40 +299,67 @@ export default function MarkdownViewer({
         )}
       </div>
     ) : null,
-    h1: ({ children }: any) => { const id = slugify(String(children)); return <h1 id={id} data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h1>; },
-    h2: ({ children }: any) => { const id = slugify(String(children)); return <h2 id={id} data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h2>; },
-    h3: ({ children }: any) => { const id = slugify(String(children)); return <h3 id={id} data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h3>; },
-    h4: ({ children }: any) => <h4 data-annotation-target className={`${PROSE_WIDTH}`}>{children}</h4>,
+    h1: ({ children }: any) => { const id = slugify(String(children)); return <h1 id={id} data-annotation-target className={`${PROSE_WIDTH}`}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h1>; },
+    h2: ({ children }: any) => { const id = slugify(String(children)); return <h2 id={id} data-annotation-target className={`${PROSE_WIDTH}`}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h2>; },
+    h3: ({ children }: any) => { const id = slugify(String(children)); return <h3 id={id} data-annotation-target className={`${PROSE_WIDTH}`}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h3>; },
+    h4: ({ children }: any) => <h4 data-annotation-target className={`${PROSE_WIDTH}`}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h4>,
   }), []);
 
   return (
-    <>
-    {lightbox && <ImageLightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
-    {tableLightbox && <TableLightbox onClose={() => setTableLightbox(null)}>{tableLightbox}</TableLightbox>}
-    <div className="w-full min-w-0 break-words">
-      <div className={`prose prose-xl prose-slate max-w-none w-full min-w-0 dark:text-slate-400
-        prose-headings:font-display prose-headings:font-bold prose-headings:tracking-tight
-        prose-headings:text-zinc-900 dark:prose-headings:text-slate-200
-        prose-h1:text-page sm:prose-h1:text-4xl lg:prose-h1:text-4xl prose-h1:mt-10 prose-h1:mb-8
-        prose-h2:text-2xl sm:prose-h2:text-3xl lg:prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-6
-        prose-h3:text-xl sm:prose-h3:text-2xl lg:prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-5
-        prose-h4:text-lg sm:prose-h4:text-xl prose-h4:mt-6 prose-h4:mb-4
-        prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline prose-a:underline-offset-4
-        prose-ul:list-disc prose-ul:pl-8 prose-ul:space-y-4 prose-ul:max-w-[720px] prose-ul:mx-auto prose-ul:mb-8
-        prose-ol:list-decimal prose-ol:pl-8 prose-ol:space-y-4 prose-ol:max-w-[720px] prose-ol:mx-auto
-        prose-li:text-zinc-700 dark:prose-li:text-slate-400 prose-li:marker:text-primary prose-li:leading-relaxed prose-li:text-lg lg:prose-li:text-xl
-        prose-strong:text-zinc-900 dark:prose-strong:text-slate-200 prose-strong:font-bold
-        prose-hr:hidden
-      `}>
-        <ReactMarkdown
-          remarkPlugins={REMARK_PLUGINS}
-          rehypePlugins={REHYPE_PLUGINS}
-          components={memoizedComponents}
-        >
-          {content}
-        </ReactMarkdown>
-      </div>
-    </div>
-    </>
+    <GlossaryProvider>
+      {compact ? (
+        <div className={cn(
+          variant === 'note' ? "prose prose-slate max-w-none dark:text-slate-400" : "prose prose-xl prose-slate max-w-none dark:text-slate-400",
+          variant === 'note' ? "prose-compact" : "prose-p:m-0 prose-p:leading-relaxed",
+          "prose-strong:text-zinc-900 dark:prose-strong:text-slate-200 prose-strong:font-bold",
+          "prose-em:italic",
+          "prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline",
+          "prose-code:text-[0.85em] prose-code:bg-zinc-100 dark:prose-code:bg-white/10 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:font-mono prose-code:before:content-none prose-code:after:content-none",
+          "prose-blockquote:border-l-0 prose-blockquote:py-6 prose-blockquote:px-0 prose-blockquote:italic prose-blockquote:text-zinc-600 dark:prose-blockquote:text-slate-400 prose-blockquote:font-medium prose-blockquote:relative prose-blockquote:before:content-['\\201C'] prose-blockquote:before:absolute prose-blockquote:before:top-0 prose-blockquote:before:-left-4 prose-blockquote:before:text-5xl prose-blockquote:before:text-primary/10 prose-blockquote:after:content-['\\201D'] prose-blockquote:after:absolute prose-blockquote:after:bottom-0 prose-blockquote:after:-right-4 prose-blockquote:after:text-5xl prose-blockquote:after:text-primary/10"
+        )}>
+          <ReactMarkdown
+            remarkPlugins={REMARK_PLUGINS}
+            allowedElements={['p','strong','em','a','code','br','ul','ol','li','blockquote']}
+            unwrapDisallowed
+            components={{
+              p: ({ children }: any) => <p data-annotation-target><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></p>,
+              li: ({ children }: any) => <li data-annotation-target><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></li>,
+              blockquote: ({ children }: any) => <blockquote><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></blockquote>,
+            }}
+          >
+            {content}
+          </ReactMarkdown>
+        </div>
+      ) : (
+        <>
+          {lightbox && <ImageLightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />}
+          {tableLightbox && <TableLightbox onClose={() => setTableLightbox(null)}>{tableLightbox}</TableLightbox>}
+          <div className="w-full min-w-0 break-words">
+            <div className={`prose prose-xl prose-slate max-w-none w-full min-w-0 dark:text-slate-400
+              prose-headings:font-display prose-headings:font-bold prose-headings:tracking-tight
+              prose-headings:text-zinc-900 dark:prose-headings:text-slate-200
+              prose-h1:text-page sm:prose-h1:text-4xl lg:prose-h1:text-4xl prose-h1:mt-10 prose-h1:mb-8
+              prose-h2:text-2xl sm:prose-h2:text-3xl lg:prose-h2:text-3xl prose-h2:mt-10 prose-h2:mb-6
+              prose-h3:text-xl sm:prose-h3:text-2xl lg:prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-5
+              prose-h4:text-lg sm:prose-h4:text-xl prose-h4:mt-6 prose-h4:mb-4
+              prose-a:text-primary prose-a:font-semibold prose-a:no-underline hover:prose-a:underline prose-a:underline-offset-4
+              prose-ul:list-disc prose-ul:pl-8 prose-ul:space-y-4 prose-ul:max-w-[720px] prose-ul:mx-auto prose-ul:mb-8
+              prose-ol:list-decimal prose-ol:pl-8 prose-ol:space-y-4 prose-ol:max-w-[720px] prose-ol:mx-auto
+              prose-li:text-zinc-700 dark:prose-li:text-slate-400 prose-li:marker:text-primary prose-li:leading-relaxed prose-li:text-lg lg:prose-li:text-xl
+              prose-strong:text-zinc-900 dark:prose-strong:text-slate-200 prose-strong:font-bold
+              prose-hr:hidden
+            `}>
+              <ReactMarkdown
+                remarkPlugins={REMARK_PLUGINS}
+                rehypePlugins={REHYPE_PLUGINS}
+                components={memoizedComponents}
+              >
+                {content}
+              </ReactMarkdown>
+            </div>
+          </div>
+        </>
+      )}
+    </GlossaryProvider>
   );
 }

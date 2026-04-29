@@ -56,6 +56,7 @@ export default function MemberFooter() {
             <ul className="space-y-4">
               <FooterLink href="/" label="Bài viết mới" />
               <FooterLink href="/search" label="Tìm kiếm bài viết" />
+              <FooterLink href="/glossary" label="Thuật ngữ" />
               <FooterLink href="#" label="Sách & Tài liệu" isComingSoon />
               <FooterLink href="#" label="Khóa học chuyên sâu" isComingSoon />
             </ul>

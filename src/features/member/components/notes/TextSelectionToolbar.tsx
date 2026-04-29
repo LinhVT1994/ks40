@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Highlighter, FileEdit, X, Check, Eraser, Users, Shield, Globe } from 'lucide-react';
+import { Highlighter, FileEdit, X, Check, Eraser, Users, Shield, Globe, Plus } from 'lucide-react';
 
 interface TextSelectionToolbarProps {
   onAddNote: (text: string, range: Range) => void;
@@ -11,6 +11,7 @@ interface TextSelectionToolbarProps {
   isAuthor?: boolean;
   onAddPublicNote?: (text: string, range: Range) => void;
   onPublicHighlight?: (text: string, range: Range, color: string) => void;
+  onAddGlossary?: (text: string, range: Range) => void;
 }
 
 const HIGHLIGHT_COLORS = [
@@ -27,6 +28,7 @@ export default function TextSelectionToolbar({
   isAuthor,
   onAddPublicNote,
   onPublicHighlight,
+  onAddGlossary,
 }: TextSelectionToolbarProps) {
   const [selection, setSelection] = useState<{
     text: string;
@@ -185,6 +187,16 @@ export default function TextSelectionToolbar({
             <FileEdit className={`w-3.5 h-3.5 ${isPublicMode ? 'text-violet-400' : 'text-slate-400'}`} />
             <span>Ghi chú</span>
           </button>
+
+          {onAddGlossary && !isPublicMode && (
+            <button
+              onClick={() => onAddGlossary(selection.text, selection.range)}
+              className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold rounded-full transition-all text-amber-200 hover:bg-amber-500/20"
+            >
+              <Plus className="w-3.5 h-3.5 text-amber-400" />
+              <span>Thuật ngữ</span>
+            </button>
+          )}
           
           {selection.isHighlighted && !isPublicMode && (
              <button
