@@ -42,7 +42,7 @@ interface ArticleInteractionContextType {
   hideSidebars: () => void;
 }
 
-const ArticleInteractionContext = createContext<ArticleInteractionContextType | undefined>(undefined);
+export const ArticleInteractionContext = createContext<ArticleInteractionContextType | undefined>(undefined);
 
 export function ArticleInteractionProvider({
   children,

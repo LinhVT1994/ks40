@@ -97,6 +97,13 @@ export default function MemberHeader({ announcement }: { announcement?: SiteAnno
                 <div className="w-1 h-1 rounded-full bg-primary scale-0 group-hover/nav:scale-100 transition-transform" />
                 Chủ đề
               </Link>
+              <Link
+                href="/glossary"
+                className="text-sm font-bold text-zinc-600 dark:text-slate-400 hover:text-primary transition-colors flex items-center gap-2 group/nav"
+              >
+                <div className="w-1 h-1 rounded-full bg-primary scale-0 group-hover/nav:scale-100 transition-transform" />
+                Thuật ngữ
+              </Link>
             </nav>
           </div>
 

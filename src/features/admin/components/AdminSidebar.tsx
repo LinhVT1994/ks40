@@ -6,13 +6,14 @@ import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, FileText, Users, MessageSquare,
   Settings, ChevronLeft, ChevronRight,
-  GraduationCap, Activity, Bell, Share2, LayoutGrid, BarChart3,
+  GraduationCap, Activity, Bell, Share2, LayoutGrid, BarChart3, BookMarked,
 } from 'lucide-react';
 
 const navItems: { href: string; icon: React.ElementType; label: string; badge?: number }[] = [
   { href: '/admin/overview',       icon: LayoutDashboard, label: 'Dashboard'    },
   { href: '/admin/analytics',      icon: BarChart3,       label: 'Phân tích'    },
   { href: '/admin/documents',      icon: FileText,        label: 'Bài viết'     },
+  { href: '/admin/glossary',       icon: BookMarked,      label: 'Thuật ngữ'    },
   { href: '/admin/users',          icon: Users,           label: 'Người dùng'  },
   { href: '/admin/comments',       icon: MessageSquare,   label: 'Bình luận'   },
   { href: '/admin/shares',         icon: Share2,          label: 'Chia sẻ file' },

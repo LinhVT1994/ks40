@@ -1,6 +1,7 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -234,6 +235,23 @@ export default function MarkdownViewer({
   }
 
   const memoizedComponents = React.useMemo(() => ({
+    a: ({ href, children, ...props }: any) => {
+      if (href?.startsWith('glossary:')) {
+        const slug = href.slice('glossary:'.length);
+        return (
+          <span className="group/gloss relative inline-block">
+            <Link
+              href={`/glossary/${slug}`}
+              className="text-primary font-semibold underline decoration-dotted underline-offset-4 decoration-primary/50 hover:decoration-solid cursor-help"
+              {...props}
+            >
+              {children}
+            </Link>
+          </span>
+        );
+      }
+      return <a href={href} target={href?.startsWith('http') ? '_blank' : undefined} rel={href?.startsWith('http') ? 'noopener noreferrer' : undefined} {...props}>{children}</a>;
+    },
     li: ({ children }: any) => <li data-annotation-target>{children}</li>,
     blockquote: ({ children }: any) => (
       <blockquote className={cn(
