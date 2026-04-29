@@ -52,11 +52,10 @@ export default function GlossaryClientView({ initialTerms }: GlossaryClientViewP
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 transition-colors">
-      <GlossaryExplorer 
-        search={search} 
-        onSearchChange={setSearch}
-        letter={letter} 
-        onLetterChange={setLetter}
+      <GlossaryExplorer
+        search={search}
+        letter={letter}
+        topics={[]}
       />
 
       <MemberContainer>

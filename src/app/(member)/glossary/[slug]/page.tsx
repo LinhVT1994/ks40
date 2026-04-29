@@ -197,11 +197,13 @@ export default async function GlossaryTermPage({ params, searchParams }: Props) 
               </div>
 
               {/* Author Section at Bottom (Mobile only) */}
-              <div className="px-6 md:px-12 pt-10 lg:hidden">
-                <div className="pt-10 border-t border-zinc-100 dark:border-white/5">
-                  <AuthorCard author={term.author} />
+              {term.author && (
+                <div className="px-6 md:px-12 pt-10 lg:hidden">
+                  <div className="pt-10 border-t border-zinc-100 dark:border-white/5">
+                    <AuthorCard author={term.author} />
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Related Terms Section */}
               {otherTerms.length > 0 && (

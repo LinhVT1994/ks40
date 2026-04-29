@@ -172,10 +172,11 @@ export function AutoGlossaryHighlight({ children }: { children: React.ReactNode 
         return node;
       }
 
-      if (node.props && node.props.children) {
-        return React.cloneElement(node, {
-          ...node.props,
-          children: React.Children.map(node.props.children, processNode),
+      const nodeProps = node.props as any;
+      if (nodeProps?.children) {
+        return React.cloneElement(node as React.ReactElement<any>, {
+          ...nodeProps,
+          children: React.Children.map(nodeProps.children, processNode),
         });
       }
     }

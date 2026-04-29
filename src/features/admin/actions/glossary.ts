@@ -12,7 +12,7 @@ export type GlossaryTermSummary = {
   term: string;
   slug: string;
   shortDef: string;
-  topic?: { id: string; label: string; color: string } | null;
+  topic?: { id: string; label: string; color: string | null } | null;
   author?: { id: string; name: string | null; image: string | null; username: string | null } | null;
 };
 
