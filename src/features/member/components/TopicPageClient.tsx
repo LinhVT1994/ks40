@@ -117,7 +117,7 @@ export default function TopicPageClient({
   const color = parentTopic?.color ?? topic.color ?? '#3b82f6';
 
   return (
-    <div className="max-w-[1200px] 2xl:max-w-[1440px] mx-auto w-full px-4 md:px-8 pb-32">
+    <div className="max-w-[1200px] 2xl:max-w-[1440px] mx-auto w-full px-8 md:px-8 pb-32">
       {/* Hero Header */}
       <header className="mt-8 sm:mt-12 flex flex-col items-start">
         {/* Back Button */}

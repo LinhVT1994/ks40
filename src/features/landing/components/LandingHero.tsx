@@ -21,10 +21,9 @@ export default function LandingHero() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 shadow-xl shadow-primary/5"
+        className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 shadow-xl shadow-primary/5"
       >
-        <Sparkles className="w-3.5 h-3.5 text-primary" />
-        <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">Khám phá vũ trụ tri thức Zen</span>
+        <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">Kiến tạo tri thức</span>
       </motion.div>
 
       {/* Main Headline */}
@@ -80,10 +79,9 @@ export default function LandingHero() {
 
           <Link 
             href="/explore"
-            className="px-8 py-4 bg-white/5 dark:bg-white/5 border border-zinc-300 dark:border-white/10 text-zinc-800 dark:text-white rounded-2xl font-bold text-lg hover:bg-zinc-50 dark:hover:bg-white/10 transition-all flex items-center gap-3 group"
+            className="px-8 py-4 bg-white/5 dark:bg-white/5 border border-zinc-300 dark:border-white/10 text-zinc-800 dark:text-white rounded-2xl font-bold text-lg hover:bg-zinc-50 dark:hover:bg-white/10 transition-all flex items-center justify-center"
           >
             Khám phá bài viết
-            <Sparkles className="w-4 h-4 text-primary group-hover:animate-pulse" />
           </Link>
         </motion.div>
       </div>

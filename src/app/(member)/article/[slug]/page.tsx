@@ -26,6 +26,7 @@ import MemberContainer from '@/components/layout/MemberContainer';
 import BackButton from '@/components/shared/BackButton';
 import { ArticleInteractionProvider } from '@/features/articles/context/ArticleInteractionContext';
 import FloatingInteractionHub from '@/features/member/components/FloatingInteractionHub';
+import MobileInteractionBar from '@/features/member/components/MobileInteractionBar';
 
 export const dynamic = 'force-dynamic';
 
@@ -277,6 +278,12 @@ export default async function ArticleDetailPage({ params }: Props) {
                 <div>
                   <ArticleResources resources={articleWithInteraction!.resources ?? []} />
                   <ArticleNavigation prev={navigation.prev} next={navigation.next} />
+                  
+                  {/* Mobile Interaction Bar at Bottom */}
+                  <div className="flex items-center justify-center xl:hidden mt-8 mb-4 px-4 border-t border-zinc-100 dark:border-white/5 pt-8">
+                    <MobileInteractionBar />
+                  </div>
+
                   {(articleWithInteraction as any).nextArticle && (
                     <NextArticleCard article={(articleWithInteraction as any).nextArticle} />
                   )}

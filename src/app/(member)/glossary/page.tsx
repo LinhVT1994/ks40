@@ -50,7 +50,9 @@ export default async function GlossaryPage({
 
   return (
     <div className="min-h-screen transition-colors">
-      <GlossaryExplorer search={search} letter={letter} topics={topics} />
+      <MemberContainer className="pb-0 pt-0">
+        <GlossaryExplorer search={search} letter={letter} topics={topics} />
+      </MemberContainer>
 
       <MemberContainer>
         <div className="max-w-4xl mx-auto pb-24 px-4">

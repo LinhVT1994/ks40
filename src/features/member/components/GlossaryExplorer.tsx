@@ -114,7 +114,17 @@ export default function GlossaryExplorer({
           </div>
 
           {/* Ultra-Compact Segmented Pill */}
-          <div className="flex flex-col items-center gap-6">
+          <div className="flex flex-col items-center gap-4">
+            <div className="md:hidden flex justify-center w-full max-w-[280px]">
+              <button
+                onClick={() => setIsSubmissionOpen(true)}
+                className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-amber-500/80 hover:text-amber-500 transition-colors"
+              >
+                <Lightbulb className="w-3 h-3" />
+                <span>Đóng góp</span>
+              </button>
+            </div>
+            
             <div className="inline-flex items-center p-1 bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/10 rounded-full shadow-sm">
               <button
                 onClick={toggleSearch}
@@ -147,24 +157,25 @@ export default function GlossaryExplorer({
                 <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${isAlphabetOpen ? 'rotate-180' : ''}`} />
               </button>
 
-              <div className="w-px h-4 bg-zinc-200 dark:bg-white/10 mx-1" />
-
-              <button
-                onClick={() => setIsSubmissionOpen(true)}
-                className="flex items-center gap-2 px-4 py-1.5 rounded-full transition-all duration-300 whitespace-nowrap text-amber-500 hover:bg-amber-500/5"
-              >
-                <Lightbulb className="w-3.5 h-3.5" />
-                <span className="text-[10px] font-bold uppercase tracking-wider">
-                  Đóng góp
-                </span>
-              </button>
+              <div className="hidden md:flex items-center">
+                <div className="w-px h-4 bg-zinc-200 dark:bg-white/10 mx-1" />
+                <button
+                  onClick={() => setIsSubmissionOpen(true)}
+                  className="flex items-center gap-2 px-4 py-1.5 rounded-full transition-all duration-300 whitespace-nowrap text-amber-500 hover:bg-amber-500/5"
+                >
+                  <Lightbulb className="w-3.5 h-3.5" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider">
+                    Đóng góp
+                  </span>
+                </button>
+              </div>
             </div>
 
             {/* Expandable Areas */}
             <div className="w-full">
               {isSearching && (
                 <div className="w-full max-w-xl mx-auto">
-                  <div className="pt-8 px-4">
+                  <div className="pt-8">
                     <div className="relative flex items-center bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-full overflow-hidden focus-within:border-primary/50 focus-within:bg-white dark:focus-within:bg-slate-900 transition-all shadow-sm">
                       <div className="pl-5 text-zinc-400 shrink-0">
                         <Search className="w-4 h-4" />
@@ -174,7 +185,7 @@ export default function GlossaryExplorer({
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Nhập thuật ngữ cần tìm..."
-                        className="flex-1 min-w-0 bg-transparent px-4 py-3.5 text-sm outline-none text-zinc-800 dark:text-white placeholder:text-zinc-400"
+                        className="flex-1 min-w-0 bg-transparent px-4 py-2.5 text-base md:text-sm outline-none text-zinc-800 dark:text-white placeholder:text-zinc-400"
                       />
                       {search && (
                         <button 
@@ -191,7 +202,7 @@ export default function GlossaryExplorer({
 
               {isAlphabetOpen && (
                 <div className="w-full">
-                  <div className="pt-10 pb-4 flex items-center justify-center flex-wrap gap-x-6 gap-y-5 px-4">
+                  <div className="pt-10 pb-4 flex items-center justify-center flex-wrap gap-x-6 gap-y-5">
                     <button
                       onClick={() => updateUrl({ letter: '' })}
                       className={`relative text-[11px] font-bold uppercase tracking-[0.2em] transition-colors ${
