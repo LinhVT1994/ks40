@@ -287,9 +287,9 @@ function WebsiteTab() {
   return (
     <div className="space-y-6">
       <Section title="Thông tin cơ bản">
-        <Field label="Tên trang web"><input className={inputClass} defaultValue="KS40" /></Field>
-        <Field label="Slogan"><input className={inputClass} defaultValue="Nền tảng học lập trình chuyên sâu" /></Field>
-        <Field label="Mô tả"><textarea className={textareaClass} rows={3} defaultValue="KS40 là nền tảng chia sẻ kiến thức về lập trình." /></Field>
+        <Field label="Tên trang web"><input className={inputClass} defaultValue="Lenote" /></Field>
+        <Field label="Tiêu đề trang (SEO)"><input className={inputClass} defaultValue="Lenote - Nền tảng tri thức thế hệ mới" /></Field>
+        <Field label="Mô tả"><textarea className={textareaClass} rows={3} defaultValue="Lenote là nền tảng quản lý và chia sẻ kiến thức thông minh, giúp bạn tối ưu hóa việc học tập và nghiên cứu." /></Field>
       </Section>
       <SaveButton saved={saved} onClick={save} />
     </div>
@@ -303,7 +303,7 @@ function AccountTab() {
     <div className="space-y-6">
       <Section title="Thông tin cá nhân">
         <Field label="Tên hiển thị"><input className={inputClass} defaultValue="Admin User" /></Field>
-        <Field label="Email"><input className={inputClass} type="email" defaultValue="admin@ks40.com" /></Field>
+        <Field label="Email"><input className={inputClass} type="email" defaultValue="admin@lenote.dev" /></Field>
       </Section>
       <SaveButton saved={saved} onClick={save} />
     </div>

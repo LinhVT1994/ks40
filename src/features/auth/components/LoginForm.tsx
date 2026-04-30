@@ -79,7 +79,7 @@ export default function LoginForm() {
           name="email"
           defaultValue={initialEmail}
           key={initialEmail}
-          placeholder="developer@ks40.com"
+          placeholder="example@lenote.dev"
           type="email"
           required
           disabled={isPending}

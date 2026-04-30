@@ -148,6 +148,15 @@ export default function GlobalNotesSidebar() {
   const isDragging = useRef(false);
   const searchInputRef = useRef<HTMLInputElement | null>(null);
 
+  // Mobile check for responsive behavior
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   useEffect(() => {
     if (isSidebarOpen) {
       loadNotes();
@@ -341,28 +350,35 @@ export default function GlobalNotesSidebar() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={closeSidebar}
-            style={{ zIndex: 99998 }}
+            style={{ zIndex: 999998 }}
             className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm"
           />
 
           <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            style={{ width: panelWidth, maxWidth: '100vw', zIndex: 99999 }}
-            className="fixed top-0 right-0 h-[100dvh] bg-white/95 dark:bg-slate-900 border-l border-zinc-200/50 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl"
+            initial={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
+            animate={{ x: 0, y: 0 }}
+            exit={isMobile ? { y: '100%', x: 0 } : { x: '100%', y: 0 }}
+            transition={{ type: 'spring', damping: 28, stiffness: 220 }}
+            style={{ 
+              width: isMobile ? '100%' : panelWidth, 
+              maxWidth: '100vw', 
+              zIndex: 1000000,
+              height: isMobile ? '100%' : '100dvh'
+            }}
+            className={`fixed ${isMobile ? 'inset-0' : 'top-0 right-0'} bg-white/95 dark:bg-slate-900 border-l border-zinc-200/50 dark:border-white/10 shadow-2xl flex flex-col overflow-hidden backdrop-blur-xl`}
           >
-            {/* Resize handle */}
-            <div
-              onMouseDown={startResizing}
-              onDoubleClick={() => setPanelWidth(420)}
-              title="Kéo để thay đổi kích thước · Double-click để reset"
-              style={{ zIndex: 100000 }}
-              className="group/resize hidden sm:flex absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize items-center justify-center hover:bg-primary/10 transition-colors"
-            >
-              <div className="w-[2px] h-12 rounded-full bg-zinc-300/0 group-hover/resize:bg-primary/60 dark:group-hover/resize:bg-primary/70 transition-colors" />
-            </div>
+            {/* Resize handle (Desktop only) */}
+            {!isMobile && (
+              <div
+                onMouseDown={startResizing}
+                onDoubleClick={() => setPanelWidth(420)}
+                title="Kéo để thay đổi kích thước · Double-click để reset"
+                style={{ zIndex: 100000 }}
+                className="group/resize hidden sm:flex absolute left-0 top-0 bottom-0 w-1.5 cursor-col-resize items-center justify-center hover:bg-primary/10 transition-colors"
+              >
+                <div className="w-[2px] h-12 rounded-full bg-zinc-300/0 group-hover/resize:bg-primary/60 dark:group-hover/resize:bg-primary/70 transition-colors" />
+              </div>
+            )}
 
             <AnimatePresence mode="wait">
               {!selectedNote ? (

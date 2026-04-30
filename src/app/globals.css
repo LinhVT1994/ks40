@@ -435,11 +435,38 @@ html.dark .focus-toc-panel {
   max-width: calc(100vw - 3rem);
 }
 
-/* Hide redundant focus elements on mobile (MobileNavHub handles it) */
+/* Responsive Focus Bar */
 @media (max-width: 1023px) {
-  .focus-bar, 
   .focus-progress-bar {
+    display: block !important;
+  }
+  
+  .focus-bar {
+    display: flex !important;
+    bottom: 1rem;
+    padding: 0.4rem 0.6rem;
+    gap: 0.25rem;
+    max-width: calc(100vw - 1rem);
+    border-radius: 20px;
+  }
+
+  .focus-bar-btn span,
+  .focus-bar kbd,
+  .focus-bar .flex-col, /* Hide Session/Remain columns */
+  .focus-bar .w-\[1px\] {  /* Hide divider */
     display: none !important;
+  }
+  
+  .focus-bar-slider {
+    width: 60px;
+  }
+
+  .focus-bar-progress-track {
+    width: 40px;
+  }
+
+  .focus-bar-btn {
+    padding: 0.5rem;
   }
 }
 

@@ -248,12 +248,17 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
       return;
     }
     const onClickOutside = (e: MouseEvent) => {
+      // On mobile, tap anywhere to toggle bar visibility (if not clicking the bar itself)
       if (barRef.current && !barRef.current.contains(e.target as Node)) {
-        setVisible(false);
+        setVisible(v => !v);
       }
     };
-    window.addEventListener('click', onClickOutside);
-    // Show bar always in focus mode
+    
+    if (typeof window !== 'undefined' && !window.matchMedia('(hover: hover)').matches) {
+      window.addEventListener('click', onClickOutside);
+    }
+    
+    // Show bar always in focus mode on start
     setVisible(true);
     
     return () => {

@@ -96,81 +96,79 @@ export default function GlobalTimer() {
 
   if (isMinimized) {
     return (
-      <div className="fixed bottom-[82px] right-6 z-[9999] animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="fixed bottom-[82px] right-4 md:right-6 z-[9999] animate-in fade-in slide-in-from-bottom-4 duration-500">
         <button 
           onClick={() => setIsMinimized(false)}
-          className="flex items-center gap-4 px-5 py-3 bg-zinc-800/90 backdrop-blur-lg md:backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl hover:bg-zinc-800 transition-all hover:scale-105 group ring-1 ring-white/5"
+          className="flex items-center gap-2.5 md:gap-4 px-3.5 md:px-5 py-2 md:py-3 bg-zinc-800/90 backdrop-blur-lg md:backdrop-blur-3xl border border-white/10 rounded-2xl shadow-2xl hover:bg-zinc-800 transition-all hover:scale-105 group ring-1 ring-white/5"
         >
           <div className="relative flex items-center justify-center">
-            <Timer className={`w-4 h-4 ${isRunning ? 'text-primary' : 'text-zinc-400'} relative z-10`} />
+            <Timer className={`w-3 h-3 md:w-4 md:h-4 ${isRunning ? 'text-primary' : 'text-zinc-400'} relative z-10`} />
             {isRunning && (
               <div className="absolute inset-0 bg-primary/20 blur-md rounded-full animate-pulse" />
             )}
           </div>
-          <span className="text-sm font-black text-white tabular-nums tracking-wide">
+          <span className="text-[11px] md:text-sm font-black text-white tabular-nums tracking-wide">
             {formatTime(elapsed)}
           </span>
-          <Maximize2 className="w-3.5 h-3.5 text-zinc-400 group-hover:text-primary transition-colors" />
+          <Maximize2 className="w-2.5 h-2.5 md:w-3.5 md:h-3.5 text-zinc-400 group-hover:text-primary transition-colors" />
         </button>
       </div>
     );
   }
 
   return (
-    <div className="fixed bottom-[82px] right-6 z-[9999] w-64 bg-zinc-900/80 backdrop-blur-lg md:backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.6)] overflow-hidden animate-in fade-in slide-in-from-bottom-6 zoom-in-95 duration-700 ring-1 ring-white/5 group/timer">
+    <div className="fixed bottom-[82px] right-4 md:right-6 z-[9999] w-[180px] md:w-64 bg-zinc-900/80 backdrop-blur-lg md:backdrop-blur-3xl border border-white/10 rounded-2xl shadow-[0_30px_60px_rgba(0,0,0,0.6)] overflow-hidden animate-in fade-in slide-in-from-bottom-6 zoom-in-95 duration-700 ring-1 ring-white/5 group/timer">
       {/* Dynamic Background Glow */}
-      <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 blur-[50px] transition-all duration-1000 ${
+      <div className={`absolute top-0 left-1/2 -translate-x-1/2 w-24 h-24 blur-[40px] transition-all duration-1000 ${
         isRunning ? 'bg-primary/20' : 'bg-zinc-500/10'
       }`} />
 
-      {/* Sheen Effect */}
-      <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent -translate-x-full group-hover/timer:translate-x-full transition-transform duration-1000" />
-
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/5 bg-white/5 relative z-10">
-        <div className="flex items-center gap-2.5">
-          <div className="relative">
-            <Timer className={`w-3.5 h-3.5 ${isRunning ? 'text-primary animate-pulse' : 'text-zinc-400'}`} />
-            <div className={`absolute -inset-1 bg-primary/20 blur-sm rounded-full transition-opacity ${isRunning ? 'opacity-100' : 'opacity-0'}`} />
-          </div>
-          <span className="text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] opacity-90">Sử dụng thời gian</span>
+      <div className="flex items-center justify-between px-3 md:px-5 py-2 md:py-3.5 border-b border-white/5 bg-white/5 relative z-10">
+        <div className="flex items-center gap-1.5 md:gap-2">
+          <Timer className={`w-3 h-3 md:w-3.5 md:h-3.5 ${isRunning ? 'text-primary animate-pulse' : 'text-zinc-400'}`} />
+          <span className="text-[7px] md:text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] opacity-90 hidden sm:inline">Timer</span>
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-0.5 md:gap-1">
           <button 
             onClick={() => setIsMinimized(true)} 
-            className="p-1.5 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-all active:scale-90"
-            title="Thu nhỏ"
+            className="p-1.5 hover:bg-white/10 rounded-lg text-zinc-400 hover:text-white transition-all"
           >
-            <div className="flex items-center justify-center">
-              <Minus className="w-3.5 h-3.5" />
-            </div>
+            <Minus className="w-3 md:w-3.5 h-3 md:h-3.5" />
           </button>
           <button 
             onClick={() => setIsVisible(false)} 
-            className="p-1.5 hover:bg-red-500/20 rounded-lg text-zinc-400 hover:text-red-400 transition-all active:scale-90"
-            title="Đóng"
+            className="p-1.5 hover:bg-red-500/20 rounded-lg text-zinc-400 hover:text-red-400 transition-all"
           >
-            <div className="flex items-center justify-center">
-              <X className="w-3.5 h-3.5" />
-            </div>
+            <X className="w-3 md:w-3.5 h-3 md:h-3.5" />
           </button>
         </div>
       </div>
 
       {/* Main Display Area */}
-      <div className="p-6 pb-7 flex flex-col items-center relative z-10">
+      <div className="p-3.5 md:p-6 pb-4 md:pb-7 flex flex-col items-center relative z-10">
         {/* Circular Progress Visualizer */}
-        <div className="relative mb-6 group/display">
-          <svg className="w-32 h-32 transform -rotate-90 drop-shadow-[0_0_10px_rgba(0,0,0,0.3)]">
+        <div className="relative mb-3 md:mb-6 group/display">
+          {/* Mobile SVG (180px context) */}
+          <svg className="w-20 h-20 transform -rotate-90 md:hidden">
+            <circle className="text-white/5" strokeWidth="3" stroke="currentColor" fill="transparent" r="36" cx="40" cy="40" />
             <circle
-              className="text-white/5"
-              strokeWidth="5"
+              className={`${isRunning ? 'text-primary' : 'text-zinc-700'} transition-all duration-1000 ease-out`}
+              strokeWidth="3"
+              strokeDasharray={226}
+              strokeDashoffset={226 - (226 * (elapsed % 60)) / 60}
+              strokeLinecap="round"
               stroke="currentColor"
               fill="transparent"
-              r="58"
-              cx="64"
-              cy="64"
+              r="36"
+              cx="40"
+              cy="40"
             />
+          </svg>
+          
+          {/* Desktop SVG (w-64 context) */}
+          <svg className="w-32 h-32 transform -rotate-90 hidden md:block">
+            <circle className="text-white/5" strokeWidth="5" stroke="currentColor" fill="transparent" r="58" cx="64" cy="64" />
             <circle
               className={`${isRunning ? 'text-primary' : 'text-zinc-700'} transition-all duration-1000 ease-out`}
               strokeWidth="5"
@@ -186,58 +184,35 @@ export default function GlobalTimer() {
           </svg>
           
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className={`text-3xl font-black tabular-nums tracking-tighter mb-0.5 transition-all duration-500 ${
+            <div className={`text-xl md:text-3xl font-black tabular-nums tracking-tighter transition-all duration-500 ${
               isRunning ? 'text-white scale-105' : 'text-zinc-400'
             }`}>
               {formatTime(elapsed)}
             </div>
-            <div className="text-[8px] font-black text-zinc-400 uppercase tracking-widest opacity-80">
-              {isRunning ? 'Đang chạy' : 'Đã dừng'}
-            </div>
           </div>
-
-          {/* Decorative Glow */}
-          {isRunning && (
-            <div className="absolute inset-0 bg-primary/5 blur-xl rounded-full -z-10 animate-pulse" />
-          )}
         </div>
 
         {/* Controls */}
-        <div className="flex items-center gap-3 w-full">
+        <div className="flex items-center gap-2 w-full">
           <button 
             onClick={() => setIsRunning(!isRunning)}
-            className={`flex-1 flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all active:scale-95 shadow-lg ${
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 md:py-3.5 rounded-xl font-black text-[8px] md:text-[10px] uppercase tracking-widest transition-all active:scale-95 ${
               isRunning 
-                ? 'bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 border border-amber-500/20 ring-1 ring-amber-500/20' 
-                : 'bg-primary text-zinc-900 hover:bg-primary-hover shadow-primary/20'
+                ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' 
+                : 'bg-primary text-zinc-900'
             }`}
           >
-            {isRunning ? (
-              <>
-                <Pause className="w-3 h-3 fill-current" />
-                <span>Dừng lại</span>
-              </>
-            ) : (
-              <>
-                <Play className="w-3 h-3 fill-current" />
-                <span>Bắt đầu</span>
-              </>
-            )}
+            {isRunning ? <Pause className="w-2.5 h-2.5 fill-current" /> : <Play className="w-2.5 h-2.5 fill-current" />}
+            <span>{isRunning ? 'Dừng' : 'Bắt đầu'}</span>
           </button>
 
           <button 
             onClick={() => { setElapsed(0); setIsRunning(false); }}
-            className="p-3.5 bg-white/5 text-zinc-400 hover:text-white hover:bg-white/10 rounded-xl transition-all border border-white/5 group/reset active:rotate-180"
-            title="Làm mới"
+            className="p-2 md:p-3.5 bg-white/5 text-zinc-400 hover:text-white rounded-xl border border-white/5"
           >
-            <RotateCcw className="w-4 h-4 transition-transform duration-500" />
+            <RotateCcw className="w-3 md:w-4 h-3 md:h-4" />
           </button>
         </div>
-      </div>
-      
-      {/* Bottom Subtle Bar */}
-      <div className="h-1 w-full bg-white/5 overflow-hidden">
-        <div className={`h-full bg-primary/40 transition-all duration-300 ${isRunning ? 'animate-[shimmer_2s_infinite_linear]' : 'w-0'}`} style={{ width: '100%' }} />
       </div>
     </div>
   );

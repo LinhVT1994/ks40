@@ -52,6 +52,7 @@ export function GlossaryTooltip({ term }: { term: GlossaryTermInfo }) {
   const [isVisible, setIsVisible] = React.useState(false);
   const [coords, setCoords] = React.useState({ top: 0, left: 0 });
   const triggerRef = React.useRef<HTMLAnchorElement>(null);
+  const tooltipRef = React.useRef<HTMLDivElement>(null);
   const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
@@ -60,17 +61,29 @@ export function GlossaryTooltip({ term }: { term: GlossaryTermInfo }) {
 
   React.useEffect(() => {
     if (!isVisible) return;
-    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
-      if (triggerRef.current && !triggerRef.current.contains(e.target as Node)) {
-        setIsVisible(false);
-      }
-    };
-    document.addEventListener('touchstart', handleClickOutside);
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('touchstart', handleClickOutside);
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    
+    // Use a small delay before adding the listener to avoid the 'ghost click' from the opening action
+    const timer = setTimeout(() => {
+      const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+        const target = e.target as Node;
+        const isInsideTrigger = triggerRef.current?.contains(target);
+        const isInsideTooltip = tooltipRef.current?.contains(target);
+        
+        if (!isInsideTrigger && !isInsideTooltip) {
+          setIsVisible(false);
+        }
+      };
+
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('touchstart', handleClickOutside);
+      
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('touchstart', handleClickOutside);
+      };
+    }, 10);
+    
+    return () => clearTimeout(timer);
   }, [isVisible]);
 
   const updateCoords = () => {
@@ -102,10 +115,9 @@ export function GlossaryTooltip({ term }: { term: GlossaryTermInfo }) {
         onMouseLeave={() => setIsVisible(false)}
         onClick={(e) => {
           // Trên touch device (iPad/iPhone): tap đầu hiện tooltip thay vì navigate.
-          // Click chỉ fire khi user tap thật (không scroll, không long-press), nên text-select
-          // qua long-press vẫn hoạt động bình thường.
           if (typeof window !== 'undefined' && !window.matchMedia('(hover: hover)').matches) {
             e.preventDefault();
+            e.stopPropagation(); // CRITICAL: Stop propagation to prevent immediate close
             if (isVisible) {
               setIsVisible(false);
             } else {
@@ -123,20 +135,21 @@ export function GlossaryTooltip({ term }: { term: GlossaryTermInfo }) {
       {mounted && createPortal(
         <AnimatePresence>
           {isVisible && (
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', pointerEvents: 'none', zIndex: 99999 }}>
-              <motion.div
-                initial={{ opacity: 0, y: 5, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 5, scale: 0.95 }}
-                transition={{ duration: 0.15, ease: 'easeOut' }}
-                style={{ 
-                  position: 'absolute', 
-                  top: coords.top - 12, // Reduced slightly as -translate-y-full adds enough gap
-                  left: coords.left,
-                }}
-                className="w-64 min-w-[256px] p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 shadow-2xl pointer-events-auto block -translate-x-1/2 -translate-y-full"
-              >
-                <Link href={`/glossary/${term.slug}`} target="_blank" className="block space-y-2 not-italic font-sans text-left normal-case tracking-normal whitespace-normal">
+            <motion.div
+              ref={tooltipRef}
+              initial={{ opacity: 0, y: 5, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 5, scale: 0.95 }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
+              style={{ 
+                position: 'absolute', 
+                top: coords.top - 12, 
+                left: coords.left,
+                zIndex: 99999
+              }}
+              className="w-64 min-w-[256px] p-4 rounded-2xl bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-white/10 shadow-2xl pointer-events-auto block -translate-x-1/2 -translate-y-full"
+            >
+                <div className="space-y-2 not-italic font-sans text-left normal-case tracking-normal whitespace-normal">
                   <div className="flex items-center gap-2">
                     <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                     <span className="text-[11px] font-black uppercase tracking-widest text-primary">Thuật ngữ</span>
@@ -145,10 +158,21 @@ export function GlossaryTooltip({ term }: { term: GlossaryTermInfo }) {
                   <p className="text-xs text-zinc-600 dark:text-slate-400 leading-relaxed italic">
                     {term.shortDef}
                   </p>
-                  <div className="pt-1 text-[10px] font-bold text-primary flex items-center gap-1">
+                  <button 
+                    type="button"
+                    className="inline-flex pt-1 text-[10px] font-bold text-primary items-center gap-1 hover:underline decoration-primary/30 underline-offset-4 transition-all cursor-pointer"
+                    onPointerUp={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const url = `/glossary/${term.slug}`;
+                      if (typeof window !== 'undefined') {
+                        window.open(url, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
+                  >
                     Nhấn để xem định nghĩa →
-                  </div>
-                </Link>
+                  </button>
+                </div>
                 <div 
                   style={{ 
                     position: 'absolute', 
@@ -164,7 +188,6 @@ export function GlossaryTooltip({ term }: { term: GlossaryTermInfo }) {
                   className="dark:!border-t-zinc-900"
                 />
               </motion.div>
-            </div>
           )}
         </AnimatePresence>,
         document.body
