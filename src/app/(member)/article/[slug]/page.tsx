@@ -246,7 +246,7 @@ export default async function ArticleDetailPage({ params }: Props) {
           
           {!isGated && <FocusMode readTime={data.readTime} headings={headings} />}
 
-          <main data-focus-main className="w-full animate-in fade-in duration-500 min-w-0 px-2 md:px-0">
+          <main data-focus-main className="w-full animate-in fade-in duration-500 min-w-0 px-4 md:px-0">
             <div data-focus-hide className="mb-8 opacity-60 hover:opacity-100 transition-opacity">
               <BackButton />
             </div>

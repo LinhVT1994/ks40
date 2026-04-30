@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { X, Maximize2, Minimize2 } from 'lucide-react';
+import { X, Maximize2, Minimize2, List } from 'lucide-react';
 import { smoothScrollTo } from '@/lib/scroll-utils';
 import { useInteractionOptional } from '@/features/articles/context/ArticleInteractionContext';
 
@@ -25,6 +25,23 @@ export default function FloatingTOC({
   const [internalOpen, setInternalOpen] = useState(false);
   const [activeId, setActiveId] = useState('');
   const [focusActive, setFocusActive] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+        setIsVisible(false); // Scrolling down
+      } else {
+        setIsVisible(true); // Scrolling up
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
 
   const interaction = useInteractionOptional();
@@ -181,20 +198,16 @@ export default function FloatingTOC({
 
       {/* Floating Trigger (Mobile & Tablet only) */}
       <div
-        className={`fixed top-[calc(50%_+_36px)] -translate-y-1/2 z-40 flex flex-col gap-4 cursor-pointer transition-opacity duration-200 xl:hidden ${
-          isLeft ? 'left-3' : 'right-3'
-        } ${
-          isOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'
+        className={`fixed top-24 right-4 z-40 cursor-pointer transition-all duration-500 xl:hidden ${
+          (isOpen || !isVisible) 
+            ? 'opacity-0 -translate-y-20 pointer-events-none' 
+            : 'opacity-100 translate-y-0'
         }`}
         onClick={() => setIsOpen(true)}
-        onMouseEnter={() => !externalOpen && setIsOpen(true)}
         title="Mục lục"
       >
-        <div className={`flex flex-col gap-1.5 ${isLeft ? 'items-start' : 'items-end'}`}>
-          <span className="block w-5 h-0.5 rounded-full bg-zinc-300 dark:bg-white/20" />
-          <span className="block w-3.5 h-0.5 rounded-full bg-zinc-300 dark:bg-white/20" />
-          <span className="block w-4 h-0.5 rounded-full bg-zinc-300 dark:bg-white/20" />
-          <span className="block w-3 h-0.5 rounded-full bg-zinc-300 dark:bg-white/20" />
+        <div className="w-12 h-12 rounded-full bg-white dark:bg-slate-900 border border-zinc-200 dark:border-white/10 shadow-xl flex items-center justify-center text-zinc-600 dark:text-slate-400 active:scale-95 transition-all">
+          <List className="w-5 h-5" />
         </div>
       </div>
 

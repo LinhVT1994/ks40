@@ -150,77 +150,85 @@ export default function NotificationBell() {
       </button>
 
       {/* Dropdown panel */}
-      {open && mounted && (
-        <div 
-          ref={dropdownRef}
-          className="absolute right-0 top-[calc(100%+8px)] w-[calc(100vw-32px)] sm:w-96 origin-top-right border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[99999] overflow-hidden animate-in fade-in zoom-in-95 duration-150 bg-surface"
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-200 dark:border-white/5">
-            <div className="flex items-center gap-2">
-              <h3 className="text-sm font-bold text-zinc-800 dark:text-white">Thông báo</h3>
-              {unreadCount > 0 && (
-                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                  {unreadCount} mới
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-1">
-              {unreadCount > 0 && (
+      {open && mounted && (() => {
+        const panel = (
+          <div 
+            ref={dropdownRef}
+            className="fixed inset-0 sm:absolute sm:inset-auto sm:right-0 sm:top-[calc(100%+8px)] w-screen sm:w-96 origin-top border-y sm:border border-zinc-300 dark:border-white/10 sm:rounded-2xl shadow-2xl z-[200000] overflow-hidden animate-in fade-in zoom-in-95 duration-200 bg-surface flex flex-col"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-5 sm:px-4 sm:py-3.5 border-b border-zinc-200 dark:border-white/5">
+              <div className="flex items-center gap-3 sm:gap-2">
+                <h3 className="text-lg sm:text-sm font-bold text-zinc-800 dark:text-white">Thông báo</h3>
+                {unreadCount > 0 && (
+                  <span className="text-[10px] sm:text-xs font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+                    {unreadCount} mới
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1">
+                {unreadCount > 0 && (
+                  <button
+                    onClick={markAllRead}
+                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-primary hover:bg-primary/5 transition-colors"
+                    title="Đánh dấu tất cả đã đọc"
+                  >
+                    <CheckCheck className="w-3.5 h-3.5" />
+                    Đọc hết
+                  </button>
+                )}
                 <button
-                  onClick={markAllRead}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-primary hover:bg-primary/5 transition-colors"
-                  title="Đánh dấu tất cả đã đọc"
+                  onClick={() => setOpen(false)}
+                  className="p-2 sm:p-1.5 rounded-lg text-zinc-500 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
                 >
-                  <CheckCheck className="w-3.5 h-3.5" />
-                  Đọc hết
+                  <X className="w-5 h-5 sm:w-3.5 sm:h-3.5" />
                 </button>
-              )}
-              <button
-                onClick={() => setOpen(false)}
-                className="p-1.5 rounded-lg text-zinc-500 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
-              >
-                <X className="w-3.5 h-3.5" />
-              </button>
+              </div>
             </div>
-          </div>
 
-          {/* List */}
-          <div className="max-h-[420px] overflow-y-auto divide-y divide-zinc-200 dark:divide-white/5">
-            {isLoading ? (
-              <div className="flex items-center justify-center py-12 gap-2 text-sm text-zinc-500">
-                <span className="w-4 h-4 border-2 border-zinc-300 border-t-primary rounded-full animate-spin" />
-                Đang tải...
+            {/* List */}
+            <div className="flex-1 sm:max-h-[420px] overflow-y-auto divide-y divide-zinc-200 dark:divide-white/5">
+              {isLoading ? (
+                <div className="flex items-center justify-center py-12 gap-2 text-sm text-zinc-500">
+                  <span className="w-4 h-4 border-2 border-zinc-300 border-t-primary rounded-full animate-spin" />
+                  Đang tải...
+                </div>
+              ) : notifications.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-3 text-zinc-500">
+                  <Bell className="w-8 h-8 opacity-30" />
+                  <p className="text-sm">Không có thông báo nào</p>
+                </div>
+              ) : (
+                notifications.map((n) => (
+                  <NotifItem
+                    key={n.id}
+                    notif={n}
+                    onRead={(id) => { markRead(id); }}
+                  />
+                ))
+              )}
+            </div>
+
+            {/* Footer */}
+            {notifications.length > 0 && (
+              <div className="px-6 py-4 sm:px-4 sm:py-2.5 border-t border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
+                <a
+                  href="/notifications"
+                  className="text-sm sm:text-xs font-semibold text-primary hover:underline"
+                >
+                  Xem tất cả thông báo →
+                </a>
               </div>
-            ) : notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 gap-3 text-zinc-500">
-                <Bell className="w-8 h-8 opacity-30" />
-                <p className="text-sm">Không có thông báo nào</p>
-              </div>
-            ) : (
-              notifications.map((n) => (
-                <NotifItem
-                  key={n.id}
-                  notif={n}
-                  onRead={(id) => { markRead(id); }}
-                />
-              ))
             )}
           </div>
+        );
 
-          {/* Footer */}
-          {notifications.length > 0 && (
-            <div className="px-4 py-2.5 border-t border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
-              <a
-                href="/notifications"
-                className="text-xs font-semibold text-primary hover:underline"
-              >
-                Xem tất cả thông báo →
-              </a>
-            </div>
-          )}
-        </div>
-      )}
+        // Portal on mobile, regular dropdown on desktop
+        if (typeof window !== 'undefined' && window.innerWidth < 640) {
+          return createPortal(panel, document.body);
+        }
+        return panel;
+      })()}
     </div>
   );
 }

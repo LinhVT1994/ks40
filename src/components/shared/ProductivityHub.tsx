@@ -28,6 +28,8 @@ export default function ProductivityHub() {
   const [isOpen, setIsOpen] = useState(false);
   const [isFocusActive, setIsFocusActive] = useState(false);
   const [isTimerActive, setIsTimerActive] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const hubRef = useRef<HTMLDivElement>(null);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -60,8 +62,25 @@ export default function ProductivityHub() {
       }
     };
 
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const isMobile = window.innerWidth < 768;
+      
+      if (isMobile) {
+        if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
+          setIsVisible(false);
+        } else {
+          setIsVisible(true);
+        }
+      } else {
+        setIsVisible(true);
+      }
+      lastScrollY.current = currentScrollY;
+    };
+
     window.addEventListener('focus-mode-changed', handleFocusChange);
     window.addEventListener('storage', syncTimerState);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     syncTimerState();
 
     // Event for timer toggle visibility specifically
@@ -73,6 +92,7 @@ export default function ProductivityHub() {
     return () => {
       window.removeEventListener('focus-mode-changed', handleFocusChange);
       window.removeEventListener('storage', syncTimerState);
+      window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('toggle-global-timer', handleTimerToggle);
     };
   }, []);
@@ -104,7 +124,9 @@ export default function ProductivityHub() {
 
   return (
     <div 
-      className="fixed bottom-8 right-4 md:bottom-8 md:right-8 z-[100]" 
+      className={`fixed bottom-8 right-4 md:bottom-8 md:right-8 z-[100] transition-all duration-500 ${
+        (isOpen || isVisible) ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0 pointer-events-none'
+      }`}
       ref={hubRef}
     >
       {/* Categorized Compact Panel */}

@@ -84,7 +84,7 @@ export default function MemberHeader({ announcement }: { announcement?: SiteAnno
                 <Menu className="w-6 h-6" />
               </button>
 
-              <Link href="/" className="flex items-center gap-2 group cursor-pointer">
+              <Link href="/" className="hidden md:flex items-center gap-2 group cursor-pointer">
                 <div className="transition-transform group-hover:scale-110">
                 <BrandLogo size={32} />
               </div>
