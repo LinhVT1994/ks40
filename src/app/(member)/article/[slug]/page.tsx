@@ -40,8 +40,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title       = article.title;
   const fullTitle   = `${article.title} | ${SITE_NAME}`;
   const description = article.summary ?? `Đọc bài viết ${article.title} trên ${SITE_NAME}`;
-  const ogImage     = article.thumbnail ?? article.cover
-    ?? `${SITE_URL}/og?title=${encodeURIComponent(article.title)}&author=${encodeURIComponent(article.author?.name ?? 'Unknown')}&topic=${encodeURIComponent(article.topic?.label ?? '')}&color=${encodeURIComponent(article.topic?.color ?? '#64748b')}`;
+  const rawImage    = article.thumbnail ?? article.cover;
+  const ogImage     = rawImage
+    ? (rawImage.startsWith('http') ? rawImage : `${SITE_URL}${rawImage}`)
+    : `${SITE_URL}/og?title=${encodeURIComponent(article.title)}&author=${encodeURIComponent(article.author?.name ?? 'Unknown')}&topic=${encodeURIComponent(article.topic?.label ?? '')}&color=${encodeURIComponent(article.topic?.color ?? '#64748b')}`;
 
   return {
     title,

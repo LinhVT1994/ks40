@@ -16,50 +16,59 @@ export async function GET(req: NextRequest) {
         style={{
           width: '100%', height: '100%',
           display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
-          padding: '60px 72px',
-          backgroundColor: '#0f172a',
+          padding: '80px 100px',
+          backgroundColor: '#080a16',
+          backgroundImage: 'radial-gradient(circle at 0% 0%, #3b82f615 0%, transparent 50%), radial-gradient(circle at 100% 100%, #a855f715 0%, transparent 50%)',
           fontFamily: 'sans-serif',
         }}
       >
         {/* Top — site name */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           <div style={{
-            width: 36, height: 36, borderRadius: 8,
-            backgroundColor: '#3b82f6', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'white', fontWeight: 800, fontSize: 16,
+            width: 48, height: 48, borderRadius: 12,
+            background: 'linear-gradient(135deg, #3b82f6, #a855f7)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'white', fontWeight: 900, fontSize: 24,
+            boxShadow: '0 0 20px rgba(59, 130, 246, 0.3)',
           }}>L</div>
-          <span style={{ color: '#94a3b8', fontSize: 18, fontWeight: 600 }}>Lenote</span>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <span style={{ color: 'white', fontSize: 24, fontWeight: 800, letterSpacing: '0.05em' }}>LENOTE</span>
+            <span style={{ color: '#64748b', fontSize: 14, fontWeight: 600 }}>Deep Tech & Knowledge</span>
+          </div>
         </div>
 
         {/* Middle — title */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, flex: 1, justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24, flex: 1, justifyContent: 'center' }}>
           {label && (
-            <span style={{
-              display: 'inline-flex', alignSelf: 'flex-start',
-              fontSize: 14, fontWeight: 700,
-              padding: '6px 14px', borderRadius: 999,
-              backgroundColor: color + '22', color,
-            }}>
-              {label}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 4, height: 24, backgroundColor: color, borderRadius: 999 }} />
+                <span style={{
+                    fontSize: 18, fontWeight: 700,
+                    color, textTransform: 'uppercase', letterSpacing: '0.1em'
+                }}>
+                    {label}
+                </span>
+            </div>
           )}
           <div style={{
-            fontSize: title.length > 60 ? 36 : title.length > 40 ? 42 : 52,
-            fontWeight: 800, color: '#f1f5f9',
-            lineHeight: 1.2, maxWidth: 900,
+            fontSize: title.length > 60 ? 42 : title.length > 40 ? 52 : 64,
+            fontWeight: 900, color: 'white',
+            lineHeight: 1.1, maxWidth: 1000,
+            textShadow: '0 4px 20px rgba(0,0,0,0.5)',
           }}>
             {title}
           </div>
         </div>
 
-        {/* Bottom — author + divider */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          {author && (
-            <span style={{ color: '#64748b', fontSize: 16 }}>
-              Tác giả: <span style={{ color: '#94a3b8', fontWeight: 600 }}>{author}</span>
-            </span>
-          )}
-          <div style={{ width: 120, height: 3, backgroundColor: '#6366f1', borderRadius: 999, marginLeft: 'auto' }} />
+        {/* Bottom — author + branding */}
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', pt: 40 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <span style={{ color: '#64748b', fontSize: 14, fontWeight: 600, textTransform: 'uppercase' }}>Tác giả</span>
+            <span style={{ color: '#f1f5f9', fontSize: 20, fontWeight: 700 }}>{author || 'Lenote Team'}</span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+             <div style={{ width: 8, height: 8, borderRadius: 999, backgroundColor: '#3b82f6' }} />
+             <span style={{ color: '#3b82f6', fontSize: 16, fontWeight: 700 }}>lenote.dev</span>
+          </div>
         </div>
       </div>
     ),
