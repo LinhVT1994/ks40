@@ -81,6 +81,16 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     getProfileArticlesAction(user.id),
   ]);
 
+  const sameAs = [
+    user.facebookUrl,
+    user.instagramUrl,
+    user.twitterUrl,
+    user.linkedinUrl,
+    user.githubUrl,
+    user.youtubeUrl,
+    user.websiteUrl,
+  ].filter(Boolean);
+
   const personJsonLd = {
     '@context': 'https://schema.org',
     '@type':    'Person',
@@ -88,6 +98,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
     description: user.bio,
     image:      user.image,
     url:        `${SITE_URL}/profile/${user.username ?? id}`,
+    ...(sameAs.length > 0 && { sameAs }),
     worksFor: {
       '@type': 'Organization',
       name:    SITE_NAME,

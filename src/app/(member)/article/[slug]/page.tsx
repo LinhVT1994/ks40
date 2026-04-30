@@ -161,6 +161,8 @@ export default async function ArticleDetailPage({ params }: Props) {
     url: articleUrl,
     mainEntityOfPage: { '@type': 'WebPage', '@id': articleUrl },
     inLanguage: 'vi-VN',
+    keywords: data.tags.map(t => t.tag.name).join(', '),
+    articleSection: data.topic?.label ?? '',
     ...(wordCount > 0 && { wordCount }),
     ...(ratingSummary && ratingSummary.totalCount > 0 && {
       aggregateRating: {

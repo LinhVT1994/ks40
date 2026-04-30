@@ -1,9 +1,21 @@
+import type { Metadata } from 'next';
 import { getArticlesAction } from '@/features/articles/actions/article';
 import SearchResults from '@/features/member/components/SearchResults';
 import BackButton from '@/features/member/components/BackButton';
 import { Search } from 'lucide-react';
+import { SITE_NAME } from '@/lib/seo';
 
 import MemberContainer from '@/components/layout/MemberContainer';
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<{ q?: string; tag?: string }> }): Promise<Metadata> {
+  const { q, tag } = await searchParams;
+  const query = q?.trim() || tag?.trim() || '';
+  
+  return {
+    title: query ? `Kết quả cho "${query}" | ${SITE_NAME}` : `Tìm kiếm | ${SITE_NAME}`,
+    robots: { index: false, follow: true },
+  };
+}
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string; tag?: string }> }) {
   const { q, tag } = await searchParams;

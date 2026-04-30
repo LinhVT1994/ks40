@@ -12,6 +12,8 @@ import FloatingInteractionHub from '@/features/member/components/FloatingInterac
 import MobileInteractionBar from '@/features/member/components/MobileInteractionBar';
 import { GlossaryInteractionProvider } from '@/features/member/context/GlossaryInteractionContext';
 import * as motion from 'framer-motion/client';
+import JsonLd from '@/components/shared/JsonLd';
+import { SITE_URL } from '@/lib/seo';
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -84,8 +86,34 @@ export default async function GlossaryTermPage({ params, searchParams }: Props) 
   if (letter) backQuery.set('letter', letter);
   const backHref = `/glossary${backQuery.toString() ? `?${backQuery.toString()}` : ''}`;
 
+  const termUrl = `${SITE_URL}/glossary/${slug}`;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type':    'DefinedTerm',
+    'name':     term.term,
+    'description': term.shortDef || '',
+    'url':      termUrl,
+    'inDefinedTermSet': `${SITE_URL}/glossary`,
+    'author': {
+      '@type': 'Person',
+      'name': term.author?.name || SITE_NAME,
+    }
+  };
+
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    'itemListElement': [
+      { '@type': 'ListItem', 'position': 1, 'name': 'Trang chủ', 'item': SITE_URL },
+      { '@type': 'ListItem', 'position': 2, 'name': 'Thuật ngữ', 'item': `${SITE_URL}/glossary` },
+      { '@type': 'ListItem', 'position': 3, 'name': term.term, 'item': termUrl }
+    ]
+  };
+
   return (
     <MemberContainer>
+      <JsonLd data={[jsonLd, breadcrumbJsonLd]} />
       <GlossaryInteractionProvider
         termId={term.id}
         initialLiked={term.isLiked}

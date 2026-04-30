@@ -11,6 +11,7 @@ import MemberContainer from '@/components/layout/MemberContainer';
 export const metadata: Metadata = {
   title: `Thuật ngữ | ${SITE_NAME}`,
   description: 'Tra cứu các thuật ngữ và định nghĩa chuyên ngành được sử dụng trong các bài viết.',
+  alternates: { canonical: '/glossary' },
 };
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');

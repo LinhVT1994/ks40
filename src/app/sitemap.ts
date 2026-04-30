@@ -5,9 +5,14 @@ import { SITE_URL } from '@/lib/seo';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static routes
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: SITE_URL, lastModified: new Date(), changeFrequency: 'daily',   priority: 1 },
+    { url: SITE_URL,               lastModified: new Date(), changeFrequency: 'daily',   priority: 1 },
+    { url: `${SITE_URL}/explore`,  lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
+    { url: `${SITE_URL}/topics`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${SITE_URL}/glossary`, lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${SITE_URL}/login`,    changeFrequency: 'monthly', priority: 0.3 },
     { url: `${SITE_URL}/register`, changeFrequency: 'monthly', priority: 0.3 },
+    { url: `${SITE_URL}/privacy`,  changeFrequency: 'monthly', priority: 0.2 },
+    { url: `${SITE_URL}/terms`,    changeFrequency: 'monthly', priority: 0.2 },
   ];
 
   // Dynamic article routes (exclude PRIVATE)
@@ -39,6 +44,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority:        0.6,
   }));
 
+  // Glossary Term routes
+  const glossaryTerms = await db.glossaryTerm.findMany({
+    select: { slug: true, updatedAt: true },
+  });
+
+  const glossaryRoutes: MetadataRoute.Sitemap = glossaryTerms.map(gt => ({
+    url:             `${SITE_URL}/glossary/${gt.slug}`,
+    lastModified:    gt.updatedAt,
+    changeFrequency: 'weekly',
+    priority:        0.7,
+  }));
+
   // Profile routes — chỉ tác giả có bài public (đã lấy từ articles ở trên)
   const authorIds = Array.from(new Set(articles.map(a => a.authorId))).filter(Boolean);
   const profileRoutes: MetadataRoute.Sitemap = authorIds.map(id => ({
@@ -47,5 +64,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority:        0.5,
   }));
 
-  return [...staticRoutes, ...articleRoutes, ...topicRoutes, ...profileRoutes];
+  return [...staticRoutes, ...articleRoutes, ...topicRoutes, ...glossaryRoutes, ...profileRoutes];
 }

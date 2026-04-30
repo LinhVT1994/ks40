@@ -1,7 +1,15 @@
+import type { Metadata } from 'next';
 import { getTopicTreeAction } from '@/features/admin/actions/topic';
 import MemberContainer from '@/components/layout/MemberContainer';
 import Link from 'next/link';
 import { ChevronRight, ArrowLeft } from 'lucide-react';
+import { SITE_NAME } from '@/lib/seo';
+
+export const metadata: Metadata = {
+  title: `Chủ đề tri thức | ${SITE_NAME}`,
+  description: 'Hệ thống hóa tri thức theo từng khối lĩnh vực: System Design, AI, DevOps, Frontend, Backend và phát triển sự nghiệp.',
+  alternates: { canonical: '/topics' },
+};
 
 export default async function TopicsExplorerPage() {
   const topicsTree = await getTopicTreeAction();

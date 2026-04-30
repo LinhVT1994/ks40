@@ -6,22 +6,22 @@
 export const SITE_URL  = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://lenote.dev';
 export const SITE_NAME = 'Lenote';
 export const SITE_DESCRIPTION =
-  'Nền tảng chia sẻ tri thức và kinh nghiệm đa góc nhìn. Từ những bài học chuyên môn sâu sắc đến những câu chuyện đời sống, cùng nhau lưu giữ và lan tỏa giá trị mỗi ngày.';
+  'Lenote — Nền tảng học tập công nghệ tinh tế. Chia sẻ tri thức chuyên sâu về System Design, AI/ML, DevOps và phát triển sự nghiệp IT dành cho cộng đồng kỹ sư phần mềm Việt Nam.';
 export const SITE_KEYWORDS = [
   'Lenote',
-  'digital garden',
-  'second brain',
-  'chia sẻ tri thức',
-  'kinh nghiệm sống',
-  'bài học chuyên môn',
-  'lan tỏa giá trị',
-  'phát triển bản thân',
-  'tư duy lập trình viên',
-  'phát triển sự nghiệp IT',
-  'blog công nghệ',
-  'kỹ sư chia sẻ',
+  'Lenote.dev',
+  'chia sẻ tri thức công nghệ',
+  'kỹ sư phần mềm chia sẻ',
   'system design chuyên sâu',
-  'viết lách công nghệ',
   'kiến trúc phần mềm',
-  'senior developer',
+  'digital garden tiếng Việt',
+  'second brain cho lập trình viên',
+  'phát triển sự nghiệp IT',
+  'bài học chuyên sâu AI ML',
+  'blog công nghệ tinh tế',
+  'tư duy lập trình viên',
+  'senior developer tips',
+  'viết lách công nghệ',
+  'cộng đồng lập trình Việt Nam',
+  'hướng dẫn DevOps thực chiến',
 ];

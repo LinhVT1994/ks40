@@ -23,27 +23,33 @@ const dancingScript = Dancing_Script({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default:  SITE_NAME,
+    default:  `${SITE_NAME} — Nền tảng học tập công nghệ tinh tế`,
     template: `%s | ${SITE_NAME}`,
   },
   description: SITE_DESCRIPTION,
   keywords:    SITE_KEYWORDS,
   authors:     [{ name: SITE_NAME }],
   creator:     SITE_NAME,
+  publisher:   SITE_NAME,
   openGraph: {
     type:        'website',
     locale:      'vi_VN',
     url:         SITE_URL,
     siteName:    SITE_NAME,
-    title:       SITE_NAME,
+    title:       `${SITE_NAME} — Lan tỏa tri thức và giá trị mỗi ngày`,
     description: SITE_DESCRIPTION,
-    images: [{ url: '/logo.png', width: 1200, height: 1200, alt: SITE_NAME }],
+    images: [{ 
+      url: `/og?title=${encodeURIComponent(SITE_NAME)}&topic=${encodeURIComponent('Knowledge Platform')}&color=${encodeURIComponent('#6366f1')}`, 
+      width: 1200, 
+      height: 630, 
+      alt: SITE_NAME 
+    }],
   },
   twitter: {
     card:        'summary_large_image',
-    title:       SITE_NAME,
+    title:       `${SITE_NAME} — Lan tỏa tri thức và giá trị mỗi ngày`,
     description: SITE_DESCRIPTION,
-    images:      ['/logo.png'],
+    images:      [`/og?title=${encodeURIComponent(SITE_NAME)}&topic=${encodeURIComponent('Knowledge Platform')}&color=${encodeURIComponent('#6366f1')}`],
   },
   robots: { index: true, follow: true },
   icons: {
