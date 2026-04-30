@@ -86,7 +86,7 @@ export default function UserMenu() {
       {isOpen && mounted && (
         <div 
           ref={dropdownRef}
-          className="absolute right-0 top-[calc(100%+8px)] w-56 origin-top-right border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[99999] py-2 overflow-hidden animate-in fade-in zoom-in duration-200 bg-white dark:bg-surface-dark"
+          className="absolute right-0 top-[calc(100%+8px)] w-56 origin-top-right border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[99999] py-2 overflow-hidden animate-in fade-in zoom-in duration-200 bg-surface"
         >
           <div className="px-4 py-3 border-b border-zinc-200 dark:border-white/5">
             <p className="text-sm font-bold text-primary truncate">{user?.name}</p>

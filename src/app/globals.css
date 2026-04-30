@@ -67,6 +67,7 @@
   
   --color-background-light: #FAFAFA;
   --color-background-dark: #080a16; /* Deep Space Navy */
+  --color-surface: var(--color-surface);
 
   --background-rgb: 250, 250, 250;
   --foreground-rgb: 39, 39, 42;
@@ -80,6 +81,10 @@
 }
 
 @layer base {
+  :root {
+    --color-surface: #ffffff;
+  }
+
   body {
     @apply bg-background-light dark:bg-background-dark text-zinc-800 dark:text-slate-400 antialiased transition-colors duration-300 font-sans;
   }
@@ -96,7 +101,7 @@
     --color-accent-purple: #a855f7;
     --background-rgb: 8, 10, 22;
     --foreground-rgb: 255, 255, 255;
-    --color-surface-dark: #0e1225;
+    --color-surface: #0e1225;
   }
 
   button:not(:disabled) {

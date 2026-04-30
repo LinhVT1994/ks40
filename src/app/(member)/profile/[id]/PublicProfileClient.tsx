@@ -102,7 +102,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
         <div className="relative px-2 flex flex-col items-center lg:items-start gap-4">
           {/* Avatar Area */}
           <div className="relative shrink-0">
-            <div className="relative w-20 h-20 lg:w-24 lg:h-24 shadow-xl rounded-full overflow-hidden border-2 border-white dark:border-slate-800 bg-white dark:bg-surface-dark group">
+            <div className="relative w-20 h-20 lg:w-24 lg:h-24 shadow-xl rounded-full overflow-hidden border-2 border-white dark:border-slate-800 bg-surface group">
                <Image
                  src={user.avatarUrl}
                  alt={user.name ?? ''}
@@ -240,7 +240,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
                     rel="noopener noreferrer"
                     title={label}
                     className={cn(
-                      "group relative p-3 rounded-full text-zinc-400 bg-white/80 dark:bg-surface-dark/60 backdrop-blur-md border border-zinc-200 dark:border-white/5 transition-all duration-300 hover:-translate-x-1 hover:shadow-xl dark:hover:shadow-primary/5 shadow-zinc-200/50",
+                      "group relative p-3 rounded-full text-zinc-400 bg-surface/60 backdrop-blur-md border border-zinc-200 dark:border-white/5 transition-all duration-300 hover:-translate-x-1 hover:shadow-xl dark:hover:shadow-primary/5 shadow-zinc-200/50",
                       colors[key]
                     )}
                   >
