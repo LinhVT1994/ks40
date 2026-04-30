@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
         </div>
 
         {/* Bottom — author + branding */}
-        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', pt: 40 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: 40 }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
             <span style={{ color: '#64748b', fontSize: 14, fontWeight: 600, textTransform: 'uppercase' }}>Tác giả</span>
             <span style={{ color: '#f1f5f9', fontSize: 20, fontWeight: 700 }}>{author || 'Lenote Team'}</span>
