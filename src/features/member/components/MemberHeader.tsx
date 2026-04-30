@@ -13,6 +13,7 @@ import BrandLogo from '@/components/shared/BrandLogo';
 import EyeTracker from '@/components/shared/EyeTracker';
 
 import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export default function MemberHeader({ announcement }: { announcement?: SiteAnnouncement | null }) {
   const { data: session } = useSession();
@@ -53,15 +54,15 @@ export default function MemberHeader({ announcement }: { announcement?: SiteAnno
   return (
     <div 
       style={{ zIndex: 50000 }}
-      className={`fixed top-0 left-0 right-0 w-full transition-transform duration-300 bg-white md:bg-transparent dark:bg-slate-950 md:dark:bg-transparent ${
+      className={`fixed top-0 left-0 right-0 w-full transition-transform duration-300 bg-white md:bg-transparent dark:bg-background-dark md:dark:bg-transparent ${
         isVisible ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
       {announcement && <AnnouncementBanner announcement={announcement} />}
       <header className={`w-full transition-[background-color,border-color] duration-500 ${
         isScrolled
-          ? 'bg-white md:bg-white/80 dark:bg-slate-950 md:dark:bg-slate-950/60 md:backdrop-blur-md border-b border-zinc-200 dark:border-white/5 shadow-lg md:shadow-sm'
-          : 'bg-white md:bg-transparent dark:bg-slate-950 md:dark:bg-transparent border-b border-transparent'
+          ? 'bg-white md:bg-white/80 dark:bg-background-dark md:dark:bg-background-dark/60 md:backdrop-blur-md border-b border-zinc-200 dark:border-white/5 shadow-lg md:shadow-sm'
+          : 'bg-white md:bg-transparent dark:bg-background-dark md:dark:bg-transparent border-b border-transparent'
       }`}>
         <div className="max-w-[1600px] mx-auto w-full flex items-center justify-between py-3 px-4 md:px-8 gap-3">
           {/* Logo */}
@@ -82,28 +83,10 @@ export default function MemberHeader({ announcement }: { announcement?: SiteAnno
             </Link>
             
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-8 ml-10">
-              <Link
-                href={isLoggedIn ? "/" : "/explore"}
-                className="text-sm font-bold text-zinc-600 dark:text-slate-400 hover:text-primary transition-colors flex items-center gap-2 group/nav"
-              >
-                <div className="w-1 h-1 rounded-full bg-primary scale-0 group-hover/nav:scale-100 transition-transform" />
-                Khám phá
-              </Link>
-              <Link
-                href="/topics"
-                className="text-sm font-bold text-zinc-600 dark:text-slate-400 hover:text-primary transition-colors flex items-center gap-2 group/nav"
-              >
-                <div className="w-1 h-1 rounded-full bg-primary scale-0 group-hover/nav:scale-100 transition-transform" />
-                Chủ đề
-              </Link>
-              <Link
-                href="/glossary"
-                className="text-sm font-bold text-zinc-600 dark:text-slate-400 hover:text-primary transition-colors flex items-center gap-2 group/nav"
-              >
-                <div className="w-1 h-1 rounded-full bg-primary scale-0 group-hover/nav:scale-100 transition-transform" />
-                Thuật ngữ
-              </Link>
+            <nav className="hidden lg:flex items-center gap-2 ml-6">
+              <NavLink href={isLoggedIn ? "/" : "/explore"} label="Khám phá" active={pathname === (isLoggedIn ? "/" : "/explore")} />
+              <NavLink href="/topics" label="Chủ đề" active={pathname === "/topics"} />
+              <NavLink href="/glossary" label="Thuật ngữ" active={pathname === "/glossary"} />
             </nav>
           </div>
 
@@ -114,7 +97,7 @@ export default function MemberHeader({ announcement }: { announcement?: SiteAnno
             </div>
 
             {/* Icons */}
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               {/* Search icon — chỉ hiện trên mobile */}
               <button
                 className="md:hidden p-2 rounded-full text-zinc-500 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
@@ -136,6 +119,26 @@ export default function MemberHeader({ announcement }: { announcement?: SiteAnno
         )}
       </header>
     </div>
+  );
+}
+
+function NavLink({ href, label, active }: { href: string; label: string; active?: boolean }) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 group/nav",
+        active 
+          ? "bg-primary/10 text-primary" 
+          : "text-zinc-600 dark:text-slate-400 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/5"
+      )}
+    >
+      <div className={cn(
+        "w-1 h-1 rounded-full bg-primary transition-all duration-300",
+        active ? "scale-100" : "scale-0 group-hover/nav:scale-100"
+      )} />
+      {label}
+    </Link>
   );
 }
 

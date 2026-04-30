@@ -84,7 +84,7 @@ export default function HeaderSearch() {
           onFocus={() => { if (results.length > 0) setOpen(true); }}
           onKeyDown={handleKeyDown}
           placeholder={isExpanded ? 'Tìm kiếm tài liệu, bài viết... (Enter)' : 'Tìm kiếm...'}
-          className={`w-full bg-transparent pl-10 pr-10 py-2 text-sm outline-none text-zinc-800 dark:text-white placeholder:text-zinc-500 transition-all duration-300 ${isExpanded ? 'opacity-100' : 'opacity-70'}`}
+          className={`w-full bg-transparent pl-10 pr-10 py-2.5 text-sm outline-none text-zinc-800 dark:text-white placeholder:text-zinc-500 transition-all duration-300 ${isExpanded ? 'opacity-100' : 'opacity-70'}`}
         />
 
         {query && (
@@ -96,7 +96,7 @@ export default function HeaderSearch() {
 
       {/* Dropdown */}
       {open && (
-        <div className="absolute top-full left-0 right-0 mt-2 mx-4 bg-white !bg-opacity-100 dark:bg-slate-900 dark:!bg-opacity-100 border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[1100] overflow-hidden">
+        <div className="absolute top-full left-0 right-0 mt-2 mx-4 bg-white !bg-opacity-100 dark:bg-surface-dark dark:!bg-opacity-100 border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[1100] overflow-hidden">
           {results.length > 0 ? (
             <>
               <div className="px-4 py-2 border-b border-zinc-200 dark:border-white/5">

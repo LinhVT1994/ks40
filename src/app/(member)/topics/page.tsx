@@ -24,7 +24,7 @@ export default async function TopicsExplorerPage() {
         <div className="mb-12">
           <Link 
             href="/" 
-            className="group inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-500 dark:text-slate-300 hover:text-primary transition-all duration-300"
+            className="group inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-500 dark:text-slate-100 hover:text-primary transition-all duration-300"
           >
             <div className="w-8 h-8 rounded-full border border-zinc-300 dark:border-white/10 flex items-center justify-center group-hover:border-primary/30 group-hover:bg-primary/5 transition-all">
               <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
@@ -38,7 +38,7 @@ export default async function TopicsExplorerPage() {
           <h1 className="text-4xl sm:text-6xl font-display font-heavy text-zinc-800 dark:text-white leading-[1.1] tracking-tight">
             Chủ đề
           </h1>
-          <p className="text-zinc-500 dark:text-slate-300 mt-6 text-lg max-w-xl leading-relaxed font-medium">
+          <p className="text-zinc-500 dark:text-slate-100 mt-6 text-lg max-w-xl leading-relaxed font-medium">
             Hệ thống hóa tri thức theo từng khối lĩnh vực để bạn dễ dàng bao quát toàn bộ nội dung.
           </p>
         </div>
@@ -74,17 +74,16 @@ export default async function TopicsExplorerPage() {
                   </h2>
                 </Link>
 
-                {/* Vertical Link List */}
                 <div className="flex flex-col gap-y-4 px-1">
                   {children.map((child) => (
                     <Link
                       key={child.id}
                       href={`/topic/${child.slug}`}
-                      className="text-[13px] font-medium text-zinc-500 dark:text-slate-300 hover:text-zinc-800 dark:hover:text-white transition-all hover:translate-x-1 w-fit flex items-center gap-2 group/item"
+                      className="text-[15px] font-medium text-zinc-500 dark:text-slate-300 hover:text-zinc-800 dark:hover:text-white transition-all hover:translate-x-1 w-fit flex items-center gap-2 group/item"
                     >
-                      <ChevronRight className="w-3 h-3 text-zinc-200 dark:text-white/20 group-hover/item:text-primary transition-all opacity-0 group-hover/item:opacity-100 -ml-5 group-hover/item:ml-0" />
+                      <ChevronRight className="w-3.5 h-3.5 text-zinc-200 dark:text-white/20 group-hover/item:text-primary transition-all opacity-0 group-hover/item:opacity-100 -ml-5 group-hover/item:ml-0" />
                       {child.label}
-                      <span className="text-[10px] text-zinc-500 dark:text-slate-400 font-normal opacity-60">({child._count?.articles ?? 0})</span>
+                      <span className="text-[11px] text-zinc-500 dark:text-slate-300 font-normal opacity-60">({child._count?.articles ?? 0})</span>
                     </Link>
                   ))}
                 </div>
@@ -93,9 +92,8 @@ export default async function TopicsExplorerPage() {
           })}
         </div>
 
-        {/* Global Footer Search */}
         <div className="mt-40 pt-16 border-t border-zinc-200 dark:border-white/5 text-center">
-            <p className="text-zinc-500 font-medium text-sm">
+            <p className="text-zinc-500 dark:text-slate-300 font-medium text-sm">
                 Bạn không tìm thấy chủ đề phù hợp? <Link href="/search" className="text-primary hover:underline font-bold transition-all underline-offset-4 decoration-2">Khám phá qua Tìm kiếm</Link>
             </p>
         </div>

@@ -153,7 +153,7 @@ export default function NotificationBell() {
       {open && mounted && (
         <div 
           ref={dropdownRef}
-          className="absolute right-0 top-[calc(100%+8px)] w-[calc(100vw-32px)] sm:w-96 origin-top-right border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[99999] overflow-hidden animate-in fade-in zoom-in-95 duration-150 bg-white dark:bg-slate-900"
+          className="absolute right-0 top-[calc(100%+8px)] w-[calc(100vw-32px)] sm:w-96 origin-top-right border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[99999] overflow-hidden animate-in fade-in zoom-in-95 duration-150 bg-white dark:bg-surface-dark"
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-200 dark:border-white/5">

@@ -574,7 +574,7 @@ function RatingsDashboard({ data: initialData }: { data: AuthorRatingStats | nul
       <div className="space-y-4">
         <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Nhận xét mới nhất</h4>
         {initialData.ratings.filter(r => r.review).slice(0, 10).map(r => (
-          <div key={`${r.userId}-${r.createdAt}`} className="flex gap-4 p-5 rounded-[2rem] bg-white dark:bg-slate-900/40 border border-zinc-100 dark:border-white/5 transition-all hover:bg-zinc-50 dark:hover:bg-white/[0.02]">
+          <div key={`${r.userId}-${r.createdAt}`} className="flex gap-4 p-5 rounded-[2rem] bg-white dark:bg-surface-dark/40 border border-zinc-100 dark:border-white/5 transition-all hover:bg-zinc-50 dark:hover:bg-white/[0.02]">
             <div className="relative w-10 h-10 shrink-0">
                <Image src={r.user.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(r.user.name)}&size=32`} alt={r.user.name} fill unoptimized sizes="40px" className="rounded-full object-cover" />
             </div>
@@ -671,7 +671,7 @@ export default function ProfileClient({
       <aside className="w-full lg:w-[280px] flex-shrink-0 lg:sticky lg:top-24 space-y-4 lg:space-y-12 order-1">
         <div className="relative px-2 flex flex-col items-center lg:items-start gap-4">
           <div className="relative shrink-0">
-            <div className="relative w-20 h-20 sm:w-24 sm:h-24 shadow-xl rounded-full overflow-hidden border-2 border-white dark:border-slate-800 bg-white dark:bg-slate-900 group">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 shadow-xl rounded-full overflow-hidden border-2 border-white dark:border-slate-800 bg-white dark:bg-surface-dark group">
               <Image src={user.avatarUrl} alt={user.name ?? ''} fill unoptimized priority sizes="96px" className="object-cover rounded-full transition-transform duration-500 group-hover:scale-110" />
             </div>
           </div>
@@ -747,7 +747,7 @@ export default function ProfileClient({
         
         {/* Tab Navigation - Mobile (Horizontal Scrollable) */}
         <div className={cn(
-          "lg:hidden sticky z-[40] w-[calc(100%+3rem)] -mx-6 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-b border-zinc-200 dark:border-white/5 mb-8 shadow-sm transition-[top] duration-300",
+          "lg:hidden sticky z-[40] w-[calc(100%+3rem)] -mx-6 bg-white/95 dark:bg-background-dark/95 backdrop-blur-xl border-b border-zinc-200 dark:border-white/5 mb-8 shadow-sm transition-[top] duration-300",
           isHeaderHidden ? "top-0" : "top-[64px]"
         )}>
           <nav className="flex items-center gap-6 overflow-x-auto no-scrollbar px-6 py-4 touch-pan-x">
@@ -794,7 +794,7 @@ export default function ProfileClient({
                 const url = (user as any)[key];
                 if (!url) return null;
                 return (
-                  <a key={key} href={url} target="_blank" rel="noopener noreferrer" title={label} className="group p-3 rounded-full text-zinc-400 bg-white dark:bg-slate-900/60 backdrop-blur-md border border-zinc-100 dark:border-white/5 transition-all hover:-translate-x-1 hover:text-primary hover:border-primary/20 shadow-sm">
+                  <a key={key} href={url} target="_blank" rel="noopener noreferrer" title={label} className="group p-3 rounded-full text-zinc-400 bg-white dark:bg-surface-dark/60 backdrop-blur-md border border-zinc-100 dark:border-white/5 transition-all hover:-translate-x-1 hover:text-primary hover:border-primary/20 shadow-sm">
                     <Icon className="w-4 h-4 transition-transform group-hover:scale-110" />
                   </a>
                 );

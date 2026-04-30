@@ -74,7 +74,7 @@ export default function UserMenu() {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-3 transition-opacity hover:opacity-80 group outline-none"
+        className="flex items-center gap-3 px-2 py-1 rounded-xl transition-all hover:bg-zinc-100 dark:hover:bg-white/5 group outline-none"
       >
         <div className="text-right hidden sm:block">
           <p className="text-xs font-bold text-primary transition-colors group-hover:text-primary/80">{user?.name ?? '...'}</p>
@@ -86,7 +86,7 @@ export default function UserMenu() {
       {isOpen && mounted && (
         <div 
           ref={dropdownRef}
-          className="absolute right-0 top-[calc(100%+8px)] w-56 origin-top-right border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[99999] py-2 overflow-hidden animate-in fade-in zoom-in duration-200 bg-white dark:bg-slate-900"
+          className="absolute right-0 top-[calc(100%+8px)] w-56 origin-top-right border border-zinc-300 dark:border-white/10 rounded-2xl shadow-2xl z-[99999] py-2 overflow-hidden animate-in fade-in zoom-in duration-200 bg-white dark:bg-surface-dark"
         >
           <div className="px-4 py-3 border-b border-zinc-200 dark:border-white/5">
             <p className="text-sm font-bold text-primary truncate">{user?.name}</p>

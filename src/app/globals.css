@@ -65,11 +65,11 @@
   --animate-wiggle: wiggle 0.5s ease-in-out;
   --color-accent-purple: #6D28D9; /* Violet 700 - Deeper purple for better readability */
   
-  --color-background-light: #FAFAFA; /* Zinc 50 - Cleaner, less blueish than Slate 50 */
-  --color-background-dark: #020617; /* Slate 950 - matches member layout */
+  --color-background-light: #FAFAFA;
+  --color-background-dark: #080a16; /* Deep Space Navy */
 
   --background-rgb: 250, 250, 250;
-  --foreground-rgb: 39, 39, 42; /* Zinc 800 */
+  --foreground-rgb: 39, 39, 42;
   
   /* Font */
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
@@ -91,11 +91,12 @@
 
 
   .dark {
-    /* Preserve Original Dark Mode Colors */
-    --color-primary: #3B82F6; /* Original Blue 500 */
-    --color-accent-purple: #8B5CF6; /* Original Violet 500 */
-    --background-rgb: 2, 6, 23;
+    /* Antigravity Theme Overrides */
+    --color-primary: #3b82f6;
+    --color-accent-purple: #a855f7;
+    --background-rgb: 8, 10, 22;
     --foreground-rgb: 255, 255, 255;
+    --color-surface-dark: #0e1225;
   }
 
   button:not(:disabled) {
@@ -542,8 +543,8 @@ html.dark .focus-toc-panel {
 }
 
 .dark {
-  --code-bg: #0f172a; /* Slate 900 */
-  --code-text: #f8fafc; /* Slate 50 */
+  --code-bg: #0e1225; /* Antigravity Secondary */
+  --code-text: #f8fafc;
   --code-accent: #3b82f6;
 }
 
