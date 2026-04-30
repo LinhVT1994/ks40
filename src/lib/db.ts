@@ -13,4 +13,5 @@ export const db = globalForPrisma.prisma || createPrismaClient();
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db;
 
 
-// Force re-initialization to pick up new Enum values
+// Force re-initialization to pick up new Prisma schema (GlossaryTerm)
+// updated at 2026-04-29

@@ -674,6 +674,32 @@ pre span {
   background-color: rgba(var(--hl-color), 0.1) !important;
 }
 
+/* ─── Glossary Term (Auto Highlight) ─────────────────────────────── */
+/* Mirrors .ks-author-note's border-bottom strategy so the underline survives
+   prose-a:no-underline / prose-a:font-semibold / prose-a:text-primary. */
+.ks-glossary-term,
+.ks-glossary-term:link,
+.ks-glossary-term:visited {
+  font-weight: inherit !important;
+  color: inherit !important;
+  text-decoration: none !important;
+  border-bottom: 1.5px solid var(--color-primary) !important;
+  opacity: 0.85;
+  transition: opacity 0.2s ease, border-color 0.2s ease !important;
+  /* iPad/iOS: tắt link callout menu khi long-press để text selection hoạt động bình thường. */
+  -webkit-touch-callout: none;
+  -webkit-user-select: text;
+  user-select: text;
+}
+.ks-glossary-term:hover {
+  opacity: 1;
+}
+.dark .ks-glossary-term,
+.dark .ks-glossary-term:link,
+.dark .ks-glossary-term:visited {
+  border-bottom-color: var(--color-primary) !important;
+}
+
 /* ─── Blockquote closing quote mark ─────────────────────────────── */
 blockquote div {
   max-width: 100% !important;
