@@ -57,7 +57,7 @@ export default function StepCategories({ value, onChange, onBack, onComplete, on
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="w-full mx-auto space-y-8">
       {/* Compact Header - Left aligned */}
       <div className="text-left space-y-4 px-2">
         <motion.h1 
@@ -67,14 +67,22 @@ export default function StepCategories({ value, onChange, onBack, onComplete, on
         >
           Bạn quan tâm gì?
         </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-zinc-500 dark:text-slate-400 text-sm leading-relaxed max-w-sm"
+        >
+          Hãy chọn ít nhất một vài chủ đề yêu thích để chúng mình xây dựng "bản đồ tri thức" dành riêng cho bạn nhé.
+        </motion.p>
       </div>
 
-      {/* Grid for Categories */}
+      {/* Grid for Categories - Full scroll on Mobile, inner scroll on Desktop */}
       <motion.div 
         variants={container}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[40vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-100 dark:scrollbar-thumb-white/5"
+        className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-none sm:max-h-[450px] overflow-visible sm:overflow-y-auto sm:pr-2 scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-white/10"
       >
         {grouped.map(category => {
           const isExpanded = expandedId === category.id;
@@ -110,13 +118,25 @@ export default function StepCategories({ value, onChange, onBack, onComplete, on
                   <button
                     type="button"
                     onClick={(e) => toggleAllInCategory(category, e)}
-                    className={`p-1 rounded-md transition-all ${
-                      allSelected 
-                        ? 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900' 
-                        : 'text-zinc-300 dark:text-zinc-600 hover:text-zinc-500 dark:hover:text-zinc-400'
-                    }`}
+                    className="relative w-6 h-6 flex items-center justify-center rounded-full transition-all"
                   >
-                    <Check className="w-3 h-3" />
+                    <div className={`absolute inset-0 rounded-full border transition-all duration-300 ${
+                      allSelected 
+                        ? 'bg-zinc-900 dark:bg-white border-zinc-900 dark:border-white scale-100' 
+                        : 'border-zinc-200 dark:border-white/20 scale-100 hover:border-zinc-400'
+                    }`} />
+                    <AnimatePresence>
+                      {allSelected && (
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          className="relative z-10"
+                        >
+                          <Check className="w-3 h-3 text-white dark:text-zinc-900 stroke-[3.5px]" />
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </button>
                   <ChevronRight className={`w-3.5 h-3.5 text-zinc-400 dark:text-slate-500 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
                 </div>

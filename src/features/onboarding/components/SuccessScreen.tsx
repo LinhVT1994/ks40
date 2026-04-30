@@ -16,75 +16,81 @@ export default function SuccessScreen({ userName }: { userName?: string }) {
   }, [router]);
 
   return (
-    <div className="relative flex flex-col items-center justify-center text-center py-6 px-4 overflow-hidden min-h-[500px] w-full max-w-lg mx-auto">
-      {/* Aurora Background Effects */}
-      <div className="absolute inset-0 pointer-events-none -z-10">
-        <motion.div 
-          animate={{ 
-            scale: [1, 1.2, 1],
-            x: [0, 20, 0],
-            y: [0, -20, 0],
-            opacity: [0.3, 0.5, 0.3]
-          }}
-          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute top-1/4 left-1/4 w-48 h-48 bg-primary/20 rounded-full blur-[80px]" 
-        />
-        <motion.div 
-          animate={{ 
-            scale: [1.1, 0.9, 1.1],
-            x: [10, -10, 10],
-            y: [-10, 10, -10],
-            opacity: [0.2, 0.4, 0.2]
-          }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute bottom-1/4 right-1/4 w-56 h-56 bg-purple-500/15 rounded-full blur-[100px]" 
-        />
-      </div>
+    <div className="relative flex flex-col items-center justify-center text-center py-6 px-4 overflow-hidden min-h-[500px] w-full mx-auto">
+      {/* Background Aurora Effects removed, now handled by OnboardingLayout */}
 
-      {/* Main Success Icon */}
+
+      {/* Simplified Success Icon Area */}
       <div className="relative flex items-center justify-center mb-10">
         <motion.div 
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.2 }}
-          className="relative z-10 w-24 h-24 rounded-[2.5rem] bg-gradient-to-br from-primary via-primary to-purple-600 flex items-center justify-center shadow-[0_20px_50px_rgba(var(--color-primary-rgb),0.3)] dark:shadow-none ring-4 ring-white/20"
+          initial={{ scale: 0, rotate: -15 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", damping: 12, stiffness: 200, delay: 0.1 }}
+          className="relative z-10 w-24 h-24 rounded-full flex items-center justify-center"
         >
-          <motion.div
-            initial={{ pathLength: 0, opacity: 0 }}
-            animate={{ pathLength: 1, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.8, ease: "easeInOut" }}
+          {/* Subtle Drawing Border */}
+          <svg className="absolute inset-0 w-full h-full -rotate-90 pointer-events-none">
+            <motion.circle
+              cx="50%" cy="50%" r="48%"
+              fill="none"
+              stroke="currentColor"
+              className="text-emerald-500"
+              strokeWidth="2"
+              strokeLinecap="round"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.8, delay: 0.3, ease: "easeInOut" }}
+            />
+          </svg>
+
+          <svg 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-12 h-12 text-emerald-500"
           >
-            <Check className="w-12 h-12 text-white stroke-[3px]" />
-          </motion.div>
+            <motion.path
+              d="M20 6L9 17L4 12"
+              stroke="currentColor"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.5, delay: 0.6, ease: "easeOut" }}
+            />
+          </svg>
         </motion.div>
         
+        {/* Animated Ripple Aura */}
         <motion.div 
-          animate={{ scale: [1, 1.2, 1], opacity: [0.5, 0.8, 0.5] }}
-          transition={{ duration: 3, repeat: Infinity }}
-          className="absolute w-40 h-40 rounded-full bg-primary/20 blur-3xl -z-10" 
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: [1, 1.6], opacity: [0.4, 0] }}
+          transition={{ 
+            duration: 2, 
+            repeat: Infinity, 
+            ease: "easeOut",
+            delay: 1.0 
+          }}
+          className="absolute w-24 h-24 rounded-full border-2 border-primary/30" 
         />
       </div>
 
-      {/* Content Area */}
-      <motion.div 
-        initial={{ y: 20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ delay: 1 }}
-        className="space-y-6"
-      >
+      {/* Content Area - Elegant staggered entrance */}
+      <div className="space-y-6 relative z-10">
         <div className="space-y-3">
           <motion.h1 
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2 }}
+            transition={{ delay: 0.9, duration: 0.5, ease: "easeOut" }}
             className="text-3xl sm:text-4xl font-black text-zinc-800 dark:text-white tracking-tight leading-tight"
           >
-            Sẵn sàng trải nghiệm <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600 italic">Lenote</span>!
+            Sẵn sàng trải nghiệm <span className="inline-block px-1 text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600 italic">Lenote</span>
           </motion.h1>
           <motion.p 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.4 }}
+            transition={{ delay: 1.1, duration: 0.5, ease: "easeOut" }}
             className="text-zinc-500 dark:text-slate-400 text-sm sm:text-base leading-relaxed max-w-[340px] mx-auto font-medium"
           >
             Tất cả đã sẵn sàng{userName ? `, ${userName.split(' ').at(-1)}` : ''}.<br />
@@ -94,9 +100,9 @@ export default function SuccessScreen({ userName }: { userName?: string }) {
 
         {/* Action Button */}
         <motion.div 
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1.8, type: "spring" }}
+          initial={{ opacity: 0, scale: 0.9, y: 10 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ delay: 1.4, type: "spring", stiffness: 200, damping: 15 }}
           className="pt-4"
         >
           <motion.button
@@ -107,21 +113,25 @@ export default function SuccessScreen({ userName }: { userName?: string }) {
           >
             <span className="relative z-10 flex items-center justify-center gap-3">
               Bắt đầu khám phá
-              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+              <motion.span
+                animate={{ x: [0, 4, 0] }}
+                transition={{ duration: 1.5, repeat: Infinity }}
+              >
+                <ArrowRight className="w-4 h-4" />
+              </motion.span>
             </span>
           </motion.button>
           
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 2.5 }}
-            className="mt-8 flex items-center justify-center gap-2 text-[10px] text-zinc-400 font-bold uppercase tracking-widest"
+            transition={{ delay: 1.8 }}
+            className="mt-8 flex items-center justify-center text-[10px] text-zinc-400 font-bold uppercase tracking-widest"
           >
-            <Sparkles className="w-3 h-3 text-primary animate-pulse" />
             Đã đồng bộ hóa sở thích của bạn
           </motion.div>
         </motion.div>
-      </motion.div>
+      </div>
     </div>
   );
 }

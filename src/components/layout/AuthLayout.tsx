@@ -12,7 +12,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
       
       <AuthHeader />
       
-      <main className="flex-grow flex items-center justify-center p-6 relative z-10 w-full">
+      <main className="flex-grow flex items-start sm:items-center justify-center p-6 pt-10 sm:pt-6 relative z-10 w-full">
         {children}
       </main>
       

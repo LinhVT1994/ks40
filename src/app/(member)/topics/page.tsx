@@ -20,25 +20,13 @@ export default async function TopicsExplorerPage() {
     <MemberContainer>
       <div className="mt-12 sm:mt-16 mb-32 px-4 md:px-8 max-w-[1600px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-1000">
         
-        {/* Breadcrumb / Back Navigation */}
-        <div className="mb-12">
-          <Link 
-            href="/" 
-            className="group inline-flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-zinc-500 dark:text-slate-100 hover:text-primary transition-all duration-300"
-          >
-            <div className="w-8 h-8 rounded-full border border-zinc-300 dark:border-white/10 flex items-center justify-center group-hover:border-primary/30 group-hover:bg-primary/5 transition-all">
-              <ArrowLeft className="w-3.5 h-3.5 transition-transform group-hover:-translate-x-0.5" />
-            </div>
-            Quay lại
-          </Link>
-        </div>
 
         {/* Page Header */}
-        <div className="mb-20">
+        <div className="mb-20 flex flex-col items-center text-center">
           <h1 className="text-4xl sm:text-6xl font-display font-heavy text-zinc-800 dark:text-white leading-[1.1] tracking-tight">
             Chủ đề
           </h1>
-          <p className="text-zinc-500 dark:text-slate-100 mt-6 text-lg max-w-xl leading-relaxed font-medium">
+          <p className="text-zinc-500 dark:text-slate-100 mt-6 text-lg max-w-xl mx-auto leading-relaxed font-medium">
             Hệ thống hóa tri thức theo từng khối lĩnh vực để bạn dễ dàng bao quát toàn bộ nội dung.
           </p>
         </div>

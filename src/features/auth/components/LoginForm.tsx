@@ -64,17 +64,17 @@ export default function LoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
       {error && (
-        <div className="px-4 py-3 rounded-lg bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 text-sm">
+        <div className="px-4 py-2.5 sm:py-3 rounded-lg bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/20 text-rose-600 dark:text-rose-400 text-sm">
           {error}
         </div>
       )}
 
       <div>
-        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-slate-500 px-1" htmlFor="email">Email</label>
+        <label className="block text-xs font-black uppercase tracking-widest mb-1.5 sm:mb-2 text-zinc-500 dark:text-slate-500 px-1" htmlFor="email">Email</label>
         <input
-          className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700"
+          className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2.5 sm:py-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700"
           id="email"
           name="email"
           defaultValue={initialEmail}
@@ -87,13 +87,13 @@ export default function LoginForm() {
       </div>
 
       <div>
-        <div className="flex justify-between items-center mb-2 px-1">
+        <div className="flex justify-between items-center mb-1.5 sm:mb-2 px-1">
           <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-slate-500" htmlFor="password">Mật khẩu</label>
           <Link href="/forgot-password" alt-target="true" className="text-[10px] font-black uppercase tracking-wider text-primary hover:text-primary/80 transition-colors">Quên mật khẩu?</Link>
         </div>
         <div className="relative">
           <input
-            className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-3 pr-10 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700"
+            className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2.5 sm:py-3 pr-10 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700"
             id="password"
             name="password"
             placeholder="••••••••"
@@ -130,7 +130,7 @@ export default function LoginForm() {
       </div>
 
       <button
-        className="w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black rounded-xl px-4 py-4 text-sm hover:opacity-90 active:scale-[0.98] transition-all mt-6 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shadow-xl shadow-zinc-200 dark:shadow-none"
+        className="w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black rounded-xl px-4 py-3.5 sm:py-4 text-sm hover:opacity-90 active:scale-[0.98] transition-all mt-4 sm:mt-6 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shadow-xl shadow-zinc-200 dark:shadow-none"
         type="submit"
         disabled={isPending}
       >

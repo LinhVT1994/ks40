@@ -59,7 +59,7 @@ export default async function ExplorePage() {
   return (
     <MemberContainer>
       <JsonLd data={exploreJsonLd} />
-      <div className="mb-8">
+      <div className="mt-12 sm:mt-16 mb-8">
         <h1 className="text-3xl md:text-4xl font-black text-zinc-800 dark:text-white uppercase tracking-tight font-display mb-2">
           Khám phá <span className="text-primary text-xl md:text-2xl align-top">★</span>
         </h1>

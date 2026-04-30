@@ -84,8 +84,8 @@ export default function MemberHeader({ announcement }: { announcement?: SiteAnno
                 <Menu className="w-6 h-6" />
               </button>
 
-              <Link href="/" className="hidden md:flex items-center gap-2 group cursor-pointer">
-                <div className="transition-transform group-hover:scale-110">
+              <Link href="/" className="flex items-center gap-2 group cursor-pointer">
+                <div className="hidden md:block transition-transform group-hover:scale-110">
                 <BrandLogo size={32} />
               </div>
                 <span className="text-lg md:text-xl tracking-[0.08em] flex items-center uppercase drop-shadow-[0_4px_8px_rgba(0,0,0,0.05)] dark:drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]">
@@ -93,7 +93,7 @@ export default function MemberHeader({ announcement }: { announcement?: SiteAnno
                   <span className="font-black bg-gradient-to-r from-primary via-accent-purple to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-text-shimmer">
                     note
                   </span>
-                  <div className="ml-1 scale-75 origin-left">
+                  <div className="hidden md:block ml-1 scale-75 origin-left">
                     <EyeTracker />
                   </div>
                 </span>

@@ -29,7 +29,7 @@ const item = {
 
 export default function StepOccupation({ value, onChange, onNext, onSkip, isPending, options }: Props) {
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
+    <div className="w-full mx-auto space-y-8">
       {/* Header section - Left aligned */}
       <div className="text-left space-y-4 px-2">
         <motion.h1 
@@ -39,6 +39,14 @@ export default function StepOccupation({ value, onChange, onNext, onSkip, isPend
         >
           Bạn là ai?
         </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="text-zinc-500 dark:text-slate-400 text-sm leading-relaxed max-w-sm"
+        >
+          Lựa chọn vai trò hiện tại giúp chúng mình cá nhân hóa các gợi ý bài viết và lộ trình học tập tối ưu nhất cho bạn.
+        </motion.p>
       </div>
 
       {/* Grid layout to save vertical space */}
@@ -79,9 +87,20 @@ export default function StepOccupation({ value, onChange, onNext, onSkip, isPend
                 )}
               </div>
 
-              {isActive && (
-                <Check className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-white dark:text-zinc-900' : ''}`} />
-              )}
+              <div className="relative flex items-center justify-center w-5 h-5 shrink-0">
+                <div className={`absolute inset-0 rounded-full border transition-all duration-300 ${
+                  isActive ? 'bg-white dark:bg-zinc-900 border-white dark:border-zinc-900 scale-100' : 'border-zinc-200 dark:border-white/10 scale-0'
+                }`} />
+                {isActive && (
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="relative z-10"
+                  >
+                    <Check className="w-3 h-3 text-zinc-900 dark:text-white stroke-[3px]" />
+                  </motion.div>
+                )}
+              </div>
             </motion.button>
           );
         })}

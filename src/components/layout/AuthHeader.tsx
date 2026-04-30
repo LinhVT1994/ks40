@@ -3,7 +3,7 @@ import { ArrowLeft } from "lucide-react";
 
 export default function AuthHeader() {
   return (
-    <header className="w-full py-8 px-10 relative z-10 flex items-center justify-between">
+    <header className="hidden sm:flex w-full py-8 px-10 relative z-10 items-center justify-between">
       <Link 
         href="/" 
         className="group flex items-center gap-2 text-zinc-500 hover:text-primary transition-all duration-300 text-sm font-medium"

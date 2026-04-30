@@ -19,7 +19,7 @@ import {
 import { useTheme } from 'next-themes';
 import { useNotes } from '@/context/NotesContext';
 
-const HIDE_PATHS = ['/login', '/register', '/forgot-password', '/reset-password', '/write', '/admin'];
+const HIDE_PATHS = ['/login', '/register', '/forgot-password', '/reset-password', '/write', '/admin', '/onboarding'];
 
 export default function ProductivityHub() {
   const pathname = usePathname();
