@@ -601,7 +601,7 @@ function TrendingSidebar({ articles, discoveryArticles, topicIds }: { articles: 
                 <div className="flex items-center gap-2 text-zinc-500">
                   <div className="flex items-center relative z-20">
                     <Link 
-                      href={`/profile/${article.author.username || article.author.id}`}
+                      href={`/@${article.author.username || article.author.id}`}
                       className="text-[10px] font-semibold text-zinc-600 dark:text-slate-400 truncate max-w-[90px] hover:text-primary transition-colors"
                     >
                       <span className="font-normal opacity-70">bởi</span> {article.author.name}
@@ -641,7 +641,7 @@ function RecentHistory({ history, currentUserId }: { history: any[]; currentUser
           <h3 className="font-display font-bold text-sm uppercase tracking-wider text-zinc-800 dark:text-white">Lịch sử gần đây</h3>
         </div>
         <Link 
-          href={`/profile/${currentUserId}?tab=history`}
+          href={`/@${currentUserId}?tab=history`}
           className="text-[10px] font-bold text-zinc-500 hover:text-primary transition-colors uppercase tracking-widest"
         >
           Tất cả

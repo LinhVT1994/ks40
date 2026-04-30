@@ -56,10 +56,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority:        0.7,
   }));
 
-  // Profile routes — chỉ tác giả có bài public (đã lấy từ articles ở trên)
+  // Profile routes — chỉ tác giả có bài public
   const authorIds = Array.from(new Set(articles.map(a => a.authorId))).filter(Boolean);
-  const profileRoutes: MetadataRoute.Sitemap = authorIds.map(id => ({
-    url:             `${SITE_URL}/profile/${id}`,
+  const users = await db.user.findMany({
+    where: { id: { in: authorIds } },
+    select: { id: true, username: true },
+  });
+
+  const profileRoutes: MetadataRoute.Sitemap = users.map(u => ({
+    url:             `${SITE_URL}/@${u.username || u.id}`,
     changeFrequency: 'weekly',
     priority:        0.5,
   }));

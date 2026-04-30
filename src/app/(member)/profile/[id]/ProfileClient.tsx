@@ -432,7 +432,7 @@ function FollowerList({ followers, totalFollowers, totalPages, userId }: {
     <div>
       <div className={cn("space-y-2 transition-opacity duration-500", loading ? "opacity-50" : "opacity-100")}>
         {items.map((f, i) => (
-          <Link key={f.id} href={`/profile/${f.username ?? f.id}`} style={{ animationDelay: `${i * 50}ms` }} className="flex items-center gap-3 md:gap-4 px-3 md:px-4 py-2 md:py-3 rounded-2xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-all animate-in fade-in slide-in-from-left-2 fill-mode-both cursor-pointer">
+          <Link key={f.id} href={`/@${f.username ?? f.id}`} style={{ animationDelay: `${i * 50}ms` }} className="flex items-center gap-3 md:gap-4 px-3 md:px-4 py-2 md:py-3 rounded-2xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-all animate-in fade-in slide-in-from-left-2 fill-mode-both cursor-pointer">
             <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0">
              <Image src={f.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name ?? 'User')}&background=e2e8f0&color=0f172a`} fill unoptimized sizes="40px" className="rounded-full object-cover border border-zinc-200 dark:border-white/10" alt={f.name ?? ''} />
             </div>
@@ -508,7 +508,7 @@ function FollowingList({ following, totalFollowing, totalPages, userId, isOwner 
     <div>
       <div className={cn("space-y-2 transition-opacity duration-500", loading ? "opacity-50" : "opacity-100")}>
         {items.map((f, i) => (
-          <Link key={f.id} href={`/profile/${f.username ?? f.id}`} style={{ animationDelay: `${i * 50}ms` }} className="group flex items-center justify-between gap-3 md:gap-4 px-3 md:px-4 py-2 md:py-3 rounded-2xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-all animate-in fade-in slide-in-from-left-2 fill-mode-both cursor-pointer">
+          <Link key={f.id} href={`/@${f.username ?? f.id}`} style={{ animationDelay: `${i * 50}ms` }} className="group flex items-center justify-between gap-3 md:gap-4 px-3 md:px-4 py-2 md:py-3 rounded-2xl hover:bg-zinc-50 dark:hover:bg-white/5 transition-all animate-in fade-in slide-in-from-left-2 fill-mode-both cursor-pointer">
             <div className="flex items-center gap-3 md:gap-4 min-w-0 flex-1">
               <div className="relative w-8 h-8 md:w-10 md:h-10 shrink-0">
                <Image src={f.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(f.name ?? 'User')}&background=e2e8f0&color=0f172a`} fill unoptimized sizes="40px" className="rounded-full object-cover border border-zinc-200 dark:border-white/10" alt={f.name ?? ''} />

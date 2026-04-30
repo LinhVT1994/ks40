@@ -98,7 +98,7 @@ function Avatar({ image, name, username, id, isSelf }: { image?: string | null; 
   const content = <AvatarImg src={image} name={name} size={40} className="shrink-0" />;
   if (isSelf) return content;
   return (
-    <Link href={`/profile/${username || id}`} className="hover:opacity-80 transition-opacity">
+    <Link href={`/@${username || id}`} className="hover:opacity-80 transition-opacity">
       {content}
     </Link>
   );
@@ -396,7 +396,7 @@ export default function ArticleComments({
               <Avatar image={c.author.image} name={c.author.name} username={c.author.username} id={c.author.id} />
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <Link href={`/profile/${c.author.username || c.author.id}`} className="font-bold text-sm text-zinc-800 dark:text-white hover:text-primary transition-colors">
+                  <Link href={`/@${c.author.username || c.author.id}`} className="font-bold text-sm text-zinc-800 dark:text-white hover:text-primary transition-colors">
                     {c.author.name}
                   </Link>
                   <div className="flex items-center gap-2">
@@ -464,7 +464,7 @@ export default function ArticleComments({
                         <Avatar image={r.author.image} name={r.author.name} username={r.author.username} id={r.author.id} />
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
-                            <Link href={`/profile/${r.author.username || r.author.id}`} className="font-bold text-sm text-zinc-800 dark:text-white hover:text-primary transition-colors">
+                            <Link href={`/@${r.author.username || r.author.id}`} className="font-bold text-sm text-zinc-800 dark:text-white hover:text-primary transition-colors">
                               {r.author.name}
                             </Link>
                             <div className="flex items-center gap-2">

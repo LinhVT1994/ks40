@@ -57,7 +57,7 @@ function ArticleGridCard({ article, isLarge }: { article: ArticleCard; isLarge?:
             {/* Author Info */}
             <div className="flex items-center mb-2 opacity-80 group-hover:opacity-100 transition-opacity relative z-30">
               <Link 
-                href={`/profile/${article.author.username || article.author.id}`}
+                href={`/@${article.author.username || article.author.id}`}
                 className="text-[10px] font-semibold text-zinc-500 dark:text-slate-400 hover:text-primary transition-colors"
               >
                 <span className="font-normal opacity-70">bởi</span> {article.author?.name}

@@ -15,7 +15,11 @@ export default function MemberFooter() {
   // Pages where we HIDE the footer to maintain a distraction-free "app" feel
   const hideOn = ['/settings', '/bookmarks', '/history', '/notifications', '/search'];
   const isWritePage = pathname.startsWith('/write');
-  const isMyProfile = session?.user?.id && pathname === `/profile/${session.user.id}`;
+  const username = (session?.user as any)?.username;
+  const isMyProfile = session?.user?.id && (
+    pathname === `/profile/${session.user.id}` || 
+    pathname === `/@${username || session.user.id}`
+  );
 
   if (hideOn.includes(pathname) || isWritePage || isMyProfile) {
     return null;

@@ -64,7 +64,7 @@ export default function FloatingInteractionHub({
         <div className="flex flex-col items-start gap-4 group/author w-full">
           <div className="flex flex-col items-start gap-3 w-full">
             <Link 
-              href={`/profile/${author.username || author.id}`}
+              href={`/@${author.username || author.id}`}
               className="relative block shrink-0"
             >
               <div className="absolute inset-0 rounded-full bg-primary/20 blur-md opacity-0 group-hover/author:opacity-100 transition-opacity duration-300" />
@@ -76,7 +76,7 @@ export default function FloatingInteractionHub({
             </Link>
             
             <div className="relative group/name">
-              <Link href={`/profile/${author.username || author.id}`} className="text-[16px] font-bold text-zinc-900 dark:text-white leading-tight hover:text-primary transition-colors">
+              <Link href={`/@${author.username || author.id}`} className="text-[16px] font-bold text-zinc-900 dark:text-white leading-tight hover:text-primary transition-colors">
                 {author.name}
               </Link>
               <div className="pointer-events-none absolute left-1/2 -translate-x-1/2 bottom-full mb-2 px-2.5 py-1.5 rounded-lg bg-zinc-900 dark:bg-slate-100 text-white dark:text-zinc-900 text-xs font-semibold whitespace-nowrap opacity-0 scale-95 group-hover/name:opacity-100 group-hover/name:scale-100 transition-all duration-200 shadow-lg origin-bottom">

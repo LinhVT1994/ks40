@@ -108,7 +108,7 @@ export default function GlossaryInteractionBar({
       {author && (
         <div className="flex flex-col items-center gap-4 mb-2">
           <Link 
-            href={`/profile/${author.username || author.id}`}
+            href={`/@${author.username || author.id}`}
             className="group/avatar relative"
           >
             <div className="absolute inset-0 rounded-full bg-primary/20 blur-md opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-300" />

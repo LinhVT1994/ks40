@@ -194,7 +194,7 @@ export default async function GlossaryTermPage({ params, searchParams }: Props) 
                       <div className="flex flex-col">
                         <span className="text-[10px] text-zinc-400 dark:text-slate-500 font-bold uppercase tracking-widest">Đóng góp bởi</span>
                         <Link 
-                          href={`/profile/${term.author.username || term.author.id}`}
+                          href={`/@${term.author.username || term.author.id}`}
                           className="text-xs font-bold text-zinc-800 dark:text-white hover:text-primary transition-colors"
                         >
                           {term.author.name}

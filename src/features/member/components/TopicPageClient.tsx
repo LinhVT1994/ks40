@@ -316,7 +316,7 @@ export default function TopicPageClient({
                               {/* Author Info */}
                               <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-5 relative z-30">
                                 <Link 
-                                  href={`/profile/${article.author.username || article.author.id}`}
+                                  href={`/@${article.author.username || article.author.id}`}
                                   className="font-semibold text-zinc-600 dark:text-slate-300 text-[11px] hover:text-primary transition-colors"
                                 >
                                   <span className="font-normal opacity-70">bởi</span> {article.author.name}
@@ -367,7 +367,7 @@ export default function TopicPageClient({
                         <div className="flex items-center flex-wrap gap-x-4 gap-y-2 text-zinc-500 dark:text-slate-400 text-[11px] font-medium">
                             <div className="flex items-center border-r border-zinc-200 dark:border-white/10 pr-3.5 relative z-30">
                               <Link 
-                                href={`/profile/${article.author.username || article.author.id}`}
+                                href={`/@${article.author.username || article.author.id}`}
                                 className="font-semibold text-zinc-600 dark:text-slate-300 text-[10px] hover:text-primary transition-colors"
                               >
                                 <span className="font-normal opacity-70">bởi</span> {article.author.name}

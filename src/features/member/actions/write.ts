@@ -31,7 +31,7 @@ async function requireWriter() {
   if (!userId) throw new Error('Unauthorized');
   const user = await db.user.findUnique({ 
     where: { id: userId }, 
-    select: { id: true, name: true, role: true, canWrite: true } 
+    select: { id: true, name: true, role: true, canWrite: true, username: true } 
   });
   
   if (!user) throw new Error('Unauthorized');
@@ -90,7 +90,7 @@ export async function createMemberArticleAction(data: MemberArticleFormData): Pr
     },
   });
 
-  revalidatePath(`/profile/${user.id}`);
+  revalidatePath(`/@${user.username || user.id}`);
   return { success: true, id: article.id };
 }
 
@@ -130,7 +130,7 @@ export async function updateArticleQuickAction(
         `Bài viết "${updated.title}" được phê duyệt!`,
         { 
           message: 'Chúc mừng! Bài viết của bạn đã được xuất bản chính thức.',
-          link: `/profile/me?tab=published` 
+          link: `/me?tab=published` 
         }
       );
 
@@ -202,7 +202,7 @@ export async function updateMemberArticleAction(id: string, data: Partial<Member
     },
   });
 
-  revalidatePath(`/profile/${user.id}`);
+  revalidatePath(`/@${user.username || user.id}`);
   return { success: true, id };
 }
 
@@ -216,7 +216,7 @@ export async function deleteMemberArticleAction(id: string): Promise<ActionResul
 
   await db.article.delete({ where: { id } });
 
-  revalidatePath(`/profile/${user.id}`);
+  revalidatePath(`/@${user.username || user.id}`);
   return { success: true, id };
 }
 
@@ -266,7 +266,7 @@ export async function submitMemberArticleAction(id: string): Promise<ActionResul
     ),
   );
 
-  revalidatePath(`/profile/${user.id}`);
+  revalidatePath(`/@${user.username || user.id}`);
   revalidatePath('/admin/documents');
   return { success: true, id };
 }

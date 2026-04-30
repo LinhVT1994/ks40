@@ -82,7 +82,7 @@ export default function NextArticleCard({ article }: { article: NextArticle }) {
                 <Clock className="w-3.5 h-3.5" /> {article.readTime} phút
               </span>
               <Link 
-                href={`/profile/${article.author.username || article.author.id}`}
+                href={`/@${article.author.username || article.author.id}`}
                 className="flex items-center gap-1.5 hover:text-primary transition-colors font-semibold"
               >
                 <Heart className="w-3.5 h-3.5" /> {article.author.name}

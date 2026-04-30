@@ -42,13 +42,13 @@ export const authConfig: NextAuthConfig = {
       if (isResetRoute) return true;
 
       // Chưa đăng nhập → không được vào các phân vùng bảo mật
-      if (!isLoggedIn && (isAdminRoute || isProtectedRoute || isProfileRoute || isOnboardingRoute)) {
+      if (!isLoggedIn && (isAdminRoute || isProtectedRoute || isOnboardingRoute)) {
         return Response.redirect(new URL('/login', nextUrl));
       }
 
       // Đã đăng nhập + chưa onboarding → redirect /onboarding (trừ admin và profile)
       // Chú ý: Trang chủ (/) của Member cũng yêu cầu onboarding nếu đã login
-      if (isLoggedIn && !onboardingDone && (path === '/' || isProtectedRoute || isProfileRoute) && role !== 'ADMIN') {
+      if (isLoggedIn && !onboardingDone && (path === '/' || isProtectedRoute) && role !== 'ADMIN') {
         return Response.redirect(new URL('/onboarding', nextUrl));
       }
 
