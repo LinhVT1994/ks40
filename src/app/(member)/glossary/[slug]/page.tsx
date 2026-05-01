@@ -139,80 +139,84 @@ export default async function GlossaryTermPage({ params, searchParams }: Props) 
           </aside>
 
           <main className="w-full transition-colors min-h-[calc(100vh-120px)]">
-            <header className="w-full pt-8 md:pt-12 pb-6 md:pb-8 px-6 md:px-12 space-y-8 md:space-y-10">
-              <div className="flex items-center justify-between">
-                <Link
-                  href={backHref}
-                  className="group flex items-center gap-2.5 text-zinc-400 hover:text-primary transition-all duration-300"
-                >
-                  <div className="p-2 rounded-full bg-zinc-50 dark:bg-white/5 group-hover:bg-primary/10 transition-colors">
-                    <ArrowLeft className="w-3.5 h-3.5 md:w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                  </div>
-                  <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest">Quay lại</span>
-                </Link>
+            <header className="w-full pt-8 md:pt-12 pb-6 md:pb-8 px-4 md:px-12 space-y-8 md:space-y-10">
+              <div className="max-w-[720px] xl:max-w-[600px] 2xl:max-w-[720px] mx-auto">
+                <div className="flex items-center justify-between">
+                  <Link
+                    href={backHref}
+                    className="group flex items-center gap-2.5 text-zinc-400 hover:text-primary transition-all duration-300"
+                  >
+                    <div className="p-2 rounded-full bg-zinc-50 dark:bg-white/5 group-hover:bg-primary/10 transition-colors">
+                      <ArrowLeft className="w-3.5 h-3.5 md:w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                    </div>
+                    <span className="text-[10px] md:text-[11px] font-bold uppercase tracking-widest">Quay lại</span>
+                  </Link>
+                </div>
               </div>
 
               {/* Hero Section */}
-              <div className="space-y-6 md:space-y-8">
-                <div className="space-y-4 md:space-y-6">
-                  <div className="flex flex-wrap items-center gap-3">
-                    {term.topic && (
-                      <span
-                        className="inline-flex px-3 py-1 rounded-xl text-[8px] md:text-[8px] font-black tracking-widest border"
-                        style={{
-                          backgroundColor: `${topicColor}10`,
-                          borderColor: `${topicColor}20`,
-                          color: topicColor
-                        }}
-                      >
-                        {term.topic.label}
-                      </span>
+              <div className="max-w-[720px] xl:max-w-[600px] 2xl:max-w-[720px] mx-auto">
+                <div className="space-y-6 md:space-y-8">
+                  <div className="space-y-4 md:space-y-6">
+                    <div className="flex flex-wrap items-center gap-3">
+                      {term.topic && (
+                        <span
+                          className="inline-flex px-3 py-1 rounded-xl text-[8px] md:text-[8px] font-black tracking-widest border"
+                          style={{
+                            backgroundColor: `${topicColor}10`,
+                            borderColor: `${topicColor}20`,
+                            color: topicColor
+                          }}
+                        >
+                          {term.topic.label}
+                        </span>
+                      )}
+                    </div>
+
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-display font-heavy text-zinc-800 dark:text-white leading-[1.15] tracking-tight">
+                      {term.term}
+                    </h1>
+
+                    {/* Short Definition */}
+                    <div className="relative w-full border-l-4 pl-6 py-2" style={{ borderColor: `${topicColor}40` }}>
+                      <p className="text-zinc-700 dark:text-slate-400 text-xl leading-relaxed font-normal italic !text-justify">
+                        {term.shortDef}
+                      </p>
+                    </div>
+
+                    {/* Contributor Info */}
+                    {term.author && (
+                      <div className="flex items-center gap-3 pt-2 lg:hidden">
+                        <div className="flex -space-x-2">
+                          <img 
+                            src={term.author.image || '/default-avatar.png'} 
+                            alt={term.author.name} 
+                            className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 shadow-sm"
+                          />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-[10px] text-zinc-400 dark:text-slate-500 font-bold uppercase tracking-widest">Đóng góp bởi</span>
+                          <Link 
+                            href={`/@${term.author.username || term.author.id}`}
+                            className="text-xs font-bold text-zinc-800 dark:text-white hover:text-primary transition-colors"
+                          >
+                            {term.author.name}
+                          </Link>
+                        </div>
+                      </div>
                     )}
                   </div>
-
-                  <h1 className="text-3xl md:text-5xl lg:text-6xl font-display font-heavy text-zinc-800 dark:text-white leading-[1.15] tracking-tight">
-                    {term.term}
-                  </h1>
-
-                  {/* Short Definition */}
-                  <div className="relative w-full border-l-4 pl-6 py-2" style={{ borderColor: `${topicColor}40` }}>
-                    <p className="text-zinc-600 dark:text-slate-300 text-lg md:text-xl leading-relaxed font-medium italic">
-                      {term.shortDef}
-                    </p>
-                  </div>
-
-                  {/* Contributor Info */}
-                  {term.author && (
-                    <div className="flex items-center gap-3 pt-2 lg:hidden">
-                      <div className="flex -space-x-2">
-                        <img 
-                          src={term.author.image || '/default-avatar.png'} 
-                          alt={term.author.name} 
-                          className="w-8 h-8 rounded-full border-2 border-white dark:border-slate-900 shadow-sm"
-                        />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[10px] text-zinc-400 dark:text-slate-500 font-bold uppercase tracking-widest">Đóng góp bởi</span>
-                        <Link 
-                          href={`/@${term.author.username || term.author.id}`}
-                          className="text-xs font-bold text-zinc-800 dark:text-white hover:text-primary transition-colors"
-                        >
-                          {term.author.name}
-                        </Link>
-                      </div>
-                    </div>
-                  )}
                 </div>
               </div>
             </header>
             <div className="w-full">
               {/* Detailed Content */}
-              <article className="prose prose-zinc dark:prose-invert max-w-none w-full px-6 md:px-12 prose-p:text-zinc-600 dark:prose-p:text-slate-400 prose-headings:text-zinc-800 dark:prose-headings:text-white prose-p:text-base md:text-lg prose-p:leading-relaxed">
+              <article className="prose prose-zinc dark:prose-invert max-w-none w-full px-4 md:px-12 prose-headings:text-zinc-800 dark:prose-headings:text-white">
                 <MarkdownViewer content={term.definition} />
               </article>
 
               {/* Footer Metadata & Interactions */}
-              <div className="flex items-center justify-between mt-8 lg:justify-end gap-4 py-8 px-6 md:px-12 border-t border-zinc-100 dark:border-white/5">
+              <div className="flex items-center justify-between mt-8 lg:justify-end gap-4 py-8 px-4 md:px-12 border-t border-zinc-100 dark:border-white/5">
                 <div className="flex items-center gap-2 text-[10px] font-bold text-zinc-400 dark:text-slate-500 uppercase tracking-widest shrink-0">
                   <Clock className="w-3 h-3" />
                   <span className="hidden sm:inline">Cập nhật:</span>
@@ -226,7 +230,7 @@ export default async function GlossaryTermPage({ params, searchParams }: Props) 
 
               {/* Author Section at Bottom (Mobile only) */}
               {term.author && (
-                <div className="px-6 md:px-12 pt-10 lg:hidden">
+                <div className="px-4 md:px-12 pt-10 lg:hidden">
                   <div className="pt-10 border-t border-zinc-100 dark:border-white/5">
                     <AuthorCard author={term.author} />
                   </div>
@@ -235,7 +239,7 @@ export default async function GlossaryTermPage({ params, searchParams }: Props) 
 
               {/* Related Terms Section */}
               {otherTerms.length > 0 && (
-                <div className="pt-8 md:pt-10 px-6 md:px-12 pb-24 md:pb-12 space-y-6 md:space-y-8">
+                <div className="pt-8 md:pt-10 px-4 md:px-12 pb-24 md:pb-12 space-y-6 md:space-y-8">
                   <div className="flex items-center gap-3">
                     <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
                     <h2 className="text-sm font-black uppercase tracking-[0.2em] text-zinc-800 dark:text-white">
