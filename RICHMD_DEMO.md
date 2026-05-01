@@ -55,7 +55,33 @@ Bảng đã được giải phóng khỏi các lề thừa của thư viện Typ
 
 ---
 
-## 4. Typography & Glossary
+## 4. Hệ thống Code Block (Mã nguồn)
+Đoạn mã được bọc trong khung màu tối sâu thẳm (`zinc-950`) với bo góc `xl`, tạo cảm giác như một trình soạn thảo mã chuyên nghiệp.
+
+```javascript
+// Hiệu ứng Shared Layout Animation (Antigravity Mode)
+const transition = {
+  type: "spring",
+  stiffness: 260,
+  damping: 26
+};
+
+export function ImageLightbox({ images, index, onClose }) {
+  return (
+    <motion.div 
+      layoutId={`img-${images[index].src}`}
+      transition={transition}
+      className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/95"
+    >
+      <img src={images[index].src} alt="Cinematic View" />
+    </motion.div>
+  );
+}
+```
+
+---
+
+## 5. Typography & Glossary
 Mọi thuật ngữ chuyên môn sẽ được tự động nhận diện và bôi đậm nếu tồn tại trong từ điển.
 
 - **Tính năng 1:** Tự động highlight thuật ngữ **Glossary**.

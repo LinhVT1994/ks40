@@ -27,6 +27,116 @@ import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GlossaryProvider, AutoGlossaryHighlight } from '@/features/member/components/GlossaryHighlighter';
 import { slugify } from '@/lib/slugify';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import {
+  vscDarkPlus,
+  dracula,
+  okaidia,
+  synthwave84,
+  nord,
+} from 'react-syntax-highlighter/dist/esm/styles/prism';
+
+const MONO_FONT = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
+
+const CODE_THEME_MAP: Record<string, { [key: string]: React.CSSProperties }> = {
+  classic: vscDarkPlus,
+  dracula,
+  monokai: okaidia,
+  synthwave: synthwave84,
+  nord,
+};
+
+const DEFAULT_CODE_THEME = 'dracula';
+
+function useCodeTheme() {
+  const [themeId, setThemeId] = useState<string>(DEFAULT_CODE_THEME);
+
+  useEffect(() => {
+    const stored = typeof window !== 'undefined' ? localStorage.getItem('ks-code-theme') : null;
+    if (stored && CODE_THEME_MAP[stored]) setThemeId(stored);
+
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent<string>).detail;
+      if (typeof detail === 'string' && CODE_THEME_MAP[detail]) setThemeId(detail);
+    };
+    window.addEventListener('code-theme-changed', handler);
+    return () => window.removeEventListener('code-theme-changed', handler);
+  }, []);
+
+  return CODE_THEME_MAP[themeId] ?? CODE_THEME_MAP[DEFAULT_CODE_THEME];
+}
+
+const CodeBlock = React.memo(({ inline, className, children, ...props }: any) => {
+  const content = Array.isArray(children) ? children.join('') : String(children);
+  const match = /language-(\w+)/.exec(className || '');
+  const [copied, setCopied] = useState(false);
+  const lang = match ? match[1] : 'text';
+  const codeTheme = useCodeTheme();
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(content.replace(/\n$/, ''));
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const isInline = inline ?? (!match && !content.includes('\n'));
+
+  if (!isInline) {
+    return (
+      <div className="relative my-10 rounded-xl overflow-hidden group not-prose border border-zinc-200 dark:border-white/10 w-full transform-gpu isolate max-w-[720px] xl:max-w-[600px] 2xl:max-w-[720px] mx-auto">
+        <div className="absolute top-3 right-3 flex items-center gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <button
+            onClick={handleCopy}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all scale-95 hover:scale-100 active:scale-90 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-xl"
+          >
+            {copied ? <Check className="w-3 h-3 text-emerald-400 dark:text-emerald-600" /> : <Copy className="w-3 h-3" />}
+            <span>{copied ? 'Đã chép' : 'Sao chép'}</span>
+          </button>
+        </div>
+
+        {match && (
+          <div className="absolute bottom-3 right-4 z-10 opacity-40 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-zinc-400 dark:text-slate-500">{lang}</span>
+          </div>
+        )}
+
+        <div className="max-h-[640px] overflow-auto text-[13px] md:text-[14px] leading-relaxed [&_*]:!whitespace-pre scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-white/10 scrollbar-track-transparent">
+          {match ? (
+            <SyntaxHighlighter
+              style={codeTheme}
+              language={lang}
+              PreTag="div"
+              className="syntax-highlighter"
+              customStyle={{
+                margin: 0,
+                padding: '1.25rem 1.5rem',
+                fontSize: 'inherit',
+                lineHeight: 'inherit',
+                fontFamily: MONO_FONT,
+                overflow: 'visible',
+                whiteSpace: 'pre',
+              }}
+              codeTagProps={{ style: { fontFamily: MONO_FONT, background: 'transparent' } }}
+            >
+              {content.replace(/\n$/, '')}
+            </SyntaxHighlighter>
+          ) : (
+            <pre style={{ fontFamily: MONO_FONT }} className="px-6 py-5 text-sm leading-relaxed whitespace-pre text-zinc-700 bg-zinc-50/50 dark:bg-black/40 dark:text-slate-400">
+              {content}
+            </pre>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <code className="bg-zinc-100 dark:bg-white/10 text-zinc-800 dark:text-slate-400 px-1.5 py-0.5 rounded-md text-[0.85em] font-mono before:content-none after:content-none border border-zinc-200 dark:border-transparent break-words" {...props}>
+      {content}
+    </code>
+  );
+});
+CodeBlock.displayName = 'CodeBlock';
 
 function ScreenSizeDebugger() {
   const [size, setSize] = useState({ width: 0, height: 0 });
@@ -529,7 +639,9 @@ export default function MarkdownViewer({ content, className, compact = false, va
     th: ({ children }: any) => <th className="px-5 py-3 text-sm font-medium text-zinc-500 dark:text-slate-500 uppercase tracking-widest text-[10px]">{children}</th>,
     td: ({ children }: any) => <td className="px-5 py-3 text-zinc-600 dark:text-slate-400 border-b border-zinc-100 dark:border-white/5 group-last:border-0"><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></td>,
     strong: ({ children }: any) => <strong className="font-medium text-zinc-900 dark:text-slate-200"><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></strong>,
-    hr: () => <hr className="my-12 border-zinc-200 dark:border-white/10 w-1/5 mx-auto" />
+    hr: () => <hr className="my-12 border-zinc-200 dark:border-white/10 w-1/5 mx-auto" />,
+    code: CodeBlock,
+    pre: ({ children }: any) => <>{children}</>,
   }), []);
 
   return (
