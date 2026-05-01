@@ -444,30 +444,19 @@ export default function MarkdownViewer({ content, className, compact = false, va
     },
     img: ({ src, alt, ...props }: any) => {
       const isGif = src?.toLowerCase().split(/[#?]/)[0].endsWith('.gif');
-      const [aspectRatio, setAspectRatio] = React.useState<number | null>(null);
 
       return src ? (
-        <div className={cn(WIDE_WIDTH, "my-12 group relative rounded-2xl transition-all duration-700")}>
-          {/* Layer 1: Shadow Layer (Handles rounded shadow without clipping) */}
-          <div className="absolute inset-0 rounded-2xl transition-all duration-700 group-hover:shadow-2xl group-hover:shadow-primary/10 pointer-events-none" />
+        <div className={cn(WIDE_WIDTH, "m-0 group relative rounded-2xl transition-all duration-1000 h-fit")}>
+          {/* Layer 1: Shadow Layer */}
+          <div className="absolute inset-0 rounded-2xl transition-all duration-1000 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)] pointer-events-none" />
           
-          {/* Layer 2: Image Clipper (Handles rounded corners and overflow) */}
-          <div 
-            className="relative overflow-hidden rounded-2xl isolation-isolate transform-gpu bg-zinc-100 dark:bg-zinc-900/30"
-            style={aspectRatio ? { aspectRatio: `${aspectRatio}` } : { minHeight: '200px' }}
-          >
+          {/* Layer 2: Image Clipper - Flex vacuum wrap with rounding fix */}
+          <div className="relative flex flex-col overflow-hidden rounded-2xl isolation-isolate transform-gpu [mask-image:-webkit-radial-gradient(white,black)]">
             <img 
               src={src} 
               alt={alt} 
               {...props} 
-              onLoad={(e) => {
-                const img = e.currentTarget;
-                setAspectRatio(img.naturalWidth / img.naturalHeight);
-              }}
-              className={cn(
-                "block cursor-zoom-in transition-transform duration-1000 group-hover:scale-105 will-change-transform",
-                aspectRatio ? "absolute inset-0 w-full h-full object-cover" : "w-full h-auto"
-              )}
+              className="w-full h-auto block !m-0 cursor-zoom-in transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03] will-change-transform origin-center" 
               onClick={() => setLightbox({ images: [{ src, alt: alt || '' }], index: 0 })} 
             />
             
@@ -480,8 +469,8 @@ export default function MarkdownViewer({ content, className, compact = false, va
               </div>
             )}
             
-            {/* Overlay controls - Subtle gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500 cursor-zoom-in flex flex-col justify-end p-4" onClick={() => setLightbox({ images: [{ src, alt: alt || '' }], index: 0 })}>
+            {/* Overlay controls - Minimalist Subtle gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-all duration-700 cursor-zoom-in flex flex-col justify-end p-6" onClick={() => setLightbox({ images: [{ src, alt: alt || '' }], index: 0 })}>
               <div className="translate-y-2 group-hover:translate-y-0 transition-transform duration-500 flex items-center justify-between">
                  <div className="flex items-center gap-2.5">
                    <div className="p-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20"><Maximize2 className="w-4 h-4 text-white" /></div>
