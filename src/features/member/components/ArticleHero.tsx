@@ -39,7 +39,7 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
           </div>
         )}
 
-        <div className="w-full max-w-[720px] mx-auto flex flex-col gap-6">
+        <div className="w-full max-w-[720px] xl:max-w-[600px] 2xl:max-w-[720px] mx-auto flex flex-col gap-6">
           <div className="flex">
             <Link
               href={`/topic/${article.topic.slug}`}
