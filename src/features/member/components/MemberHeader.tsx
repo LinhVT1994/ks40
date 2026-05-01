@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { useSession } from 'next-auth/react';
-import { Search, X, Menu, Compass, Hash, BookMarked, ArrowRight } from 'lucide-react';
+import { Search, X, Menu, Compass, Hash, BookMarked, ArrowRight, PenLine } from 'lucide-react';
 import AnnouncementBanner from '@/components/AnnouncementBanner';
 import type { SiteAnnouncement } from '@/features/admin/actions/config';
 import UserMenu from './UserMenu';
@@ -16,8 +16,13 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { AnimatePresence, motion } from 'framer-motion';
 
-export default function MemberHeader({ announcement }: { announcement?: SiteAnnouncement | null }) {
-  const { data: session } = useSession();
+export default function MemberHeader({ 
+  announcement, 
+  session 
+}: { 
+  announcement?: SiteAnnouncement | null,
+  session?: any
+}) {
   const isLoggedIn = !!session?.user;
   const pathname = usePathname();
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
@@ -109,7 +114,20 @@ export default function MemberHeader({ announcement }: { announcement?: SiteAnno
 
             <div className="flex items-center gap-4 shrink-0">
               {/* Desktop Search */}
-              <div className="hidden md:block">
+              <div className="hidden lg:flex items-center gap-3">
+                <HeaderSearch />
+                {isLoggedIn && (session?.user as any)?.canWrite && (
+                  <Link 
+                    href="/write"
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary text-white hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 active:scale-95"
+                  >
+                    <PenLine className="w-3.5 h-3.5" />
+                    <span className="text-[11px] font-bold uppercase tracking-wider">Viết bài</span>
+                  </Link>
+                )}
+              </div>
+
+              <div className="hidden md:flex lg:hidden">
                 <HeaderSearch />
               </div>
 

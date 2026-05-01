@@ -11,7 +11,6 @@ export default function ForgotPasswordPage() {
         <h2 className="text-3xl font-black mb-3 tracking-tight text-zinc-900 dark:text-white font-display">Khôi phục mật khẩu</h2>
         <p className="text-zinc-500 dark:text-slate-400 text-sm leading-relaxed max-w-[280px] mx-auto font-medium">Đừng lo lắng, đôi khi chúng ta cũng hay quên mà.</p>
       </div>
-      
       <ForgotPasswordForm />
     </div>
   );

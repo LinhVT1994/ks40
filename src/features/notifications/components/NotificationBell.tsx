@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useEffect, useRef, useState, useMemo } from 'react';
-import { Bell, FileText, MessageSquare, Heart, Zap, CheckCheck, X, CheckCircle2, AlertCircle, Lightbulb, BookOpen } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Bell, FileText, MessageSquare, Heart, Zap, CheckCheck, X, CheckCircle2, AlertCircle, Lightbulb } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -110,7 +110,7 @@ export default function NotificationBell() {
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   
-  const buttonRef = useRef<HTMLButtonElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -124,7 +124,7 @@ export default function NotificationBell() {
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (buttonRef.current?.contains(e.target as Node)) return;
+      if (containerRef.current?.contains(e.target as Node)) return;
       if (dropdownRef.current?.contains(e.target as Node)) return;
       setOpen(false);
     };
@@ -135,92 +135,87 @@ export default function NotificationBell() {
   if (!mounted || !userId) return null;
 
   const dropdownContent = (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          ref={dropdownRef}
-          initial={{ opacity: 0, scale: 0.95, y: -10 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: -10 }}
-          transition={{ duration: 0.15, ease: 'easeOut' }}
-          className={
-            isMobile
-              ? "fixed inset-0 z-[200000] bg-surface flex flex-col"
-              : "fixed right-4 md:right-8 top-16 w-96 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl z-[200000] overflow-hidden bg-surface flex flex-col max-h-[500px]"
-          }
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between px-6 py-5 sm:px-4 sm:py-3.5 border-b border-zinc-200 dark:border-white/5 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md">
-            <div className="flex items-center gap-2">
-              <h3 className="text-base sm:text-sm font-bold text-zinc-800 dark:text-white">Thông báo</h3>
-              {unreadCount > 0 && (
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                  {unreadCount} mới
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-1">
-              {unreadCount > 0 && (
-                <button
-                  onClick={markAllRead}
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold text-primary hover:bg-primary/5 transition-colors"
-                >
-                  <CheckCheck className="w-3.5 h-3.5" />
-                  Đọc hết
-                </button>
-              )}
-              <button
-                onClick={() => setOpen(false)}
-                className="p-2 sm:p-1.5 rounded-lg text-zinc-500 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
-              >
-                <X className="w-5 h-5 sm:w-3.5 sm:h-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* List */}
-          <div className="flex-1 overflow-y-auto divide-y divide-zinc-200 dark:divide-white/5 custom-scrollbar">
-            {isLoading ? (
-              <div className="flex flex-col items-center justify-center py-12 gap-3 text-zinc-500">
-                <div className="w-5 h-5 border-2 border-zinc-300 border-t-primary rounded-full animate-spin" />
-                <p className="text-xs font-medium">Đang tải...</p>
-              </div>
-            ) : notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 gap-3 text-zinc-500 opacity-60">
-                <Bell className="w-10 h-10 stroke-[1.5px]" />
-                <p className="text-sm font-medium">Bạn chưa có thông báo nào</p>
-              </div>
-            ) : (
-              notifications.map((n) => (
-                <NotifItem
-                  key={n.id}
-                  notif={n}
-                  onRead={(id) => { markRead(id); }}
-                />
-              ))
-            )}
-          </div>
-
-          {/* Footer */}
-          {notifications.length > 0 && (
-            <div className="px-6 py-4 sm:px-4 sm:py-2.5 border-t border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
-              <a
-                href="/notifications"
-                className="text-xs font-bold text-primary hover:underline flex items-center justify-center w-full"
-              >
-                Xem tất cả thông báo →
-              </a>
-            </div>
+    <motion.div
+      ref={dropdownRef}
+      initial={isMobile ? { opacity: 0, y: 20 } : { opacity: 0, scale: 0.95, y: -10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={isMobile ? { opacity: 0, y: 20 } : { opacity: 0, scale: 0.95, y: -10 }}
+      transition={{ duration: 0.15, ease: 'easeOut' }}
+      className={
+        isMobile
+          ? "fixed inset-0 z-[200000] bg-surface flex flex-col"
+          : "absolute right-0 top-[calc(100%+8px)] w-96 border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl z-[200000] overflow-hidden bg-surface flex flex-col max-h-[500px] origin-top-right"
+      }
+    >
+      {/* Header */}
+      <div className="flex items-center justify-between px-6 py-5 sm:px-4 sm:py-3.5 border-b border-zinc-200 dark:border-white/5 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md">
+        <div className="flex items-center gap-2">
+          <h3 className="text-base sm:text-sm font-bold text-zinc-800 dark:text-white">Thông báo</h3>
+          {unreadCount > 0 && (
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">
+              {unreadCount} mới
+            </span>
           )}
-        </motion.div>
+        </div>
+        <div className="flex items-center gap-1">
+          {unreadCount > 0 && (
+            <button
+              onClick={markAllRead}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-bold text-primary hover:bg-primary/5 transition-colors"
+            >
+              <CheckCheck className="w-3.5 h-3.5" />
+              Đọc hết
+            </button>
+          )}
+          <button
+            onClick={() => setOpen(false)}
+            className="p-2 sm:p-1.5 rounded-lg text-zinc-500 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
+          >
+            <X className="w-5 h-5 sm:w-3.5 sm:h-3.5" />
+          </button>
+        </div>
+      </div>
+
+      {/* List */}
+      <div className="flex-1 overflow-y-auto divide-y divide-zinc-200 dark:divide-white/5 custom-scrollbar">
+        {isLoading ? (
+          <div className="flex flex-col items-center justify-center py-12 gap-3 text-zinc-500">
+            <div className="w-5 h-5 border-2 border-zinc-300 border-t-primary rounded-full animate-spin" />
+            <p className="text-xs font-medium">Đang tải...</p>
+          </div>
+        ) : notifications.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 gap-3 text-zinc-500 opacity-60">
+            <Bell className="w-10 h-10 stroke-[1.5px]" />
+            <p className="text-sm font-medium">Bạn chưa có thông báo nào</p>
+          </div>
+        ) : (
+          notifications.map((n) => (
+            <NotifItem
+              key={n.id}
+              notif={n}
+              onRead={(id) => { markRead(id); }}
+            />
+          ))
+        )}
+      </div>
+
+      {/* Footer */}
+      {notifications.length > 0 && (
+        <div className="px-6 py-4 sm:px-4 sm:py-2.5 border-t border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
+          <a
+            href="/notifications"
+            className="text-xs font-bold text-primary hover:underline flex items-center justify-center w-full"
+          >
+            Xem tất cả thông báo →
+          </a>
+        </div>
       )}
-    </AnimatePresence>
+    </motion.div>
   );
 
   return (
-    <>
+    <div className="relative" ref={containerRef}>
       <button
-        ref={buttonRef}
         onClick={() => setOpen((v) => !v)}
         className={`relative p-2 rounded-full transition-all active:scale-90 ${
           open
@@ -232,7 +227,13 @@ export default function NotificationBell() {
         <BellIcon count={unreadCount} />
       </button>
 
-      {mounted && createPortal(dropdownContent, document.body)}
-    </>
+      <AnimatePresence>
+        {open && (
+          isMobile 
+            ? createPortal(dropdownContent, document.body)
+            : dropdownContent
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

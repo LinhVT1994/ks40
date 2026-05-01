@@ -50,12 +50,17 @@ export async function compressImage(
 }
 
 export async function uploadImage(file: File, maxWidth: number, maxHeight: number): Promise<string> {
-  const compressed = await compressImage(file, maxWidth, maxHeight);
-  const ext = compressed.type === 'image/webp' ? 'webp' : 'jpg';
-  const compressedFile = new File([compressed], `image.${ext}`, { type: compressed.type });
+  let fileToUpload: File = file;
+
+  // Only compress if it's NOT a GIF
+  if (file.type !== 'image/gif') {
+    const compressed = await compressImage(file, maxWidth, maxHeight);
+    const ext = compressed.type === 'image/webp' ? 'webp' : 'jpg';
+    fileToUpload = new File([compressed], `image.${ext}`, { type: compressed.type });
+  }
 
   const form = new FormData();
-  form.append('file', compressedFile);
+  form.append('file', fileToUpload);
 
   const res = await fetch('/api/upload', { method: 'POST', body: form });
   if (!res.ok) {

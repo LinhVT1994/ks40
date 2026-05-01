@@ -53,7 +53,6 @@ export default async function GlossaryPage({
       <MemberContainer className="pb-0 pt-0">
         <GlossaryExplorer search={search} letter={letter} topics={topics} />
       </MemberContainer>
-
       <MemberContainer>
         <div className="max-w-4xl mx-auto pb-24 px-4">
           {terms.length === 0 ? (

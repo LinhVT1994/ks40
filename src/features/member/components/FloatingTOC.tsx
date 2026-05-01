@@ -229,13 +229,20 @@ export default function FloatingTOC({
             ? 'opacity-100 pointer-events-auto'
             : 'opacity-0 pointer-events-none'
           }
-          ${sidebarsVisible ? 'xl:!opacity-100 xl:!pointer-events-auto' : 'xl:opacity-0'}
+          ${sidebarsVisible ? 'xl:opacity-0 xl:hover:opacity-100 xl:pointer-events-auto' : 'xl:opacity-0'}
           ${focusActive ? 'xl:!opacity-0 xl:pointer-events-none' : ''}
+          transition-opacity duration-500
           group
         `}
         onMouseLeave={handleMouseLeave}
         onMouseEnter={handleMouseEnter}
       >
+        {/* Full-height Hover Trigger Zone (Desktop only) */}
+        <div 
+          className="hidden xl:block absolute top-[-100vh] bottom-[-100vh] -left-20 -right-10 z-[-1] pointer-events-auto"
+          onMouseEnter={handleMouseEnter}
+        />
+
         {/* Mobile Close Button */}
         <button
           onClick={() => setIsOpen(false)}

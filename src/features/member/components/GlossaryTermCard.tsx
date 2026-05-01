@@ -3,7 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
 
 interface Term {
   id: string;
@@ -22,6 +21,24 @@ interface GlossaryTermCardProps {
   index: number;
   currentSearch?: string;
   currentLetter?: string;
+}
+
+// Helper component to highlight matching text
+function HighlightText({ text, query }: { text: string, query: string }) {
+  if (!query.trim()) return <>{text}</>;
+  
+  const parts = text.split(new RegExp(`(${query})`, 'gi'));
+  return (
+    <>
+      {parts.map((part, i) => 
+        part.toLowerCase() === query.toLowerCase() ? (
+          <span key={i} className="text-primary dark:text-primary-light font-black">{part}</span>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
 }
 
 function GlossaryTermCard({ term, index, currentSearch, currentLetter }: GlossaryTermCardProps) {
@@ -44,7 +61,7 @@ function GlossaryTermCard({ term, index, currentSearch, currentLetter }: Glossar
         <div className="space-y-4">
           <div className="flex items-center justify-between gap-3">
             <h3 className="text-lg font-bold text-zinc-900 dark:text-white group-hover:text-primary transition-colors">
-              {term.term}
+              <HighlightText text={term.term} query={currentSearch || ''} />
             </h3>
             {term.topic && (
               <span
@@ -61,7 +78,7 @@ function GlossaryTermCard({ term, index, currentSearch, currentLetter }: Glossar
           </div>
           
           <p className="text-sm text-zinc-500 dark:text-slate-400 line-clamp-2 leading-relaxed font-medium">
-            {term.shortDef}
+            <HighlightText text={term.shortDef} query={currentSearch || ''} />
           </p>
           
         </div>

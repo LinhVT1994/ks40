@@ -222,7 +222,7 @@ export default async function ArticleDetailPage({ params }: Props) {
           {!isGated && (
             <>
               <div data-focus-hide className="hidden xl:block absolute right-full top-0 h-full pointer-events-none">
-                <div className="sticky top-32 pr-12 xl:pr-14 2xl:pr-24 transition-all pointer-events-auto">
+                <div className="sticky top-28 pr-12 xl:pr-14 2xl:pr-24 transition-all pointer-events-auto">
                   <aside className="xl:w-60 2xl:w-64">
                     <FloatingTOC headings={headings} />
                   </aside>
@@ -230,7 +230,7 @@ export default async function ArticleDetailPage({ params }: Props) {
               </div>
 
               <div className="hidden xl:block absolute left-full top-0 h-full pointer-events-none">
-                <div data-focus-hide className="sticky top-32 pl-12 xl:pl-14 2xl:pl-24 transition-all pointer-events-auto">
+                <div data-focus-hide className="sticky top-28 pl-12 xl:pl-14 2xl:pl-24 transition-all pointer-events-auto">
                   <FloatingInteractionHub />
                 </div>
               </div>
@@ -247,7 +247,7 @@ export default async function ArticleDetailPage({ params }: Props) {
           {!isGated && <FocusMode readTime={data.readTime} headings={headings} />}
 
           <main data-focus-main className="w-full animate-in fade-in duration-500 min-w-0 px-4 md:px-0">
-            <div data-focus-hide className="mb-8 opacity-60 hover:opacity-100 transition-opacity">
+            <div data-focus-hide className="mb-4 opacity-60 hover:opacity-100 transition-opacity">
               <BackButton />
             </div>
             <ArticleHero article={heroArticle as any} />

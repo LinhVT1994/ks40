@@ -53,12 +53,17 @@ export default function FloatingInteractionHub({
 
   return (
     <div 
-      className={`flex flex-col items-start gap-8 sticky top-40 h-fit py-4 transition-opacity duration-700 group/hub w-44 ${
-        sidebarsVisible ? 'opacity-100' : 'opacity-0'
-      } ${focusActive ? 'pointer-events-none !opacity-0' : ''} ${className || ''}`}
+      className={`flex flex-col items-start gap-8 sticky top-28 h-fit py-4 transition-opacity duration-500 group/hub w-44 ${
+        focusActive ? 'pointer-events-none !opacity-0' : 'xl:opacity-60 xl:hover:opacity-100 opacity-100'
+      } ${className || ''}`}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
+      {/* Full-height Hover Trigger Zone (Desktop only) */}
+      <div 
+        className="hidden xl:block absolute top-[-100vh] bottom-[-100vh] -left-10 -right-20 z-[-1] pointer-events-auto"
+        onMouseEnter={handleMouseEnter}
+      />
       {/* Author Section (Minimalist Vertical) */}
       {!hideAuthor && (
         <div className="flex flex-col items-start gap-4 group/author w-full">

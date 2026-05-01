@@ -4,7 +4,7 @@ import React from 'react';
 import {
   Bold, Italic, Heading1, Heading2, Heading3, Link2,
   Code, Image, Minus, List, ListOrdered, Quote,
-  Eye, Columns, Edit3
+  Eye, Columns, Edit3, Images
 } from 'lucide-react';
 
 type ViewMode = 'editor' | 'split' | 'preview';
@@ -26,7 +26,8 @@ const formatActions = [
   { divider: true },
   { icon: Code, label: 'Code', syntax: '`', wrap: true },
   { icon: Link2, label: 'Link', syntax: '[text](url)', wrap: false },
-  { icon: Image, label: 'Image', syntax: '![alt](url)', wrap: false },
+  { icon: Image, label: 'Image', syntax: '![alt](url)', wrap: false, action: 'upload_image' },
+  { icon: Images, label: 'GIF', syntax: '![alt](url)', wrap: false, action: 'upload_gif' },
   { divider: true },
   { icon: List, label: 'List', syntax: '- ', wrap: false },
   { icon: ListOrdered, label: 'Ordered', syntax: '1. ', wrap: false },

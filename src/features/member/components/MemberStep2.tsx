@@ -336,7 +336,10 @@ export default function MemberStep2({
 
                   const handleClick = () => {
                     if (isImageBtn) {
-                      if (!uploadingImage) fileInputRef.current?.click();
+                      if (!uploadingImage) {
+                        if (fileInputRef.current) fileInputRef.current.accept = 'image/*,image/gif';
+                        fileInputRef.current?.click();
+                      }
                     } else if (isVideoBtn) {
                       setVideoPromptOpen(v => !v);
                     } else if (action.syntax) {

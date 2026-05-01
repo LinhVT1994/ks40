@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode, useState, useMemo, useCallback, useTransition } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useMemo, useCallback, useTransition, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { toast } from 'sonner';
@@ -79,10 +79,36 @@ export function ArticleInteractionProvider({
   const [followerCount, setFollowerCount] = useState(initialFollowerCount);
   const [followPending, startFollowTransition] = useTransition();
 
-  // Sidebar Visibility Strategy — always visible in normal mode
-  const sidebarsVisible = true;
-  const showSidebars = useCallback(() => {}, []);
-  const hideSidebars = useCallback(() => {}, []);
+  // ── Sidebar Visibility Logic ────────────────────────────────────────────────
+  const [sidebarsVisible, setSidebarsVisible] = useState(true);
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearTimer = () => {
+    if (hideTimerRef.current) {
+      clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  };
+
+  const showSidebars = useCallback(() => {
+    clearTimer();
+    setSidebarsVisible(true);
+  }, []);
+
+  const hideSidebars = useCallback(() => {
+    clearTimer();
+    hideTimerRef.current = setTimeout(() => {
+      setSidebarsVisible(false);
+    }, 1500); // Wait 1.5s after mouse leaves before fading out
+  }, []);
+
+  // Initial auto-hide after 3.5 seconds
+  useEffect(() => {
+    hideTimerRef.current = setTimeout(() => {
+      setSidebarsVisible(false);
+    }, 3500);
+    return () => clearTimer();
+  }, []);
 
   const handleFollow = useCallback(() => {
     if (!session) {
@@ -161,8 +187,6 @@ export function useInteraction() {
   return context;
 }
 
-// Returns null when no provider is mounted — safe for components
-// that may render in contexts without ArticleInteractionProvider (e.g. onboarding previews).
 export function useInteractionOptional() {
   return useContext(ArticleInteractionContext) ?? null;
 }

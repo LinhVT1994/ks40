@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useTransition } from 'react';
-import { Search, ChevronDown, Hash, Lightbulb } from 'lucide-react';
+import React, { useState, useEffect, useTransition, useRef } from 'react';
+import { Search, ChevronDown, Hash, Lightbulb, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -29,6 +29,8 @@ export default function GlossaryExplorer({
   const [isSearching, setIsSearching] = useState(!initialLetter);
   const [isAlphabetOpen, setIsAlphabetOpen] = useState(!!initialLetter);
   const [isSubmissionOpen, setIsSubmissionOpen] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -102,7 +104,7 @@ export default function GlossaryExplorer({
       `}</style>
 
       {/* Hero Section */}
-      <section className="relative pt-16 pb-8 overflow-hidden text-center">
+      <section className="relative pt-32 pb-8 overflow-hidden text-center">
         <div className="max-w-4xl mx-auto px-4 space-y-12">
           <div className="space-y-6">
             <h1 className="text-4xl md:text-6xl font-display font-heavy text-zinc-800 dark:text-white leading-[1.1] tracking-tight">
@@ -172,86 +174,125 @@ export default function GlossaryExplorer({
             </div>
 
             {/* Expandable Areas */}
-            <div className="w-full">
-              {isSearching && (
-                <div className="w-full max-w-xl mx-auto">
-                  <div className="pt-8">
-                    <div className="relative flex items-center bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-full overflow-hidden focus-within:border-primary/50 focus-within:bg-white dark:focus-within:bg-slate-900 transition-all shadow-sm">
-                      <div className="pl-5 text-zinc-400 shrink-0">
-                        <Search className="w-4 h-4" />
-                      </div>
-                      <input
-                        autoFocus
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        placeholder="Nhập thuật ngữ cần tìm..."
-                        className="flex-1 min-w-0 bg-transparent px-4 py-2.5 text-base md:text-sm outline-none text-zinc-800 dark:text-white placeholder:text-zinc-400"
-                      />
-                      {search && (
-                        <button 
-                          onClick={() => setSearch('')}
-                          className="mr-4 text-zinc-400 hover:text-zinc-600 dark:hover:text-white text-[10px] font-bold uppercase"
-                        >
-                          Xóa
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {isAlphabetOpen && (
-                <div className="w-full">
-                  <div className="pt-10 pb-4 flex items-center justify-center flex-wrap gap-x-6 gap-y-5">
-                    <button
-                      onClick={() => updateUrl({ letter: '' })}
-                      className={`relative text-[11px] font-bold uppercase tracking-[0.2em] transition-colors ${
-                        !initialLetter 
-                          ? 'text-primary' 
-                          : 'text-zinc-400 dark:text-slate-500 hover:text-zinc-900 dark:hover:text-white'
-                      }`}
+            <div className="w-full min-h-[100px]">
+              <AnimatePresence mode="wait">
+                {isSearching && (
+                  <motion.div 
+                    key="search-area"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="pt-8 relative"
+                  >
+                    <motion.div 
+                      initial={false}
+                      animate={{ 
+                        maxWidth: (isInputFocused || search) ? '480px' : '320px',
+                      }}
+                      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                      className="mx-auto relative group w-full"
                     >
-                      Tất cả
-                      {!initialLetter && (
-                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
-                      )}
-                    </button>
-                    
-                    <div className="w-px h-3 bg-zinc-200 dark:bg-white/10 hidden sm:block" />
+                      <div className="relative">
+                        <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-300 ${isInputFocused || search ? 'text-primary' : 'text-zinc-500'}`} />
+                        <input
+                          ref={inputRef}
+                          type="text"
+                          value={search}
+                          onFocus={() => setIsInputFocused(true)}
+                          onBlur={() => setIsInputFocused(false)}
+                          onChange={(e) => setSearch(e.target.value)}
+                          placeholder={isInputFocused || search ? "Nhập thuật ngữ cần tìm..." : "Tìm thuật ngữ..."}
+                          className={`w-full h-10 bg-zinc-100/50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-sm pl-12 pr-10 rounded-full outline-none transition-all duration-300 dark:text-white placeholder:text-zinc-500 ${
+                            isInputFocused || search ? 'ring-2 ring-primary/20 border-primary/30 shadow-lg shadow-primary/5 bg-white dark:bg-zinc-900/40' : 'hover:bg-zinc-200/50 dark:hover:bg-white/10'
+                          }`}
+                        />
+                        {search && (
+                          <button 
+                            onClick={() => { setSearch(''); inputRef.current?.focus(); }}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-zinc-100 dark:hover:bg-white/10 rounded-full text-zinc-400 hover:text-zinc-600 dark:hover:text-white transition-all"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                      
+                      <AnimatePresence>
+                        {search && (
+                          <motion.div 
+                            initial={{ opacity: 0, y: -5 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -5 }}
+                            className="absolute top-full left-0 right-0 mt-3 flex items-center justify-start px-2"
+                          >
+                            <p className="text-[11px] font-medium text-primary">
+                              Đang lọc theo: "{search}"
+                            </p>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </motion.div>
+                  </motion.div>
+                )}
 
-                    {ALPHABET.map((l) => (
+                {isAlphabetOpen && (
+                  <motion.div 
+                    key="alphabet-area"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="w-full"
+                  >
+                    <div className="pt-10 pb-4 flex items-center justify-center flex-wrap gap-x-6 gap-y-5">
                       <button
-                        key={l}
-                        onClick={() => updateUrl({ letter: l === initialLetter ? '' : l })}
+                        onClick={() => updateUrl({ letter: '' })}
+                        className={`relative text-[11px] font-bold uppercase tracking-[0.2em] transition-colors ${
+                          !initialLetter 
+                            ? 'text-primary' 
+                            : 'text-zinc-400 dark:text-slate-500 hover:text-zinc-900 dark:hover:text-white'
+                        }`}
+                      >
+                        Tất cả
+                        {!initialLetter && (
+                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                        )}
+                      </button>
+                      
+                      <div className="w-px h-3 bg-zinc-200 dark:bg-white/10 hidden sm:block" />
+
+                      {ALPHABET.map((l) => (
+                        <button
+                          key={l}
+                          onClick={() => updateUrl({ letter: l === initialLetter ? '' : l })}
+                          className={`relative text-[13px] font-bold transition-all ${
+                            initialLetter === l 
+                              ? 'text-primary scale-125' 
+                              : 'text-zinc-400 dark:text-slate-500 hover:text-zinc-900 dark:hover:text-white'
+                          }`}
+                        >
+                          {l}
+                          {initialLetter === l && (
+                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                          )}
+                        </button>
+                      ))}
+                      
+                      <button
+                        onClick={() => updateUrl({ letter: initialLetter === '#' ? '' : '#' })}
                         className={`relative text-[13px] font-bold transition-all ${
-                          initialLetter === l 
+                          initialLetter === '#' 
                             ? 'text-primary scale-125' 
                             : 'text-zinc-400 dark:text-slate-500 hover:text-zinc-900 dark:hover:text-white'
                         }`}
                       >
-                        {l}
-                        {initialLetter === l && (
+                        <Hash className="w-4 h-4" />
+                        {initialLetter === '#' && (
                           <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
                         )}
                       </button>
-                    ))}
-                    
-                    <button
-                      onClick={() => updateUrl({ letter: initialLetter === '#' ? '' : '#' })}
-                      className={`relative text-[13px] font-bold transition-all ${
-                        initialLetter === '#' 
-                          ? 'text-primary scale-125' 
-                          : 'text-zinc-400 dark:text-slate-500 hover:text-zinc-900 dark:hover:text-white'
-                      }`}
-                    >
-                      <Hash className="w-4 h-4" />
-                      {initialLetter === '#' && (
-                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
