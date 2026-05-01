@@ -165,7 +165,7 @@ function DropCap({ text, className }: { text: string; className?: string }) {
       <span className="float-left text-7xl font-medium mr-3 mt-2 text-primary leading-[0.8] drop-shadow-sm select-none font-display">
         {firstChar}
       </span>
-      <p className="text-lg lg:text-xl leading-[1.85] text-zinc-700 dark:text-slate-400 font-medium italic">
+      <p className="text-xl leading-[1.85] text-zinc-700 dark:text-slate-400 font-normal italic !text-justify">
         <AutoGlossaryHighlight>{restText}</AutoGlossaryHighlight>
       </p>
       <div className="clear-both" />
@@ -368,7 +368,7 @@ export default function MarkdownViewer({ content, className, compact = false, le
     h6: ({ children }: any) => <h6 id={slugify(flatten(children))} data-annotation-target className={cn("text-base font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-6", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h6>,
     ul: ({ children }: any) => <ul className={cn("my-6 space-y-4", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></ul>,
     ol: ({ children }: any) => <ol className={cn("my-6 space-y-4", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></ol>,
-    li: ({ children }: any) => <li data-annotation-target className="ml-4 text-base md:text-lg 2xl:text-xl leading-relaxed text-zinc-700 dark:text-slate-400"><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></li>,
+    li: ({ children }: any) => <li data-annotation-target className="ml-4 text-xl leading-relaxed text-zinc-700 dark:text-slate-400 !text-justify"><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></li>,
     a: ({ href, children, ...props }: any) => {
       if (href?.startsWith('glossary:')) {
         const slug = href.slice('glossary:'.length);
@@ -396,7 +396,7 @@ export default function MarkdownViewer({ content, className, compact = false, le
         const actualText = textContent.replace(/^\[!DROP-CAP\]\s*/i, '');
         return <DropCap text={actualText} className={PROSE_WIDTH} />;
       }
-      return <p data-annotation-target className={cn("text-base md:text-lg 2xl:text-xl leading-[1.75] mb-8 text-zinc-700 dark:text-slate-400 font-normal", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></p>;
+      return <p data-annotation-target className={cn("text-xl leading-[1.75] mb-8 text-zinc-700 dark:text-slate-400 font-normal !text-justify", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></p>;
     },
     blockquote: ({ children }: any) => {
       const textContent = flatten(children).trim();
@@ -449,7 +449,7 @@ export default function MarkdownViewer({ content, className, compact = false, le
                 </div>
                 <ChevronDown className="w-4 h-4 text-zinc-400 transition-transform duration-300 group-open:rotate-180" />
               </summary>
-              <div data-annotation-target className="px-6 pb-8 pt-6 border-t border-zinc-200/50 dark:border-white/5 animate-in fade-in slide-in-from-top-2 duration-300 text-base md:text-lg 2xl:text-xl leading-[1.75] [&_p:last-child]:mb-0">
+              <div data-annotation-target className="px-6 pb-8 pt-6 border-t border-zinc-200/50 dark:border-white/5 animate-in fade-in slide-in-from-top-2 duration-300 text-xl leading-[1.75] [&_p:last-child]:mb-0">
                 <AutoGlossaryHighlight>
                   {(() => {
                     let tagStripped = false;
@@ -497,7 +497,7 @@ export default function MarkdownViewer({ content, className, compact = false, le
               <Icon className="w-3.5 h-3.5" />
               <span>{config.label}</span>
             </div>
-            <div data-annotation-target className="text-zinc-700 dark:text-slate-300 text-base lg:text-lg leading-relaxed font-medium">
+            <div data-annotation-target className="text-zinc-700 dark:text-slate-300 text-xl leading-relaxed font-normal !text-justify">
               <AutoGlossaryHighlight>
                 {(() => {
                   let tagStripped = false;
@@ -523,7 +523,7 @@ export default function MarkdownViewer({ content, className, compact = false, le
         );
       }
 
-      return <blockquote data-annotation-target className={cn("not-prose border-l-4 border-primary pl-6 pr-10 py-4 my-10 italic text-zinc-600 dark:text-slate-400 bg-zinc-50 dark:bg-zinc-900/50 rounded-r-xl text-base md:text-lg 2xl:text-xl leading-[1.75] [&_p]:mb-0", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></blockquote>;
+      return <blockquote data-annotation-target className={cn("not-prose border-l-4 border-primary pl-6 pr-10 py-4 my-10 italic text-zinc-600 dark:text-slate-400 bg-zinc-50 dark:bg-zinc-900/50 rounded-r-xl text-xl leading-[1.75] [&_p]:mb-0 !text-justify", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></blockquote>;
     },
     img: ({ src, alt, ...props }: any) => {
       const isGif = src?.toLowerCase().split(/[#?]/)[0].endsWith('.gif');
@@ -597,8 +597,8 @@ export default function MarkdownViewer({ content, className, compact = false, le
   return (
     <GlossaryProvider>
       <div className={cn("markdown-viewer-root relative", className)}>
-        <div className="max-w-[960px] mx-auto px-4 sm:px-6">
-          <div className="markdown-content prose dark:prose-invert max-w-none prose-pre:bg-zinc-950 prose-pre:border prose-pre:border-zinc-800 prose-pre:rounded-xl">
+        <div className="max-w-[960px] mx-auto">
+          <div className="markdown-content prose dark:prose-invert max-w-none !text-justify prose-pre:bg-zinc-950 prose-pre:border prose-pre:border-zinc-800 prose-pre:rounded-xl">
             <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} components={memoizedComponents}>
               {content}
             </ReactMarkdown>

@@ -1034,3 +1034,19 @@ blockquote:hover div:last-child::after {
   background-color: #020617 !important; /* Deepest Slate */
   color: #f8fafc !important;
 }
+
+/* Force justify alignment for article content */
+.markdown-content p, 
+.markdown-content li,
+[data-article-content] p,
+[data-article-content] li,
+.prose p,
+.prose li {
+  text-align: justify !important;
+  text-justify: inter-word !important;
+}
+
+/* Ensure headings are still left-aligned if needed, or follow their own rules */
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+  text-align: left !important;
+}

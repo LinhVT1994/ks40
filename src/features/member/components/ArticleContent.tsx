@@ -147,7 +147,7 @@ export default function ArticleContent({
                 <div className="flex flex-col gap-1">
                   <h2 id="overview" data-annotation-target className="font-medium text-2xl md:text-3xl text-zinc-900 dark:text-slate-200">Tóm tắt nhanh</h2>
                 </div>
-                <div className="text-zinc-800 dark:text-slate-400 text-lg md:text-xl font-medium tracking-tight">
+                <div className="text-zinc-700 dark:text-slate-400 text-xl font-normal tracking-tight !text-justify">
                   <MarkdownViewer content={overview} compact leftAlign />
                 </div>
               </div>
@@ -158,19 +158,17 @@ export default function ArticleContent({
       {objectives && (
         <div className="w-full max-w-[720px] xl:max-w-[600px] 2xl:max-w-[720px] mx-auto">
           <div className="relative overflow-hidden px-0 py-2 mb-4 group">
-            {/* Background Decorative Pattern */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
-              <div className="flex flex-col gap-0">
+            <div className="flex flex-col gap-0">
               <div className="flex flex-col gap-0">
                 <h2 id="objectives" data-annotation-target className="font-medium text-2xl md:text-3xl text-zinc-900 dark:text-slate-200">Mục tiêu bài đọc</h2>
-                <p data-annotation-target className="text-zinc-600 dark:text-slate-500 text-lg md:text-xl mt-4 font-medium">Sau khi đọc xong bài này, bạn sẽ:</p>
+                <p data-annotation-target className="text-zinc-700 dark:text-slate-400 text-xl mt-4 font-normal !text-justify">Sau khi đọc xong bài này, bạn sẽ:</p>
               </div>
 
                 <div className="max-w-none 
                   [&_ul]:list-none [&_ul]:p-0 [&_ul]:m-0 [&_ul]:space-y-4
                   [&_li]:relative [&_li]:pl-6
                   [&_li]:text-zinc-700 dark:[&_li]:text-slate-400
-                  [&_li]:text-lg md:[&_li]:text-xl font-medium tracking-tight
+                  [&_li]:text-xl font-normal tracking-tight !text-justify
                   [&_li]:before:content-[''] [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:top-[0.65em]
                   [&_li]:before:w-1.5 [&_li]:before:h-1.5 [&_li]:before:rounded-full [&_li]:before:bg-primary
                   [&_li]:before:shrink-0"
