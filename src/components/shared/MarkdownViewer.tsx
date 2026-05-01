@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, memo, useMemo } from 'react';
+import React, { useState, useEffect, memo, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
@@ -121,15 +122,21 @@ function ImageCarousel({ images, onImageClick }: { images: { src: string; alt: s
   if (!images.length) return null;
 
   return (
-    <div className={cn("group/carousel not-prose relative my-20 overflow-hidden rounded-2xl border border-zinc-200 dark:border-white/10 shadow-2xl h-[400px] sm:h-[550px] lg:h-[650px] w-full mx-auto")}>
-      <AnimatePresence initial={false} custom={direction}>
+    <div className={cn("group/carousel not-prose relative my-10 overflow-hidden rounded-2xl border border-zinc-200 dark:border-white/10 shadow-2xl h-[400px] sm:h-[550px] lg:h-[650px] w-full mx-auto")}>
+      <AnimatePresence mode="popLayout" initial={false} custom={direction}>
         <motion.div
           key={index}
           custom={direction}
-          initial={{ opacity: 0, x: direction * 100 + "%" }}
+          layoutId={images[index].src}
+          initial={{ opacity: 0, x: -direction * 100 + "%" }}
           animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: direction * -100 + "%" }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          exit={{ opacity: 0, x: direction * 100 + "%" }}
+          transition={{ 
+            type: "spring", 
+            stiffness: 260, 
+            damping: 26,
+            opacity: { duration: 0.3 }
+          }}
           className="absolute top-0 left-0 w-full h-full cursor-pointer z-10 m-0 p-0"
           onClick={() => onImageClick(images[index])}
         >
@@ -161,31 +168,30 @@ function ImageCarousel({ images, onImageClick }: { images: { src: string; alt: s
         </div>
       )}
 
-      <div className="absolute inset-x-0 bottom-0 p-4 sm:p-6 z-30 pointer-events-none flex flex-col justify-end gap-4 opacity-0 group-hover/carousel:opacity-100 transition-all duration-500 translate-y-4 group-hover/carousel:translate-y-0">
-        <div className="flex items-end justify-between gap-8">
-          <div className="flex-1 min-w-0">
-             {(() => {
-               const [title, ...descParts] = (images[index].alt || 'Untitled').split('|');
-               const description = descParts.join('|').trim();
-               return (
-                 <div className="w-fit max-w-full sm:max-w-xl bg-black/25 backdrop-blur-2xl border border-white/10 rounded-2xl p-5 sm:p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] pointer-events-auto relative overflow-hidden">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/80" />
-                    <div className="pl-2">
-                      <p className="text-lg sm:text-2xl font-medium text-white leading-tight tracking-tight mb-1.5">{title.trim()}</p>
-                      {description && (
-                        <p className="text-[11px] sm:text-sm text-white/60 leading-relaxed line-clamp-2 font-medium tracking-wide">
-                          {description}
-                        </p>
-                      )}
-                    </div>
-                 </div>
-               );
-             })()}
-          </div>
-          <div className="bg-black/30 backdrop-blur-2xl border border-white/10 rounded-full px-5 py-2.5 text-white font-medium text-[11px] tracking-[0.2em] shadow-xl mb-1 shrink-0 flex items-center gap-3">
-            <span className="text-primary/90">{index + 1}</span>
-            <div className="w-px h-3 bg-white/10" />
-            <span className="text-white/40">{images.length}</span>
+      <div className="absolute bottom-4 left-4 z-30 pointer-events-none flex flex-col gap-3 opacity-0 group-hover/carousel:opacity-100 transition-all duration-500 translate-y-2 group-hover/carousel:translate-y-0">
+        <div className="flex flex-col items-start gap-3">
+           {(() => {
+             const [title, ...descParts] = (images[index].alt || 'Untitled').split('|');
+             const description = descParts.join('|').trim();
+             return (
+               <div className="w-fit max-w-[280px] sm:max-w-md bg-black/20 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-2xl pointer-events-auto relative overflow-hidden">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/60" />
+                  <div className="pl-3">
+                    <p className="text-base sm:text-lg font-medium text-white/90 leading-tight tracking-tight mb-1">{title.trim()}</p>
+                    {description && (
+                      <p className="text-[10px] sm:text-xs text-white/40 leading-relaxed line-clamp-2 font-medium tracking-wide">
+                        {description}
+                      </p>
+                    )}
+                  </div>
+               </div>
+             );
+           })()}
+
+          <div className="bg-black/20 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 text-white/60 font-medium text-[10px] tracking-[0.2em] shadow-xl pointer-events-auto flex items-center gap-2.5">
+            <span className="text-primary/80">{index + 1}</span>
+            <div className="w-px h-2.5 bg-white/10" />
+            <span className="text-white/30">{images.length}</span>
           </div>
         </div>
       </div>
@@ -196,6 +202,7 @@ function ImageCarousel({ images, onImageClick }: { images: { src: string; alt: s
 function ImageLightbox({ images, index, onClose }: { images: { src: string; alt: string }[]; index: number; onClose: () => void }) {
   const [currentIndex, setCurrentIndex] = useState(index);
   const [direction, setDirection] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   const next = () => {
     setDirection(1);
@@ -207,6 +214,7 @@ function ImageLightbox({ images, index, onClose }: { images: { src: string; alt:
   };
 
   useEffect(() => {
+    setMounted(true);
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
       if (e.key === 'ArrowRight') next();
@@ -220,53 +228,52 @@ function ImageLightbox({ images, index, onClose }: { images: { src: string; alt:
     };
   }, [onClose]);
 
-  return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-2xl animate-in fade-in duration-500">
-      <button onClick={onClose} className="absolute top-8 right-8 p-4 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10 transition-all z-[10000] active:scale-90 backdrop-blur-xl">
+  if (!mounted || typeof document === 'undefined') return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[100000] flex items-center justify-center bg-black/90 backdrop-blur-2xl animate-in fade-in duration-500">
+      <button onClick={onClose} className="absolute top-8 right-8 p-4 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/10 transition-all z-[100001] active:scale-90 backdrop-blur-xl">
         <X className="w-6 h-6" />
       </button>
 
       <div className="relative w-full h-full flex items-center justify-center p-6 sm:p-20" onClick={onClose}>
-        <AnimatePresence mode="wait" custom={direction}>
+        <AnimatePresence mode="popLayout" custom={direction}>
           <motion.div 
             key={currentIndex}
             custom={direction}
-            initial={{ opacity: 0, scale: 0.95, x: direction * 50 }}
+            layoutId={images[currentIndex].src}
+            initial={{ opacity: 0, scale: 0.9, x: -direction * 100 }}
             animate={{ opacity: 1, scale: 1, x: 0 }}
-            exit={{ opacity: 0, scale: 1.05, x: direction * -50 }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            exit={{ opacity: 0, scale: 1.1, x: direction * 100 }}
+            transition={{ 
+              type: "spring", 
+              stiffness: 260, 
+              damping: 26,
+              opacity: { duration: 0.4 }
+            }}
             className="relative max-w-7xl w-full h-full flex items-center justify-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <img src={images[currentIndex].src} alt={images[currentIndex].alt} className="max-w-full max-h-full object-contain rounded-xl shadow-[0_40px_100px_rgba(0,0,0,0.8)] border border-white/5" />
-
-            {images.length > 1 && (
-              <>
-                <button onClick={(e) => { e.stopPropagation(); prev(); }} className="absolute left-4 p-4 rounded-full bg-black/20 hover:bg-black/40 text-white border border-white/10 transition-all active:scale-90 backdrop-blur-xl group/nav">
-                  <ChevronLeft className="w-8 h-8 group-hover/nav:-translate-x-0.5 transition-transform" />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); next(); }} className="absolute right-4 p-4 rounded-full bg-black/20 hover:bg-black/40 text-white border border-white/10 transition-all active:scale-90 backdrop-blur-xl group/nav">
-                  <ChevronRight className="w-8 h-8 group-hover/nav:translate-x-0.5 transition-transform" />
-                </button>
-              </>
-            )}
-            
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-2xl px-6 pointer-events-none">
-               {(() => {
-                 const [title, ...descParts] = (images[currentIndex].alt || 'Untitled').split('|');
-                 const description = descParts.join('|').trim();
-                 return (
-                   <div className="bg-black/40 backdrop-blur-3xl border border-white/10 rounded-2xl p-6 shadow-2xl relative overflow-hidden pointer-events-auto">
-                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/80" />
-                      <div className="pl-3">
-                        <p className="text-xl sm:text-2xl font-medium text-white tracking-tight mb-1">{title.trim()}</p>
-                        {description && (
-                          <p className="text-xs sm:text-sm text-white/50 font-medium tracking-wide leading-relaxed line-clamp-2">{description}</p>
-                        )}
-                      </div>
-                   </div>
-                 );
-               })()}
+            <div className="relative group/content flex items-center justify-center max-w-full max-h-full">
+              <img src={images[currentIndex].src} alt={images[currentIndex].alt} className="max-w-full max-h-full object-contain rounded-xl shadow-[0_40px_100px_rgba(0,0,0,0.8)] border border-white/5" />
+              
+              <div className="absolute bottom-4 left-4 w-full max-w-sm pointer-events-none opacity-0 group-hover/content:opacity-100 transition-opacity duration-300">
+                 {(() => {
+                   const [title, ...descParts] = (images[currentIndex].alt || 'Untitled').split('|');
+                   const description = descParts.join('|').trim();
+                   return (
+                     <div className="w-fit max-w-[280px] sm:max-w-md bg-black/20 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-2xl relative overflow-hidden pointer-events-auto">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary/60" />
+                        <div className="pl-3">
+                          <p className="text-base sm:text-lg font-medium text-white/90 tracking-tight mb-1">{title.trim()}</p>
+                          {description && (
+                            <p className="text-[10px] sm:text-xs text-white/40 font-medium tracking-wide leading-relaxed line-clamp-2">{description}</p>
+                          )}
+                        </div>
+                     </div>
+                   );
+                 })()}
+              </div>
             </div>
           </motion.div>
         </AnimatePresence>
@@ -275,7 +282,8 @@ function ImageLightbox({ images, index, onClose }: { images: { src: string; alt:
       <div className="absolute bottom-8 right-8 text-white/20 font-medium text-xs tracking-[0.4em] uppercase">
         {currentIndex + 1} / {images.length}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -371,17 +379,17 @@ export default function MarkdownViewer({ content, className, compact = false, va
         }[type];
 
         if (type === 'DETAILS') {
-          const summaryText = textContent.replace(/^\[!DETAILS\]\s*/i, '').split('\n')[0] || 'Xem chi tiết';
+          const lines = textContent.replace(/^\[!DETAILS\]\s*/i, '').split('\n').map(l => l.trim()).filter(l => l !== '');
+          const summaryText = lines[0] || 'Xem chi tiết';
           return (
             <details className={cn("group my-8 rounded-2xl border border-zinc-200 dark:border-white/10 bg-zinc-50/50 dark:bg-white/[0.02] transition-all duration-300 mx-auto [&_p:first-child]:mt-0 [&_p]:mb-3 [&_p:last-child]:mb-0", PROSE_WIDTH)}>
-              <summary className="flex cursor-pointer items-center justify-between px-5 py-3.5 list-none">
+              <summary className="flex cursor-pointer items-center justify-between px-6 py-5 list-none">
                 <div className="flex items-center gap-2">
-                  <ImageIcon className="w-3.5 h-3.5 text-zinc-400 group-open:text-primary transition-colors" />
                   <span className="font-medium text-zinc-700 dark:text-zinc-300 tracking-tight text-base sm:text-lg"><AutoGlossaryHighlight>{summaryText}</AutoGlossaryHighlight></span>
                 </div>
                 <ChevronDown className="w-4 h-4 text-zinc-400 transition-transform duration-300 group-open:rotate-180" />
               </summary>
-              <div className="px-5 pb-4 pt-1 border-t border-zinc-200/50 dark:border-white/5 animate-in fade-in slide-in-from-top-2 duration-300 text-base md:text-lg 2xl:text-xl leading-[1.75] [&_p:last-child]:mb-0">
+              <div className="px-6 pb-8 pt-6 border-t border-zinc-200/50 dark:border-white/5 animate-in fade-in slide-in-from-top-2 duration-300 text-base md:text-lg 2xl:text-xl leading-[1.75] [&_p:last-child]:mb-0">
                 <AutoGlossaryHighlight>
                   {(() => {
                     let tagStripped = false;
@@ -389,9 +397,24 @@ export default function MarkdownViewer({ content, className, compact = false, va
                       return React.Children.map(nodes, (node) => {
                         if (tagStripped) return node;
                         if (typeof node === 'string') {
-                          const cleaned = node.replace(/^\[!DETAILS\].*?(\n|$)/i, '');
-                          if (cleaned !== node) tagStripped = true;
-                          return cleaned;
+                          // 1. Remove the tag line
+                          let cleaned = node.replace(/^\[!DETAILS\].*?(\n|$)/i, '');
+                          
+                          // 2. If we haven't stripped the summary line yet, try to remove it
+                          if (!tagStripped) {
+                            const summaryPattern = summaryText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                            const regex = new RegExp(`^\\s*(\\*{2})?${summaryPattern}(\\*{2})?\\s*(\\n|$)`, 'i');
+                            const furtherCleaned = cleaned.replace(regex, '');
+                            if (furtherCleaned !== cleaned) {
+                              tagStripped = true;
+                              return furtherCleaned.trim() === '' ? null : furtherCleaned;
+                            }
+                          }
+
+                          if (cleaned !== node) {
+                            // If we only removed the tag but not the summary, we keep going
+                            return cleaned.trim() === '' ? null : cleaned;
+                          }
                         }
                         if (React.isValidElement(node) && (node.props as any).children) {
                           return React.cloneElement(node, { children: recursiveStrip((node.props as any).children) } as any);
@@ -440,13 +463,27 @@ export default function MarkdownViewer({ content, className, compact = false, va
         );
       }
 
-      return <blockquote className={cn("border-l-4 border-primary pl-6 py-2 my-10 italic text-zinc-600 dark:text-slate-400 bg-zinc-50 dark:bg-zinc-900/50 rounded-r-xl text-base md:text-lg 2xl:text-xl leading-[1.75]", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></blockquote>;
+      return <blockquote className={cn("not-prose border-l-4 border-primary pl-6 pr-10 py-4 my-10 italic text-zinc-600 dark:text-slate-400 bg-zinc-50 dark:bg-zinc-900/50 rounded-r-xl text-base md:text-lg 2xl:text-xl leading-[1.75] [&_p]:mb-0", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></blockquote>;
     },
     img: ({ src, alt, ...props }: any) => {
       const isGif = src?.toLowerCase().split(/[#?]/)[0].endsWith('.gif');
+      
+      // Parse alt for width parameters: ![Description|width=600] or ![Description|600]
+      const [altText, ...params] = (alt || '').split('|');
+      const widthParam = params.find(p => p.trim().startsWith('width=') || /^\d+$/.test(p.trim()));
+      const rawWidth = widthParam?.includes('=') ? widthParam.split('=')[1] : widthParam;
+      const cleanWidth = rawWidth?.trim();
+      
+      const widthStyle = cleanWidth ? { 
+        maxWidth: /^\d+$/.test(cleanWidth) ? `${cleanWidth}px` : cleanWidth,
+        width: '100%'
+      } : {};
 
       return src ? (
-        <div className={cn(WIDE_WIDTH, "m-0 group relative rounded-2xl transition-all duration-1000 h-fit")}>
+        <div 
+          className={cn(!cleanWidth && WIDE_WIDTH, "m-0 group relative rounded-2xl transition-all duration-1000 h-fit mx-auto")}
+          style={widthStyle}
+        >
           {/* Layer 1: Shadow Layer */}
           <div className="absolute inset-0 rounded-2xl transition-all duration-1000 group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:group-hover:shadow-[0_20px_50px_rgba(0,0,0,0.4)] pointer-events-none" />
           
@@ -454,7 +491,7 @@ export default function MarkdownViewer({ content, className, compact = false, va
           <div className="relative flex flex-col overflow-hidden rounded-2xl isolation-isolate transform-gpu [mask-image:-webkit-radial-gradient(white,black)]">
             <img 
               src={src} 
-              alt={alt} 
+              alt={altText.trim()} 
               {...props} 
               className="w-full h-auto block !m-0 cursor-zoom-in transition-transform duration-[1200ms] ease-out group-hover:scale-[1.03] will-change-transform origin-center" 
               onClick={() => setLightbox({ images: [{ src, alt: alt || '' }], index: 0 })} 
@@ -476,7 +513,7 @@ export default function MarkdownViewer({ content, className, compact = false, va
                    <div className="p-1.5 bg-white/10 backdrop-blur-md rounded-full border border-white/20"><Maximize2 className="w-4 h-4 text-white" /></div>
                    <span className="text-white font-medium tracking-wide text-[10px] uppercase">{isGif ? 'Xem GIF' : 'Xem ảnh'}</span>
                  </div>
-                 {alt && <p className="text-white/80 text-[10px] italic font-medium max-w-[50%] truncate">{alt}</p>}
+                 {altText && <p className="text-white/80 text-[10px] italic font-medium max-w-[50%] truncate">{altText.trim()}</p>}
               </div>
             </div>
           </div>
@@ -484,7 +521,7 @@ export default function MarkdownViewer({ content, className, compact = false, va
       ) : null;
     },
     table: ({ children }: any) => (
-      <div className="w-full my-12 overflow-x-auto rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900/50 shadow-sm mx-auto" style={{ maxWidth: '960px' }}>
+      <div className="w-full not-prose my-8 overflow-x-auto rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-zinc-900/50 shadow-sm mx-auto" style={{ maxWidth: '960px' }}>
         <table className="w-full min-w-max text-base text-left border-collapse">{children}</table>
       </div>
     ),
