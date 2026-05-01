@@ -38,6 +38,14 @@ import {
 
 const MONO_FONT = 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace';
 
+const flatten = (nodes: any): string => {
+  return React.Children.toArray(nodes).map(node => {
+    if (typeof node === 'string') return node;
+    if (React.isValidElement(node) && (node.props as any).children) return flatten((node.props as any).children);
+    return '';
+  }).join('');
+};
+
 const CODE_THEME_MAP: Record<string, { [key: string]: React.CSSProperties }> = {
   classic: vscDarkPlus,
   dracula,
@@ -352,12 +360,12 @@ export default function MarkdownViewer({ content, className, compact = false, le
   const PROSE_WIDTH = cn(PROSE_WIDTH_BASE, leftAlign ? 'ml-0' : 'mx-auto');
 
   const memoizedComponents = useMemo(() => ({
-    h1: ({ children }: any) => <h1 data-annotation-target className={cn("text-3xl sm:text-4xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-8 mt-16", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h1>,
-    h2: ({ children }: any) => <h2 data-annotation-target className={cn("text-2xl sm:text-3xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-6 mt-12", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h2>,
-    h3: ({ children }: any) => <h3 data-annotation-target className={cn("text-xl sm:text-2xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-8", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h3>,
-    h4: ({ children }: any) => <h4 data-annotation-target className={cn("text-lg sm:text-xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-6", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h4>,
-    h5: ({ children }: any) => <h5 data-annotation-target className={cn("text-base sm:text-lg font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-6", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h5>,
-    h6: ({ children }: any) => <h6 data-annotation-target className={cn("text-base font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-6", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h6>,
+    h1: ({ children }: any) => <h1 id={slugify(flatten(children))} data-annotation-target className={cn("text-3xl sm:text-4xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-8 mt-16", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h1>,
+    h2: ({ children }: any) => <h2 id={slugify(flatten(children))} data-annotation-target className={cn("text-2xl sm:text-3xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-6 mt-12", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h2>,
+    h3: ({ children }: any) => <h3 id={slugify(flatten(children))} data-annotation-target className={cn("text-xl sm:text-2xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-8", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h3>,
+    h4: ({ children }: any) => <h4 id={slugify(flatten(children))} data-annotation-target className={cn("text-lg sm:text-xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-6", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h4>,
+    h5: ({ children }: any) => <h5 id={slugify(flatten(children))} data-annotation-target className={cn("text-base sm:text-lg font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-6", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h5>,
+    h6: ({ children }: any) => <h6 id={slugify(flatten(children))} data-annotation-target className={cn("text-base font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-6", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h6>,
     ul: ({ children }: any) => <ul className={cn("my-6 space-y-4", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></ul>,
     ol: ({ children }: any) => <ol className={cn("my-6 space-y-4", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></ol>,
     li: ({ children }: any) => <li data-annotation-target className="ml-4 text-base md:text-lg 2xl:text-xl leading-relaxed text-zinc-700 dark:text-slate-400"><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></li>,
@@ -391,16 +399,7 @@ export default function MarkdownViewer({ content, className, compact = false, le
       return <p data-annotation-target className={cn("text-base md:text-lg 2xl:text-xl leading-[1.75] mb-8 text-zinc-700 dark:text-slate-400 font-normal", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></p>;
     },
     blockquote: ({ children }: any) => {
-      let textContent = '';
-      const flatten = (nodes: any): string => {
-        return React.Children.toArray(nodes).map(node => {
-          if (typeof node === 'string') return node;
-          if (React.isValidElement(node) && (node.props as any).children) return flatten((node.props as any).children);
-          return '';
-        }).join('');
-      };
-      
-      textContent = flatten(children).trim();
+      const textContent = flatten(children).trim();
       const match = textContent.match(/^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION|DETAILS|CAROUSEL)\]/i);
 
       if (match) {
