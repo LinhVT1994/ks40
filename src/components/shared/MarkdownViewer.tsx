@@ -138,58 +138,6 @@ const CodeBlock = React.memo(({ inline, className, children, ...props }: any) =>
 });
 CodeBlock.displayName = 'CodeBlock';
 
-function ScreenSizeDebugger() {
-  const [size, setSize] = useState({ width: 0, height: 0 });
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    const updateSize = () => setSize({ width: window.innerWidth, height: window.innerHeight });
-    window.addEventListener('resize', updateSize);
-    updateSize();
-    return () => window.removeEventListener('resize', updateSize);
-  }, []);
-
-  const getBreakpoint = (w: number) => {
-    if (w >= 1536) return '2xl';
-    if (w >= 1280) return 'xl';
-    if (w >= 1024) return 'lg';
-    if (w >= 768) return 'md';
-    if (w >= 640) return 'sm';
-    return 'xs';
-  };
-
-  return (
-    <div className="fixed bottom-32 right-6 z-[9999] flex flex-col items-end gap-2">
-      <AnimatePresence>
-        {show && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 10 }}
-            className="bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-2xl text-white font-mono text-xs flex flex-col gap-1"
-          >
-            <div className="flex justify-between gap-8 text-white/50">
-              <span>Dimension:</span>
-              <span className="text-primary font-bold">{size.width} x {size.height}</span>
-            </div>
-            <div className="flex justify-between gap-8 text-white/50">
-              <span>Breakpoint:</span>
-              <span className="text-emerald-400 font-bold uppercase">{getBreakpoint(size.width)}</span>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-      <button
-        onClick={() => setShow(!show)}
-        className="p-3 rounded-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 shadow-2xl border border-white/10 dark:border-zinc-200 hover:scale-110 active:scale-95 transition-all"
-        title="Check Screen Size"
-      >
-        <Maximize2 className="w-5 h-5" />
-      </button>
-    </div>
-  );
-}
-
 interface MarkdownViewerProps {
   content: string;
   className?: string;
@@ -205,7 +153,7 @@ function DropCap({ text, className }: { text: string; className?: string }) {
   const firstChar = text.trim().charAt(0);
   const restText = text.trim().slice(1);
   return (
-    <div className={cn("relative my-12", className)}>
+    <div data-annotation-target className={cn("relative my-12", className)}>
       <span className="float-left text-7xl font-medium mr-3 mt-2 text-primary leading-[0.8] drop-shadow-sm select-none font-display">
         {firstChar}
       </span>
@@ -404,15 +352,15 @@ export default function MarkdownViewer({ content, className, compact = false, le
   const PROSE_WIDTH = cn(PROSE_WIDTH_BASE, leftAlign ? 'ml-0' : 'mx-auto');
 
   const memoizedComponents = useMemo(() => ({
-    h1: ({ children }: any) => <h1 className={cn("text-3xl sm:text-4xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-8 mt-16", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h1>,
-    h2: ({ children }: any) => <h2 className={cn("text-2xl sm:text-3xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-6 mt-12", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h2>,
-    h3: ({ children }: any) => <h3 className={cn("text-xl sm:text-2xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-8", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h3>,
-    h4: ({ children }: any) => <h4 className={cn("text-lg sm:text-xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-6", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h4>,
-    h5: ({ children }: any) => <h5 className={cn("text-base sm:text-lg font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-6", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h5>,
-    h6: ({ children }: any) => <h6 className={cn("text-base font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-6", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h6>,
+    h1: ({ children }: any) => <h1 data-annotation-target className={cn("text-3xl sm:text-4xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-8 mt-16", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h1>,
+    h2: ({ children }: any) => <h2 data-annotation-target className={cn("text-2xl sm:text-3xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-6 mt-12", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h2>,
+    h3: ({ children }: any) => <h3 data-annotation-target className={cn("text-xl sm:text-2xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-8", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h3>,
+    h4: ({ children }: any) => <h4 data-annotation-target className={cn("text-lg sm:text-xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-6", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h4>,
+    h5: ({ children }: any) => <h5 data-annotation-target className={cn("text-base sm:text-lg font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-6", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h5>,
+    h6: ({ children }: any) => <h6 data-annotation-target className={cn("text-base font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-6", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h6>,
     ul: ({ children }: any) => <ul className={cn("my-6 space-y-4", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></ul>,
     ol: ({ children }: any) => <ol className={cn("my-6 space-y-4", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></ol>,
-    li: ({ children }: any) => <li className="ml-4 text-base md:text-lg 2xl:text-xl leading-relaxed text-zinc-700 dark:text-slate-400"><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></li>,
+    li: ({ children }: any) => <li data-annotation-target className="ml-4 text-base md:text-lg 2xl:text-xl leading-relaxed text-zinc-700 dark:text-slate-400"><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></li>,
     a: ({ href, children, ...props }: any) => {
       if (href?.startsWith('glossary:')) {
         const slug = href.slice('glossary:'.length);
@@ -440,7 +388,7 @@ export default function MarkdownViewer({ content, className, compact = false, le
         const actualText = textContent.replace(/^\[!DROP-CAP\]\s*/i, '');
         return <DropCap text={actualText} className={PROSE_WIDTH} />;
       }
-      return <p className={cn("text-base md:text-lg 2xl:text-xl leading-[1.75] mb-8 text-zinc-700 dark:text-slate-400 font-normal", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></p>;
+      return <p data-annotation-target className={cn("text-base md:text-lg 2xl:text-xl leading-[1.75] mb-8 text-zinc-700 dark:text-slate-400 font-normal", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></p>;
     },
     blockquote: ({ children }: any) => {
       let textContent = '';
@@ -502,7 +450,7 @@ export default function MarkdownViewer({ content, className, compact = false, le
                 </div>
                 <ChevronDown className="w-4 h-4 text-zinc-400 transition-transform duration-300 group-open:rotate-180" />
               </summary>
-              <div className="px-6 pb-8 pt-6 border-t border-zinc-200/50 dark:border-white/5 animate-in fade-in slide-in-from-top-2 duration-300 text-base md:text-lg 2xl:text-xl leading-[1.75] [&_p:last-child]:mb-0">
+              <div data-annotation-target className="px-6 pb-8 pt-6 border-t border-zinc-200/50 dark:border-white/5 animate-in fade-in slide-in-from-top-2 duration-300 text-base md:text-lg 2xl:text-xl leading-[1.75] [&_p:last-child]:mb-0">
                 <AutoGlossaryHighlight>
                   {(() => {
                     let tagStripped = false;
@@ -550,7 +498,7 @@ export default function MarkdownViewer({ content, className, compact = false, le
               <Icon className="w-3.5 h-3.5" />
               <span>{config.label}</span>
             </div>
-            <div className="text-zinc-700 dark:text-slate-300 text-base lg:text-lg leading-relaxed font-medium">
+            <div data-annotation-target className="text-zinc-700 dark:text-slate-300 text-base lg:text-lg leading-relaxed font-medium">
               <AutoGlossaryHighlight>
                 {(() => {
                   let tagStripped = false;
@@ -576,7 +524,7 @@ export default function MarkdownViewer({ content, className, compact = false, le
         );
       }
 
-      return <blockquote className={cn("not-prose border-l-4 border-primary pl-6 pr-10 py-4 my-10 italic text-zinc-600 dark:text-slate-400 bg-zinc-50 dark:bg-zinc-900/50 rounded-r-xl text-base md:text-lg 2xl:text-xl leading-[1.75] [&_p]:mb-0", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></blockquote>;
+      return <blockquote data-annotation-target className={cn("not-prose border-l-4 border-primary pl-6 pr-10 py-4 my-10 italic text-zinc-600 dark:text-slate-400 bg-zinc-50 dark:bg-zinc-900/50 rounded-r-xl text-base md:text-lg 2xl:text-xl leading-[1.75] [&_p]:mb-0", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></blockquote>;
     },
     img: ({ src, alt, ...props }: any) => {
       const isGif = src?.toLowerCase().split(/[#?]/)[0].endsWith('.gif');
@@ -640,7 +588,7 @@ export default function MarkdownViewer({ content, className, compact = false, le
     ),
     thead: ({ children }: any) => <thead className="bg-zinc-50/30 dark:bg-white/[0.03] border-b border-zinc-200 dark:border-white/10">{children}</thead>,
     th: ({ children }: any) => <th className="px-5 py-3 text-sm font-medium text-zinc-500 dark:text-slate-500 uppercase tracking-widest text-[10px]">{children}</th>,
-    td: ({ children }: any) => <td className="px-5 py-3 text-zinc-600 dark:text-slate-400 border-b border-zinc-100 dark:border-white/5 group-last:border-0"><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></td>,
+    td: ({ children }: any) => <td data-annotation-target className="px-5 py-3 text-zinc-600 dark:text-slate-400 border-b border-zinc-100 dark:border-white/5 group-last:border-0"><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></td>,
     strong: ({ children }: any) => <strong className="font-medium text-zinc-900 dark:text-slate-200"><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></strong>,
     hr: () => <hr className="my-12 border-zinc-200 dark:border-white/10 w-1/5 mx-auto" />,
     code: CodeBlock,
@@ -649,7 +597,6 @@ export default function MarkdownViewer({ content, className, compact = false, le
 
   return (
     <GlossaryProvider>
-      <ScreenSizeDebugger />
       <div className={cn("markdown-viewer-root relative", className)}>
         <div className="max-w-[960px] mx-auto px-4 sm:px-6">
           <div className="markdown-content prose dark:prose-invert max-w-none prose-pre:bg-zinc-950 prose-pre:border prose-pre:border-zinc-800 prose-pre:rounded-xl">
