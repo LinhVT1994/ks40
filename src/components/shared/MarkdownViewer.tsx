@@ -530,7 +530,7 @@ export default function MarkdownViewer({ content, className, compact = false, le
       
       // Parse alt for width parameters: ![Description|width=600] or ![Description|600]
       const [altText, ...params] = (alt || '').split('|');
-      const widthParam = params.find(p => p.trim().startsWith('width=') || /^\d+$/.test(p.trim()));
+      const widthParam = params.find((p: string) => p.trim().startsWith('width=') || /^\d+$/.test(p.trim()));
       const rawWidth = widthParam?.includes('=') ? widthParam.split('=')[1] : widthParam;
       const cleanWidth = rawWidth?.trim();
       
