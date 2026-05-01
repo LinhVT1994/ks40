@@ -42,14 +42,14 @@ export default function TopicsExplorerPage() {
 
   const filteredTree = useMemo(() => {
     if (!searchQuery.trim()) {
-      return topicsTree.filter(t => t.enabled && (t.children?.some(c => c.enabled) || (t._count?.articles ?? 0) > 0));
+      return topicsTree.filter(t => t.enabled && (t.children?.some((c: any) => c.enabled) || (t._count?.articles ?? 0) > 0));
     }
 
     const query = searchQuery.toLowerCase();
     return topicsTree
       .filter(t => t.enabled)
       .map(parent => {
-        const matchingChildren = (parent.children ?? []).filter(c => 
+        const matchingChildren = (parent.children ?? []).filter((c: any) => 
           c.enabled && c.label.toLowerCase().includes(query)
         );
         const parentMatches = parent.label.toLowerCase().includes(query);
