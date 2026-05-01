@@ -147,9 +147,8 @@ export default function ArticleContent({
                 <div className="flex flex-col gap-1">
                   <h2 id="overview" data-annotation-target className="font-medium text-2xl md:text-3xl text-zinc-900 dark:text-slate-200">Tóm tắt nhanh</h2>
                 </div>
-                  
                 <div className="text-zinc-800 dark:text-slate-400 text-lg md:text-xl font-medium tracking-tight">
-                  <MarkdownViewer content={overview} compact />
+                  <MarkdownViewer content={overview} compact leftAlign />
                 </div>
               </div>
           </div>
@@ -161,11 +160,10 @@ export default function ArticleContent({
           <div className="relative overflow-hidden px-0 py-2 mb-4 group">
             {/* Background Decorative Pattern */}
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 blur-3xl rounded-full -mr-16 -mt-16 pointer-events-none" />
-            
               <div className="flex flex-col gap-0">
               <div className="flex flex-col gap-0">
                 <h2 id="objectives" data-annotation-target className="font-medium text-2xl md:text-3xl text-zinc-900 dark:text-slate-200">Mục tiêu bài đọc</h2>
-                <p data-annotation-target className="text-zinc-600 dark:text-slate-500 text-lg md:text-xl font-medium">Sau khi đọc xong bài này, bạn sẽ:</p>
+                <p data-annotation-target className="text-zinc-600 dark:text-slate-500 text-lg md:text-xl mt-4 font-medium">Sau khi đọc xong bài này, bạn sẽ:</p>
               </div>
 
                 <div className="max-w-none 
@@ -178,7 +176,7 @@ export default function ArticleContent({
                   [&_li]:before:shrink-0"
                 >
                   <div className="markdown-content">
-                    <MarkdownViewer content={objectives} />
+                    <MarkdownViewer content={objectives} leftAlign />
                   </div>
                 </div>
               </div>

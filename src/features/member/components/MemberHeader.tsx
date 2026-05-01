@@ -63,6 +63,7 @@ export default function MemberHeader({
     setMobileSearchOpen(false);
   }, [pathname]);
 
+  if (pathname.startsWith('/write')) return null;
 
   return (
     <>

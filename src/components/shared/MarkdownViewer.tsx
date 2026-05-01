@@ -194,17 +194,18 @@ interface MarkdownViewerProps {
   content: string;
   className?: string;
   compact?: boolean;
+  leftAlign?: boolean;
   variant?: 'article' | 'note';
 }
 
-const PROSE_WIDTH = 'max-w-[720px] xl:max-w-[600px] 2xl:max-w-[720px] mx-auto';
+const PROSE_WIDTH_BASE = 'max-w-[720px] xl:max-w-[600px] 2xl:max-w-[720px]';
 const WIDE_WIDTH  = 'max-w-[960px] mx-auto';
 
-function DropCap({ text }: { text: string }) {
+function DropCap({ text, className }: { text: string; className?: string }) {
   const firstChar = text.trim().charAt(0);
   const restText = text.trim().slice(1);
   return (
-    <div className={cn("relative my-12", PROSE_WIDTH)}>
+    <div className={cn("relative my-12", className)}>
       <span className="float-left text-7xl font-medium mr-3 mt-2 text-primary leading-[0.8] drop-shadow-sm select-none font-display">
         {firstChar}
       </span>
@@ -397,8 +398,10 @@ function ImageLightbox({ images, index, onClose }: { images: { src: string; alt:
   );
 }
 
-export default function MarkdownViewer({ content, className, compact = false, variant = 'article' }: MarkdownViewerProps) {
+export default function MarkdownViewer({ content, className, compact = false, leftAlign = false, variant = 'article' }: MarkdownViewerProps) {
   const [lightbox, setLightbox] = useState<{ images: { src: string; alt: string }[]; index: number } | null>(null);
+
+  const PROSE_WIDTH = cn(PROSE_WIDTH_BASE, leftAlign ? 'ml-0' : 'mx-auto');
 
   const memoizedComponents = useMemo(() => ({
     h1: ({ children }: any) => <h1 className={cn("text-3xl sm:text-4xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-8 mt-16", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h1>,
@@ -435,7 +438,7 @@ export default function MarkdownViewer({ content, className, compact = false, va
       const textContent = React.Children.toArray(children).join('');
       if (textContent.startsWith('[!DROP-CAP]')) {
         const actualText = textContent.replace(/^\[!DROP-CAP\]\s*/i, '');
-        return <DropCap text={actualText} />;
+        return <DropCap text={actualText} className={PROSE_WIDTH} />;
       }
       return <p className={cn("text-base md:text-lg 2xl:text-xl leading-[1.75] mb-8 text-zinc-700 dark:text-slate-400 font-normal", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></p>;
     },

@@ -213,17 +213,10 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-64px)] overflow-hidden bg-background-light dark:bg-background-dark">
+    <div className="fixed inset-0 z-[300000] flex flex-col h-screen w-screen overflow-hidden bg-background-light dark:bg-background-dark">
       {/* Immersive Header / Local Nav */}
       <div className="flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-zinc-300 dark:border-white/5 shrink-0 z-50">
         <div className="flex items-center gap-4">
-          <button 
-            onClick={() => router.back()}
-            className="text-xs font-black text-zinc-500 hover:text-primary uppercase tracking-widest transition-colors"
-          >
-            Hủy bỏ
-          </button>
-          <div className="h-4 w-px bg-zinc-200 dark:bg-white/10" />
           <h1 className="text-sm font-black text-zinc-800 dark:text-white uppercase tracking-widest">
             {currentId ? 'Chỉnh sửa bài viết' : 'Viết bài mới'}
           </h1>
@@ -251,6 +244,13 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
 
         <div className="flex items-center gap-6">
            <div className="flex items-center gap-2">
+             <button 
+               onClick={() => router.back()}
+               className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-rose-500 transition-colors mr-2"
+             >
+               Hủy bỏ
+             </button>
+
              {step > 1 && (
                <button 
                  onClick={() => setStep(prev => prev - 1)}
