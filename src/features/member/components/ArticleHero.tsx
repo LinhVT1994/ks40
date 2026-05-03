@@ -24,7 +24,7 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
 
       <div className="flex flex-col gap-10">
         {article.cover && (
-          <div className="w-full aspect-[21/9] rounded-2xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.6)] relative group/cover animate-in fade-in zoom-in-95 duration-500 border border-zinc-200/50 dark:border-white/5">
+          <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-[0_20px_50px_-12px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_50px_-12px_rgba(0,0,0,0.6)] relative group/cover animate-in fade-in zoom-in-95 duration-500 border border-zinc-200/50 dark:border-white/5">
             <Image
               src={article.cover}
               alt={article.title}
