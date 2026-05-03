@@ -2,11 +2,8 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { X, Download, ChevronLeft, ChevronRight, Presentation, Sparkles, Image as ImageIcon, Save, Trash2, Library, GripVertical, Hash, List, Heart, MessageCircle, Share2, Music, ShieldCheck, Bookmark, Search, Grid, Layout } from 'lucide-react';
+import { X, Download, ChevronLeft, ChevronRight, Presentation, Sparkles, Image as ImageIcon, Save, Trash2, Library, GripVertical, Hash, List, Heart, MessageCircle, Share2, Music, ShieldCheck, Bookmark, Search, Grid, Layout, AlignLeft, AlignCenter, AlignRight, Palette, Plus, Minus, Type as FontIcon, Smartphone, Square, Monitor, Maximize, RectangleVertical, RectangleHorizontal } from 'lucide-react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { toPng } from 'html-to-image';
-import JSZip from 'jszip';
-import { saveAs } from 'file-saver';
 import { getSlideshowTemplatesAction, saveSlideshowTemplateAction, deleteSlideshowTemplateAction } from '@/features/member/actions/studio';
 import { toast } from 'sonner';
 
@@ -18,6 +15,8 @@ interface SlideBlock {
   align: 'left' | 'center' | 'right';
   content: string;
   color?: string; // Custom text color
+  fontSize?: number; // Custom font size multiplier
+  groupId?: string; // For grouping blocks together
 }
 
 interface SlideData {
@@ -45,16 +44,11 @@ export default function SlideshowGenerator({
   authorImage,
   onClose 
 }: SlideshowGeneratorProps) {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const [direction, setDirection] = useState(0); // -1 for prev, 1 for next
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generationProgress, setGenerationProgress] = useState(0);
   const [overlayOpacity, setOverlayOpacity] = useState(0.6);
   const [accentColor, setAccentColor] = useState('#3b82f6'); // Default Blue
   const [layout, setLayout] = useState<'center' | 'left' | 'split'>('center');
   const [fontFamily, setFontFamily] = useState<'sans' | 'serif' | 'display'>('display');
-  const [platform, setPlatform] = useState<'tiktok' | 'instagram' | 'square'>('tiktok');
-  const [device, setDevice] = useState<'none' | 'iphone14' | 'iphone13'>('none');
+  const [platform, setPlatform] = useState<'tiktok' | 'instagram' | 'facebook' | 'landscape'>('tiktok');
   const isEditMode = true; // Always locked in blueprint mode
   const [gridMode, setGridMode] = useState<'off' | 'white' | 'black' | 'accent'>('off');
   const [isSavingTemplate, setIsSavingTemplate] = useState(false);
@@ -66,130 +60,37 @@ export default function SlideshowGenerator({
   const [blockOffsets, setBlockOffsets] = useState<Record<string, { x: number, y: number }>>({});
   const [activeDragId, setActiveDragId] = useState<string | null>(null);
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
+  const [selectedBlockIds, setSelectedBlockIds] = useState<string[]>([]);
+  const [blockSizes, setBlockSizes] = useState<Record<string, { width?: number | string, height?: number | string }>>({});
+  const [isResizing, setIsResizing] = useState(false);
+  const [selectionBox, setSelectionBox] = useState<{ startX: number, startY: number, endX: number, endY: number } | null>(null);
   const [savedTemplates, setSavedTemplates] = useState<any[]>([]);
-  const [activeBlocks, setActiveBlocks] = useState<SlideBlock[]>([
-    { id: '1', type: 'title', name: 'title', description: '', align: 'center', content: '' },
-    { id: '2', type: 'text', name: 'content', description: '', align: 'left', content: '' }
+  const [slides, setSlides] = useState<{ id: string, blocks: SlideBlock[], name?: string, description?: string }[]>([
+    { 
+      id: 'slide-1', 
+      name: 'Trang Bìa',
+      description: 'Dùng để mở đầu bài viết, tiêu đề lớn và hình ảnh ấn tượng.',
+      blocks: [
+        { id: '1', type: 'logo', name: 'Logo', content: 'BRAND', align: 'center', fontSize: 1, description: '' },
+        { id: '2', type: 'title', name: 'title', description: '', align: 'center', content: 'Khám phá tri thức mới cùng KS40' },
+        { id: '3', type: 'text', name: 'content', description: '', align: 'left', content: 'Nền tảng học tập và sáng tạo nội dung AI thế hệ mới.' },
+      ]
+    }
   ]);
+  const [currentSlideId, setCurrentSlideId] = useState('slide-1');
+  const currentSlide = slides.find(s => s.id === currentSlideId) || slides[0];
+  const currentBlocks = currentSlide.blocks;
+
+  const updateCurrentBlocks = (newBlocks: SlideBlock[]) => {
+    setSlides(slides.map(s => s.id === currentSlideId ? { ...s, blocks: newBlocks } : s));
+  };
   const [editingBlockId, setEditingBlockId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const slideRef = useRef<HTMLDivElement>(null);
+  const blockRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  // Advanced logic to extract detailed sections from markdown
-  const slides = useMemo(() => {
-    const res: SlideData[] = [];
-    
-    // Fallback backgrounds if article has no images
-    const fallbackImages = [
-      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=1080',
-      'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&q=80&w=1080',
-      'https://images.unsplash.com/photo-1557683316-973673baf926?auto=format&fit=crop&q=80&w=1080',
-      'https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&q=80&w=1080',
-    ];
-
-    // Extract images: ![alt](url)
-    const imageRegex = /!\[.*?\]\((.*?)\)/g;
-    const images: string[] = [];
-    let match;
-    while ((match = imageRegex.exec(content)) !== null) {
-      images.push(match[1]);
-    }
-
-    // Slide 1: Cover
-    res.push({
-      title: title,
-      content: authorName,
-      type: 'cover',
-      image: images[0] || fallbackImages[0]
-    });
-
-    // Slide 2: Context / Overview
-    if (overview) {
-      res.push({
-        title: 'Bối cảnh & Mục tiêu',
-        content: overview.length > 300 ? overview.substring(0, 280) + '...' : overview,
-        type: 'content',
-        image: images[1] || fallbackImages[1]
-      });
-    }
-
-    // Extract Sections (H2 + following paragraph)
-    const sections = content.split(/\n(?=## )/);
-    let slideCount = 0;
-
-    sections.forEach((section) => {
-      if (slideCount >= 5) return; // Limit to 5 detail slides
-
-      const lines = section.trim().split('\n');
-      if (lines.length < 2) return;
-
-      const sectionTitle = lines[0].replace(/^##\s+/, '').trim();
-      const sectionContent = lines.slice(1)
-        .find(l => l.trim() && !l.startsWith('!') && !l.startsWith('#') && !l.startsWith('>'))
-        ?.trim();
-
-      if (sectionTitle && sectionContent && sectionTitle !== title) {
-        res.push({
-          title: sectionTitle,
-          content: sectionContent.length > 250 ? sectionContent.substring(0, 240) + '...' : sectionContent,
-          type: 'content',
-          image: images[slideCount + 2] || fallbackImages[(slideCount + 2) % fallbackImages.length]
-        });
-        slideCount++;
-      }
-    });
-
-    // Final Slide: CTA
-    res.push({
-      title: 'Học tập sâu hơn',
-      content: 'Truy cập KS40 để khám phá trọn vẹn lộ trình tri thức này.',
-      type: 'cta',
-      image: fallbackImages[3]
-    });
-
-    return res;
-  }, [title, overview, content, authorName]);
-
-  const [editableSlides, setEditableSlides] = useState<SlideData[]>([]);
-
-  useEffect(() => {
-    if (slides.length > 0 && editableSlides.length === 0) {
-      setEditableSlides(slides);
-    }
-  }, [slides, editableSlides.length]);
-
-  const updateSlideContent = (index: number, field: 'title' | 'content', value: string) => {
-    const newSlides = [...editableSlides];
-    newSlides[index] = { ...newSlides[index], [field]: value };
-    setEditableSlides(newSlides);
-  };
-
-  const currentSlideData = editableSlides[currentSlide] || slides[currentSlide];
-
-  const variants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? '100%' : '-100%',
-      opacity: 0,
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1,
-    },
-    exit: (direction: number) => ({
-      zIndex: 0,
-      x: direction < 0 ? '100%' : '-100%',
-      opacity: 0,
-    }),
-  };
-
-  const paginate = (newDirection: number) => {
-    const newPage = currentSlide + newDirection;
-    if (newPage >= 0 && newPage < slides.length) {
-      setDirection(newDirection);
-      setCurrentSlide(newPage);
-    }
-  };
-
+  const selectedBlocks = useMemo(() => currentBlocks.filter(b => selectedBlockIds.includes(b.id)), [currentBlocks, selectedBlockIds]);
+  const selectedBlock = selectedBlocks.length === 1 ? selectedBlocks[0] : null;
 
   const [mounted, setMounted] = useState(false);
 
@@ -224,7 +125,7 @@ export default function SlideshowGenerator({
         fontFamily,
         accentColor,
         overlayOpacity,
-        blocks: activeBlocks,
+        blocks: slides.flatMap(s => s.blocks), // Adjust if you want to save all slides or just template structure
       });
       toast.success('Đã lưu Template thành công');
       setTemplateName('');
@@ -243,7 +144,8 @@ export default function SlideshowGenerator({
     setAccentColor(template.accentColor);
     setOverlayOpacity(template.overlayOpacity);
     if (template.blocks) {
-      setActiveBlocks(template.blocks);
+      setSlides([{ id: 'slide-1', blocks: template.blocks }]);
+      setCurrentSlideId('slide-1');
     }
     toast.success(`Đã áp dụng Template: ${template.name}`);
   };
@@ -263,29 +165,73 @@ export default function SlideshowGenerator({
     const newBlock: SlideBlock = {
       id: Math.random().toString(36).substr(2, 9),
       type,
-      name: type === 'list' ? 'highlights' : type === 'logo' ? 'brand_logo' : type + '_' + (activeBlocks.length + 1),
+      name: type === 'list' ? 'highlights' : type === 'logo' ? 'brand_logo' : type + '_' + (currentBlocks.length + 1),
       description: type === 'list' ? 'Danh sách điểm nổi bật' : '',
       align: type === 'title' || type === 'logo' ? 'center' : 'left',
-      content: type === 'list' ? '- Mục tiêu chính 1\n- Lợi ích cốt lõi 2\n- Kết quả kỳ vọng 3' : type === 'logo' ? (authorName || 'YOUR BRAND') : ''
+      content: type === 'list' ? '- Mục tiêu chính 1\n- Lợi ích cốt lõi 2\n- Kết quả kỳ vọng 3' : type === 'logo' ? (authorName || 'YOUR BRAND') : '',
+      fontSize: 1
     };
-    setActiveBlocks([...activeBlocks, newBlock]);
+    updateCurrentBlocks([...currentBlocks, newBlock]);
     toast.success(`Đã thêm khối ${type.toUpperCase()}`);
   };
 
+  const updateSelectedBlocks = (updates: Partial<SlideBlock>) => {
+    updateCurrentBlocks(currentBlocks.map(b => selectedBlockIds.includes(b.id) ? { ...b, ...updates } : b));
+  };
+
   const removeBlock = (id: string) => {
-    setActiveBlocks(activeBlocks.filter(b => b.id !== id));
-    if (selectedBlockId === id) setSelectedBlockId(null);
+    updateCurrentBlocks(currentBlocks.filter(b => b.id !== id));
+    setSelectedBlockIds(prev => prev.filter(bid => bid !== id));
+  };
+
+  const removeSelectedBlocks = () => {
+    updateCurrentBlocks(currentBlocks.filter(b => !selectedBlockIds.includes(b.id)));
+    setSelectedBlockIds([]);
   };
 
   const updateBlock = (id: string, updates: Partial<SlideBlock>) => {
-    setActiveBlocks(activeBlocks.map(b => b.id === id ? { ...b, ...updates } : b));
+    updateCurrentBlocks(currentBlocks.map(b => b.id === id ? { ...b, ...updates } : b));
+  };
+
+  const groupSelectedBlocks = () => {
+    if (selectedBlockIds.length < 2) return;
+    const groupId = `group-${Date.now()}`;
+    updateCurrentBlocks(currentBlocks.map(b => 
+      selectedBlockIds.includes(b.id) ? { ...b, groupId } : b
+    ));
+    toast.success('Đã nhóm các khối lại');
+  };
+
+  const ungroupSelectedBlocks = () => {
+    const groupIdsToClear = new Set(
+      currentBlocks
+        .filter(b => selectedBlockIds.includes(b.id) && b.groupId)
+        .map(b => b.groupId)
+    );
+    
+    updateCurrentBlocks(currentBlocks.map(b => 
+      b.groupId && groupIdsToClear.has(b.groupId) ? { ...b, groupId: undefined } : b
+    ));
+    toast.success('Đã rã nhóm');
   };
 
   // --- Keyboard Shortcuts ---
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const isCmd = e.metaKey || e.ctrlKey;
+      
+      // Grouping shortcuts
+      if (isCmd && e.key === 'g') {
+        e.preventDefault();
+        if (e.shiftKey) {
+          ungroupSelectedBlocks();
+        } else {
+          groupSelectedBlocks();
+        }
+        return;
+      }
+
       if (e.key === 'Delete' || e.key === 'Backspace') {
-        // Prevent deleting if the user is typing in an input or contentEditable
         const activeTag = document.activeElement?.tagName;
         const isEditing = 
           activeTag === 'INPUT' || 
@@ -293,14 +239,72 @@ export default function SlideshowGenerator({
           document.activeElement?.getAttribute('contenteditable') === 'true' ||
           editingBlockId !== null;
 
-        if (!isEditing && selectedBlockId) {
-          removeBlock(selectedBlockId);
+        if (!isEditing && (selectedBlockId || selectedBlockIds.length > 0)) {
+          removeSelectedBlocks();
         }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedBlockId, activeBlocks, editingBlockId]);
+  }, [selectedBlockId, selectedBlockIds, currentBlocks, editingBlockId]);
+
+  const handleCanvasPointerDown = (e: React.PointerEvent) => {
+    if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains('canvas-area')) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      setSelectionBox({ startX: x, startY: y, endX: x, endY: y });
+      setSelectedBlockIds([]);
+    }
+  };
+
+  const handleCanvasPointerMove = (e: React.PointerEvent) => {
+    if (selectionBox) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      setSelectionBox(prev => prev ? { ...prev, endX: e.clientX - rect.left, endY: e.clientY - rect.top } : null);
+    }
+  };
+
+  const handleCanvasPointerUp = () => {
+    if (selectionBox) {
+      const boxRect = {
+        left: Math.min(selectionBox.startX, selectionBox.endX),
+        top: Math.min(selectionBox.startY, selectionBox.endY),
+        right: Math.max(selectionBox.startX, selectionBox.endX),
+        bottom: Math.max(selectionBox.startY, selectionBox.endY)
+      };
+
+      const newlySelectedIds: string[] = [];
+      currentBlocks.forEach(block => {
+        const el = blockRefs.current[block.id];
+        if (el) {
+          const blockRect = el.getBoundingClientRect();
+          const canvasRect = containerRef.current?.getBoundingClientRect();
+          if (canvasRect) {
+            const relativeBlockRect = {
+              left: blockRect.left - canvasRect.left,
+              top: blockRect.top - canvasRect.top,
+              right: blockRect.right - canvasRect.left,
+              bottom: blockRect.bottom - canvasRect.top
+            };
+
+            const isInside = (
+              relativeBlockRect.left < boxRect.right &&
+              relativeBlockRect.right > boxRect.left &&
+              relativeBlockRect.top < boxRect.bottom &&
+              relativeBlockRect.bottom > boxRect.top
+            );
+
+            if (isInside) newlySelectedIds.push(block.id);
+          }
+        }
+      });
+
+      setSelectedBlockIds(newlySelectedIds);
+      setSelectionBox(null);
+    }
+  };
+
 
   const startDrag = (
     e: React.PointerEvent,
@@ -324,49 +328,73 @@ export default function SlideshowGenerator({
     window.addEventListener('pointerup', onUp);
   };
 
-  const handleDownload = async () => {
-    if (isGenerating) return;
+  const handleResize = (e: React.PointerEvent, blockId: string, direction: 'br' | 'r' | 'b') => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResizing(true);
+    
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const el = blockRefs.current[blockId];
+    if (!el) return;
+    
+    const startWidth = el.offsetWidth;
+    const startHeight = el.offsetHeight;
+    const startFontSize = currentBlocks.find(b => b.id === blockId)?.fontSize || 1;
 
-    setIsGenerating(true);
-    setGenerationProgress(0);
-    const zip = new JSZip();
-    const originalSlide = currentSlide;
-    const originalSafeZone = showSafeZone;
-    setShowSafeZone(false);
-
-    try {
-      // Iterate through all slides and capture them
-      for (let i = 0; i < editableSlides.length; i++) {
-        setGenerationProgress(Math.round(((i + 1) / editableSlides.length) * 100));
-        setCurrentSlide(i);
-        
-        // Wait for state update and animation to settle
-        await new Promise(resolve => setTimeout(resolve, 800));
-
-        if (slideRef.current) {
-          const dataUrl = await toPng(slideRef.current, {
-            pixelRatio: 2,
-            quality: 1,
-            cacheBust: true,
-          });
-          
-          const base64Data = dataUrl.replace(/^data:image\/png;base64,/, "");
-          zip.file(`ks40-slide-${i + 1}.png`, base64Data, { base64: true });
-        }
-      }
-
-      const contentZip = await zip.generateAsync({ type: "blob" });
-      saveAs(contentZip, `ks40-slideshow-${title.substring(0, 20)}.zip`);
+    const onMove = (moveEvent: PointerEvent) => {
+      const dx = moveEvent.clientX - startX;
+      const dy = moveEvent.clientY - startY;
       
-      // Return to the original slide
-      setCurrentSlide(originalSlide);
-    } catch (error) {
-      console.error('Lỗi khi tạo ảnh:', error);
-      alert('Có lỗi xảy ra khi tạo bộ ảnh. Vui lòng thử lại.');
-    } finally {
-      setIsGenerating(false);
-      setGenerationProgress(0);
-      setShowSafeZone(originalSafeZone);
+      if (direction === 'br') {
+        // Proportional scaling for corner handle
+        const scaleFactor = Math.max(0.1, (startWidth + dx) / startWidth);
+        updateBlock(blockId, { fontSize: startFontSize * scaleFactor });
+      } else {
+        // Linear resizing for edge handles
+        setBlockSizes(prev => ({
+          ...prev,
+          [blockId]: {
+            ...prev[blockId],
+            width: direction === 'r' ? Math.max(50, startWidth + dx) : prev[blockId]?.width,
+            height: direction === 'b' ? Math.max(20, startHeight + dy) : prev[blockId]?.height,
+          }
+        }));
+      }
+    };
+
+    const onUp = () => {
+      setIsResizing(false);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  };
+
+  const addSlide = () => {
+    const newId = `slide-${Date.now()}`;
+    const newSlide = { 
+      id: newId, 
+      blocks: [], 
+      name: `Slide ${slides.length + 1}`,
+      description: ''
+    };
+    setSlides([...slides, newSlide]);
+    setCurrentSlideId(newId);
+  };
+
+  const updateSlideMetadata = (id: string, updates: { name?: string, description?: string }) => {
+    setSlides(slides.map(s => s.id === id ? { ...s, ...updates } : s));
+  };
+
+  const deleteSlide = (id: string) => {
+    if (slides.length <= 1) return;
+    const newSlides = slides.filter(s => s.id !== id);
+    setSlides(newSlides);
+    if (currentSlideId === id) {
+      setCurrentSlideId(newSlides[0].id);
     }
   };
 
@@ -383,7 +411,7 @@ export default function SlideshowGenerator({
           >
             <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <h2 className="font-black text-xs uppercase tracking-tighter leading-none">Studio</h2>
+          <h2 className="font-black text-xs uppercase tracking-tighter leading-none">TEMPLATE BUILDER</h2>
         </div>
         <div className="pointer-events-auto">
           <button 
@@ -422,67 +450,18 @@ export default function SlideshowGenerator({
             </div>
           </div>
 
-          {/* Saved Frames / Templates Section */}
-          <div className="space-y-4">
-            <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Saved Frames</h4>
-            <div className="p-4 bg-white/5 rounded-2xl border border-white/5 space-y-3">
-              <div className="flex items-center gap-2">
-                <input 
-                  type="text" 
-                  placeholder="Tên khung mới..." 
-                  value={templateName}
-                  onChange={(e) => setTemplateName(e.target.value)}
-                  className="flex-1 bg-black/40 border border-white/5 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-primary/50 transition-colors placeholder:text-white/20"
-                />
-                <button 
-                  onClick={handleSaveTemplate} 
-                  disabled={isSavingTemplate || !templateName.trim()} 
-                  className="h-8 px-3 bg-primary/20 text-primary hover:bg-primary hover:text-white rounded-lg flex items-center justify-center text-xs font-bold whitespace-nowrap transition-colors disabled:opacity-50 disabled:hover:bg-primary/20 disabled:hover:text-primary"
-                >
-                  Lưu Khung
-                </button>
-              </div>
-              
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
-                {savedTemplates.length > 0 ? (
-                  savedTemplates.map(t => (
-                    <div key={t.id} onClick={() => applyTemplate(t)} className="group flex items-center justify-between p-2.5 bg-black/20 hover:bg-white/10 rounded-xl cursor-pointer transition-colors border border-transparent hover:border-white/10">
-                      <div className="flex items-center gap-2 overflow-hidden">
-                        <Layout className="w-3.5 h-3.5 text-white/40 shrink-0 group-hover:text-primary transition-colors" />
-                        <span className="text-xs text-white/80 truncate font-medium group-hover:text-white transition-colors">{t.name}</span>
-                      </div>
-                      <button onClick={(e) => handleDeleteTemplate(t.id, e)} className="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-500 transition-colors p-1" title="Xoá khung này">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))
-                ) : (
-                  <div className="text-center py-4 text-[11px] text-white/30 italic">
-                    Chưa có khung nào được lưu
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
 
           {/* Blueprint Structure Section */}
           <div className="space-y-4">
             <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Active Blueprint</h4>
 
-            <Reorder.Group axis="y" values={activeBlocks} onReorder={setActiveBlocks} className="space-y-3">
-              {activeBlocks.map((block, index) => (
+            <Reorder.Group axis="y" values={currentBlocks} onReorder={updateCurrentBlocks} className="space-y-3">
+              {currentBlocks.map((block, index) => (
                 <Reorder.Item key={block.id} value={block} className="p-4 bg-white/5 border border-white/5 rounded-[1.5rem] space-y-3 group cursor-grab active:cursor-grabbing">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <GripVertical className="w-3.5 h-3.5 text-white/20" />
                       <span className="text-[9px] font-black text-primary uppercase">#{index + 1} {block.type}</span>
-                    </div>
-                    <div className="flex items-center gap-1 bg-black/40 p-1 rounded-lg">
-                      {(['left', 'center', 'right'] as const).map(a => (
-                        <button key={a} onClick={() => updateBlock(block.id, { align: a })} className={`w-5 h-5 rounded-md flex items-center justify-center transition-all ${block.align === a ? 'bg-white/10 text-white' : 'text-white/20'}`}>
-                          <div className={`w-2.5 h-0.5 bg-current rounded-full ${a === 'center' ? 'w-1.5' : a === 'right' ? 'ml-auto w-1.5' : 'mr-auto w-1.5'}`} />
-                        </button>
-                      ))}
                     </div>
                     <button onClick={() => removeBlock(block.id)} className="opacity-0 group-hover:opacity-100 text-white/20 hover:text-red-500"><Trash2 className="w-3.5 h-3.5" /></button>
                   </div>
@@ -500,82 +479,183 @@ export default function SlideshowGenerator({
       {/* 2. CENTER & RIGHT WRAPPER */}
       <div className="flex-1 flex relative overflow-hidden">
         {/* Center Canvas: Live Preview */}
-        <div className="flex-1 relative flex items-center justify-center p-12 bg-black/20 overflow-hidden">
-          <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-3">
-            <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">Live Preview</span>
-            <button
-              onClick={() => {
-                const modes = ['off', 'white', 'black', 'accent'] as const;
-                setGridMode(modes[(modes.indexOf(gridMode) + 1) % modes.length]);
+        <div 
+          ref={containerRef}
+          className="flex-1 relative flex flex-col items-center bg-black/20 overflow-hidden canvas-area"
+          onPointerDown={handleCanvasPointerDown}
+          onPointerMove={handleCanvasPointerMove}
+          onPointerUp={handleCanvasPointerUp}
+        >
+          {/* Selection Box UI */}
+          {selectionBox && (
+            <div 
+              className="absolute z-[100] border border-primary bg-primary/10 pointer-events-none rounded-sm"
+              style={{
+                left: Math.min(selectionBox.startX, selectionBox.endX),
+                top: Math.min(selectionBox.startY, selectionBox.endY),
+                width: Math.abs(selectionBox.endX - selectionBox.startX),
+                height: Math.abs(selectionBox.endY - selectionBox.startY)
               }}
-              className={`p-1.5 rounded-md transition-colors ${gridMode !== 'off' ? 'bg-primary/20 text-primary' : 'bg-white/5 text-white/40 hover:bg-white/10 hover:text-white/70'}`}
-              title={`Grid: ${gridMode}`}
-            >
-              <Grid className="w-3.5 h-3.5" />
-            </button>
-            {Object.keys(blockOffsets).length > 0 && (
-              <button
-                onClick={() => setBlockOffsets({})}
-                className="text-[9px] font-black text-white/30 hover:text-white/60 uppercase tracking-wider transition-colors px-2 py-0.5 rounded-md bg-white/5 hover:bg-white/10"
+            />
+          )}
+
+          {/* Top Toolbar (Canva Style) */}
+          <AnimatePresence>
+            {selectedBlockIds.length > 0 && (
+              <motion.div 
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: -20, opacity: 0 }}
+                className="absolute top-4 z-[100] flex items-center gap-1 p-1 bg-zinc-900/80 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl pointer-events-auto"
               >
-                ↺ Reset Layout
-              </button>
+                {/* Font Family Selector (Show if all are text-based or just for simplicity) */}
+                <div className="flex items-center gap-1 px-2 border-r border-white/5">
+                  <select 
+                    value={fontFamily} 
+                    onChange={(e: any) => setFontFamily(e.target.value)}
+                    className="bg-transparent text-[11px] font-bold outline-none cursor-pointer hover:text-primary transition-colors"
+                  >
+                    <option value="display">Outfit</option>
+                    <option value="sans">Inter</option>
+                    <option value="serif">Playfair</option>
+                  </select>
+                </div>
+
+                {/* Font Size Controls */}
+                <div className="flex items-center gap-1 px-2 border-r border-white/5">
+                  <button 
+                    onClick={() => updateSelectedBlocks({ fontSize: Math.max(0.1, (selectedBlock?.fontSize || 1) - 0.1) })}
+                    className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <input 
+                    type="number" 
+                    value={Math.round((selectedBlock?.fontSize || 1) * 100)} 
+                    onChange={(e) => updateSelectedBlocks({ fontSize: parseInt(e.target.value) / 100 })}
+                    className="w-10 bg-transparent text-[11px] font-mono text-center outline-none"
+                  />
+                  <button 
+                    onClick={() => updateSelectedBlocks({ fontSize: (selectedBlock?.fontSize || 1) + 0.1 })}
+                    className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Color Picker Quick Toggle */}
+                <div className="flex items-center gap-1 px-2 border-r border-white/5">
+                  <button className="p-1.5 hover:bg-white/10 rounded-lg transition-colors relative group">
+                    <Palette className="w-3.5 h-3.5" style={{ color: selectedBlock?.color || accentColor }} />
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 p-2 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl hidden group-hover:grid grid-cols-4 gap-1 w-32">
+                      {['#ffffff', '#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#000000'].map(c => (
+                        <button 
+                          key={c} 
+                          onClick={() => updateSelectedBlocks({ color: c })}
+                          className="w-6 h-6 rounded-md border border-white/10" 
+                          style={{ backgroundColor: c }} 
+                        />
+                      ))}
+                    </div>
+                  </button>
+                </div>
+
+                {/* Alignment Controls */}
+                <div className="flex items-center gap-1 px-2">
+                  <button 
+                    onClick={() => updateSelectedBlocks({ align: 'left' })}
+                    className={`p-1.5 rounded-lg transition-colors ${selectedBlock?.align === 'left' ? 'bg-primary text-white' : 'hover:bg-white/10'}`}
+                  >
+                    <AlignLeft className="w-3.5 h-3.5" />
+                  </button>
+                  <button 
+                    onClick={() => updateSelectedBlocks({ align: 'center' })}
+                    className={`p-1.5 rounded-lg transition-colors ${selectedBlock?.align === 'center' ? 'bg-primary text-white' : 'hover:bg-white/10'}`}
+                  >
+                    <AlignCenter className="w-3.5 h-3.5" />
+                  </button>
+                  <button 
+                    onClick={() => updateSelectedBlocks({ align: 'right' })}
+                    className={`p-1.5 rounded-lg transition-colors ${selectedBlock?.align === 'right' ? 'bg-primary text-white' : 'hover:bg-white/10'}`}
+                  >
+                    <AlignRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Grouping Actions */}
+                <div className="flex items-center gap-1 px-2 border-l border-white/5">
+                  {selectedBlockIds.length >= 2 && !selectedBlocks.every(b => b.groupId && b.groupId === selectedBlocks[0].groupId) && (
+                    <button 
+                      onClick={groupSelectedBlocks}
+                      className="p-1.5 hover:bg-white/10 text-white/40 hover:text-white rounded-lg transition-colors flex items-center gap-1.5"
+                      title="Nhóm lại (Group)"
+                    >
+                      <Layout className="w-3.5 h-3.5" />
+                      <span className="text-[10px] font-bold">Group</span>
+                    </button>
+                  )}
+                  {selectedBlocks.some(b => b.groupId) && (
+                    <button 
+                      onClick={ungroupSelectedBlocks}
+                      className="p-1.5 hover:bg-white/10 text-white/40 hover:text-white rounded-lg transition-colors flex items-center gap-1.5"
+                      title="Rã nhóm (Ungroup)"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                      <span className="text-[10px] font-bold">Ungroup</span>
+                    </button>
+                  )}
+                </div>
+
+                {/* Delete Quick Action */}
+                <div className="flex items-center gap-1 px-2 ml-1 border-l border-white/5">
+                  <button 
+                    onClick={removeSelectedBlocks}
+                    className="p-1.5 hover:bg-red-500/20 text-white/40 hover:text-red-500 rounded-lg transition-colors"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                {selectedBlockIds.length > 1 && (
+                  <div className="px-3 border-l border-white/5 flex items-center">
+                    <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">{selectedBlockIds.length} items</span>
+                  </div>
+                )}
+              </motion.div>
             )}
-          </div>
-          <AnimatePresence initial={false} custom={direction} mode="popLayout">
+          </AnimatePresence>
+
+          <div className="flex-1 relative w-full flex items-center justify-center p-12 canvas-area">
+            <div className="absolute bottom-6 right-6 z-20">
+              <button
+                onClick={() => {
+                  const modes = ['off', 'white', 'black', 'accent'] as const;
+                  setGridMode(modes[(modes.indexOf(gridMode) + 1) % modes.length]);
+                }}
+                className={`p-2.5 rounded-xl transition-all shadow-2xl backdrop-blur-xl border ${gridMode !== 'off' ? 'bg-primary border-primary text-white scale-110' : 'bg-zinc-900/80 border-white/10 text-white/40 hover:text-white hover:bg-zinc-800'}`}
+                title={`Grid: ${gridMode}`}
+              >
+                <Grid className="w-4 h-4" />
+              </button>
+            </div>
+
             <motion.div 
-              key={currentSlide}
               ref={slideRef}
-              custom={direction}
-              variants={variants}
-              initial="enter"
-              animate="center"
-              exit="exit"
-              className={`relative shadow-[0_50px_120px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col transition-all duration-700 ${
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, ease: 'easeOut' }}
+              className={`relative shadow-[0_50px_120px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col transition-all duration-700 rounded-[2.5rem] border border-white/5 ${
                 fontFamily === 'serif' ? 'font-serif' : fontFamily === 'display' ? 'font-display' : 'font-sans'
               } ${
                 platform === 'tiktok' ? 'aspect-[9/16] h-full max-h-[85vh]' : 
                 platform === 'instagram' ? 'aspect-[4/5] h-full max-h-[80vh]' : 
+                platform === 'facebook' ? 'aspect-square h-full max-h-[75vh]' :
+                platform === 'landscape' ? 'aspect-video h-full max-h-[60vh]' :
                 'aspect-square h-full max-h-[75vh]'
-              } ${
-                device !== 'none' ? 'rounded-[3.5rem] ring-[14px] ring-zinc-800' : 'rounded-[2.5rem] border border-white/5'
               }`}
             >
-              {/* Notch/Island */}
-              {device === 'iphone14' && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-7 bg-black rounded-b-[1.2rem] z-[110] flex items-center justify-center shadow-2xl">
-                  <div className="w-10 h-1 bg-zinc-900 rounded-full" />
-                </div>
-              )}
-              {device === 'iphone13' && <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-6 bg-black rounded-b-2xl z-[110]" />}
-
-              {/* iOS Status Bar */}
-              {device !== 'none' && (
-                <div className="absolute top-0 left-0 right-0 h-10 z-[100] flex items-center justify-between px-8">
-                  <div className="text-[11px] font-bold text-white/90">16:05</div>
-                  <div className="flex items-center gap-1.5">
-                    <div className="flex gap-0.5">
-                      <div className="w-0.5 h-2 bg-white/90 rounded-full" />
-                      <div className="w-0.5 h-2.5 bg-white/90 rounded-full" />
-                      <div className="w-0.5 h-3 bg-white/90 rounded-full" />
-                      <div className="w-0.5 h-3.5 bg-white/20 rounded-full" />
-                    </div>
-                    <div className="w-5 h-2.5 border border-white/20 rounded-[2px] relative flex items-center px-0.5">
-                      <div className="w-full h-1.5 bg-white/90 rounded-[1px]" />
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Background */}
-              {currentSlideData.image ? (
-                <div className="absolute inset-0 z-0">
-                  <img src={currentSlideData.image} alt="" className="w-full h-full object-cover scale-105" />
-                  <div className="absolute inset-0 transition-all duration-500" style={{ background: `linear-gradient(to bottom, rgba(9,9,11,${overlayOpacity * 0.5}), rgba(9,9,11,${overlayOpacity}), rgba(9,9,11,${overlayOpacity * 1.2}))` }} />
-                </div>
-              ) : (
-                <div className="absolute inset-0 z-0" style={{ background: currentSlideData.type === 'cover' ? `radial-gradient(circle at 0% 0%, ${accentColor} 0%, #1e1b4b 100%)` : currentSlideData.type === 'cta' ? `linear-gradient(135deg, #1e1b4b 0%, ${accentColor} 100%)` : 'linear-gradient(180deg, #18181b 0%, #09090b 100%)' }} />
-              )}
+              <div className="absolute inset-0 z-0" style={{ background: `linear-gradient(135deg, #09090b 0%, ${accentColor}33 100%)` }} />
 
               {/* Platform Overlays (Safe Zones) */}
               <AnimatePresence>
@@ -600,8 +680,8 @@ export default function SlideshowGenerator({
                             </div>
                           </div>
                           <div className="flex justify-end pr-1">
-                            <span className="bg-black/30 px-2 py-0.5 rounded text-[9px] font-bold text-white/70">
-                              {currentSlide + 1} / {editableSlides.length || slides.length}
+                            <span className="bg-black/30 px-2 py-0.5 rounded text-[9px] font-bold text-white/70 tracking-widest uppercase">
+                              TEMPLATE
                             </span>
                           </div>
                         </div>
@@ -797,96 +877,105 @@ export default function SlideshowGenerator({
                 className="flex-1 flex flex-col min-h-0 relative z-10 pt-32 px-8 sm:px-10"
                 onPointerDown={() => setSelectedBlockId(null)}
               >
-                <div className={`flex flex-col flex-1 ${layout === 'split' ? 'justify-end pb-32' : 'justify-center'} gap-6`}>
-                  {activeBlocks.map((block) => {
+                <div 
+                  className={`flex flex-col flex-1 !items-start ${layout === 'split' ? 'justify-end pb-32' : 'justify-start'} gap-6 canvas-area`}
+                  onPointerDown={() => setSelectedBlockIds([])}
+                >
+                  {currentBlocks.map((block) => {
                     const offset = blockOffsets[block.id] ?? { x: 0, y: 0 };
-                    const hasMoved = offset.x !== 0 || offset.y !== 0;
+                    const size = blockSizes[block.id] ?? {};
+                    const isSelected = selectedBlockIds.includes(block.id);
+                    
                     return (
                       <motion.div
-                        key={block.id + (offset.x === 0 && offset.y === 0 ? '-reset' : '')}
-                        drag
+                        key={block.id}
+                        ref={el => { blockRefs.current[block.id] = el; }}
+                        drag={!isResizing}
                         dragMomentum={false}
-                        onDragStart={() => setActiveDragId(block.id)}
+                        style={{ 
+                          x: offset.x, 
+                          y: 0, // Force Y transform to 0 so marginTop handles the layout
+                          marginTop: offset.y,
+                          width: size.width ?? 'fit-content',
+                          minWidth: size.width ? undefined : '100%',
+                          height: size.height ?? 'auto',
+                          transformOrigin: 'top left',
+                          marginRight: 'auto',
+                          marginLeft: 0,
+                          alignSelf: 'flex-start',
+                          flexShrink: 0,
+                          flexGrow: 0,
+                          display: 'flex'
+                        }}
+                        onDragStart={() => {
+                          setActiveDragId(block.id);
+                          // Ensure whole group is selected if dragging a group member
+                          if (block.groupId && !selectedBlockIds.includes(block.id)) {
+                            const groupMemberIds = currentBlocks.filter(b => b.groupId === block.groupId).map(b => b.id);
+                            setSelectedBlockIds(groupMemberIds);
+                          }
+                        }}
                         onDragEnd={() => setActiveDragId(null)}
-                        onDrag={(event, info) => {
-                          setBlockOffsets(prev => ({
-                            ...prev,
-                            [block.id]: {
-                              x: (prev[block.id]?.x || 0) + info.delta.x,
-                              y: (prev[block.id]?.y || 0) + info.delta.y
-                            }
-                          }));
+                        onDrag={(e, info) => {
+                          const delta = { x: info.delta.x, y: info.delta.y };
+                          const idsToMove = selectedBlockIds.includes(block.id) ? selectedBlockIds : [block.id];
+                          
+                          setBlockOffsets(prev => {
+                            const next = { ...prev };
+                            idsToMove.forEach(id => {
+                              next[id] = {
+                                x: (prev[id]?.x || 0) + delta.x,
+                                y: (prev[id]?.y || 0) + delta.y
+                              };
+                            });
+                            return next;
+                          });
                         }}
                         onPointerDown={(e) => {
-                          e.stopPropagation(); // Prevent bubbling to the canvas wrapper which clears selection
-                          setSelectedBlockId(block.id);
+                          e.stopPropagation();
+                          if (e.shiftKey) {
+                            setSelectedBlockIds(prev => prev.includes(block.id) ? prev.filter(id => id !== block.id) : [...prev, block.id]);
+                          } else {
+                            if (block.groupId) {
+                              const groupMemberIds = currentBlocks.filter(b => b.groupId === block.groupId).map(b => b.id);
+                              setSelectedBlockIds(groupMemberIds);
+                            } else {
+                              setSelectedBlockIds([block.id]);
+                            }
+                          }
+                          setEditingBlockId(null);
                         }}
-                        className={`relative w-full flex flex-col cursor-grab active:cursor-grabbing group/block touch-none ${block.align === 'center' ? 'items-center text-center' : block.align === 'right' ? 'items-end text-right' : 'items-start text-left'} ${selectedBlockId === block.id ? 'ring-1 ring-white/10 rounded-2xl p-1 -m-1' : ''}`}
+                        className={`relative flex flex-col cursor-grab active:cursor-grabbing group/block touch-none ${block.align === 'center' ? 'items-center text-center' : block.align === 'right' ? 'items-end text-right' : 'items-start text-left'} ${isSelected ? 'ring-2 ring-primary rounded-2xl bg-primary/5' : ''}`}
                       >
-                        {/* Floating Formatting Toolbar */}
-                        <div 
-                          className={`absolute -top-10 right-0 flex items-center gap-3 bg-zinc-900/90 backdrop-blur-xl px-2 py-1.5 rounded-xl transition-all shadow-2xl z-40 pointer-events-auto border border-white/10 translate-y-2 group-hover/block:translate-y-0 ${selectedBlockId === block.id ? 'opacity-100 translate-y-0' : 'opacity-0 group-hover/block:opacity-100'}`}
-                          onPointerDown={(e) => e.stopPropagation()}
-                        >
-                          {/* Color Picker */}
-                          <div className="flex items-center gap-1.5 pr-3 border-r border-white/10">
-                            {['#ffffff', '#d4d4d8', '#a1a1aa', accentColor].map(c => (
-                              <button 
-                                key={c}
-                                onClick={(e) => { e.stopPropagation(); updateBlock(block.id, { color: c }); }}
-                                className={`w-5 h-5 rounded-full border-2 transition-transform hover:scale-110 shadow-inner ${block.color === c || (!block.color && c === '#ffffff') ? 'border-primary scale-110 ring-2 ring-primary/30' : 'border-white/10'}`}
-                                style={{ backgroundColor: c }}
-                                title="Change color"
-                              />
-                            ))}
-                          </div>
-
-                          {/* Alignment */}
-                          <div className="flex items-center gap-1 border-r border-white/10 pr-3">
-                            {(['left', 'center', 'right'] as const).map(a => (
-                              <button 
-                                key={a} 
-                                onClick={(e) => { e.stopPropagation(); updateBlock(block.id, { align: a }); }} 
-                                className={`w-6 h-6 rounded-md flex items-center justify-center transition-all hover:bg-white/20 ${block.align === a ? 'bg-primary text-white' : 'text-white/40'}`}
-                                title={`Align ${a}`}
-                              >
-                                <div className="flex flex-col gap-[3px] w-3 pointer-events-none">
-                                  <div className={`h-[2px] bg-current rounded-full ${a === 'center' ? 'w-full' : 'w-full'}`} />
-                                  <div className={`h-[2px] bg-current rounded-full ${a === 'center' ? 'w-2 mx-auto' : a === 'right' ? 'w-2 ml-auto' : 'w-2'}`} />
-                                  <div className={`h-[2px] bg-current rounded-full ${a === 'center' ? 'w-full' : 'w-full'}`} />
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-
-                          {/* Quick Reset Position */}
-                          <button
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              setBlockOffsets(prev => { const n = { ...prev }; delete n[block.id]; return n; }); 
-                            }}
-                            className={`w-6 h-6 rounded-md flex items-center justify-center transition-all hover:bg-white/20 ${hasMoved ? 'text-white' : 'text-white/20'}`}
-                            title="Reset position to center flow"
-                            disabled={!hasMoved}
-                          >
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <circle cx="12" cy="12" r="10" />
-                              <line x1="12" y1="8" x2="12" y2="16" />
-                              <line x1="8" y1="12" x2="16" y2="12" />
-                            </svg>
-                          </button>
-
-                        </div>
-
+                        {/* Resize Handles */}
+                        {isSelected && (
+                          <>
+                            {/* Bottom Right Handle */}
+                            <div 
+                              className="absolute -bottom-1 -right-1 w-4 h-4 bg-primary border-2 border-zinc-900 rounded-full z-50 cursor-nwse-resize shadow-lg hover:scale-125 transition-transform"
+                              onPointerDown={(e) => handleResize(e, block.id, 'br')}
+                            />
+                            {/* Right Edge Handle */}
+                            <div 
+                              className="absolute top-1/2 -right-1 -translate-y-1/2 w-1.5 h-8 bg-primary/50 hover:bg-primary rounded-full z-50 cursor-ew-resize transition-all"
+                              onPointerDown={(e) => handleResize(e, block.id, 'r')}
+                            />
+                            {/* Bottom Edge Handle */}
+                            <div 
+                              className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-8 h-1.5 bg-primary/50 hover:bg-primary rounded-full z-50 cursor-ns-resize transition-all"
+                              onPointerDown={(e) => handleResize(e, block.id, 'b')}
+                            />
+                          </>
+                        )}
                         {block.type === 'title' && (
                           <h3 
-                            className={`font-black leading-[1.15] tracking-tight break-words w-full outline-none transition-colors ${editingBlockId === block.id ? 'bg-white/10 rounded-xl px-2 -mx-2 shadow-[0_0_0_2px_rgba(255,255,255,0.2)]' : 'hover:bg-white/5 rounded-xl px-2 -mx-2'} ${currentSlide === 0 ? 'text-4xl sm:text-5xl' : 'text-2xl sm:text-3xl'}`} 
-                            style={{ color: block.color || (currentSlide === 0 ? 'white' : accentColor) }}
+                            className={`font-black leading-[1.15] tracking-tight break-words w-full outline-none transition-colors ${editingBlockId === block.id ? 'bg-white/10 rounded-xl px-2 shadow-[0_0_0_2px_rgba(255,255,255,0.2)]' : 'hover:bg-white/5 rounded-xl px-2'} text-5xl sm:text-7xl`} 
+                            style={{ color: block.color || 'white', zoom: block.fontSize || 1 }}
                             contentEditable={editingBlockId === block.id}
                             suppressContentEditableWarning={true}
                             onBlur={(e) => {
                               setEditingBlockId(null);
-                              updateSlideContent(currentSlide, 'title', e.currentTarget.innerText);
+                              updateBlock(block.id, { content: e.currentTarget.innerText });
                             }}
                             onDoubleClick={(e) => { 
                               setEditingBlockId(block.id); 
@@ -898,18 +987,18 @@ export default function SlideshowGenerator({
                               }
                             }}
                           >
-                            {isEditMode ? <span className="opacity-40 italic">{block.name.toUpperCase()}</span> : currentSlideData.title}
+                            <span className="opacity-40 italic">{block.name.toUpperCase() || 'TITLE'}</span>
                           </h3>
                         )}
                         {block.type === 'text' && (
                           <p 
-                            className={`leading-[1.5] w-full outline-none transition-colors ${editingBlockId === block.id ? 'bg-white/10 rounded-xl px-2 -mx-2 py-1 shadow-[0_0_0_2px_rgba(255,255,255,0.2)]' : 'hover:bg-white/5 rounded-xl px-2 -mx-2 py-1'} ${currentSlide === 0 ? 'text-base opacity-70' : 'text-lg sm:text-xl font-light'}`}
-                            style={{ color: block.color || '#f4f4f5' }}
+                            className={`leading-[1.5] w-full outline-none transition-colors ${editingBlockId === block.id ? 'bg-white/10 rounded-xl px-2 py-1 shadow-[0_0_0_2px_rgba(255,255,255,0.2)]' : 'hover:bg-white/5 rounded-xl px-2 py-1'} text-xl sm:text-2xl font-light`}
+                            style={{ color: block.color || '#f4f4f5', zoom: block.fontSize || 1 }}
                             contentEditable={editingBlockId === block.id}
                             suppressContentEditableWarning={true}
                             onBlur={(e) => {
                               setEditingBlockId(null);
-                              updateSlideContent(currentSlide, 'content', e.currentTarget.innerText);
+                              updateBlock(block.id, { content: e.currentTarget.innerText });
                             }}
                             onDoubleClick={(e) => { 
                               setEditingBlockId(block.id); 
@@ -921,19 +1010,19 @@ export default function SlideshowGenerator({
                               }
                             }}
                           >
-                            {isEditMode ? <span className="opacity-40">AI content: {block.name}</span> : currentSlideData.content}
+                            <span className="opacity-40">AI content: {block.name || 'content'}</span>
                           </p>
                         )}
                         {block.type === 'quote' && (
                           <div className={`py-4 border-l-4 pl-6 w-full ${block.align === 'center' ? 'border-l-0 border-t-4 pt-4 pl-0' : block.align === 'right' ? 'border-l-0 border-r-4 pr-6 pl-0' : ''}`} style={{ borderColor: accentColor }}>
                             <p 
-                              className={`text-xl sm:text-2xl font-serif italic outline-none transition-colors ${editingBlockId === block.id ? 'bg-white/10 rounded-xl px-2 -mx-2 shadow-[0_0_0_2px_rgba(255,255,255,0.2)]' : 'hover:bg-white/5 rounded-xl px-2 -mx-2'}`}
-                              style={{ color: block.color || 'rgba(255,255,255,0.9)' }}
+                              className={`text-2xl sm:text-4xl font-serif italic outline-none transition-colors ${editingBlockId === block.id ? 'bg-white/10 rounded-xl px-2 -mx-2 shadow-[0_0_0_2px_rgba(255,255,255,0.2)]' : 'hover:bg-white/5 rounded-xl px-2 -mx-2'}`}
+                              style={{ color: block.color || 'rgba(255,255,255,0.9)', zoom: block.fontSize || 1 }}
                               contentEditable={editingBlockId === block.id}
                               suppressContentEditableWarning={true}
                               onBlur={(e) => {
                                 setEditingBlockId(null);
-                                updateSlideContent(currentSlide, 'content', e.currentTarget.innerText);
+                                updateBlock(block.id, { content: e.currentTarget.innerText });
                               }}
                               onDoubleClick={(e) => { 
                                 setEditingBlockId(block.id); 
@@ -945,55 +1034,26 @@ export default function SlideshowGenerator({
                                 }
                               }}
                             >
-                              {isEditMode ? `Quote: ${block.name}` : currentSlideData.content}
+                              Quote: {block.name || 'quote'}
                             </p>
                           </div>
                         )}
                         {block.type === 'list' && (
-                          <div className="w-full space-y-3">
-                            {isEditMode ? (
-                              <div className="space-y-4">
-                                {[1, 2, 3].map(i => (
-                                  <div key={i} className="flex items-center gap-4">
-                                    <div className="w-2 h-2 rounded-full bg-primary shrink-0 shadow-[0_0_10px_rgba(59,130,246,0.5)]" />
-                                    <span className="text-xl text-zinc-100 font-light tracking-wide">Mục nội dung mẫu {i} (Dữ liệu từ: {block.name})</span>
-                                  </div>
-                                ))}
-                              </div>
-                            ) : (
-                              currentSlideData.content.split('\n').filter(l => l.trim()).map((item, idx, arr) => (
-                                <div key={idx} className="flex items-start gap-4">
+                          <div className="w-full space-y-3" style={{ zoom: block.fontSize || 1 }}>
+                            <div className="space-y-4">
+                              {[1, 2, 3].map(i => (
+                                <div key={i} className="flex items-start gap-4">
                                   <div className="mt-2.5 w-2 h-2 rounded-full shrink-0 shadow-[0_0_10px_rgba(59,130,246,0.5)]" style={{ backgroundColor: accentColor }} />
-                                  <p 
-                                    className={`text-lg sm:text-xl font-light leading-relaxed outline-none flex-1 transition-colors ${editingBlockId === block.id + '-' + idx ? 'bg-white/10 rounded-xl px-2 -mx-2 shadow-[0_0_0_2px_rgba(255,255,255,0.2)]' : 'hover:bg-white/5 rounded-xl px-2 -mx-2'}`}
-                                    style={{ color: block.color || '#f4f4f5' }}
-                                    contentEditable={editingBlockId === block.id + '-' + idx}
-                                    suppressContentEditableWarning={true}
-                                    onBlur={(e) => {
-                                      setEditingBlockId(null);
-                                      const newArr = [...arr];
-                                      newArr[idx] = `- ${e.currentTarget.innerText}`;
-                                      updateSlideContent(currentSlide, 'content', newArr.join('\n'));
-                                    }}
-                                    onDoubleClick={(e) => { 
-                                      setEditingBlockId(block.id + '-' + idx); 
-                                      setTimeout(() => { e.currentTarget.focus(); document.execCommand('selectAll', false, null); }, 10);
-                                    }}
-                                    onPointerDown={(e) => {
-                                      if (editingBlockId === block.id + '-' + idx) {
-                                        e.stopPropagation();
-                                      }
-                                    }}
-                                  >
-                                    {item.replace(/^-\s*/, '')}
-                                  </p>
+                                  <span className="text-xl sm:text-2xl text-white/90 leading-[1.4] font-light">
+                                    Mục nội dung mẫu {i} (Dữ liệu từ: {block.name || 'danh sách'})
+                                  </span>
                                 </div>
-                              ))
-                            )}
+                              ))}
+                            </div>
                           </div>
                         )}
                         {block.type === 'logo' && (
-                          <div className={`w-full flex flex-col ${block.align === 'center' ? 'items-center text-center' : block.align === 'right' ? 'items-end text-right' : 'items-start text-left'}`}>
+                          <div className={`w-full flex flex-col ${block.align === 'center' ? 'items-center text-center' : block.align === 'right' ? 'items-end text-right' : 'items-start text-left'}`} style={{ zoom: block.fontSize || 1 }}>
                             <div className={`inline-flex flex-col ${block.align === 'center' ? 'items-center' : block.align === 'right' ? 'items-end' : 'items-start'} transition-colors ${editingBlockId === block.id ? 'bg-white/10 rounded-2xl p-4 -m-4 shadow-[0_0_0_2px_rgba(255,255,255,0.2)]' : 'hover:bg-white/5 rounded-2xl p-4 -m-4'}`}>
                               <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-black shadow-lg mb-3" style={{ backgroundColor: accentColor, color: '#fff' }}>
                                 {(block.content || 'B')[0].toUpperCase()}
@@ -1017,59 +1077,139 @@ export default function SlideshowGenerator({
                                   }
                                 }}
                               >
-                                {isEditMode && !block.content ? 'BRAND LOGO' : block.content}
+                                {block.content || 'BRAND LOGO'}
                               </p>
                             </div>
                           </div>
                         )}
 
-                        {block.type === 'logo' && (
-                          <div className={`w-full flex flex-col ${block.align === 'center' ? 'items-center text-center' : block.align === 'right' ? 'items-end text-right' : 'items-start text-left'}`}>
-                            <div className={`inline-flex flex-col ${block.align === 'center' ? 'items-center' : block.align === 'right' ? 'items-end' : 'items-start'} transition-colors ${editingBlockId === block.id ? 'bg-white/10 rounded-2xl p-4 -m-4 shadow-[0_0_0_2px_rgba(255,255,255,0.2)]' : 'hover:bg-white/5 rounded-2xl p-4 -m-4'}`}>
-                              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-black shadow-lg mb-3" style={{ backgroundColor: accentColor, color: '#fff' }}>
-                                {(block.content || 'B')[0].toUpperCase()}
-                              </div>
-                              <p 
-                                className="text-sm sm:text-base font-bold tracking-[0.2em] uppercase outline-none"
-                                style={{ color: block.color || 'rgba(255,255,255,0.9)' }}
-                                contentEditable={editingBlockId === block.id}
-                                suppressContentEditableWarning={true}
-                                onBlur={(e) => {
-                                  setEditingBlockId(null);
-                                  updateBlock(block.id, { content: e.currentTarget.innerText });
-                                }}
-                                onDoubleClick={(e) => { 
-                                  setEditingBlockId(block.id); 
-                                  setTimeout(() => { e.currentTarget.focus(); document.execCommand('selectAll', false, null); }, 10);
-                                }}
-                                onPointerDown={(e) => {
-                                  if (editingBlockId === block.id) {
-                                    e.stopPropagation();
-                                  }
-                                }}
-                              >
-                                {isEditMode && !block.content ? 'BRAND LOGO' : block.content}
-                              </p>
-                            </div>
-                          </div>
-                        )}
-
-                        {block.type === 'image' && currentSlideData.image && <div className="max-w-full aspect-video rounded-2xl overflow-hidden border border-white/10 shadow-2xl"><img src={currentSlideData.image} alt="" className="w-full h-full object-cover" /></div>}
-                      </motion.div>
+                        {block.type === 'image' && <div className="w-full h-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white/5 flex items-center justify-center"><ImageIcon className="w-12 h-12 text-white/20" /></div>}
+                      </div>
+                    </motion.div>
                     );
                   })}
                 </div>
               </div>
-
-
             </motion.div>
-          </AnimatePresence>
-
-
+          </div>
         </div>
+      </div>
+    </div>
+
+        {/* Bottom Slide Navigator */}
+        <div className="h-20 bg-zinc-900/40 backdrop-blur-3xl border-t border-white/5 flex items-center px-3 gap-3 overflow-x-auto custom-scrollbar z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.3)]">
+            {slides.map((slide, index) => (
+              <div key={slide.id} className="flex flex-col gap-1.5 min-w-[80px]">
+                <div 
+                  onClick={() => setCurrentSlideId(slide.id)}
+                  className={`group relative flex-none w-20 aspect-video rounded-md border transition-all cursor-pointer overflow-hidden ${currentSlideId === slide.id ? 'border-primary shadow-[0_0_8px_rgba(59,130,246,0.3)]' : 'border-white/5 hover:border-white/10'}`}
+                >
+                  <div className="absolute inset-0 bg-black/10 flex items-center justify-center group-hover:bg-black/5 transition-colors">
+                    <span className={`text-[8px] font-black transition-colors ${currentSlideId === slide.id ? 'text-primary' : 'text-white/10 group-hover:text-white/30'}`}>{index + 1}</span>
+                  </div>
+                  
+                  {/* Dynamic Mini Preview Map */}
+                  <div className="absolute inset-1.5 flex flex-col gap-0.5 pointer-events-none">
+                    {slide.blocks.slice(0, 5).map((block) => (
+                      <div 
+                        key={block.id}
+                        className={`rounded-full transition-colors ${block.type === 'logo' ? 'opacity-40' : 'bg-white/10 group-hover:bg-white/20'}`}
+                        style={{ 
+                          height: block.type === 'title' ? '2px' : '1px',
+                          width: block.type === 'title' ? '60%' : block.type === 'logo' ? '15%' : '40%',
+                          backgroundColor: block.type === 'logo' ? accentColor : undefined,
+                          alignSelf: block.align === 'center' ? 'center' : block.align === 'right' ? 'flex-end' : 'flex-start'
+                        }}
+                      />
+                    ))}
+                  </div>
+
+                  {/* Delete button */}
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); deleteSlide(slide.id); }}
+                    className="absolute top-0 right-0 w-3.5 h-3.5 bg-black/60 text-white/20 hover:bg-red-500 hover:text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all z-10"
+                  >
+                    <X className="w-2 h-2" />
+                  </button>
+                </div>
+                <span className={`text-[7px] font-medium truncate text-center transition-colors ${currentSlideId === slide.id ? 'text-primary' : 'text-white/30'}`}>
+                  {slide.name || `Slide ${index + 1}`}
+                </span>
+              </div>
+            ))}
+            <button 
+              onClick={addSlide}
+              className="flex-none w-8 h-8 rounded-md bg-white/5 hover:bg-white/10 border border-dashed border-white/10 flex items-center justify-center text-white/20 hover:text-white transition-all group"
+            >
+              <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            </button>
+          </div>
 
         {/* Right Sidebar: Visual Design */}
-        <div className="w-80 bg-zinc-900/40 backdrop-blur-3xl border-l border-white/5 flex flex-col z-40 overflow-hidden shadow-2xl">
+        <div className="w-80 bg-zinc-900/40 backdrop-blur-3xl border-l border-white/5 flex flex-col overflow-y-auto custom-scrollbar p-6 space-y-8">
+          
+          {/* Slide Metadata Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-primary">
+              <Presentation className="w-4 h-4" />
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em]">Thông tin Slide</h4>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="space-y-1.5">
+                <label className="text-[10px] text-white/40 uppercase font-bold px-1">Tên Frame / Mục đích</label>
+                <input 
+                  type="text"
+                  value={currentSlide.name || ''}
+                  onChange={(e) => updateSlideMetadata(currentSlideId, { name: e.target.value })}
+                  placeholder="Ví dụ: Trang Bìa, Giải thích..."
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors placeholder:text-white/10"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] text-white/40 uppercase font-bold px-1">Hướng dẫn cho AI</label>
+                <textarea 
+                  value={currentSlide.description || ''}
+                  onChange={(e) => updateSlideMetadata(currentSlideId, { description: e.target.value })}
+                  placeholder="Ví dụ: Chỉ đưa tối đa 3 ý chính, tập trung vào con số..."
+                  rows={3}
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-primary transition-colors placeholder:text-white/10 resize-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="h-px bg-white/5" />
+          
+          {/* Canvas Setup Section */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-primary">
+              <Maximize className="w-4 h-4" />
+              <h4 className="text-[10px] font-black uppercase tracking-[0.2em]">Kích thước Slide</h4>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {[
+                { id: 'tiktok', label: '9:16', icon: <Smartphone className="w-4 h-4" />, sub: 'Story' },
+                { id: 'instagram', label: '4:5', icon: <RectangleVertical className="w-4 h-4" />, sub: 'Portrait' },
+                { id: 'facebook', label: '1:1', icon: <Square className="w-4 h-4" />, sub: 'Square' },
+                { id: 'landscape', label: '16:9', icon: <RectangleHorizontal className="w-4 h-4" />, sub: 'HD' }
+              ].map(p => (
+                <button 
+                  key={p.id}
+                  onClick={() => setPlatform(p.id as any)}
+                  className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all gap-1.5 ${platform === p.id ? 'bg-primary/20 border-primary text-primary shadow-[0_0_15px_rgba(59,130,246,0.3)]' : 'bg-white/5 border-white/5 text-white/40 hover:bg-white/10'}`}
+                >
+                  {p.icon}
+                  <div className="flex flex-col items-center">
+                    <span className="text-[10px] font-black">{p.label}</span>
+                    <span className="text-[7px] uppercase font-bold opacity-40">{p.sub}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+
           <div className="p-6 border-b border-white/5 flex items-center justify-between">
             <h4 className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">Visual Design</h4>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border bg-primary/20 border-primary text-primary shadow-[0_0_15px_rgba(59,130,246,0.3)]">
@@ -1093,41 +1233,6 @@ export default function SlideshowGenerator({
                 <input type="range" min="0.2" max="0.9" step="0.05" value={overlayOpacity} onChange={(e) => setOverlayOpacity(parseFloat(e.target.value))} className="flex-1 h-1.5 accent-primary bg-white/5 rounded-full appearance-none cursor-pointer" />
               </div>
             </div>
-            {/* Platform & Device */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Platform</span>
-                <div className="flex gap-1 bg-white/5 p-1 rounded-2xl">
-                  {(['tiktok', 'instagram', 'square'] as const).map(p => (
-                    <button key={p} onClick={() => setPlatform(p)} className={`flex-1 h-9 rounded-xl flex items-center justify-center transition-all ${platform === p ? 'bg-white text-zinc-950 shadow-lg' : 'text-white/20'}`}>
-                      {p === 'tiktok' && <Presentation className="w-4 h-4" />}
-                      {p === 'instagram' && <Hash className="w-4 h-4" />}
-                      {p === 'square' && <div className="w-3 h-3 border-2 border-current rounded-sm" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-3">
-                <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Device</span>
-                <div className="flex gap-1 bg-white/5 p-1 rounded-2xl">
-                  {(['none', 'iphone14', 'iphone13'] as const).map(d => (
-                    <button key={d} onClick={() => setDevice(d)} className={`flex-1 h-9 rounded-xl text-[8px] font-black transition-all ${device === d ? 'bg-white text-zinc-950 shadow-lg' : 'text-white/20'}`}>
-                      {d === 'none' ? 'OFF' : d === 'iphone14' ? 'IP14' : 'IP13'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-            {/* Typography */}
-            <div className="space-y-3">
-              <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Typography</span>
-              <div className="flex gap-1 bg-white/5 p-1 rounded-2xl">
-                {(['sans', 'serif', 'display'] as const).map(f => (
-                  <button key={f} onClick={() => setFontFamily(f)} className={`flex-1 h-10 rounded-xl text-[9px] font-black transition-all ${fontFamily === f ? 'bg-white text-zinc-950 shadow-lg' : 'text-white/20'}`}>{f.toUpperCase()}</button>
-                ))}
-              </div>
-            </div>
-
             {/* Safe Zone Toggle */}
             <div className="space-y-2">
               <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">Safe Zone Overlay</span>
@@ -1148,17 +1253,10 @@ export default function SlideshowGenerator({
                   onClick={() => { setSidebarOffset({ x: 0, y: 0 }); setBottomInfoOffset({ x: 0, y: 0 }); }}
                   className="w-full text-[9px] font-black text-white/30 hover:text-white/60 uppercase tracking-widest py-1 transition-colors"
                 >
-                  ↺ Reset Positions
+                  Reset Positions
                 </button>
               )}
             </div>
-          </div>
-          {/* Export */}
-          <div className="p-7 bg-black/60 backdrop-blur-3xl border-t border-white/5 flex flex-col">
-            <button onClick={handleDownload} disabled={isGenerating} className="w-full h-16 bg-white text-zinc-950 rounded-[2rem] font-black text-sm flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 shadow-2xl">
-              {isGenerating ? <span className="animate-spin w-5 h-5 border-2 border-zinc-900 border-t-transparent rounded-full" /> : <Download className="w-6 h-6" />}
-              {isGenerating ? `EXPORTING ${generationProgress}%` : 'EXPORT COLLECTION'}
-            </button>
           </div>
         </div>
       </div>
