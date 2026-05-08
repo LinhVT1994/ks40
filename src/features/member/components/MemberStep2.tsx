@@ -6,6 +6,7 @@ import {
   Link2, Code, Image as ImageIcon, Minus, List, ListOrdered,
   Quote, Eye, Columns, Edit3, Target, ChevronDown, AlignLeft, Loader2, Youtube
 } from 'lucide-react';
+import { toast } from 'sonner';
 import MarkdownPreview from '@/components/shared/editor/MarkdownPreview';
 import ArticleHero from '@/features/member/components/ArticleHero';
 import ArticleContent from '@/features/member/components/ArticleContent';
@@ -75,8 +76,9 @@ export default function MemberStep2({
     try {
       const url = await uploadImage(file, 1200, 900);
       insertSyntax(`\n![${file.name}](${url})\n`, false);
-    } catch {
-      // silent
+    } catch (err: any) {
+      toast.error(err.message || 'Lỗi khi tải ảnh lên');
+      console.error(err);
     } finally {
       setUploadingImage(false);
     }

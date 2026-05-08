@@ -52,8 +52,11 @@ export async function compressImage(
 export async function uploadImage(file: File, maxWidth: number, maxHeight: number): Promise<string> {
   let fileToUpload: File = file;
 
+  // More robust GIF detection (check MIME type case-insensitive and file extension)
+  const isGif = file.type.toLowerCase() === 'image/gif' || file.name.toLowerCase().endsWith('.gif');
+
   // Only compress if it's NOT a GIF
-  if (file.type !== 'image/gif') {
+  if (!isGif) {
     const compressed = await compressImage(file, maxWidth, maxHeight);
     const ext = compressed.type === 'image/webp' ? 'webp' : 'jpg';
     fileToUpload = new File([compressed], `image.${ext}`, { type: compressed.type });
@@ -63,10 +66,19 @@ export async function uploadImage(file: File, maxWidth: number, maxHeight: numbe
   form.append('file', fileToUpload);
 
   const res = await fetch('/api/upload', { method: 'POST', body: form });
+  
   if (!res.ok) {
-    const { error } = await res.json();
-    throw new Error(error ?? 'Upload thất bại');
+    let errorMessage = 'Upload thất bại';
+    try {
+      const data = await res.json();
+      errorMessage = data.error ?? errorMessage;
+    } catch (e) {
+      // If response is not JSON, use status text
+      errorMessage = `${res.status} ${res.statusText}`;
+    }
+    throw new Error(errorMessage);
   }
+  
   const { url } = await res.json();
   return url as string;
 }

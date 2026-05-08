@@ -4,6 +4,7 @@ import Image from 'next/image';
 import React, { useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { ImagePlus, Type, AlignLeft, ArrowLeft, Link as LinkIcon, Loader2, Globe, Users, Shield, Send } from 'lucide-react';
+import { toast } from 'sonner';
 import Link from 'next/link';
 import { ArticleAudience } from '@prisma/client';
 import { createBookAction } from '@/features/admin/actions/book';
@@ -49,6 +50,7 @@ export default function BookCreateClient() {
       set('cover', url);
     } catch (err: any) {
       setUploadError(err.message ?? 'Upload ảnh bìa thất bại');
+      toast.error(err.message || 'Lỗi khi tải ảnh bìa');
     } finally {
       setUploadingCover(false);
     }

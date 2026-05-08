@@ -7,6 +7,7 @@ import {
   Quote, Eye, Columns, Edit3, ArrowLeft, ArrowRight, Target, ChevronDown, AlignLeft, Loader2, Youtube
 } from 'lucide-react';
 import MarkdownPreview from '@/components/shared/editor/MarkdownPreview';
+import { toast } from 'sonner';
 import { uploadImage } from '@/lib/compress-image';
 
 type ViewMode = 'editor' | 'split' | 'preview';
@@ -61,8 +62,9 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
     try {
       const url = await uploadImage(file, 1200, 900);
       insertSyntax(`\n![${file.name}](${url})\n`, false);
-    } catch {
-      // silent — có thể thêm toast sau
+    } catch (err: any) {
+      toast.error(err.message || 'Lỗi khi tải ảnh lên');
+      console.error(err);
     } finally {
       setUploadingImage(false);
     }

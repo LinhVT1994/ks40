@@ -14,12 +14,18 @@ const MAX_IMAGES = 4;
 const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10MB raw; compressed before upload
 
 async function uploadCommentImage(file: File): Promise<string> {
-  const blob = await compressImage(file, 1280, 1280, 0.82);
-  const ext  = blob.type === 'image/webp' ? 'webp' : 'jpg';
-  const compressed = new File([blob], `comment.${ext}`, { type: blob.type });
+  const isGif = file.type.toLowerCase() === 'image/gif' || file.name.toLowerCase().endsWith('.gif');
+  
+  let fileToUpload: File = file;
+
+  if (!isGif) {
+    const blob = await compressImage(file, 1280, 1280, 0.82);
+    const ext  = blob.type === 'image/webp' ? 'webp' : 'jpg';
+    fileToUpload = new File([blob], `comment.${ext}`, { type: blob.type });
+  }
 
   const fd = new FormData();
-  fd.append('file', compressed);
+  fd.append('file', fileToUpload);
   const res = await fetch('/api/upload/comment-image', { method: 'POST', body: fd });
   if (!res.ok) {
     const { error } = await res.json().catch(() => ({ error: 'Upload lỗi' }));

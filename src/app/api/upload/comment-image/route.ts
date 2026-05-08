@@ -5,7 +5,7 @@ import { auth } from '@/auth';
 import { uploadToAzure, isAzureConfigured } from '@/lib/azure-storage';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads');
-const MAX_SIZE   = 5 * 1024 * 1024; // 5 MB
+const MAX_SIZE   = 10 * 1024 * 1024; // 10 MB
 const ALLOWED    = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
 export async function POST(req: NextRequest) {
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   const file = formData.get('file') as File | null;
   if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 });
   if (file.size > MAX_SIZE) {
-    return NextResponse.json({ error: 'Ảnh quá lớn (tối đa 2MB)' }, { status: 400 });
+    return NextResponse.json({ error: `Ảnh quá lớn (tối đa 10MB). File hiện tại: ${(file.size / 1024 / 1024).toFixed(2)}MB` }, { status: 400 });
   }
   if (!ALLOWED.includes(file.type)) {
     return NextResponse.json({ error: 'Chỉ chấp nhận JPEG, PNG, WebP, GIF' }, { status: 400 });

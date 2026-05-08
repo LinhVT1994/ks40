@@ -5,6 +5,7 @@ import { ImagePlus, ArrowRight, Tag, Type, AlignLeft, Hash, X, Star, Link as Lin
 import ImagePositionPicker from '@/components/shared/editor/ImagePositionPicker';
 import { getTagsAction } from '@/features/admin/actions/article';
 import { uploadImage } from '@/lib/compress-image';
+import { toast } from 'sonner';
 import type { TopicItem } from '@/features/admin/actions/topic';
 import TopicSelector from '@/components/shared/editor/TopicSelector';
 
@@ -95,6 +96,7 @@ export default function ArticleStep1({
       onCoverChange(url);
     } catch (err: any) {
       setUploadError(err.message ?? 'Upload thất bại');
+      toast.error(err.message || 'Lỗi khi tải ảnh bìa');
     } finally {
       setUploadingCover(false);
     }
@@ -116,6 +118,7 @@ export default function ArticleStep1({
       onThumbnailChange(url);
     } catch (err: any) {
       setUploadError(err.message ?? 'Upload thất bại');
+      toast.error(err.message || 'Lỗi khi tải ảnh thumbnail');
     } finally {
       setUploadingThumb(false);
     }

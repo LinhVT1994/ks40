@@ -2,6 +2,7 @@
 
 import React, { useRef, useState, useEffect } from 'react';
 import { ImagePlus, ArrowRight, Tag, Type, AlignLeft, Hash, X, Link as LinkIcon, Plus, Loader2, Star } from 'lucide-react';
+import { toast } from 'sonner';
 import ImagePositionPicker from '@/components/shared/editor/ImagePositionPicker';
 import { getTagsAction } from '@/features/admin/actions/article';
 import { uploadImage } from '@/lib/compress-image';
@@ -60,7 +61,10 @@ export default function MemberStep1({
     try {
       const url = await uploadImage(file, 1920, 1080);
       setCover(url);
-    } catch (err) { console.error(err); } finally { setUploadingCover(false); }
+    } catch (err: any) { 
+      console.error(err);
+      toast.error(err.message || 'Lỗi khi tải ảnh bìa');
+    } finally { setUploadingCover(false); }
   };
 
   const handleThumbFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,7 +74,10 @@ export default function MemberStep1({
     try {
       const url = await uploadImage(file, 800, 600);
       setThumbnail(url);
-    } catch (err) { console.error(err); } finally { setUploadingThumb(false); }
+    } catch (err: any) { 
+      console.error(err);
+      toast.error(err.message || 'Lỗi khi tải ảnh thumbnail');
+    } finally { setUploadingThumb(false); }
   };
 
   const addTag = (name: string) => {

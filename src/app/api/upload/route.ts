@@ -8,7 +8,7 @@ import { uploadToAzure, isAzureConfigured } from '@/lib/azure-storage';
 const log = logger.child({ module: 'api/upload' });
 
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads');
-const MAX_SIZE   = 10 * 1024 * 1024; // 10 MB
+const MAX_SIZE   = 50 * 1024 * 1024; // 50 MB
 
 export async function POST(req: NextRequest) {
   const session  = await auth();
@@ -26,18 +26,22 @@ export async function POST(req: NextRequest) {
   if (!file) return NextResponse.json({ error: 'No file' }, { status: 400 });
   if (file.size > MAX_SIZE) {
     log.warn({ userId, fileSize: file.size }, 'Upload thất bại: file quá lớn');
-    return NextResponse.json({ error: 'File quá lớn (tối đa 10MB)' }, { status: 400 });
+    return NextResponse.json({ error: `File quá lớn (tối đa 50MB). File hiện tại: ${(file.size / 1024 / 1024).toFixed(2)}MB` }, { status: 400 });
   }
 
-  const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-  if (!allowed.includes(file.type)) {
+  const mimeType = file.type.toLowerCase();
+  const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif', 'image/x-gif'];
+  
+  if (!allowed.includes(mimeType) && !file.name.toLowerCase().endsWith('.gif')) {
     log.warn({ userId, fileType: file.type }, 'Upload thất bại: định dạng không hỗ trợ');
     return NextResponse.json({ error: 'Chỉ chấp nhận JPEG, PNG, WebP, GIF' }, { status: 400 });
   }
 
-  const ext = file.type === 'image/webp' ? 'webp'
-    : file.type === 'image/png'  ? 'png'
-    : file.type === 'image/gif'  ? 'gif'
+  const isGif = mimeType === 'image/gif' || mimeType === 'image/x-gif' || file.name.toLowerCase().endsWith('.gif');
+
+  const ext = mimeType === 'image/webp' ? 'webp'
+    : mimeType === 'image/png'  ? 'png'
+    : isGif  ? 'gif'
     : 'jpg';
 
   const filename = `images/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
