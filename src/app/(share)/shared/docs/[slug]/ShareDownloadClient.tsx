@@ -41,12 +41,35 @@ export default function ShareDownloadClient({ pkg, isLoggedIn }: { pkg: SharedPk
 
   const downloadFile = async (file: SharedFile) => {
     if (!tracked) { setTracked(true); incrementPackageDownloadAction(pkg.slug); }
-    const a = document.createElement('a');
-    a.href = file.url;
-    a.download = file.name;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    
+    try {
+      // Nếu là link cùng origin hoặc local, dùng phương pháp cũ cho nhanh
+      if (file.url.startsWith('/') || file.url.startsWith(window.location.origin)) {
+        const a = document.createElement('a');
+        a.href = file.url;
+        a.download = file.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+      }
+
+      // Với Azure hoặc link ngoài, dùng fetch + blob để ép trình duyệt phải download thay vì mở file
+      const res = await fetch(file.url);
+      const blob = await res.blob();
+      const bUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = bUrl;
+      a.download = file.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(bUrl);
+    } catch (err) {
+      console.error('Download error:', err);
+      // Fallback cuối cùng: mở tab mới
+      window.open(file.url, '_blank');
+    }
   };
 
   const downloadAll = () => pkg.files.forEach(f => setTimeout(() => downloadFile(f), 300));

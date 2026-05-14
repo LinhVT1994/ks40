@@ -4,6 +4,7 @@ import path from 'path';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { ArticleAudience } from '@prisma/client';
+import { uploadToAzure, isAzureConfigured } from '@/lib/azure-storage';
 
 const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads', 'shared');
 const MAX_SIZE = 200 * 1024 * 1024; // 200 MB
@@ -95,10 +96,18 @@ export async function POST(req: NextRequest) {
 
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(path.join(UPLOAD_DIR, filename), buffer);
+
+    let url = '';
+    if (isAzureConfigured()) {
+      url = await uploadToAzure(buffer, `shared/${filename}`, mime);
+    } else {
+      await writeFile(path.join(UPLOAD_DIR, filename), buffer);
+      url = `/uploads/shared/${filename}`;
+    }
+
     savedFiles.push({
       name:     path.basename(file.name),
-      url:      `/uploads/shared/${filename}`,
+      url,
       size:     file.size,
       mimeType: mime,
     });

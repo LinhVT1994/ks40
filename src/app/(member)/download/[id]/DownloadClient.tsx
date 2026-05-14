@@ -41,15 +41,33 @@ export default function DownloadClient({ resource, initialReady = false }: { res
     return () => clearTimeout(t);
   }, [count]);
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     setDownloaded(true);
-    // Trigger browser download
-    const a = document.createElement('a');
-    a.href = resource.url;
-    a.download = resource.name;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    try {
+      if (resource.url.startsWith('/') || resource.url.startsWith(window.location.origin)) {
+        const a = document.createElement('a');
+        a.href = resource.url;
+        a.download = resource.name;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        return;
+      }
+
+      const res = await fetch(resource.url);
+      const blob = await res.blob();
+      const bUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = bUrl;
+      a.download = resource.name;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(bUrl);
+    } catch (err) {
+      console.error('Download error:', err);
+      window.open(resource.url, '_blank');
+    }
   };
 
   return (
