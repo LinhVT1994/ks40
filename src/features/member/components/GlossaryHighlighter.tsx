@@ -48,7 +48,7 @@ export function useGlossaryTerms() {
 
 
 
-export function GlossaryTooltip({ term }: { term: GlossaryTermInfo }) {
+export function GlossaryTooltip({ term, displayText }: { term: GlossaryTermInfo, displayText?: string }) {
   const [isVisible, setIsVisible] = React.useState(false);
   const [coords, setCoords] = React.useState({ top: 0, left: 0 });
   const triggerRef = React.useRef<HTMLAnchorElement>(null);
@@ -129,7 +129,7 @@ export function GlossaryTooltip({ term }: { term: GlossaryTermInfo }) {
         style={{ fontWeight: 'inherit', color: 'inherit' }}
         className="ks-glossary-term inline cursor-pointer relative transition-colors"
       >
-        {term.term}
+        {displayText || term.term}
       </a>
 
       {mounted && createPortal(
@@ -221,7 +221,7 @@ export function AutoGlossaryHighlight({ children }: { children: React.ReactNode 
         if (index % 3 === 2) {
           const matchingTerm = sortedTerms.find(t => t.term.toLowerCase() === part.toLowerCase());
           if (matchingTerm) {
-            return <GlossaryTooltip key={`${matchingTerm.id}-${index}`} term={matchingTerm} />;
+            return <GlossaryTooltip key={`${matchingTerm.id}-${index}`} term={matchingTerm} displayText={part} />;
           }
         }
         return part;

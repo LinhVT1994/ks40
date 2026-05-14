@@ -28,11 +28,11 @@ function FileIcon({ mimeType, size = 6 }: { mimeType: string; size?: number }) {
 
 const COUNTDOWN = 10;
 const ADSENSE_CLIENT = process.env.NEXT_PUBLIC_ADSENSE_CLIENT ?? '';
-const ADSENSE_SLOT   = process.env.NEXT_PUBLIC_ADSENSE_SLOT   ?? '';
+const ADSENSE_SLOT = process.env.NEXT_PUBLIC_ADSENSE_SLOT ?? '';
 
-export default function DownloadClient({ resource }: { resource: Resource }) {
-  const [count, setCount] = useState(COUNTDOWN);
-  const [ready, setReady] = useState(false);
+export default function DownloadClient({ resource, initialReady = false }: { resource: Resource; initialReady?: boolean }) {
+  const [count, setCount] = useState(initialReady ? 0 : COUNTDOWN);
+  const [ready, setReady] = useState(initialReady);
   const [downloaded, setDownloaded] = useState(false);
 
   useEffect(() => {
@@ -47,7 +47,9 @@ export default function DownloadClient({ resource }: { resource: Resource }) {
     const a = document.createElement('a');
     a.href = resource.url;
     a.download = resource.name;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
   };
 
   return (

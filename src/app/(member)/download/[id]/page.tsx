@@ -16,13 +16,8 @@ export default async function DownloadPage({ params }: { params: Promise<{ id: s
   const session = await auth();
   const isLoggedIn = !!session?.user;
 
-  // Thành viên đã đăng nhập → redirect thẳng tới file
-  if (isLoggedIn) {
-    redirect(resource.url);
-  }
-
   // Chỉ PUBLIC mới cho guest tải (với quảng cáo)
-  if (resource.article.audience !== 'PUBLIC') {
+  if (!isLoggedIn && resource.article.audience !== 'PUBLIC') {
     redirect(`/login?callbackUrl=/download/${id}`);
   }
 
@@ -35,6 +30,7 @@ export default async function DownloadPage({ params }: { params: Promise<{ id: s
         size:     resource.size,
         mimeType: resource.mimeType,
       }}
+      initialReady={isLoggedIn}
     />
   );
 }

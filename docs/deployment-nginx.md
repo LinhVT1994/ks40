@@ -79,8 +79,8 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # Giới hạn dung lượng upload (nếu cần)
-    client_max_body_size 10M;
+    # Giới hạn dung lượng upload (phù hợp với cấu hình API 50MB)
+    client_max_body_size 50M;
 }
 ```
 

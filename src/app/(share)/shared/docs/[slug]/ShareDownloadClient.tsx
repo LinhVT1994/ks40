@@ -44,7 +44,9 @@ export default function ShareDownloadClient({ pkg, isLoggedIn }: { pkg: SharedPk
     const a = document.createElement('a');
     a.href = file.url;
     a.download = file.name;
+    document.body.appendChild(a);
     a.click();
+    document.body.removeChild(a);
   };
 
   const downloadAll = () => pkg.files.forEach(f => setTimeout(() => downloadFile(f), 300));
