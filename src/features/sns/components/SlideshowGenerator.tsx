@@ -1084,17 +1084,13 @@ export default function SlideshowGenerator({
                         )}
 
                         {block.type === 'image' && <div className="w-full h-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-white/5 flex items-center justify-center"><ImageIcon className="w-12 h-12 text-white/20" /></div>}
-                      </div>
-                    </motion.div>
+                      </motion.div>
                     );
                   })}
                 </div>
               </div>
             </motion.div>
           </div>
-        </div>
-      </div>
-    </div>
 
         {/* Bottom Slide Navigator */}
         <div className="h-20 bg-zinc-900/40 backdrop-blur-3xl border-t border-white/5 flex items-center px-3 gap-3 overflow-x-auto custom-scrollbar z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.3)]">
@@ -1144,6 +1140,7 @@ export default function SlideshowGenerator({
               <Plus className="w-4 h-4 group-hover:scale-110 transition-transform" />
             </button>
           </div>
+        </div>
 
         {/* Right Sidebar: Visual Design */}
         <div className="w-80 bg-zinc-900/40 backdrop-blur-3xl border-l border-white/5 flex flex-col overflow-y-auto custom-scrollbar p-6 space-y-8">
