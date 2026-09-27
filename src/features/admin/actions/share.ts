@@ -39,6 +39,28 @@ export async function deleteSharedPackageAction(id: string) {
   return { success: true };
 }
 
+const EXTEND_DAYS = { '1d': 1, '7d': 7, '30d': 30 } as const;
+export type ExtendOption = keyof typeof EXTEND_DAYS | 'never';
+
+export async function extendSharedPackageAction(id: string, extendBy: ExtendOption) {
+  await requireAdmin();
+  if (extendBy !== 'never' && !Object.hasOwn(EXTEND_DAYS, extendBy)) return { success: false as const };
+  const pkg = await db.sharedPackage.findUnique({ where: { id }, select: { expiresAt: true } });
+  if (!pkg) return { success: false as const };
+
+  let expiresAt: Date | null = null;
+  if (extendBy !== 'never') {
+    // Still active → extend from current expiry; expired → extend from now.
+    const now = Date.now();
+    const base = pkg.expiresAt && pkg.expiresAt.getTime() > now ? pkg.expiresAt.getTime() : now;
+    expiresAt = new Date(base + EXTEND_DAYS[extendBy] * 24 * 60 * 60 * 1000);
+  }
+
+  await db.sharedPackage.update({ where: { id }, data: { expiresAt } });
+  revalidatePath('/admin/shares');
+  return { success: true as const, expiresAt };
+}
+
 export async function incrementPackageDownloadAction(slug: string) {
   const session = await auth();
   const pkg = await db.sharedPackage.findUnique({ where: { slug } });

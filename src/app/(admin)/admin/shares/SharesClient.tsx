@@ -5,9 +5,10 @@ import Link from 'next/link';
 import {
   Copy, Trash2, FileArchive, FileText, File, Image as ImageIcon,
   Loader2, Check, Download, ExternalLink, Globe, Users, Star, Lock,
-  Plus, Search,
+  Plus, Search, CalendarPlus,
 } from 'lucide-react';
-import { deleteSharedPackageAction } from '@/features/admin/actions/share';
+import { toast } from 'sonner';
+import { deleteSharedPackageAction, extendSharedPackageAction, type ExtendOption } from '@/features/admin/actions/share';
 
 type SharedFile = { id: string; name: string; size: number; mimeType: string };
 type SharedPackage = {
@@ -42,10 +43,49 @@ const AUDIENCE = [
   { value: 'PREMIUM', label: 'Premium',   icon: Star,  cls: 'text-amber-500',   badge: 'bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400' },
   { value: 'PRIVATE', label: 'Riêng tư',  icon: Lock,  cls: 'text-zinc-500',   badge: 'bg-zinc-100 text-zinc-500 dark:bg-white/5 dark:text-slate-400' },
 ];
-const EXPIRES = [
+const EXPIRES: { value: ExtendOption; label: string }[] = [
   { value: '1d', label: '1 ngày' }, { value: '7d', label: '7 ngày' },
   { value: '30d', label: '30 ngày' }, { value: 'never', label: 'Mãi mãi' },
 ];
+
+function ExtendMenu({ pkg, onExtended }: { pkg: SharedPackage; onExtended: (expiresAt: Date | null) => void }) {
+  const [open, setOpen] = useState(false);
+  const [pending, startTrans] = useTransition();
+  const active = pkg.expiresAt && new Date(pkg.expiresAt) > new Date();
+
+  const extend = (value: ExtendOption) => {
+    setOpen(false);
+    startTrans(async () => {
+      const res = await extendSharedPackageAction(pkg.id, value);
+      if (!res.success) { toast.error('Gia hạn thất bại'); return; }
+      onExtended(res.expiresAt);
+      toast.success(res.expiresAt ? `Đã gia hạn đến ${fmtDate(res.expiresAt)}` : 'Đã đặt không giới hạn');
+    });
+  };
+
+  return (
+    <div className="relative">
+      <button onClick={() => setOpen(o => !o)} disabled={pending}
+        className="flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-lg text-zinc-500 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors disabled:opacity-50">
+        {pending ? <Loader2 className="w-3 h-3 animate-spin" /> : <CalendarPlus className="w-3 h-3" />}
+        {pkg.expiresAt ? 'Gia hạn' : 'Đặt hạn'}
+      </button>
+      {open && (
+        <>
+          <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
+          <div className="absolute right-1/2 translate-x-1/2 top-full mt-1 z-40 w-36 py-1 bg-white dark:bg-slate-900 border border-zinc-200 dark:border-white/10 rounded-xl shadow-lg">
+            {EXPIRES.filter(e => e.value !== 'never' || pkg.expiresAt).map(e => (
+              <button key={e.value} onClick={() => extend(e.value)}
+                className="w-full text-left px-3 py-1.5 text-xs text-zinc-700 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-white/5">
+                {e.value === 'never' ? 'Không giới hạn' : active ? `+ ${e.label}` : `${e.label} từ hôm nay`}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
 
 export default function SharesClient({ initialPackages }: { initialPackages: SharedPackage[] }) {
   const [packages, setPackages] = useState(initialPackages);
@@ -162,6 +202,8 @@ export default function SharesClient({ initialPackages }: { initialPackages: Sha
                           : <><span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">Khả dụng</span>
                             <span className="text-[10px] text-zinc-500">Không giới hạn</span></>
                       }
+                      <ExtendMenu pkg={pkg} onExtended={expiresAt =>
+                        setPackages(ps => ps.map(x => x.id === pkg.id ? { ...x, expiresAt } : x))} />
                     </div>
                   </div>
                 );
