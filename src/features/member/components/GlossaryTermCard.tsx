@@ -32,7 +32,7 @@ function HighlightText({ text, query }: { text: string, query: string }) {
     <>
       {parts.map((part, i) => 
         part.toLowerCase() === query.toLowerCase() ? (
-          <span key={i} className="text-primary dark:text-primary-light font-black">{part}</span>
+          <span key={i} className="text-primary dark:text-primary-light font-semibold">{part}</span>
         ) : (
           <span key={i}>{part}</span>
         )
@@ -65,7 +65,7 @@ function GlossaryTermCard({ term, index, currentSearch, currentLetter }: Glossar
             </h3>
             {term.topic && (
               <span
-                className="shrink-0 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border"
+                className="shrink-0 px-2.5 py-1 rounded-lg text-[10px] font-semibold uppercase tracking-widest border"
                 style={{ 
                   backgroundColor: `${term.topic.color ?? '#64748b'}10`, 
                   borderColor: `${term.topic.color ?? '#64748b'}20`,

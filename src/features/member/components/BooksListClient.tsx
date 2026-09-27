@@ -29,7 +29,7 @@ export default function BooksListClient({ books }: { books: Book[] }) {
       <div className="flex-1 flex flex-col items-center justify-center min-h-[70vh] py-32 px-6 text-center">
         <div className="relative mb-10">
           <div className="absolute inset-0 bg-primary/20 blur-[60px] rounded-full animate-pulse" />
-          <div className="w-28 h-28 bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-[2rem] flex items-center justify-center shadow-2xl relative z-10 -rotate-3 transition-transform hover:rotate-0 duration-500">
+          <div className="w-28 h-28 bg-white dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-3xl flex items-center justify-center shadow-2xl relative z-10 -rotate-3 transition-transform hover:rotate-0 duration-500">
             <BookOpen className="w-12 h-12 text-primary" />
           </div>
           <Sparkles className="absolute -top-6 -right-6 w-8 h-8 text-amber-400 animate-bounce delay-150" />
@@ -37,7 +37,7 @@ export default function BooksListClient({ books }: { books: Book[] }) {
         <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-primary/10">
           Coming Soon
         </div>
-        <h2 className="text-3xl md:text-5xl font-black text-zinc-800 dark:text-white font-display mb-6 tracking-tight">
+        <h2 className="text-3xl md:text-5xl font-semibold text-zinc-800 dark:text-white font-display mb-6 tracking-tight">
           Lộ trình đang được <span className="text-primary italic">biên soạn</span>
         </h2>
         <p className="text-lg text-zinc-500 dark:text-slate-400 max-w-lg mx-auto leading-relaxed">
@@ -50,24 +50,24 @@ export default function BooksListClient({ books }: { books: Book[] }) {
   return (
     <div className="pb-24">
       {/* Hero */}
-      <section className="relative pt-0 pb-20 px-0 overflow-hidden bg-zinc-50 dark:bg-slate-900/10">
+      <section className="relative pt-0 pb-12 px-0 overflow-hidden bg-panel-soft border-b border-line">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] bg-primary/5 blur-[120px] rounded-full animate-pulse" />
           <div className="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-blue-500/5 blur-[100px] rounded-full" />
         </div>
 
-        <div className="w-full text-center relative z-10 pt-20 md:pt-32">
+        <div className="w-full max-w-[1320px] mx-auto px-6 text-left relative z-10 pt-10 md:pt-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full text-xs font-bold uppercase tracking-widest mb-8 border border-primary/10">
-            <Sparkles className="w-3.5 h-3.5" /> Book Library
+            <BookOpen className="w-3.5 h-3.5" /> Thư viện Lenote
           </div>
-          <h1 className="text-4xl md:text-6xl font-black text-zinc-800 dark:text-white font-display leading-[1.1] mb-8">
+          <h1 className="text-3xl md:text-5xl font-medium text-ink font-display leading-[1.15] mb-5">
             Lộ trình học <span className="text-primary italic">chuyên sâu</span>
           </h1>
-          <p className="max-w-2xl mx-auto text-lg text-zinc-500 dark:text-slate-400 mb-14 leading-relaxed px-6">
+          <p className="max-w-2xl text-base text-muted mb-8 leading-relaxed">
             Hệ thống các chương trình đào tạo dài hơi, được thiết kế theo dạng Book giúp bạn nắm vững kiến thức từ cơ bản đến nâng cao một cách có hệ thống.
           </p>
 
-          <div className="max-w-xl mx-auto px-6">
+          <div className="max-w-xl">
             <div className="relative group">
               {/* Subtle outer glow */}
               <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-full blur opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
@@ -86,7 +86,7 @@ export default function BooksListClient({ books }: { books: Book[] }) {
       </section>
 
       {/* Grid */}
-      <section className="px-6 max-w-[1600px] mx-auto pt-24">
+      <section className="px-6 max-w-[1320px] mx-auto pt-10">
         <div className="flex items-center gap-3 mb-12">
           <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
             <BookOpen className="w-5 h-5" />

@@ -50,15 +50,15 @@ export default function UserMenu() {
       <div className="flex items-center gap-2">
         <Link
           href="/login"
-          className="hidden sm:inline-block px-3 py-1.5 text-sm font-semibold text-zinc-600 dark:text-slate-300 hover:text-primary transition-colors"
+          className="inline-block rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white sm:bg-transparent sm:text-sm sm:text-zinc-600 sm:dark:text-slate-300 sm:hover:text-primary transition-colors"
         >
           Đăng nhập
         </Link>
         <Link
-          href="/login"
-          className="px-3 py-1.5 text-xs sm:text-sm font-semibold bg-primary text-white rounded-lg sm:rounded-xl hover:bg-primary/90 transition-colors shadow-sm"
+          href="/register"
+          className="hidden sm:inline-block px-3 py-1.5 text-sm font-semibold bg-brand text-white rounded-xl hover:bg-brand/90 transition-colors shadow-sm"
         >
-          Đăng nhập
+          Tạo tài khoản
         </Link>
       </div>
     );
@@ -74,6 +74,8 @@ export default function UserMenu() {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-label="Menu tài khoản"
+        aria-expanded={isOpen}
         className="flex items-center gap-3 px-2 py-1 rounded-xl transition-all hover:bg-zinc-100 dark:hover:bg-white/5 group outline-none"
       >
         <div className="text-right hidden sm:block">
@@ -124,7 +126,7 @@ export default function UserMenu() {
               <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Chế độ tối</span>
               <button
                 onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${theme === 'dark' ? 'bg-primary' : 'bg-zinc-200'}`}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${theme === 'dark' ? 'bg-brand' : 'bg-zinc-200'}`}
               >
                 <div className={`transform transition-transform duration-200 ease-in-out bg-white rounded-full w-4 h-4 shadow-sm flex items-center justify-center ${theme === 'dark' ? 'translate-x-6' : 'translate-x-1'}`}>
                   {theme === 'dark' ? <Moon className="w-2.5 h-2.5 text-primary" /> : <Sun className="w-2.5 h-2.5 text-orange-400" />}

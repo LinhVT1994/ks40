@@ -60,7 +60,7 @@ export default function InlineNoteEditor({
             }`}
           >
             {isPublic ? <Globe className="w-3 h-3" /> : <Shield className="w-3 h-3" />}
-            <span className="text-[9px] font-black uppercase tracking-wider">
+            <span className="text-[9px] font-semibold uppercase tracking-wider">
               {isPublic ? 'Công khai' : 'Cá nhân'}
             </span>
           </div>

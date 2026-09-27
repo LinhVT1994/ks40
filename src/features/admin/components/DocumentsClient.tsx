@@ -345,7 +345,7 @@ export default function DocumentsClient({
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setApproveDoc(null)} />
           <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-zinc-300 dark:border-white/10 p-6 space-y-5 animate-in fade-in zoom-in-95 duration-200">
             <div>
-              <h3 className="text-lg font-black text-zinc-800 dark:text-white">Duyệt bài viết</h3>
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-white">Duyệt bài viết</h3>
               <p className="text-sm text-zinc-500 mt-1 line-clamp-1">{approveDoc.title}</p>
             </div>
             <div className="space-y-4">
@@ -401,7 +401,7 @@ export default function DocumentsClient({
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setRejectingDoc(null)} />
           <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-zinc-300 dark:border-white/10 p-6 space-y-5 animate-in fade-in zoom-in-95 duration-200">
             <div>
-              <h3 className="text-lg font-black text-zinc-800 dark:text-white text-center">Từ chối bản thảo</h3>
+              <h3 className="text-lg font-semibold text-zinc-800 dark:text-white text-center">Từ chối bản thảo</h3>
               <p className="text-sm text-zinc-500 mt-2 text-center line-clamp-2">Cung cấp lý do từ chối để tác giả có thể chỉnh sửa và hoàn thiện bài viết tốt hơn.</p>
             </div>
             <div className="space-y-2">

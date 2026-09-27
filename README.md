@@ -1,5 +1,7 @@
 # KS40
 
+> **Cập nhật website đã có DB:** xem [hướng dẫn deploy giữ nguyên dữ liệu](docs/deployment-existing-db.md). Các bước khởi tạo DB phía dưới chỉ dành cho môi trường mới, không dùng để cập nhật production.
+
 Nền tảng đọc và chia sẻ bài viết kỹ thuật, xây dựng bằng Next.js 15 App Router.
 
 ## Tech Stack

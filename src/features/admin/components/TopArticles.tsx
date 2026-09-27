@@ -46,7 +46,7 @@ export default function TopArticles({ articles }: { articles: Article[] }) {
       <div className="divide-y divide-zinc-200 dark:divide-white/5">
         {articles.map((article, idx) => (
           <div key={article.id} className="flex items-center gap-4 px-6 py-3.5 hover:bg-zinc-50 dark:hover:bg-white/[0.02] transition-all group relative">
-            <span className="text-sm font-black text-zinc-300 dark:text-white/10 w-4 shrink-0 text-center">{idx + 1}</span>
+            <span className="text-sm font-semibold text-zinc-300 dark:text-white/10 w-4 shrink-0 text-center">{idx + 1}</span>
             
             {/* Thumbnail */}
             <div className="relative w-20 aspect-[16/10] rounded-lg overflow-hidden shrink-0 border border-zinc-200 dark:border-white/5 shadow-sm bg-zinc-50 dark:bg-white/5">
@@ -68,7 +68,7 @@ export default function TopArticles({ articles }: { articles: Article[] }) {
                 {article.title}
               </Link>
               <div className="flex items-center gap-2 mt-1">
-                <span className="text-[10px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider bg-primary/5 text-primary border border-primary/10">
+                <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md uppercase tracking-wider bg-primary/5 text-primary border border-primary/10">
                   {article.topic.label}
                 </span>
                 <span className="text-[11px] font-medium text-zinc-500">{article.author.name}</span>

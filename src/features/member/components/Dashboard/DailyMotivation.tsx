@@ -34,7 +34,7 @@ export default function DailyMotivation() {
         <p className="text-xs sm:text-sm font-medium text-zinc-500 dark:text-slate-400 italic leading-relaxed">
           "{quote.text}"
         </p>
-        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mt-3">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 mt-3">
           — {quote.author}
         </span>
       </div>

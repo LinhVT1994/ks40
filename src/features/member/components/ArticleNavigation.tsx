@@ -28,7 +28,7 @@ export default function ArticleNavigation({ prev, next }: Props) {
         <div className="relative group">
           <Link 
             href={`/article/${next.slug}`}
-            className="block relative w-full h-64 sm:h-80 overflow-hidden rounded-[2.5rem] border border-zinc-200 dark:border-white/5 transition-all duration-700 hover:shadow-2xl hover:shadow-primary/20 active:scale-[0.99]"
+            className="block relative w-full h-64 sm:h-80 overflow-hidden rounded-3xl border border-zinc-200 dark:border-white/5 transition-all duration-700 hover:shadow-2xl hover:shadow-primary/20 active:scale-[0.99]"
           >
             {/* Background Image with Parallax-like scale */}
             <div 
@@ -41,14 +41,14 @@ export default function ArticleNavigation({ prev, next }: Props) {
             
             <div className="absolute inset-0 p-8 sm:p-12 flex flex-col justify-end">
               <div className="flex items-center gap-3 mb-4">
-                <span className="px-3 py-1 bg-primary text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg shadow-primary/30">
+                <span className="px-3 py-1 bg-brand text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-lg shadow-primary/30">
                   Bài tiếp theo
                 </span>
                 <div className="h-px w-12 bg-white/20" />
               </div>
               
               <div className="max-w-2xl">
-                <h3 className="font-display font-black text-2xl sm:text-4xl text-white mb-4 leading-tight group-hover:translate-x-1 transition-transform duration-500">
+                <h3 className="font-display font-semibold text-2xl sm:text-4xl text-white mb-4 leading-tight group-hover:translate-x-1 transition-transform duration-500">
                   {next.title}
                 </h3>
                 {next.summary && (
@@ -65,7 +65,7 @@ export default function ArticleNavigation({ prev, next }: Props) {
             </div>
 
             {/* Floating Arrow Badge */}
-            <div className="absolute top-8 right-8 w-14 h-14 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white transition-all duration-500 group-hover:bg-primary group-hover:border-primary group-hover:scale-110">
+            <div className="absolute top-8 right-8 w-14 h-14 rounded-full bg-white/10 backdrop-blur-xl border border-white/20 flex items-center justify-center text-white transition-all duration-500 group-hover:bg-brand group-hover:border-primary group-hover:scale-110">
               <ChevronRight className="w-6 h-6" />
             </div>
           </Link>
@@ -79,11 +79,11 @@ export default function ArticleNavigation({ prev, next }: Props) {
             href={`/article/${prev.slug}`}
             className="group flex items-center gap-4 px-6 py-4 rounded-full border border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-white/5 backdrop-blur-md hover:bg-white dark:hover:bg-white/10 hover:shadow-xl hover:shadow-zinc-200/50 dark:hover:shadow-none transition-all duration-500 active:scale-95"
           >
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-200 dark:bg-white/10 group-hover:bg-primary group-hover:text-white transition-all duration-500">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-zinc-200 dark:bg-white/10 group-hover:bg-brand group-hover:text-white transition-all duration-500">
               <ArrowLeft className="w-4 h-4" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[9px] font-black text-zinc-500 dark:text-slate-500 min-w-0 uppercase tracking-[0.2em] leading-none mb-1">
+              <span className="text-[9px] font-semibold text-zinc-500 dark:text-slate-500 min-w-0 uppercase tracking-[0.2em] leading-none mb-1">
                 Quay lại bài trước
               </span>
               <span className="text-sm font-bold text-zinc-700 dark:text-slate-300 group-hover:text-primary transition-colors line-clamp-1 max-w-[200px] sm:max-w-sm">

@@ -395,11 +395,11 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
               onMouseLeave={() => setShowLibrary(false)}
             >
               <div className="px-2 py-1.5 mb-2 border-b border-white/5 flex items-center justify-between">
-                <span className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.2em] opacity-80">Library</span>
+                <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-[0.2em] opacity-80">Library</span>
                 {activeSound && (
                    <button 
                      onClick={() => setActiveSound(null)}
-                     className="text-[9px] font-black text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"
+                     className="text-[9px] font-semibold text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"
                    >
                      Mute
                    </button>
@@ -415,7 +415,7 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
                       onClick={() => setActiveSound(isActive ? null : s.id)}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all ${
                         isActive 
-                          ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-[1.02] active:scale-95' 
+                          ? 'bg-brand text-white shadow-lg shadow-primary/20 scale-[1.02] active:scale-95'
                           : 'text-zinc-400 hover:text-white hover:bg-white/5 active:scale-95'
                       }`}
                     >
@@ -484,8 +484,8 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
         {/* Stopwatch & Time Left */}
         <div className="flex items-baseline gap-2.5 min-w-fit px-1">
           <div className="flex flex-col items-start translate-y-[-1px]">
-            <span className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] leading-none mb-1.5 opacity-90">Session</span>
-            <span className="text-sm font-black text-white tabular-nums leading-none tracking-tight">
+            <span className="text-[9px] font-semibold text-blue-400 uppercase tracking-[0.2em] leading-none mb-1.5 opacity-90">Session</span>
+            <span className="text-sm font-semibold text-white tabular-nums leading-none tracking-tight">
               {formatSessionTime(sessionTime)}
             </span>
           </div>
@@ -493,7 +493,7 @@ export default function FocusMode({ readTime, headings, onToggleNotes }: { readT
           <div className="w-[1px] h-6 bg-white/10 self-center mx-1" />
 
           <div className="flex flex-col items-start opacity-70 translate-y-[-1px]">
-            <span className="text-[9px] font-black text-zinc-400 uppercase tracking-widest leading-none mb-1.5 opacity-90">Remain</span>
+            <span className="text-[9px] font-semibold text-zinc-400 uppercase tracking-widest leading-none mb-1.5 opacity-90">Remain</span>
             <span className="text-xs font-bold text-zinc-200 whitespace-nowrap leading-none">
               ~{minutesLeft} min
             </span>

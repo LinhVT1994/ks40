@@ -26,7 +26,7 @@ export default function ArticleStepper({ currentStep }: StepperProps) {
               {/* Circle */}
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all ${
                 isDone
-                  ? 'bg-primary text-white'
+                  ? 'bg-brand text-white'
                   : isActive
                     ? 'bg-primary/10 text-primary border-2 border-primary'
                     : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 border-2 border-zinc-300 dark:border-white/10'

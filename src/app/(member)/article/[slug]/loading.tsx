@@ -57,7 +57,7 @@ export default function ArticleLoading() {
             </div>
 
             {/* Cover image */}
-            <div className="aspect-[16/9] w-full bg-zinc-200 dark:bg-white/10 rounded-[2rem]" />
+            <div className="aspect-[16/9] w-full bg-zinc-200 dark:bg-white/10 rounded-3xl" />
           </div>
 
           {/* Overview / Objectives box */}

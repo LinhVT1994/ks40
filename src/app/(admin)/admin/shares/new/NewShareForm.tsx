@@ -143,7 +143,7 @@ export default function NewShareForm() {
                     <button key={a.value} onClick={() => setAudience(a.value)}
                       className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
                         active
-                          ? 'bg-primary border-primary text-white shadow-sm'
+                          ? 'bg-brand border-primary text-white shadow-sm'
                           : 'bg-white dark:bg-white/5 border-zinc-300 dark:border-white/10 text-zinc-500 hover:border-primary/50 hover:text-primary'
                       }`}>
                       <Icon className={`w-4 h-4 ${active ? 'text-white' : a.cls}`} />
@@ -163,7 +163,7 @@ export default function NewShareForm() {
                   <button key={e.value} onClick={() => setExpires(e.value)}
                     className={`px-4 py-2.5 rounded-xl border text-sm font-semibold transition-all ${
                       expires === e.value
-                        ? 'bg-primary border-primary text-white shadow-sm'
+                        ? 'bg-brand border-primary text-white shadow-sm'
                         : 'bg-white dark:bg-white/5 border-zinc-300 dark:border-white/10 text-zinc-500 hover:border-primary/50 hover:text-primary'
                     }`}>
                     {e.label}
@@ -226,7 +226,7 @@ export default function NewShareForm() {
             <button
               onClick={submit}
               disabled={uploading || !title.trim() || !files.length}
-              className="flex items-center gap-2 px-8 py-3 rounded-xl bg-zinc-800 dark:bg-primary text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-8 py-3 rounded-xl bg-zinc-800 dark:bg-brand text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
             >
               {uploading
                 ? <><Loader2 className="w-4 h-4 animate-spin" />Đang upload…</>

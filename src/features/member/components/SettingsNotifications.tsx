@@ -37,7 +37,7 @@ export default function SettingsNotifications() {
       </div>
       <button
         onClick={() => onChange(!checked)}
-        className={`relative inline-flex justify-center shrink-0 h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${checked ? 'bg-primary shadow-lg shadow-primary/30' : 'bg-zinc-200 dark:bg-white/10'}`}
+        className={`relative inline-flex justify-center shrink-0 h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${checked ? 'bg-brand shadow-lg shadow-primary/30' : 'bg-zinc-200 dark:bg-white/10'}`}
       >
         <div className={`transform transition-transform duration-200 ease-in-out bg-white rounded-full w-4 h-4 shadow-sm flex items-center justify-center ${checked ? 'translate-x-[10px]' : '-translate-x-[10px]'}`} />
       </button>

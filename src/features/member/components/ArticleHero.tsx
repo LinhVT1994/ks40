@@ -39,18 +39,18 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
           </div>
         )}
 
-        <div className="w-full max-w-[720px] xl:max-w-[600px] 2xl:max-w-[720px] mx-auto flex flex-col gap-6">
+        <div className="ui-reader-heading w-full max-w-[720px] xl:max-w-[600px] 2xl:max-w-[720px] mx-auto flex flex-col gap-6">
           <div className="flex">
             <Link
               href={`/topic/${article.topic.slug}`}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-[0.2em] border border-primary/20 hover:bg-primary hover:text-white transition-all duration-300"
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-[0.2em] border border-primary/20 hover:bg-brand hover:text-white transition-all duration-300"
             >
               <Tag className="w-3 h-3" />
               {article.topic.label}
             </Link>
           </div>
 
-          <h1 className="text-4xl sm:text-5xl lg:text-5xl font-black text-zinc-900 dark:text-slate-200 font-display leading-[1.15] tracking-tight text-left animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <h1 className="text-4xl sm:text-5xl lg:text-5xl font-semibold text-zinc-900 dark:text-slate-200 font-display leading-[1.15] tracking-tight text-left animate-in fade-in slide-in-from-bottom-2 duration-500">
             {article.title}
           </h1>
 
@@ -61,7 +61,7 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
                 <div className="absolute inset-0 rounded-full border-2 border-primary/20 scale-110 opacity-0 group-hover/author:opacity-100 transition-all duration-300" />
               </div>
               <div className="flex flex-col -space-y-0.5">
-                <span className="text-[10px] uppercase tracking-[0.15em] font-black text-zinc-400 dark:text-slate-500 mb-0.5">Tác giả</span>
+                <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-zinc-400 dark:text-slate-500 mb-0.5">Tác giả</span>
                 <span className="text-base font-bold text-zinc-900 dark:text-slate-200 group-hover/author:text-primary transition-colors">{article.author.name}</span>
               </div>
             </Link>
@@ -70,7 +70,7 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
               <button
                 onClick={interaction.handleFollow}
                 disabled={interaction.followPending}
-                className={`group/follow inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all duration-300 border disabled:opacity-60 ${
+                className={`group/follow inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-semibold uppercase tracking-wider transition-all duration-300 border disabled:opacity-60 ${
                   interaction.isFollowing
                     ? 'bg-zinc-100 dark:bg-white/10 text-zinc-500 border-zinc-200 dark:border-white/5 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 hover:border-red-200 dark:hover:border-red-500/20'
                     : 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-transparent hover:translate-y-[-1px] active:scale-95 shadow-sm'
@@ -97,7 +97,7 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
             <div className="flex flex-row sm:flex-col gap-6 sm:gap-0 sm:-space-y-0.5">
               {date && (
                 <div className="flex flex-col -space-y-0.5">
-                  <span className="text-[10px] uppercase tracking-[0.15em] font-black text-zinc-400 dark:text-slate-500 mb-0.5">Xuất bản</span>
+                  <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-zinc-400 dark:text-slate-500 mb-0.5">Xuất bản</span>
                   <span className="font-bold text-zinc-800 dark:text-slate-300 text-sm">{date}</span>
                 </div>
               )}
@@ -106,7 +106,7 @@ export default function ArticleHero({ article }: { article: ArticleFull }) {
             <div className="h-10 w-px bg-zinc-200 dark:bg-slate-800 hidden sm:block" />
 
             <div className="flex flex-col -space-y-0.5">
-              <span className="text-[10px] uppercase tracking-[0.15em] font-black text-zinc-400 dark:text-slate-500 mb-0.5">Thời lượng</span>
+              <span className="text-[10px] uppercase tracking-[0.15em] font-semibold text-zinc-400 dark:text-slate-500 mb-0.5">Thời lượng</span>
               <div className="flex items-center gap-1.5 font-bold text-zinc-800 dark:text-slate-300 text-sm">
                 <Clock className="w-3.5 h-3.5" />
                 <span>{article.readTime} phút đọc</span>

@@ -71,7 +71,7 @@ function SettingsLayoutContent({
       {/* Main Form Content */}
       <div className="flex-1 w-full min-w-0 lg:max-w-4xl">
         {activeTab === 'profile' && (
-          <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md border border-zinc-300 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-sm lg:shadow-xl lg:shadow-zinc-200/20 dark:lg:shadow-none animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="ui-panel p-6 sm:p-8">
             <div className="mb-10 pb-6 border-b border-zinc-200 dark:border-white/5">
               <h2 className="text-xl font-display font-bold text-zinc-800 dark:text-white">Hồ sơ cá nhân</h2>
               <p className="text-sm text-zinc-500 mt-2 max-w-lg leading-relaxed">Quản lý cách mà hồ sơ của bạn hiển thị trên nền tảng KS4.0. Thông tin này sẽ công khai tới cộng đồng khi bạn đăng bài viết hoặc bình luận.</p>
@@ -81,7 +81,7 @@ function SettingsLayoutContent({
         )}
 
         {activeTab === 'preferences' && (
-          <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md border border-zinc-300 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-sm lg:shadow-xl lg:shadow-zinc-200/20 dark:lg:shadow-none animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="ui-panel p-6 sm:p-8">
             <div className="mb-10 pb-6 border-b border-zinc-200 dark:border-white/5">
               <h2 className="text-xl font-display font-bold text-zinc-800 dark:text-white">Sở thích & Thuật toán</h2>
               <p className="text-sm text-zinc-500 mt-2 max-w-lg leading-relaxed">Bạn cung cấp càng chi tiết, thuật toán của chúng tôi càng dễ dàng đề xuất các bài báo học thuật tốt nhất dành riêng cho cá nhân bạn.</p>
@@ -97,7 +97,7 @@ function SettingsLayoutContent({
         )}
 
         {activeTab === 'security' && (
-          <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md border border-zinc-300 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-sm lg:shadow-xl lg:shadow-zinc-200/20 dark:lg:shadow-none animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="ui-panel p-6 sm:p-8">
             <div className="mb-10 pb-6 border-b border-zinc-200 dark:border-white/5">
               <h2 className="text-xl font-display font-bold text-zinc-800 dark:text-white">Bảo mật tài khoản</h2>
               <p className="text-sm text-zinc-500 mt-2 max-w-lg leading-relaxed">Quản lý mật khẩu, xác thực hai lớp (2FA) và theo dõi các thiết bị đang đăng nhập vào nền tảng.</p>
@@ -107,7 +107,7 @@ function SettingsLayoutContent({
         )}
 
         {activeTab === 'notifications' && (
-          <div className="bg-white dark:bg-slate-900/50 backdrop-blur-md border border-zinc-300 dark:border-white/10 rounded-3xl p-6 sm:p-8 shadow-sm lg:shadow-xl lg:shadow-zinc-200/20 dark:lg:shadow-none animate-in fade-in slide-in-from-bottom-4 duration-500">
+          <div className="ui-panel p-6 sm:p-8">
             <div className="mb-10 pb-6 border-b border-zinc-200 dark:border-white/5">
               <h2 className="text-xl font-display font-bold text-zinc-800 dark:text-white">Tùy chọn Thông báo</h2>
               <p className="text-sm text-zinc-500 mt-2 max-w-lg leading-relaxed">Kiểm soát hộp thư và thông báo đẩy (Push) từ hệ thống để bạn luôn tập trung vào việc học.</p>

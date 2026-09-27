@@ -156,7 +156,7 @@ export default function GlossarySubmissionModal({ isOpen, onClose, topics, initi
                     <button
                       type="submit"
                       disabled={isPending || !term.trim() || !topicId || !shortDef.trim()}
-                      className="flex items-center gap-2 px-8 py-2.5 rounded-xl bg-zinc-800 dark:bg-primary text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-xl shadow-primary/20 active:scale-95"
+                      className="flex items-center gap-2 px-8 py-2.5 rounded-xl bg-zinc-800 dark:bg-brand text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-xl shadow-primary/20 active:scale-95"
                     >
                       {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                       Gửi đề xuất

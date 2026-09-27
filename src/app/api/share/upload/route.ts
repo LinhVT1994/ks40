@@ -1,22 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { ArticleAudience } from '@prisma/client';
-import { uploadToAzure, isAzureConfigured } from '@/lib/azure-storage';
+import { storePrivateFile } from '@/lib/private-files';
 
-const UPLOAD_DIR = path.join(process.cwd(), 'public', 'uploads', 'shared');
 const MAX_SIZE = 200 * 1024 * 1024; // 200 MB
 
 // Whitelist extensions & MIME types — reject anything else
 const ALLOWED_EXTENSIONS = new Set([
   'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'md', 'rtf',
   'zip', 'rar', '7z', 'tar', 'gz',
-  'jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp',
+  'jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp',
   'mp3', 'wav', 'ogg', 'flac', 'm4a',
   'mp4', 'mov', 'avi', 'mkv', 'webm',
-  'csv', 'json', 'xml', 'epub',
+  'csv', 'json', 'epub',
 ]);
 
 const ALLOWED_MIME_PREFIXES = [
@@ -80,7 +78,10 @@ export async function POST(req: NextRequest) {
   if (!title) return NextResponse.json({ error: 'Thiếu tiêu đề' }, { status: 400 });
   if (rawFiles.length === 0) return NextResponse.json({ error: 'Chưa có file nào' }, { status: 400 });
 
-  await mkdir(UPLOAD_DIR, { recursive: true });
+  if (!Object.values(ArticleAudience).includes(audience)) return NextResponse.json({ error: 'Quyền truy cập không hợp lệ' }, { status: 400 });
+  if (rawFiles.length > 10 || rawFiles.some(file => !(file instanceof File)) || rawFiles.reduce((sum, file) => sum + file.size, 0) > MAX_SIZE) {
+    return NextResponse.json({ error: 'Tối đa 10 file, tổng dung lượng tối đa 200MB' }, { status: 400 });
+  }
 
   const savedFiles: { name: string; url: string; size: number; mimeType: string }[] = [];
 
@@ -94,16 +95,9 @@ export async function POST(req: NextRequest) {
     const mime = file.type || 'application/octet-stream';
     if (!isMimeAllowed(mime)) continue;
 
-    const filename = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    let url = '';
-    if (isAzureConfigured()) {
-      url = await uploadToAzure(buffer, `shared/${filename}`, mime);
-    } else {
-      await writeFile(path.join(UPLOAD_DIR, filename), buffer);
-      url = `/uploads/shared/${filename}`;
-    }
+    const url = await storePrivateFile(buffer, 'shared', ext, mime);
 
     savedFiles.push({
       name:     path.basename(file.name),

@@ -381,7 +381,7 @@ export default function ArticleComments({
               onClick={handleSubmit}
               disabled={(!text.trim() && files.length === 0) || isPending}
               className={`absolute bottom-3 right-3 p-2 rounded-xl transition-all ${
-                (text.trim() || files.length > 0) ? 'bg-primary text-white shadow-lg shadow-primary/20 hover:scale-105 active:scale-95' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 cursor-not-allowed'
+                (text.trim() || files.length > 0) ? 'bg-brand text-white shadow-lg shadow-primary/20 hover:scale-105 active:scale-95' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 cursor-not-allowed'
               }`}
             >
               <Send className="w-4 h-4" />
@@ -583,7 +583,7 @@ export default function ArticleComments({
                             onClick={handleReply}
                             disabled={(!replyText.trim() && replyFiles.length === 0) || isPending}
                             className={`absolute bottom-2 right-2 p-1.5 rounded-lg transition-all ${
-                              (replyText.trim() || replyFiles.length > 0) ? 'bg-primary text-white' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 cursor-not-allowed'
+                              (replyText.trim() || replyFiles.length > 0) ? 'bg-brand text-white' : 'bg-zinc-100 dark:bg-white/5 text-zinc-500 cursor-not-allowed'
                             }`}
                           >
                             <Send className="w-3.5 h-3.5" />

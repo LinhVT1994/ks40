@@ -37,9 +37,9 @@ export default function LandingZenPreview() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              className="text-4xl sm:text-6xl font-black text-zinc-800 dark:text-white mb-8 font-display leading-[1.1]"
+              className="text-4xl sm:text-6xl font-semibold text-zinc-800 dark:text-white mb-8 font-display leading-[1.1]"
             >
-              TRÌNH SOẠN THẢO <br /> <span className="text-primary italic">THUẦN KHIẾT</span>
+              Để dòng suy nghĩ <br /> <span className="text-primary italic">được tiếp nối.</span>
             </motion.h2>
             
             <motion.p
@@ -82,7 +82,7 @@ export default function LandingZenPreview() {
                   scale: 1.02, 
                   boxShadow: "0 60px 120px rgba(0,0,0,0.2), 0 0 30px rgba(59,130,246,0.1)"
                 }}
-                className="relative bg-white dark:bg-slate-900 rounded-[2rem] border border-zinc-300 dark:border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.15)] dark:shadow-none overflow-hidden transition-all duration-500 cursor-default"
+                className="relative bg-white dark:bg-slate-900 rounded-3xl border border-zinc-300 dark:border-white/10 shadow-[0_50px_100px_rgba(0,0,0,0.15)] dark:shadow-none overflow-hidden transition-all duration-500 cursor-default"
              >
                 {/* Window Header */}
                 <div className="flex items-center justify-between px-8 py-4 border-b border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-white/20 backdrop-blur-md">
@@ -109,7 +109,7 @@ export default function LandingZenPreview() {
                             <motion.span 
                                animate={{ opacity: [1, 0] }}
                                transition={{ duration: 0.8, repeat: Infinity }}
-                               className="inline-block w-1 h-8 bg-primary ml-1 align-middle shadow-sm dark:shadow-[0_0_10px_rgba(59,130,246,0.8)]" 
+                               className="inline-block w-1 h-8 bg-brand ml-1 align-middle shadow-sm dark:shadow-[0_0_10px_rgba(59,130,246,0.8)]"
                             />
                          </div>
                       </div>
@@ -121,7 +121,7 @@ export default function LandingZenPreview() {
                          <motion.div 
                             animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
                             transition={{ duration: 3, repeat: Infinity }}
-                            className="w-4 h-4 rounded-full bg-primary shadow-sm dark:shadow-[0_0_20px_rgba(59,130,246,1)]" 
+                            className="w-4 h-4 rounded-full bg-brand shadow-sm dark:shadow-[0_0_20px_rgba(59,130,246,1)]"
                          />
                          <svg className="absolute top-2 left-2 w-32 h-32 -z-10 overflow-visible">
                             <motion.path 

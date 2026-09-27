@@ -2,6 +2,7 @@ import { notFound, redirect } from 'next/navigation';
 import { db } from '@/lib/db';
 import { auth } from '@/auth';
 import ShareDownloadClient from './ShareDownloadClient';
+export const metadata = { robots: { index: false, follow: false } };
 
 export default async function SharePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -58,7 +59,7 @@ export default async function SharePage({ params }: { params: Promise<{ slug: st
         description: pkg.description,
         audience:    pkg.audience,
         uploadedBy:  pkg.uploadedBy,
-        files:       pkg.files,
+        files:       pkg.files.map(file => ({ ...file, url: `/api/download/shared/${file.id}` })),
       }}
       isLoggedIn={isLoggedIn}
     />

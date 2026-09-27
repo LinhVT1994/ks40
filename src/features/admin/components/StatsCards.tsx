@@ -23,13 +23,13 @@ export default function StatsCards({ totalArticles, totalUsers, totalViews, newC
   ];
 
   return (
-    <div className="grid grid-cols-2 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 md:gap-5">
       {stats.map((stat, i) => {
         const Icon = stat.icon;
         return (
           <div
             key={i}
-            className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-3xl p-6 hover:shadow-lg hover:shadow-zinc-100 dark:hover:shadow-black/10 transition-all duration-300 group"
+            className="ui-panel ui-stat-card p-4 md:p-6 transition-shadow hover:shadow-md group"
           >
             <div className="flex items-start justify-between mb-5">
               <div className={`p-3 rounded-2xl ${stat.bg} transition-transform group-hover:scale-110`}>

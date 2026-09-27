@@ -153,7 +153,7 @@ function ArticleList({ articles: initialArticles, totalArticles, totalPages: ini
               disabled={loading}
               className={cn(
                 "w-8 h-8 rounded-lg text-xs font-bold transition-colors",
-                p === page ? "bg-primary text-white" : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5"
+                p === page ? "bg-brand text-white" : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5"
               )}
             >
               {p}
@@ -296,7 +296,7 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
       <div className="w-full py-20 text-center rounded-2xl border-2 border-dashed border-zinc-200 dark:border-white/5">
         <PenLine className="w-10 h-10 text-zinc-200 dark:text-white/10 mx-auto mb-4" />
         <p className="text-zinc-500 text-sm font-bold tracking-tight">Cảm hứng đang chờ đợi bạn.</p>
-        <Link href="/write" className="mt-8 inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-primary hover:opacity-70 transition-all">
+        <Link href="/write" className="mt-8 inline-flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary hover:opacity-70 transition-all">
           <span>Khởi tạo bản thảo mới</span>
         </Link>
       </div>
@@ -316,7 +316,7 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
             href={d.status === 'PENDING' ? '#' : `/write/${d.id}`}
             style={{ animationDelay: `${index * 80}ms` }}
             className={cn(
-              "group relative w-full cursor-pointer bg-white/60 dark:bg-white/[0.02] backdrop-blur-xl border border-zinc-200 dark:border-white/5 rounded-2xl md:rounded-[2rem] p-0 md:p-4 flex flex-col md:flex-row gap-0 md:gap-6 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 fill-mode-both overflow-hidden",
+              "group relative w-full cursor-pointer bg-white/60 dark:bg-white/[0.02] backdrop-blur-xl border border-zinc-200 dark:border-white/5 rounded-2xl md:rounded-3xl p-0 md:p-4 flex flex-col md:flex-row gap-0 md:gap-6 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4 fill-mode-both overflow-hidden",
               d.status === 'PENDING' && "pointer-events-none opacity-80"
             )}
           >
@@ -327,20 +327,20 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
                   <div className="w-full h-full opacity-20" style={{ background: `linear-gradient(135deg, ${d.topic.color ?? '#3b82f6'}, transparent)` }} />
                )}
                <div className="absolute inset-x-0 top-3 px-3 flex justify-between items-start">
-                  <span className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-widest backdrop-blur-md border", s.color)}>
+                  <span className={cn("flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[9px] font-semibold uppercase tracking-widest backdrop-blur-md border", s.color)}>
                      <StatusIcon className="w-3 h-3" />
                      {s.label}
                   </span>
                </div>
                <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-zinc-900/60 to-transparent flex items-end p-4">
-                  <span className="text-[9px] font-black text-white px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-md border border-white/20 uppercase tracking-widest">
+                  <span className="text-[9px] font-semibold text-white px-2.5 py-1 rounded-lg bg-white/20 backdrop-blur-md border border-white/20 uppercase tracking-widest">
                     {d.topic.label}
                   </span>
                </div>
             </div>
 
             <div className="flex-1 flex flex-col p-4 md:p-0 md:py-2">
-              <h3 className="text-base md:text-lg font-black text-zinc-800 dark:text-white group-hover:text-primary transition-colors leading-tight line-clamp-1 mb-2 md:mb-3">
+              <h3 className="text-base md:text-lg font-semibold text-zinc-800 dark:text-white group-hover:text-primary transition-colors leading-tight line-clamp-1 mb-2 md:mb-3">
                 {d.title || 'Draft: Chưa có tiêu đề'}
               </h3>
               <p className="text-[11px] md:text-xs text-zinc-500 dark:text-slate-400 line-clamp-2 leading-relaxed mb-4 md:mb-6">
@@ -349,7 +349,7 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
 
               {d.status === 'REJECTED' && d.rejectionReason && (
                 <div className="mb-4 md:mb-6 p-3 md:p-4 bg-rose-50/50 dark:bg-rose-500/5 border border-rose-100 dark:border-rose-500/10 rounded-xl md:rounded-2xl">
-                  <div className="flex items-center gap-2 mb-1.5 text-[10px] font-black text-rose-500 uppercase tracking-widest">
+                  <div className="flex items-center gap-2 mb-1.5 text-[10px] font-semibold text-rose-500 uppercase tracking-widest">
                     <AlertCircle className="w-3 md:w-3.5 h-3 md:h-3.5" /> Phản hồi từ Admin
                   </div>
                   <p className="text-[10px] md:text-[11px] font-semibold text-rose-600 dark:text-rose-400 leading-normal italic line-clamp-2">
@@ -361,11 +361,11 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
               <div className="mt-auto flex flex-wrap items-center gap-4">
                 <div className="flex items-center gap-1.5 bg-zinc-100 dark:bg-white/5 px-2.5 py-1 rounded-lg">
                   <FileText className="w-3 h-3 text-zinc-400" />
-                  <span className="text-[10px] font-black text-zinc-500 uppercase tabular-nums">{words} từ</span>
+                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tabular-nums">{words} từ</span>
                 </div>
                 <div className="flex items-center gap-1.5 bg-zinc-100 dark:bg-white/5 px-2.5 py-1 rounded-lg">
                   <Clock className="w-3 h-3 text-zinc-400" />
-                  <span className="text-[10px] font-black text-zinc-500 uppercase tabular-nums">{readTime}m đọc</span>
+                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tabular-nums">{readTime}m đọc</span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-400 ml-auto uppercase tracking-tighter">
                   <Calendar className="w-3 h-3 opacity-60" />
@@ -377,10 +377,10 @@ function DraftList({ drafts }: { drafts: Draft[] }) {
             <div className="flex flex-row md:flex-col items-center justify-center gap-2 p-4 pt-0 md:p-0 md:pl-2">
                <div className={cn(
                  "flex-1 md:flex-none flex items-center justify-center gap-2 px-6 md:px-4 py-3 rounded-[1.25rem] transition-all duration-300",
-                 d.status === 'PENDING' ? "bg-zinc-100 dark:bg-white/5 text-zinc-400 cursor-not-allowed" : "bg-primary/10 hover:bg-primary text-primary hover:text-white"
+                 d.status === 'PENDING' ? "bg-zinc-100 dark:bg-white/5 text-zinc-400 cursor-not-allowed" : "bg-primary/10 hover:bg-brand text-primary hover:text-white"
                )}>
                   <PenLine className="w-4 h-4" />
-                  <span className="text-[10px] font-black uppercase tracking-widest">{d.status === 'PENDING' ? 'Đang duyệt' : 'Viết tiếp'}</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-widest">{d.status === 'PENDING' ? 'Đang duyệt' : 'Viết tiếp'}</span>
                </div>
                {d.status !== 'PENDING' && (
                  <button onClick={(e) => handleDelete(d.id, e)} disabled={deleting === d.id} className="p-3 text-zinc-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-[1.25rem] transition-all disabled:opacity-30 relative z-10">
@@ -440,7 +440,7 @@ function FollowerList({ followers, totalFollowers, totalPages, userId }: {
               <h3 className="text-sm font-bold text-zinc-800 dark:text-white truncate">{f.name}</h3>
               {f.bio && <p className="text-xs text-zinc-500 truncate mt-0.5">{f.bio}</p>}
             </div>
-            <span className="text-[10px] font-black text-zinc-400 uppercase tracking-tighter shrink-0">{f.articleCount} bài</span>
+            <span className="text-[10px] font-semibold text-zinc-400 uppercase tracking-tighter shrink-0">{f.articleCount} bài</span>
           </Link>
         ))}
       </div>
@@ -553,28 +553,28 @@ function RatingsDashboard({ data: initialData }: { data: AuthorRatingStats | nul
     <div className="space-y-6 md:space-y-8">
       <div className="grid grid-cols-3 gap-2 md:gap-4">
         <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-xl md:rounded-2xl p-3 md:p-5 text-center transition-all hover:border-primary/20">
-          <p className="text-xl md:text-3xl font-black text-zinc-800 dark:text-white tracking-tighter">{initialData.averageScore.toFixed(1)}</p>
+          <p className="text-xl md:text-3xl font-semibold text-zinc-800 dark:text-white tracking-tighter">{initialData.averageScore.toFixed(1)}</p>
           <div className="flex items-center justify-center md:gap-0.5 mt-1 md:mt-2">
             {[1, 2, 3, 4, 5].map(i => (
               <Star key={i} className={cn("w-2.5 h-2.5 md:w-3.5 md:h-3.5", i <= Math.round(initialData.averageScore) ? "text-yellow-400 fill-yellow-400" : "text-zinc-300 dark:text-zinc-800")} />
             ))}
           </div>
-          <p className="text-[8px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-black mt-2 md:mt-3">Điểm TB</p>
+          <p className="text-[8px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-semibold mt-2 md:mt-3">Điểm TB</p>
         </div>
         <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-xl md:rounded-2xl p-3 md:p-5 text-center">
-          <p className="text-xl md:text-3xl font-black text-zinc-800 dark:text-white tracking-tighter">{initialData.totalCount}</p>
-          <p className="text-[8px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-black mt-2 md:mt-3">Đánh giá</p>
+          <p className="text-xl md:text-3xl font-semibold text-zinc-800 dark:text-white tracking-tighter">{initialData.totalCount}</p>
+          <p className="text-[8px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-semibold mt-2 md:mt-3">Đánh giá</p>
         </div>
         <div className="bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/10 rounded-xl md:rounded-2xl p-3 md:p-5 text-center">
-          <p className="text-xl md:text-3xl font-black text-zinc-800 dark:text-white tracking-tighter">{initialData.totalRatedArticles}</p>
-          <p className="text-[8px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-black mt-2 md:mt-3">Bài viết</p>
+          <p className="text-xl md:text-3xl font-semibold text-zinc-800 dark:text-white tracking-tighter">{initialData.totalRatedArticles}</p>
+          <p className="text-[8px] md:text-[10px] text-zinc-400 uppercase tracking-widest font-semibold mt-2 md:mt-3">Bài viết</p>
         </div>
       </div>
 
       <div className="space-y-4">
-        <h4 className="text-[10px] font-black text-zinc-400 uppercase tracking-widest">Nhận xét mới nhất</h4>
+        <h4 className="text-[10px] font-semibold text-zinc-400 uppercase tracking-widest">Nhận xét mới nhất</h4>
         {initialData.ratings.filter(r => r.review).slice(0, 10).map(r => (
-          <div key={`${r.userId}-${r.createdAt}`} className="flex gap-4 p-5 rounded-[2rem] bg-surface/40 border border-zinc-100 dark:border-white/5 transition-all hover:bg-zinc-50 dark:hover:bg-white/[0.02]">
+          <div key={`${r.userId}-${r.createdAt}`} className="flex gap-4 p-5 rounded-3xl bg-surface/40 border border-zinc-100 dark:border-white/5 transition-all hover:bg-zinc-50 dark:hover:bg-white/[0.02]">
             <div className="relative w-10 h-10 shrink-0">
                <Image src={r.user.image ?? `https://ui-avatars.com/api/?name=${encodeURIComponent(r.user.name)}&size=32`} alt={r.user.name} fill unoptimized sizes="40px" className="rounded-full object-cover" />
             </div>
@@ -678,7 +678,7 @@ export default function ProfileClient({
 
           {/* Identity Info */}
           <div className="w-full flex flex-col items-center lg:items-start text-center lg:text-left py-1">
-            <h1 className="text-xl sm:text-2xl font-black text-zinc-800 dark:text-white tracking-tight leading-tight">{user.name}</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight">{user.name}</h1>
             {user.username && <p className="text-[10px] font-bold text-primary tracking-widest uppercase opacity-80 mt-1">@{user.username}</p>}
             
             <div className="mt-4 flex flex-col gap-5 w-full">
@@ -689,7 +689,7 @@ export default function ProfileClient({
                   { label: 'Fans', value: fmtViews(totalFollowers) },
                 ].map(s => (
                   <div key={s.label} className="flex flex-col items-center lg:items-start min-w-[40px]">
-                    <span className="text-sm font-black text-zinc-800 dark:text-white leading-none tracking-tight">{s.value}</span>
+                    <span className="text-sm font-semibold text-zinc-800 dark:text-white leading-none tracking-tight">{s.value}</span>
                     <span className="text-[7px] font-bold text-zinc-500 uppercase tracking-tighter mt-1">{s.label}</span>
                   </div>
                 ))}
@@ -705,12 +705,12 @@ export default function ProfileClient({
               {isOwner && (
                 <div className="mt-2 w-full flex flex-col gap-2">
                   {canWrite && (
-                    <Link href="/write" className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-primary text-white text-[10px] font-black tracking-widest uppercase hover:bg-primary/90 transition-all shadow-md shadow-primary/20 hover:-translate-y-0.5">
+                    <Link href="/write" className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-brand text-white text-[10px] font-semibold tracking-widest uppercase hover:bg-brand/90 transition-all shadow-md shadow-primary/20 hover:-translate-y-0.5">
                       <PenLine className="w-3.5 h-3.5" />
                       Viết bài mới
                     </Link>
                   )}
-                  <Link href="/settings" className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-zinc-200 dark:border-white/10 text-[10px] font-black tracking-widest uppercase text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all">
+                  <Link href="/settings" className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-zinc-200 dark:border-white/10 text-[10px] font-semibold tracking-widest uppercase text-zinc-600 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-white/5 transition-all">
                     <Settings className="w-3.5 h-3.5" />
                     Cài đặt hồ sơ
                   </Link>
@@ -727,7 +727,7 @@ export default function ProfileClient({
               key={key} 
               onClick={() => handleTabChange(key)} 
               className={cn(
-                "relative flex items-center justify-between px-4 py-3 rounded-xl text-[11px] w-full font-black uppercase tracking-wider transition-all duration-300 group",
+                "relative flex items-center justify-between px-4 py-3 rounded-xl text-[11px] w-full font-semibold uppercase tracking-wider transition-all duration-300 group",
                 tab === key 
                   ? "bg-primary/5 text-primary" 
                   : "text-zinc-400 hover:text-zinc-800 dark:hover:text-white hover:bg-zinc-50 dark:hover:bg-white/5"
@@ -763,7 +763,7 @@ export default function ProfileClient({
                 <div className="relative">
                   <Icon className={cn("w-5 h-5 transition-transform duration-300", tab === key ? "scale-110 drop-shadow-md" : "group-hover:scale-110 opacity-70")} />
                 </div>
-                <span className="text-[9px] font-black uppercase tracking-widest mt-0.5">{label}</span>
+                <span className="text-[9px] font-semibold uppercase tracking-widest mt-0.5">{label}</span>
               </button>
             ))}
           </nav>
@@ -771,7 +771,7 @@ export default function ProfileClient({
 
         <main className="w-full animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150">
           <div className="hidden lg:flex mb-10 items-center gap-6">
-            <h2 className="text-lg font-black text-zinc-800 dark:text-white uppercase tracking-tight">{tabDefs.find(t => t.key === tab)?.label}</h2>
+            <h2 className="text-lg font-semibold text-zinc-800 dark:text-white uppercase tracking-tight">{tabDefs.find(t => t.key === tab)?.label}</h2>
             <div className="h-[1px] flex-1 bg-gradient-to-r from-zinc-200 via-zinc-100 to-transparent dark:from-white/5 dark:via-white/[0.02]" />
           </div>
           

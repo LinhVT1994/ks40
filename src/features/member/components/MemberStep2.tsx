@@ -216,7 +216,7 @@ export default function MemberStep2({
         <div className="flex items-center bg-zinc-100 dark:bg-white/5 rounded-xl p-0.5 gap-0.5 shrink-0">
           {(['editor', 'split', 'preview'] as ViewMode[]).map((mode) => (
              <button type="button" key={mode} onClick={() => setViewMode(mode)}
-               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${
+               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-widest transition-all ${
                  viewMode === mode ? 'bg-white dark:bg-slate-700 text-zinc-800 dark:text-white shadow-sm' : 'text-zinc-500'
                }`}>
                {mode === 'editor' ? <Edit3 className="w-3 h-3" /> : mode === 'split' ? <Columns className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
@@ -243,7 +243,7 @@ export default function MemberStep2({
             onClick={handleInsertVideo}
             disabled={!videoUrl.trim()}
             type="button"
-            className="px-3 py-1.5 text-xs font-bold bg-zinc-800 dark:bg-primary text-white rounded-lg hover:opacity-90 transition-all disabled:opacity-40"
+            className="px-3 py-1.5 text-xs font-bold bg-zinc-800 dark:bg-brand text-white rounded-lg hover:opacity-90 transition-all disabled:opacity-40"
           >
             Chèn
           </button>
@@ -264,7 +264,7 @@ export default function MemberStep2({
                    <button
                      type="button"
                      onClick={() => { setSummaryOpen(v => !v); setMetadataHeight(null); }}
-                     className="w-full flex items-center gap-2 px-4 py-1.5 text-left text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-primary transition-colors shrink-0"
+                     className="w-full flex items-center gap-2 px-4 py-1.5 text-left text-[10px] font-semibold uppercase tracking-widest text-zinc-500 hover:text-primary transition-colors shrink-0"
                    >
                      <AlignLeft className="w-3 h-3 text-primary/60" />
                      <span>Tóm tắt</span>
@@ -289,7 +289,7 @@ export default function MemberStep2({
                    <button
                      type="button"
                      onClick={() => { setObjOpen(v => !v); setMetadataHeight(null); }}
-                     className="w-full flex items-center gap-2 px-4 py-1.5 text-left text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-emerald-500 transition-colors shrink-0"
+                     className="w-full flex items-center gap-2 px-4 py-1.5 text-left text-[10px] font-semibold uppercase tracking-widest text-zinc-500 hover:text-emerald-500 transition-colors shrink-0"
                    >
                      <Target className="w-3 h-3 text-emerald-500/60" />
                      <span>Mục tiêu</span>
@@ -320,7 +320,7 @@ export default function MemberStep2({
             </div>
 
             {/* Markdown Controls - Now below Metadata */}
-            <div className="shrink-0 flex items-center justify-between px-3 py-1.5 border-b border-zinc-200 dark:border-white/5 bg-white dark:bg-[#0c0c0c] overflow-x-auto no-scrollbar">
+            <div className="shrink-0 flex items-center justify-between px-3 py-1.5 border-b border-zinc-200 dark:border-white/5 bg-white dark:bg-canvas overflow-x-auto no-scrollbar">
               <div className="flex items-center gap-0.5 flex-1">
                 <input
                   type="file"
@@ -362,7 +362,7 @@ export default function MemberStep2({
               </div>
             </div>
 
-            <div className="flex justify-between items-center px-4 py-2 bg-zinc-100 dark:bg-white/5 border-b border-zinc-200 dark:border-white/5 text-[10px] text-zinc-500 uppercase font-black tracking-widest">
+            <div className="flex justify-between items-center px-4 py-2 bg-zinc-100 dark:bg-white/5 border-b border-zinc-200 dark:border-white/5 text-[10px] text-zinc-500 uppercase font-semibold tracking-widest">
               <span>Editor</span>
             </div>
             <textarea
@@ -376,7 +376,7 @@ export default function MemberStep2({
           </div>
         )}
         {(viewMode === 'preview' || viewMode === 'split') && (
-          <div className={`flex-1 overflow-y-auto bg-white dark:bg-[#0c0c0c] scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-white/10 ${viewMode === 'split' ? 'w-1/2' : ''}`}>
+          <div className={`flex-1 overflow-y-auto bg-white dark:bg-canvas scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-white/10 ${viewMode === 'split' ? 'w-1/2' : ''}`}>
               <div className="max-w-[1400px] mx-auto px-6 py-12 md:py-20">
                 <main className="max-w-4xl mx-auto">
                    <ArticleHero article={mockArticle} />

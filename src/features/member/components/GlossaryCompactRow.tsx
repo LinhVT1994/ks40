@@ -51,7 +51,7 @@ export default function GlossaryCompactRow({ term, index }: GlossaryCompactRowPr
           
           <div className="hidden sm:flex items-center gap-4 shrink-0">
              {term.topic && (
-               <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">
+               <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-400 dark:text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">
                  {term.topic.label}
                </span>
              )}

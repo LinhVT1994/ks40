@@ -78,7 +78,7 @@ export default function BookEditorClient({ book }: { book: Book }) {
           </Link>
           <Link 
             href={`/admin/books/${book.id}/chapters/new`}
-            className="flex items-center gap-2 px-6 py-3 bg-primary text-white text-sm font-bold rounded-2xl hover:bg-primary/90 hover:shadow-lg hover:shadow-primary/20 transition-all shrink-0"
+            className="flex items-center gap-2 px-6 py-3 bg-brand text-white text-sm font-bold rounded-2xl hover:bg-brand/90 hover:shadow-lg hover:shadow-primary/20 transition-all shrink-0"
           >
             <Plus className="w-4 h-4" /> Thêm chương mới
           </Link>
@@ -90,9 +90,9 @@ export default function BookEditorClient({ book }: { book: Book }) {
         {/* Table Header */}
         <div className="flex items-center gap-4 px-6 py-3 border-b border-zinc-200 dark:border-white/5 mb-2">
           <div className="w-12 shrink-0"></div>
-          <div className="flex-1 text-[11px] font-black text-zinc-500 uppercase tracking-widest">Tiêu đề</div>
-          <div className="w-32 text-[11px] font-black text-zinc-500 uppercase tracking-widest text-center">Quyền</div>
-          <div className="w-32 text-[11px] font-black text-zinc-500 uppercase tracking-widest text-right pr-4">Hành động</div>
+          <div className="flex-1 text-[11px] font-semibold text-zinc-500 uppercase tracking-widest">Tiêu đề</div>
+          <div className="w-32 text-[11px] font-semibold text-zinc-500 uppercase tracking-widest text-center">Quyền</div>
+          <div className="w-32 text-[11px] font-semibold text-zinc-500 uppercase tracking-widest text-right pr-4">Hành động</div>
         </div>
 
         <div className="space-y-1">
@@ -154,13 +154,13 @@ export default function BookEditorClient({ book }: { book: Book }) {
           ))}
 
           {chapters.length === 0 && (
-            <div className="text-center py-32 border-2 border-dashed border-zinc-300 dark:border-white/5 rounded-[4rem] bg-zinc-50/50 dark:bg-white/[0.01]">
-              <div className="w-24 h-24 rounded-[2.5rem] bg-white dark:bg-white/5 flex items-center justify-center mx-auto mb-8 shadow-xl shadow-zinc-200/50 dark:shadow-none border border-zinc-200 dark:border-white/5">
+            <div className="text-center py-32 border-2 border-dashed border-zinc-300 dark:border-white/5 rounded-3xl bg-zinc-50/50 dark:bg-white/[0.01]">
+              <div className="w-24 h-24 rounded-3xl bg-white dark:bg-white/5 flex items-center justify-center mx-auto mb-8 shadow-xl shadow-zinc-200/50 dark:shadow-none border border-zinc-200 dark:border-white/5">
                 <Layers className="w-10 h-10 text-zinc-300 dark:text-slate-700" />
               </div>
-              <h3 className="text-xl font-black text-zinc-800 dark:text-white tracking-tight">Lộ trình chương đang trống</h3>
+              <h3 className="text-xl font-semibold text-zinc-800 dark:text-white tracking-tight">Lộ trình chương đang trống</h3>
               <p className="text-sm font-medium text-zinc-500 mt-3 mb-10 max-w-sm mx-auto leading-relaxed">Cuốn sách này chưa có chương nào. Hãy bắt đầu xây dựng cấu trúc nội dung để giúp học viên dễ dàng theo dõi nhé.</p>
-              <Link href={`/admin/books/${book.id}/chapters/new`} className="inline-flex items-center gap-3 px-10 py-4 rounded-[2rem] bg-primary text-white hover:bg-primary/95 transition-all font-black text-xs uppercase tracking-widest shadow-2xl shadow-primary/30 hover:-translate-y-1">
+              <Link href={`/admin/books/${book.id}/chapters/new`} className="inline-flex items-center gap-3 px-10 py-4 rounded-3xl bg-brand text-white hover:bg-brand/95 transition-all font-semibold text-xs uppercase tracking-widest shadow-2xl shadow-primary/30 hover:-translate-y-1">
                 <Plus className="w-5 h-5" /> Bắt đầu tạo ngay
               </Link>
             </div>

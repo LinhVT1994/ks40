@@ -78,7 +78,7 @@ function QuickReplyBox({ commentId, onClose }: { commentId: string; onClose: () 
           <button
             onClick={handleSend}
             disabled={!text.trim() || isPending || sent}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-white text-xs font-bold hover:bg-primary/90 disabled:opacity-40 transition-all"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand text-white text-xs font-bold hover:bg-brand/90 disabled:opacity-40 transition-all"
           >
             {sent
               ? <><Check className="w-3.5 h-3.5" />Đã gửi!</>

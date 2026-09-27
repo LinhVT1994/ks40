@@ -48,24 +48,25 @@ export default function AdminSidebar() {
 
       {/* Sidebar Wrapper */}
       <aside className={`
-        fixed lg:sticky top-0 left-0 z-50 h-[100dvh] flex flex-col bg-white dark:bg-slate-950 border-r border-zinc-300 dark:border-white/5 transition-transform duration-300 ease-in-out shrink-0
+        ui-admin-sidebar fixed lg:sticky top-0 left-0 z-50 h-[100dvh] flex flex-col transition-transform duration-300 ease-in-out shrink-0
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         ${collapsed ? 'lg:w-20 w-64' : 'w-64'}
       `}>
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-zinc-300 dark:border-white/5 shrink-0">
-        <div className="inline-flex items-center justify-center bg-gradient-to-br from-primary to-accent-purple rounded-lg p-1.5 shadow-sm dark:shadow-[0_0_15px_rgba(59,130,246,0.4)] shrink-0">
+        <div className="inline-flex items-center justify-center bg-brand rounded-lg p-2 shrink-0">
           <GraduationCap className="text-white w-5 h-5" />
         </div>
         {!collapsed && (
-          <span className="font-bold text-lg tracking-tight text-zinc-800 dark:text-white whitespace-nowrap">
-            KS4.0 <span className="text-zinc-500 font-normal">Admin</span>
+          <span className="ui-wordmark whitespace-nowrap">
+            lenote<span>.</span> <span className="text-[10px] font-medium tracking-widest uppercase">Studio</span>
           </span>
         )}
       </div>
 
       {/* Navigation */}
       <nav className="flex-1 py-6 px-3 space-y-1 overflow-y-auto">
+        {!collapsed && <p className="px-3 pb-3 text-[10px] font-semibold tracking-widest uppercase text-muted">Quản trị nội dung</p>}
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
           const Icon = item.icon;
@@ -73,14 +74,16 @@ export default function AdminSidebar() {
             <Link
               key={item.href}
               href={item.href}
+              aria-current={isActive ? 'page' : undefined}
+              title={collapsed ? item.label : undefined}
               onClick={() => mobileOpen && closeMenu()}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group relative ${
                 isActive
-                  ? 'bg-primary/10 text-primary border border-primary/20'
+                  ? 'bg-primary/10 text-primary'
                   : 'text-zinc-500 dark:text-slate-400 hover:text-zinc-800 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5'
               }`}
             >
-              <Icon className={`w-5 h-5 shrink-0 transition-transform group-hover:scale-110 ${isActive ? 'text-primary' : ''}`} />
+              <Icon className="w-[18px] h-[18px] shrink-0" />
               {!collapsed && (
                 <span className="text-sm font-semibold truncate">{item.label}</span>
               )}
@@ -90,7 +93,7 @@ export default function AdminSidebar() {
                 </span>
               )}
               {collapsed && item.badge && (
-                <span className="absolute top-1 right-1 w-2 h-2 bg-primary rounded-full" />
+                <span className="absolute top-1 right-1 w-2 h-2 bg-brand rounded-full" />
               )}
             </Link>
           );
@@ -101,6 +104,8 @@ export default function AdminSidebar() {
       <div className="px-3 py-4 border-t border-zinc-300 dark:border-white/5 shrink-0">
         <button
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng'}
+          aria-expanded={!collapsed}
           className="hidden lg:flex w-full items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-zinc-500 dark:text-slate-400 hover:text-zinc-800 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-white/5 transition-all text-sm font-medium"
         >
           {collapsed ? <ChevronRight className="w-4 h-4" /> : (

@@ -63,7 +63,7 @@ export default function GlossaryPagination({ currentPage, totalPages, total }: G
               onClick={() => handlePageChange(p)}
               className={`w-10 h-10 flex items-center justify-center rounded-xl text-sm font-bold transition-all ${
                 p === currentPage
-                  ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                  ? 'bg-brand text-white shadow-lg shadow-primary/20'
                   : 'text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 hover:text-zinc-900 dark:hover:text-white'
               }`}
             >

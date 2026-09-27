@@ -39,7 +39,7 @@ export default function GlossaryAlphabet({ currentLetter, hasSearch, isExpanded 
               >
                 Tất cả
                 {!currentLetter && (
-                  <motion.div layoutId="activeDot" className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                  <motion.div layoutId="activeDot" className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand" />
                 )}
               </Link>
               
@@ -57,7 +57,7 @@ export default function GlossaryAlphabet({ currentLetter, hasSearch, isExpanded 
                 >
                   {l}
                   {currentLetter === l && (
-                    <motion.div layoutId="activeDot" className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                    <motion.div layoutId="activeDot" className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand" />
                   )}
                 </Link>
               ))}
@@ -72,7 +72,7 @@ export default function GlossaryAlphabet({ currentLetter, hasSearch, isExpanded 
               >
                 <Hash className="w-4 h-4" />
                 {currentLetter === '#' && (
-                  <motion.div layoutId="activeDot" className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                  <motion.div layoutId="activeDot" className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand" />
                 )}
               </Link>
             </div>

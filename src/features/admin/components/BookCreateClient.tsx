@@ -84,7 +84,7 @@ export default function BookCreateClient() {
           </div>
           <button 
             onClick={submit} disabled={pending} 
-            className="flex items-center gap-2 px-8 py-3 bg-zinc-800 dark:bg-primary text-white text-sm font-bold rounded-xl hover:opacity-90 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-8 py-3 bg-zinc-800 dark:bg-brand text-white text-sm font-bold rounded-xl hover:opacity-90 transition-all disabled:opacity-50"
           >
             {pending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             {pending ? 'Đang tạo...' : 'Lưu Lộ trình & Hoàn tất'}
@@ -206,7 +206,7 @@ export default function BookCreateClient() {
                       key={aud.id} onClick={() => set('audience', aud.id)}
                       className={`flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold border transition-colors ${
                         form.audience === aud.id
-                          ? 'bg-primary border-primary text-white shadow-sm'
+                          ? 'bg-brand border-primary text-white shadow-sm'
                           : 'bg-white dark:bg-white/5 border-zinc-300 dark:border-white/10 text-zinc-500 hover:border-primary/50 hover:text-primary'
                       }`}
                     >

@@ -3,7 +3,6 @@ import { getArticlesAction } from '@/features/articles/actions/article';
 import SearchResults from '@/features/member/components/SearchResults';
 import BackButton from '@/features/member/components/BackButton';
 import { Search } from 'lucide-react';
-import { SITE_NAME } from '@/lib/seo';
 
 import MemberContainer from '@/components/layout/MemberContainer';
 
@@ -12,7 +11,7 @@ export async function generateMetadata({ searchParams }: { searchParams: Promise
   const query = q?.trim() || tag?.trim() || '';
   
   return {
-    title: query ? `Kết quả cho "${query}" | ${SITE_NAME}` : `Tìm kiếm | ${SITE_NAME}`,
+    title: query ? `Kết quả cho "${query}"` : 'Tìm kiếm',
     robots: { index: false, follow: true },
   };
 }

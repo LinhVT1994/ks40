@@ -11,7 +11,6 @@ import LandingTestimonials from './LandingTestimonials';
 import LandingComparison from './LandingComparison';
 import LandingZenPreview from './LandingZenPreview';
 import LandingEarlyAccess from './LandingEarlyAccess';
-import { CursorSpotlight } from './LandingSpotlight';
 import { motion, useScroll, useSpring } from 'framer-motion';
 
 export default function LandingPage() {
@@ -23,15 +22,14 @@ export default function LandingPage() {
   });
 
   return (
-    <main className="min-h-screen bg-white dark:bg-[#020617] relative selection:bg-primary/30">
-      <CursorSpotlight />
+    <div className="ui-landing min-h-screen relative selection:bg-primary/30">
       {/* Scroll Progress Bar - Refined & Subtle */}
       <motion.div 
-        className="fixed top-0 left-0 right-0 h-0.5 bg-primary z-[100] origin-left shadow-sm dark:shadow-[0_0_10px_rgba(59,130,246,0.5)]" 
+        className="fixed top-0 left-0 right-0 h-0.5 bg-brand z-[100] origin-left shadow-sm dark:shadow-[0_0_10px_rgba(59,130,246,0.5)]"
         style={{ scaleX }}
       />
 
-      <div className="relative z-10">
+      <div className="ui-landing-content relative z-10">
         <LandingHero />
         
         <LandingComparison />
@@ -55,6 +53,6 @@ export default function LandingPage() {
         
         <LandingCTA />
       </div>
-    </main>
+    </div>
   );
 }

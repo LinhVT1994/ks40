@@ -3,7 +3,7 @@ import MemberContainer from '@/components/layout/MemberContainer';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Điều khoản Dịch vụ | Lenote.dev',
+  title: 'Điều khoản Dịch vụ',
   description: 'Các quy định và hướng dẫn khi tham gia cộng đồng tri thức tại Lenote.dev.',
 };
 

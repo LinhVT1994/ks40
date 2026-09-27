@@ -154,7 +154,7 @@ export default function TopicSelector({ topics, selectedId, onSelect, error }: T
                           <div className="flex items-center gap-3">
                             <div 
                               className={`w-1.5 h-1.5 rounded-full shrink-0 transition-transform group-hover:scale-125 ${
-                                selectedId === child.id ? 'bg-primary' : 'bg-blue-500'
+                                selectedId === child.id ? 'bg-brand' : 'bg-blue-500'
                               }`}
                             />
                             <span className="truncate">{child.label}</span>
@@ -180,7 +180,7 @@ export default function TopicSelector({ topics, selectedId, onSelect, error }: T
                           }`}
                         >
                           <div className="flex items-center gap-3">
-                            <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedId === parent.id ? 'bg-primary' : 'bg-zinc-400'}`} />
+                            <div className={`w-1.5 h-1.5 rounded-full shrink-0 ${selectedId === parent.id ? 'bg-brand' : 'bg-zinc-400'}`} />
                             <span>{parent.label} (Chính)</span>
                           </div>
                           {selectedId === parent.id && <Check className="w-4 h-4 shrink-0" />}

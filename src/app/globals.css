@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./design-system.css"; /* Shared warm-neutral workspace design system. */
 @plugin "@tailwindcss/typography";
 @custom-variant dark (&:is(.dark *));
 
@@ -60,21 +61,21 @@
 }
 
 @theme {
-  /* Default Light Mode Palette - Premium Minimalist (Zinc/Neutral) */
-  --color-primary: #27272A; /* Zinc 800 - dark solid color for high contrast & elegance */
+  /* Warm neutral surfaces and terracotta accents, inspired by Claude. */
+  --color-primary: #a65136;
   --animate-wiggle: wiggle 0.5s ease-in-out;
-  --color-accent-purple: #6D28D9; /* Violet 700 - Deeper purple for better readability */
+  --color-accent-purple: #b58466;
   
-  --color-background-light: #FAFAFA;
-  --color-background-dark: #080a16; /* Deep Space Navy */
-  --color-surface: var(--color-surface);
+  --color-background-light: #faf9f5;
+  --color-background-dark: #22211e;
+  --color-surface: #fffefa;
 
-  --background-rgb: 250, 250, 250;
-  --foreground-rgb: 39, 39, 42;
+  --background-rgb: 250, 249, 245;
+  --foreground-rgb: 38, 37, 31;
   
   /* Font */
-  --font-sans: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-  --font-display: "Google Sans Text", "Arial", sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: Georgia, "Times New Roman", serif;
 
   /* Focus Mode Defaults */
   --focus-zoom: 1;
@@ -82,7 +83,7 @@
 
 @layer base {
   :root {
-    --color-surface: #ffffff;
+    --color-surface: #fffefa;
   }
 
   body {
@@ -96,12 +97,11 @@
 
 
   .dark {
-    /* Antigravity Theme Overrides */
-    --color-primary: #3b82f6;
-    --color-accent-purple: #a855f7;
-    --background-rgb: 8, 10, 22;
-    --foreground-rgb: 255, 255, 255;
-    --color-surface: #0e1225;
+    --color-primary: #e3a184;
+    --color-accent-purple: #cfb39b;
+    --background-rgb: 34, 33, 30;
+    --foreground-rgb: 239, 238, 232;
+    --color-surface: #2b2924;
   }
 
   button:not(:disabled) {
@@ -355,7 +355,7 @@ html.focus-mode [data-focus-prose] {
 }
 
 .focus-toc-trigger:hover .focus-toc-line {
-  background: #3B82F6;
+  background: var(--color-primary);
 }
 
 html.dark .focus-toc-line {
@@ -374,7 +374,7 @@ html.dark .focus-toc-line {
   z-index: 40;
   width: 260px;
   height: 100vh;
-  background: rgba(248, 250, 252, 0.92);
+  background: var(--ui-panel);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-right: 1px solid rgba(0, 0, 0, 0.06);
@@ -386,7 +386,7 @@ html.dark .focus-toc-line {
 }
 
 html.dark .focus-toc-panel {
-  background: rgba(15, 23, 42, 0.92);
+  background: var(--ui-panel);
   border-right-color: rgba(255, 255, 255, 0.06);
 }
 
@@ -407,7 +407,7 @@ html.dark .focus-toc-panel {
   top: 0;
   left: 0;
   height: 3px;
-  background: linear-gradient(90deg, #3B82F6, #8B5CF6);
+  background: var(--color-primary);
   z-index: 9999;
   transition: width 0.2s ease;
   border-radius: 0 2px 2px 0;
@@ -829,7 +829,7 @@ blockquote:hover div:last-child::after {
 }
 
 [data-sonner-toaster] {
-  --toast-radius: 20px;
+  --toast-radius: 12px;
   --toast-pad-y: 16px;
   --toast-pad-x: 20px;
 }
@@ -839,13 +839,13 @@ blockquote:hover div:last-child::after {
   display: flex !important;
   align-items: center !important;
   gap: 14px !important;
-  min-width: 340px !important;
-  max-width: 440px !important;
+  min-width: min(340px, calc(100vw - 32px)) !important;
+  max-width: min(440px, calc(100vw - 32px)) !important;
   border-radius: var(--toast-radius) !important;
   padding: var(--toast-pad-y) var(--toast-pad-x) !important;
   
   /* Solid Premium Base */
-  background: #ffffff !important;
+  background: var(--ui-panel) !important;
   
   border: 1px solid rgba(0, 0, 0, 0.08) !important;
   box-shadow: 
@@ -942,7 +942,7 @@ blockquote:hover div:last-child::after {
 
 /* ── Dark Mode Immersive ── */
 .dark [data-sonner-toast] {
-  background: #0f172a !important; /* Solid Dark Slate */
+  background: var(--ui-panel) !important;
   border-color: rgba(255, 255, 255, 0.1) !important;
   box-shadow: 
     0 4px 6px -1px rgba(0, 0, 0, 0.2),
@@ -952,7 +952,7 @@ blockquote:hover div:last-child::after {
 }
 
 .dark [data-sonner-toast]:hover {
-  background: #1e293b !important; /* Slightly lighter on hover */
+  background: var(--ui-panel-soft) !important;
   box-shadow: 
     0 12px 30px -10px rgba(0, 0, 0, 0.5),
     0 30px 60px -15px rgba(0, 0, 0, 0.6),
@@ -1015,10 +1015,10 @@ blockquote:hover div:last-child::after {
 .prose-compact a {
   text-decoration: underline !important;
   text-underline-offset: 2px !important;
-  color: #3b82f6 !important;
+  color: var(--color-primary) !important;
 }
 .dark .prose-compact a {
-  color: #60a5fa !important;
+  color: var(--color-primary) !important;
 }
 
 /* Force Opaque Utility - Aggressive */
@@ -1031,7 +1031,7 @@ blockquote:hover div:last-child::after {
 }
 
 .dark .ks-force-opaque {
-  background-color: #020617 !important; /* Deepest Slate */
+  background-color: var(--ui-panel) !important;
   color: #f8fafc !important;
 }
 

@@ -83,7 +83,7 @@ export default function SuccessScreen({ userName }: { userName?: string }) {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.5, ease: "easeOut" }}
-            className="text-3xl sm:text-4xl font-black text-zinc-800 dark:text-white tracking-tight leading-tight"
+            className="text-3xl sm:text-4xl font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight"
           >
             Sẵn sàng trải nghiệm <span className="inline-block px-1 text-transparent bg-clip-text bg-gradient-to-r from-primary to-purple-600 italic">Lenote</span>
           </motion.h1>
@@ -109,7 +109,7 @@ export default function SuccessScreen({ userName }: { userName?: string }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => router.push('/')}
-            className="group relative px-10 py-4 bg-zinc-900 dark:bg-primary text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all shadow-2xl shadow-zinc-900/20 dark:shadow-primary/30"
+            className="group relative px-10 py-4 bg-zinc-900 dark:bg-brand text-white rounded-2xl font-semibold text-xs uppercase tracking-[0.2em] transition-all shadow-2xl shadow-zinc-900/20 dark:shadow-primary/30"
           >
             <span className="relative z-10 flex items-center justify-center gap-3">
               Bắt đầu khám phá

@@ -108,7 +108,7 @@ export default function ShareMenu({ title, url, trigger, align = 'right', classN
           className={`absolute ${alignClass} top-full mt-2 z-50 w-56 rounded-2xl border border-zinc-200 dark:border-white/10 bg-white dark:bg-slate-900 shadow-2xl p-1.5 animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-150`}
           role="menu"
         >
-          <div className="px-3 py-2 flex items-center gap-2 text-[10px] font-black text-zinc-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+          <div className="px-3 py-2 flex items-center gap-2 text-[10px] font-semibold text-zinc-400 dark:text-slate-500 uppercase tracking-[0.2em]">
             <Share2 className="w-3 h-3" /> Chia sẻ
           </div>
           <div className="flex flex-col">

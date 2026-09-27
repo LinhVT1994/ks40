@@ -6,6 +6,11 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
+// Tài khoản seed (prisma/seed.ts) — chỉ điền sẵn khi chạy development
+const DEV_ACCOUNT = process.env.NODE_ENV === 'development'
+  ? { email: 'admin@lenote.dev', password: 'admin123456a@' }
+  : null;
+
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl');
@@ -14,7 +19,7 @@ export default function LoginForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [initialEmail, setInitialEmail] = useState('');
+  const [initialEmail, setInitialEmail] = useState(DEV_ACCOUNT?.email ?? '');
 
   React.useEffect(() => {
     const saved = localStorage.getItem('remembered_email');
@@ -72,7 +77,7 @@ export default function LoginForm() {
       )}
 
       <div>
-        <label className="block text-xs font-black uppercase tracking-widest mb-1.5 sm:mb-2 text-zinc-500 dark:text-slate-500 px-1" htmlFor="email">Email</label>
+        <label className="block text-xs font-semibold uppercase tracking-widest mb-1.5 sm:mb-2 text-zinc-500 dark:text-slate-500 px-1" htmlFor="email">Email</label>
         <input
           className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2.5 sm:py-3 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700"
           id="email"
@@ -88,14 +93,15 @@ export default function LoginForm() {
 
       <div>
         <div className="flex justify-between items-center mb-1.5 sm:mb-2 px-1">
-          <label className="block text-xs font-black uppercase tracking-widest text-zinc-500 dark:text-slate-500" htmlFor="password">Mật khẩu</label>
-          <Link href="/forgot-password" alt-target="true" className="text-[10px] font-black uppercase tracking-wider text-primary hover:text-primary/80 transition-colors">Quên mật khẩu?</Link>
+          <label className="block text-xs font-semibold uppercase tracking-widest text-zinc-500 dark:text-slate-500" htmlFor="password">Mật khẩu</label>
+          <Link href="/forgot-password" alt-target="true" className="text-[10px] font-semibold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors">Quên mật khẩu?</Link>
         </div>
         <div className="relative">
           <input
             className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2.5 sm:py-3 pr-10 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700"
             id="password"
             name="password"
+            defaultValue={DEV_ACCOUNT?.password}
             placeholder="••••••••"
             type={showPassword ? 'text' : 'password'}
             required
@@ -104,6 +110,7 @@ export default function LoginForm() {
           <button
             type="button"
             onClick={() => setShowPassword(v => !v)}
+            aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-primary transition-colors p-1"
           >
             {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -118,7 +125,7 @@ export default function LoginForm() {
             id="remember"
             name="remember"
             defaultChecked
-            className="peer w-4 h-4 appearance-none rounded-md border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-black/30 checked:bg-primary checked:border-primary transition-all cursor-pointer"
+            className="peer w-4 h-4 appearance-none rounded-md border border-zinc-200 dark:border-white/10 bg-zinc-50 dark:bg-black/30 checked:bg-brand checked:border-primary transition-all cursor-pointer"
           />
           <svg className="absolute w-2.5 h-2.5 pointer-events-none hidden peer-checked:block left-0.5" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4">
             <polyline points="20 6 9 17 4 12" />
@@ -130,7 +137,7 @@ export default function LoginForm() {
       </div>
 
       <button
-        className="w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black rounded-xl px-4 py-3.5 sm:py-4 text-sm hover:opacity-90 active:scale-[0.98] transition-all mt-4 sm:mt-6 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shadow-xl shadow-zinc-200 dark:shadow-none"
+        className="w-full bg-brand text-white font-semibold rounded-xl px-4 py-3.5 sm:py-4 text-sm hover:bg-brand-hover active:scale-[0.98] transition-all mt-4 sm:mt-6 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
         type="submit"
         disabled={isPending}
       >

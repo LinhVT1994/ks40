@@ -104,23 +104,24 @@ export default function GlossaryExplorer({
       `}</style>
 
       {/* Hero Section */}
-      <section className="relative pt-32 pb-8 overflow-hidden text-center">
-        <div className="max-w-4xl mx-auto px-4 space-y-12">
-          <div className="space-y-6">
-            <h1 className="text-4xl md:text-6xl font-display font-heavy text-zinc-800 dark:text-white leading-[1.1] tracking-tight">
+      <section className="relative pt-10 pb-8 overflow-hidden text-left border-b border-line">
+        <div className="max-w-4xl mx-auto px-4 space-y-8">
+          <div className="space-y-4">
+            <p className="ui-eyebrow">Từ điển tri thức</p>
+            <h1 className="text-3xl md:text-5xl font-display font-medium text-ink leading-[1.15] tracking-tight">
               Thuật ngữ
             </h1>
-            <p className="text-zinc-500 dark:text-slate-300 text-lg max-w-xl mx-auto leading-relaxed font-medium">
+            <p className="text-muted text-base max-w-2xl leading-relaxed">
               Hệ thống hóa các định nghĩa chuyên ngành giúp bạn nắm bắt nhanh chóng nội dung bài viết và tài liệu.
             </p>
           </div>
 
           {/* Ultra-Compact Segmented Pill */}
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col items-start gap-4">
             <div className="md:hidden flex justify-center w-full max-w-[280px]">
               <button
                 onClick={() => setIsSubmissionOpen(true)}
-                className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-amber-500/80 hover:text-amber-500 transition-colors"
+                className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-amber-500/80 hover:text-amber-500 transition-colors"
               >
                 <Lightbulb className="w-3 h-3" />
                 <span>Đóng góp</span>
@@ -152,7 +153,7 @@ export default function GlossaryExplorer({
                     : 'text-zinc-500 hover:text-zinc-800 dark:hover:text-white'
                 }`}
               >
-                <span className="text-[10px] font-black tracking-tighter">A-Z</span>
+                <span className="text-[10px] font-semibold tracking-tighter">A-Z</span>
                 <span className="text-[10px] font-bold uppercase tracking-wider">
                   {initialLetter ? `Chữ: ${initialLetter}` : 'Bảng chữ'}
                 </span>
@@ -190,7 +191,7 @@ export default function GlossaryExplorer({
                         maxWidth: (isInputFocused || search) ? '480px' : '320px',
                       }}
                       transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                      className="mx-auto relative group w-full"
+                      className="relative group w-full"
                     >
                       <div className="relative">
                         <Search className={`absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-300 ${isInputFocused || search ? 'text-primary' : 'text-zinc-500'}`} />
@@ -253,7 +254,7 @@ export default function GlossaryExplorer({
                       >
                         Tất cả
                         {!initialLetter && (
-                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand" />
                         )}
                       </button>
                       
@@ -271,7 +272,7 @@ export default function GlossaryExplorer({
                         >
                           {l}
                           {initialLetter === l && (
-                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand" />
                           )}
                         </button>
                       ))}
@@ -286,7 +287,7 @@ export default function GlossaryExplorer({
                       >
                         <Hash className="w-4 h-4" />
                         {initialLetter === '#' && (
-                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-brand" />
                         )}
                       </button>
                     </div>

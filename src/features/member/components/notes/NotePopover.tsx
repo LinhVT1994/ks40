@@ -32,7 +32,7 @@ export default function NotePopover({ rect, content, onClose, onEdit, onDelete, 
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: showAbove ? 10 : -10 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className={`fixed z-[101] w-[300px] rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.2)] border bg-white dark:bg-[#151515] overflow-hidden group ${
+        className={`fixed z-[101] w-[300px] rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.2)] border bg-white dark:bg-canvas overflow-hidden group ${
           isAuthorNote
             ? 'border-violet-300/50 dark:border-violet-500/30'
             : 'border-zinc-200 dark:border-white/10'

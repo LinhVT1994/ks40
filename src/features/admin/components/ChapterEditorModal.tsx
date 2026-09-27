@@ -19,7 +19,7 @@ export default function ChapterEditorModal({ isOpen, onClose, chapter }: Chapter
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-zinc-800/60 backdrop-blur-md animate-in fade-in duration-300">
-      <div className="w-full max-w-6xl h-full max-h-[90vh] bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden border border-white/20">
+      <div className="w-full max-w-6xl h-full max-h-[90vh] bg-white dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col overflow-hidden border border-white/20">
         
         {/* Modal Header */}
         <div className="px-8 py-5 border-b border-zinc-200 dark:border-white/5 flex items-center justify-between bg-zinc-50/50 dark:bg-white/[0.02]">
@@ -129,7 +129,7 @@ export default function ChapterEditorModal({ isOpen, onClose, chapter }: Chapter
                Hủy bỏ
              </button>
              <button 
-               className="flex items-center gap-2 px-8 py-2.5 bg-primary text-white rounded-2xl text-sm font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20"
+               className="flex items-center gap-2 px-8 py-2.5 bg-brand text-white rounded-2xl text-sm font-bold hover:bg-brand/90 transition-all shadow-lg shadow-primary/20"
              >
                <Save className="w-4 h-4" /> Lưu Chapter
              </button>

@@ -107,7 +107,7 @@ export default function ChapterEditorClient({ book, chapter }: { book: Book, cha
             title="Thoát về danh sách chương"
           >
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-widest hidden sm:inline">Quay lại</span>
+            <span className="text-[10px] font-semibold uppercase tracking-widest hidden sm:inline">Quay lại</span>
           </Link>
           <div className="flex items-center gap-2 text-sm text-zinc-500 flex-1 min-w-0 pr-4">
             <span className="hidden sm:inline shrink-0 font-bold bg-zinc-200 dark:bg-white/10 px-3 py-1.5 rounded-lg text-zinc-600 dark:text-slate-300 shadow-inner">
@@ -131,7 +131,7 @@ export default function ChapterEditorClient({ book, chapter }: { book: Book, cha
             {isFullscreen ? <Minimize className="w-4 h-4 group-hover:scale-110 transition-transform" /> : <Maximize className="w-4 h-4 group-hover:scale-110 transition-transform" />}
           </button>
 
-          <button onClick={handleSave} disabled={formPending} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-zinc-800 dark:bg-primary text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-zinc-800/10 dark:shadow-primary/20 hover:-translate-y-0.5 active:translate-y-0">
+          <button onClick={handleSave} disabled={formPending} className="flex items-center gap-2 px-6 py-3 rounded-xl bg-zinc-800 dark:bg-brand text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-zinc-800/10 dark:shadow-primary/20 hover:-translate-y-0.5 active:translate-y-0">
             <Save className="w-4 h-4" />
             {formPending ? 'Đang lưu...' : (!chapter ? 'Tạo' : 'Lưu bản nháp')}
           </button>

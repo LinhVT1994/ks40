@@ -26,8 +26,8 @@ export default function MemberFooter() {
   }
 
   return (
-    <footer className="w-full relative z-10 bg-transparent pt-32 pb-1">
-      <div className="max-w-[1600px] mx-auto px-6 lg:px-12">
+    <footer className="ui-footer w-full relative z-10 mt-16 pt-16 pb-1">
+      <div className="max-w-[1320px] mx-auto px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8">
 
           {/* Column 1: Brand & About */}
@@ -36,12 +36,7 @@ export default function MemberFooter() {
               <div className="transition-transform group-hover:scale-110">
                 <BrandLogo size={40} />
               </div>
-              <span className="text-lg tracking-[0.08em] flex items-center uppercase drop-shadow-[0_4px_8px_rgba(0,0,0,0.05)] dark:drop-shadow-[0_0_8px_rgba(59,130,246,0.2)]">
-                <span className="font-medium text-zinc-500 dark:text-slate-400">Le</span>
-                <span className="font-black bg-gradient-to-r from-primary via-accent-purple to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-text-shimmer">
-                  note
-                </span>
-              </span>
+              <span className="ui-wordmark">lenote<span>.</span></span>
             </Link>
             <p className="text-zinc-500 dark:text-slate-400 text-sm leading-relaxed max-w-sm">
               Nền tảng chia sẻ tri thức và kinh nghiệm đa góc nhìn. Từ những bài học chuyên môn sâu sắc đến những câu chuyện đời sống, cùng nhau lưu giữ và lan tỏa giá trị mỗi ngày.

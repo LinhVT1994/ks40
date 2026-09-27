@@ -392,7 +392,7 @@ export default function GlobalNotesSidebar() {
                   {/* Header */}
                   <div className="px-5 py-3.5 border-b border-zinc-200/40 dark:border-white/5 flex items-center justify-between bg-white/40 dark:bg-slate-900/50">
                     <div className="min-w-0">
-                      <h2 className="text-lg font-black text-zinc-800 dark:text-white leading-tight">
+                      <h2 className="text-lg font-semibold text-zinc-800 dark:text-white leading-tight">
                         {isSelectMode
                           ? selectedIds.size > 0
                             ? `Đã chọn ${selectedIds.size}`
@@ -440,7 +440,7 @@ export default function GlobalNotesSidebar() {
                             <X className="w-3.5 h-3.5" />
                           </button>
                         ) : (
-                          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-black text-zinc-400 dark:text-slate-500 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded px-1.5 py-0.5 pointer-events-none select-none">
+                          <kbd className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-semibold text-zinc-400 dark:text-slate-500 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded px-1.5 py-0.5 pointer-events-none select-none">
                             /
                           </kbd>
                         )}
@@ -461,13 +461,13 @@ export default function GlobalNotesSidebar() {
                             }`}
                           >
                             <span>{type}</span>
-                            <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-md leading-none min-w-[16px] text-center transition-colors ${isActive ? 'bg-primary/10 text-primary' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400'}`}>
+                            <span className={`text-[8px] font-semibold px-1.5 py-0.5 rounded-md leading-none min-w-[16px] text-center transition-colors ${isActive ? 'bg-primary/10 text-primary' : 'bg-zinc-100 dark:bg-white/5 text-zinc-400'}`}>
                               {count}
                             </span>
                             {isActive && (
                               <motion.div
                                 layoutId="globalAnnotationTabFilter"
-                                className="absolute bottom-[-1px] left-0 w-full h-[2px] bg-primary rounded-t-full z-10"
+                                className="absolute bottom-[-1px] left-0 w-full h-[2px] bg-brand rounded-t-full z-10"
                                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                               />
                             )}
@@ -704,7 +704,7 @@ function NoteCard({
           <div
             className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
               isSelected
-                ? 'bg-primary border-primary'
+                ? 'bg-brand border-primary'
                 : 'bg-white/70 dark:bg-slate-900/70 border-zinc-300 dark:border-white/20'
             }`}
           >
@@ -945,7 +945,7 @@ function NoteDetail({
         <div className="px-6 pt-6 pb-4">
           <div className="relative group/source cursor-pointer" onClick={() => onNavigate(initialNote)}>
             <div className="absolute -left-4 top-0 bottom-0 w-1 bg-primary/20 rounded-full group-hover/source:bg-primary/40 transition-colors" />
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400 mb-2">Trích dẫn từ bài viết</p>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400 mb-2">Trích dẫn từ bài viết</p>
             <p className="text-[13px] font-serif italic text-zinc-600 dark:text-slate-400 leading-relaxed line-clamp-3 group-hover/source:text-zinc-800 dark:group-hover/source:text-slate-200 transition-colors">
               "{initialNote.selectedText || 'Ghi chú tự do'}"
             </p>
@@ -963,12 +963,12 @@ function NoteDetail({
                   {initialNote.note ? (
                     <>
                       <Pencil className="w-3 h-3" />
-                      <span className="text-[9px] font-black uppercase tracking-wider">Chỉnh sửa</span>
+                      <span className="text-[9px] font-semibold uppercase tracking-wider">Chỉnh sửa</span>
                     </>
                   ) : (
                     <>
                       <Plus className="w-3 h-3" />
-                      <span className="text-[9px] font-black uppercase tracking-wider">Thêm ghi chú</span>
+                      <span className="text-[9px] font-semibold uppercase tracking-wider">Thêm ghi chú</span>
                     </>
                   )}
                 </button>
@@ -983,7 +983,7 @@ function NoteDetail({
                   }`}
                 >
                   {isPublic ? <CheckSquare className="w-3 h-3" /> : <StickyNote className="w-3 h-3" />}
-                  <span className="text-[9px] font-black uppercase tracking-wider">
+                  <span className="text-[9px] font-semibold uppercase tracking-wider">
                     {isPublic ? 'Công khai' : 'Cá nhân'}
                   </span>
                 </div>
@@ -1032,7 +1032,7 @@ function NoteDetail({
                       />
                       <div className="flex items-center gap-1">
                         <button onClick={() => setIsLinkMode(false)} className="px-2 py-1 text-[11px] font-bold text-slate-500 hover:text-slate-700 dark:hover:text-white transition-colors">Hủy</button>
-                        <button onClick={confirmLink} className="px-3 py-1 bg-primary text-white text-[11px] font-bold rounded-lg shadow-sm shadow-primary/20 transition-all active:scale-95">Áp dụng</button>
+                        <button onClick={confirmLink} className="px-3 py-1 bg-brand text-white text-[11px] font-bold rounded-lg shadow-sm shadow-primary/20 transition-all active:scale-95">Áp dụng</button>
                       </div>
                     </motion.div>
                   ) : (

@@ -45,8 +45,8 @@ function ArticleGridCard({ article, isLarge }: { article: ArticleCard; isLarge?:
             <div className="absolute top-3 left-3 px-2 py-0.5 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md rounded-full border border-white/20 shadow-sm transition-transform duration-300 group-hover:scale-95">
               <span className="text-[9px] font-bold text-primary uppercase tracking-widest flex items-center gap-1.5">
                 <span className="relative flex h-1.5 w-1.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-primary"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand"></span>
                 </span>
                 Kiến thức
               </span>

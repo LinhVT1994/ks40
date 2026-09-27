@@ -63,14 +63,14 @@ export default function BookHero({ book }: BookHeroProps) {
               </div>
               
               {/* Floating badges */}
-              <div className="absolute -bottom-8 -right-8 p-5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/20 dark:border-white/10 transform hover:scale-110 transition-transform">
+              <div className="absolute -bottom-8 -right-8 p-5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 dark:border-white/10 transform hover:scale-110 transition-transform">
                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-primary shadow-lg shadow-primary/20 flex items-center justify-center text-white">
+                    <div className="w-12 h-12 rounded-2xl bg-brand shadow-lg shadow-primary/20 flex items-center justify-center text-white">
                        <Layers className="w-6 h-6" />
                     </div>
                     <div>
-                       <div className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] mb-0.5">Chapters</div>
-                       <div className="text-xl font-black text-zinc-800 dark:text-white leading-none">{book._count.chapters}</div>
+                       <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.2em] mb-0.5">Chapters</div>
+                       <div className="text-xl font-semibold text-zinc-800 dark:text-white leading-none">{book._count.chapters}</div>
                     </div>
                  </div>
               </div>
@@ -80,11 +80,11 @@ export default function BookHero({ book }: BookHeroProps) {
         {/* Content Side */}
         <div className="lg:col-span-7 text-center lg:text-left space-y-10">
            <div className="space-y-6">
-              <div className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-primary/10 text-primary rounded-full text-[11px] font-black uppercase tracking-[0.2em] border border-primary/10 backdrop-blur-md">
+              <div className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-primary/10 text-primary rounded-full text-[11px] font-semibold uppercase tracking-[0.2em] border border-primary/10 backdrop-blur-md">
                  <Star className="w-3.5 h-3.5 fill-current" /> Premium Learning Path
               </div>
               
-              <h1 className="text-5xl md:text-7xl font-black text-zinc-800 dark:text-white font-display leading-[1] tracking-tight">
+              <h1 className="text-5xl md:text-7xl font-semibold text-zinc-800 dark:text-white font-display leading-[1] tracking-tight">
                 {book.title}
               </h1>
               
@@ -100,8 +100,8 @@ export default function BookHero({ book }: BookHeroProps) {
                     {book.author.image ? <Image src={book.author.image} alt="" fill sizes="48px" className="object-cover" /> : <div className="w-full h-full bg-zinc-200 dark:bg-slate-800 flex items-center justify-center font-bold text-zinc-500">?</div>}
                  </div>
                  <div>
-                    <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">Tác giả</div>
-                    <div className="text-base font-black text-zinc-800 dark:text-white tracking-tight">{book.author.name}</div>
+                    <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">Tác giả</div>
+                    <div className="text-base font-semibold text-zinc-800 dark:text-white tracking-tight">{book.author.name}</div>
                  </div>
               </div>
               
@@ -110,8 +110,8 @@ export default function BookHero({ book }: BookHeroProps) {
                      <Clock className="w-6 h-6" />
                   </div>
                   <div>
-                    <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">Cập nhật</div>
-                    <div className="text-base font-black text-zinc-800 dark:text-white tracking-tight">{new Intl.DateTimeFormat('vi-VN').format(book.createdAt)}</div>
+                    <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">Cập nhật</div>
+                    <div className="text-base font-semibold text-zinc-800 dark:text-white tracking-tight">{new Intl.DateTimeFormat('vi-VN').format(book.createdAt)}</div>
                   </div>
               </div>
               
@@ -120,15 +120,15 @@ export default function BookHero({ book }: BookHeroProps) {
                      <Users className="w-6 h-6" />
                   </div>
                   <div>
-                    <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-0.5">Member</div>
-                    <div className="text-base font-black text-zinc-800 dark:text-white tracking-tight">2.5k+</div>
+                    <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-0.5">Member</div>
+                    <div className="text-base font-semibold text-zinc-800 dark:text-white tracking-tight">2.5k+</div>
                   </div>
               </div>
            </div>
 
            {/* Actions */}
            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-5">
-              <button className="flex items-center gap-4 px-10 py-5 bg-zinc-800 dark:bg-white text-white dark:text-slate-900 rounded-[2rem] text-lg font-black hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-zinc-800/20 dark:shadow-white/5 group">
+              <button className="flex items-center gap-4 px-10 py-5 bg-zinc-800 dark:bg-white text-white dark:text-slate-900 rounded-3xl text-lg font-semibold hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-zinc-800/20 dark:shadow-white/5 group">
                  <Play className="w-6 h-6 fill-current group-hover:text-primary transition-colors" /> Bắt đầu ngay
               </button>
               

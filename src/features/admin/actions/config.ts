@@ -1,6 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
+import { requireAdmin } from '@/lib/authorization';
 
 export type SiteAnnouncement = {
   active: boolean;
@@ -25,6 +26,7 @@ export async function getAnnouncementAction(): Promise<SiteAnnouncement | null> 
 }
 
 export async function getSiteConfigAction(key: string) {
+  await requireAdmin();
   try {
     const config = await db.siteConfig.findUnique({
       where: { key },
@@ -36,6 +38,8 @@ export async function getSiteConfigAction(key: string) {
 }
 
 export async function setSiteConfigAction(key: string, value: unknown) {
+  await requireAdmin();
+  if (!['site_announcement', 'article_badges'].includes(key)) throw new Error('Invalid configuration key');
   await db.siteConfig.upsert({
     where: { key },
     update: { value: value as any },

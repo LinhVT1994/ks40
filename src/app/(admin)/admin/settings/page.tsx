@@ -48,7 +48,7 @@ function AddModal({ isOpen, onClose, onConfirm, title, isPending }: { isOpen: bo
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <button onClick={onClose} className="px-5 py-2.5 font-bold text-zinc-500 hover:text-zinc-700 transition-colors text-sm">Huỷ</button>
-            <button onClick={submit} disabled={!label.trim() || !slug.trim() || isPending} className="px-6 py-2.5 rounded-2xl bg-primary text-white font-bold hover:bg-primary/90 disabled:opacity-30 transition-all shadow-lg shadow-primary/20 text-sm">
+            <button onClick={submit} disabled={!label.trim() || !slug.trim() || isPending} className="px-6 py-2.5 rounded-2xl bg-brand text-white font-bold hover:bg-brand/90 disabled:opacity-30 transition-all shadow-lg shadow-primary/20 text-sm">
               {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Thêm ngay'}
             </button>
           </div>
@@ -72,7 +72,7 @@ function AddTagModal({ isOpen, onClose, onConfirm, isPending }: { isOpen: boolea
           <input autoFocus value={val} onChange={e => setVal(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') submit(); if (e.key === 'Escape') onClose(); }} placeholder="Tên tag (ví dụ: Marketing, Tip...)" className="w-full px-4 py-3 bg-zinc-50 dark:bg-white/5 border border-zinc-200 dark:border-white/5 rounded-2xl outline-none focus:border-primary/30 transition-all text-sm" />
           <div className="flex justify-end gap-3">
             <button onClick={onClose} className="px-5 py-2.5 font-bold text-zinc-500 hover:text-zinc-700 transition-colors text-sm">Huỷ</button>
-            <button onClick={submit} disabled={!val.trim() || isPending} className="px-6 py-2.5 rounded-2xl bg-primary text-white font-bold hover:bg-primary/90 disabled:opacity-30 transition-all shadow-lg shadow-primary/20 text-sm">
+            <button onClick={submit} disabled={!val.trim() || isPending} className="px-6 py-2.5 rounded-2xl bg-brand text-white font-bold hover:bg-brand/90 disabled:opacity-30 transition-all shadow-lg shadow-primary/20 text-sm">
               {isPending ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Thêm ngay'}
             </button>
           </div>
@@ -143,7 +143,7 @@ function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: 
       <button
         type="button"
         onClick={() => onChange(!checked)}
-        className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${checked ? 'bg-primary' : 'bg-zinc-200 dark:bg-white/10'}`}
+        className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${checked ? 'bg-brand' : 'bg-zinc-200 dark:bg-white/10'}`}
       >
         <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${checked ? 'translate-x-5' : 'translate-x-0'}`} />
       </button>
@@ -160,7 +160,7 @@ function SaveButton({ saved, onClick }: { saved: boolean; onClick: () => void })
         className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all shadow-sm ${
           saved
             ? 'bg-emerald-500 text-white shadow-emerald-500/20'
-            : 'bg-primary text-white hover:bg-primary/90 shadow-primary/20'
+            : 'bg-brand text-white hover:bg-brand/90 shadow-primary/20'
         }`}
       >
         {saved ? <Check className="w-4 h-4" /> : <Save className="w-4 h-4" />}
@@ -221,7 +221,7 @@ function AddItemForm({ onAdd }: { onAdd: (item: ConfigItem) => void }) {
         </div>
       </div>
       <div className="flex items-center gap-2 pt-1">
-        <button type="button" onClick={handleAdd} disabled={!label.trim()} className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:opacity-90">
+        <button type="button" onClick={handleAdd} disabled={!label.trim()} className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand text-white text-sm font-bold hover:opacity-90">
           <Plus className="w-3.5 h-3.5" /> Thêm
         </button>
         <button type="button" onClick={() => setOpen(false)} className="px-4 py-2 rounded-lg text-sm font-semibold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5">Huỷ</button>
@@ -254,7 +254,7 @@ function ConfigItemRow({ item, onChange, onDelete }: { item: ConfigItem; onChang
           </button>
         )}
         <button type="button" onClick={() => onChange({ ...item, enabled: !item.enabled })}
-          className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${item.enabled ? 'bg-primary' : 'bg-zinc-200 dark:bg-white/10'}`}>
+          className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${item.enabled ? 'bg-brand' : 'bg-zinc-200 dark:bg-white/10'}`}>
           <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${item.enabled ? 'translate-x-4' : ''}`} />
         </button>
       </div>
@@ -272,7 +272,7 @@ function ConfigItemRow({ item, onChange, onDelete }: { item: ConfigItem; onChang
           </div>
           <div className="flex items-center justify-end gap-2 pt-1">
              <button type="button" onClick={() => setExpanded(false)} className="px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors">Huỷ</button>
-             <button type="button" onClick={commit} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary text-white text-sm font-bold"><Check className="w-3.5 h-3.5" /> OK</button>
+             <button type="button" onClick={commit} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-brand text-white text-sm font-bold"><Check className="w-3.5 h-3.5" /> OK</button>
           </div>
         </div>
       )}
@@ -403,7 +403,7 @@ function OccupationRow({ item, onToggle, onDelete, onUpdate }: {
           <Trash2 className="w-3.5 h-3.5" />
         </button>
         <button type="button" onClick={onToggle}
-          className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${item.enabled ? 'bg-primary' : 'bg-zinc-200 dark:bg-white/10'}`}>
+          className={`relative w-9 h-5 rounded-full transition-colors shrink-0 ${item.enabled ? 'bg-brand' : 'bg-zinc-200 dark:bg-white/10'}`}>
           <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${item.enabled ? 'translate-x-4' : ''}`} />
         </button>
       </div>
@@ -425,7 +425,7 @@ function OccupationRow({ item, onToggle, onDelete, onUpdate }: {
           </div>
           <div className="flex items-center justify-end gap-2 pt-1">
             <button type="button" onClick={() => setExpanded(false)} className="px-3 py-1.5 rounded-lg text-sm text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors">Huỷ</button>
-            <button type="button" onClick={commit} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary text-white text-sm font-bold"><Check className="w-3.5 h-3.5" /> OK</button>
+            <button type="button" onClick={commit} className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-brand text-white text-sm font-bold"><Check className="w-3.5 h-3.5" /> OK</button>
           </div>
         </div>
       )}
@@ -478,7 +478,7 @@ function AddOccupationForm({ onAdd }: { onAdd: (data: { value: string; label: st
         </div>
       </div>
       <div className="flex items-center gap-2 pt-1">
-        <button type="button" onClick={handleAdd} disabled={!label.trim()} className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-white text-sm font-bold hover:opacity-90 disabled:opacity-30">
+        <button type="button" onClick={handleAdd} disabled={!label.trim()} className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-brand text-white text-sm font-bold hover:opacity-90 disabled:opacity-30">
           <Plus className="w-3.5 h-3.5" /> Thêm
         </button>
         <button type="button" onClick={() => setOpen(false)} className="px-4 py-2 rounded-lg text-sm font-semibold text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5">Huỷ</button>
@@ -631,7 +631,7 @@ function TopicsTab() {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
             <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Tìm kiếm chủ đề..." className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/5 pl-10 pr-4 py-2.5 text-sm rounded-2xl outline-none focus:border-primary/30 transition-all" />
           </div>
-          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-2xl hover:bg-primary/90 shadow-sm shadow-primary/10 transition-all shrink-0">
+          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-brand text-white text-sm font-bold rounded-2xl hover:bg-brand/90 shadow-sm shadow-primary/10 transition-all shrink-0">
             <Plus className="w-4 h-4" /> Thêm nhóm
           </button>
         </div>
@@ -680,7 +680,7 @@ function DataGridRow({ item, isParent, isExpanded, onToggle, onChange, onDelete 
           <input type="color" value={draft.color ?? '#64748b'} onChange={e => setDraft(d => ({ ...d, color: e.target.value }))} className="w-8 h-8 rounded-lg cursor-pointer border border-zinc-300 dark:border-white/10 bg-transparent p-0.5 overflow-hidden shrink-0" />
           <div className="flex items-center gap-1">
             <button onClick={() => setIsEditing(false)} className="p-1.5 text-zinc-500 hover:bg-white/50 rounded-lg"><X className="w-4 h-4" /></button>
-            <button onClick={commit} className="p-1.5 bg-primary text-white rounded-lg"><Check className="w-4 h-4" /></button>
+            <button onClick={commit} className="p-1.5 bg-brand text-white rounded-lg"><Check className="w-4 h-4" /></button>
           </div>
         </div>
       </div>
@@ -710,7 +710,7 @@ function DataGridRow({ item, isParent, isExpanded, onToggle, onChange, onDelete 
           {onDelete && <button onClick={onDelete} disabled={articleCount > 0} className="p-1.5 text-zinc-500 hover:text-rose-500 hover:bg-rose-50 rounded-lg disabled:opacity-20 transition-colors" title={articleCount > 0 ? "Không thể xóa chủ đề có bài viết" : "Xóa"}><Trash2 className="w-3.5 h-3.5" /></button>}
         </div>
 
-        <button onClick={() => onChange({ ...item, enabled: !item.enabled })} className={`relative w-8 h-4.5 rounded-full transition-colors shrink-0 ${item.enabled ? 'bg-primary' : 'bg-zinc-200 dark:bg-white/10'}`}>
+        <button onClick={() => onChange({ ...item, enabled: !item.enabled })} className={`relative w-8 h-4.5 rounded-full transition-colors shrink-0 ${item.enabled ? 'bg-brand' : 'bg-zinc-200 dark:bg-white/10'}`}>
           <span className={`absolute top-0.5 left-0.5 w-3.5 h-3.5 bg-white rounded-full shadow transition-all ${item.enabled ? 'translate-x-[14px]' : ''}`} />
         </button>
       </div>
@@ -767,7 +767,7 @@ function TagsTab() {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
             <input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Tìm kiếm tags..." className="w-full bg-zinc-50 dark:bg-white/[0.03] border border-zinc-200 dark:border-white/5 pl-10 pr-4 py-2.5 text-sm rounded-2xl outline-none focus:border-primary/30 transition-all" />
           </div>
-          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-bold rounded-2xl hover:bg-primary/90 shadow-sm shadow-primary/10 transition-all shrink-0">
+          <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 px-5 py-2.5 bg-brand text-white text-sm font-bold rounded-2xl hover:bg-brand/90 shadow-sm shadow-primary/10 transition-all shrink-0">
             <Plus className="w-4 h-4" /> Thêm tag
           </button>
         </div>

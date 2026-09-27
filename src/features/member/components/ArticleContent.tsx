@@ -170,7 +170,7 @@ export default function ArticleContent({
                   [&_li]:text-zinc-700 dark:[&_li]:text-slate-400
                   [&_li]:text-xl font-normal tracking-tight !text-justify
                   [&_li]:before:content-[''] [&_li]:before:absolute [&_li]:before:left-0 [&_li]:before:top-[0.65em]
-                  [&_li]:before:w-1.5 [&_li]:before:h-1.5 [&_li]:before:rounded-full [&_li]:before:bg-primary
+                  [&_li]:before:w-1.5 [&_li]:before:h-1.5 [&_li]:before:rounded-full [&_li]:before:bg-brand
                   [&_li]:before:shrink-0"
                 >
                   <div className="markdown-content">
@@ -218,7 +218,7 @@ export default function ArticleContent({
             <div className="relative z-10 flex flex-col items-center text-center space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-1000 pointer-events-auto">
               {/* Text Content */}
               <div className="max-w-[420px] space-y-4">
-                <h3 className="text-2xl sm:text-3xl font-black text-zinc-900 dark:text-slate-200 tracking-tight leading-tight">
+                <h3 className="text-2xl sm:text-3xl font-semibold text-zinc-900 dark:text-slate-200 tracking-tight leading-tight">
                   {!session ? 'Đăng nhập để đọc tiếp' : audience === 'PREMIUM' ? 'Mở khóa Premium' : 'Gia nhập Hội viên'}
                 </h3>
                 <p className="text-zinc-600 dark:text-slate-500 leading-relaxed font-medium text-base sm:text-lg">
@@ -251,7 +251,7 @@ export default function ArticleContent({
                 ) : (
                   <a
                     href={audience === 'PREMIUM' ? '/pricing' : '#'}
-                    className={`w-full h-14 flex items-center justify-center rounded-2xl font-bold text-white shadow-2xl transition-all active:scale-95 ${audience === 'PREMIUM' ? 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/20' : 'bg-primary hover:bg-primary/90 shadow-primary/20'}`}
+                    className={`w-full h-14 flex items-center justify-center rounded-2xl font-bold text-white shadow-2xl transition-all active:scale-95 ${audience === 'PREMIUM' ? 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/20' : 'bg-brand hover:bg-brand/90 shadow-primary/20'}`}
                   >
                     {audience === 'PREMIUM' ? 'Nâng cấp ngay' : 'Đăng ký Hội viên'}
                   </a>

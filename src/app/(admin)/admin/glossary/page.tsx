@@ -41,7 +41,7 @@ export default async function AdminGlossaryPage({
           </div>
           <Link
             href="/admin/glossary/new"
-            className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap w-fit"
+            className="flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-brand/90 transition-all shadow-lg shadow-primary/20 active:scale-95 whitespace-nowrap w-fit"
           >
             <Plus className="w-4 h-4" /> Thêm thuật ngữ
           </Link>

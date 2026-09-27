@@ -26,7 +26,7 @@ export default function BookCard({ book }: BookCardProps) {
   return (
     <Link 
       href={`/books/${book.slug}`}
-      className="group relative flex flex-col h-full bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-[2rem] overflow-hidden hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 transition-all duration-500"
+      className="ui-panel group relative flex flex-col h-full overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-200"
     >
       {/* Cover Image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-zinc-100 dark:bg-white/5">
@@ -95,7 +95,7 @@ export default function BookCard({ book }: BookCardProps) {
             <span className="text-xs font-bold text-zinc-600 dark:text-slate-300">{book.author.name}</span>
           </div>
           
-          <div className="p-2 rounded-xl bg-zinc-50 dark:bg-white/5 text-zinc-500 group-hover:bg-primary group-hover:text-white transition-all transform group-hover:translate-x-1">
+          <div className="p-2 rounded-xl bg-zinc-50 dark:bg-white/5 text-zinc-500 group-hover:bg-brand group-hover:text-white transition-all transform group-hover:translate-x-1">
             <ChevronRight className="w-4 h-4" />
           </div>
         </div>

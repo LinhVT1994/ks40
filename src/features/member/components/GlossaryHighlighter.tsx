@@ -151,8 +151,8 @@ export function GlossaryTooltip({ term, displayText }: { term: GlossaryTermInfo,
             >
                 <div className="space-y-2 not-italic font-sans text-left normal-case tracking-normal whitespace-normal">
                   <div className="flex items-center gap-2">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary" />
-                    <span className="text-[11px] font-black uppercase tracking-widest text-primary">Thuật ngữ</span>
+                    <div className="w-1.5 h-1.5 rounded-full bg-brand" />
+                    <span className="text-[11px] font-semibold uppercase tracking-widest text-primary">Thuật ngữ</span>
                   </div>
                   <h4 className="text-sm font-bold text-zinc-900 dark:text-white">{term.term}</h4>
                   <p className="text-xs text-zinc-600 dark:text-slate-400 leading-relaxed italic">

@@ -3,7 +3,7 @@
  * mọi file (layout, sitemap, robots, generateMetadata, JSON-LD) đều phải import từ đây.
  */
 
-export const SITE_URL  = process.env.NEXT_PUBLIC_BASE_URL ?? 'https://lenote.dev';
+export const SITE_URL  = (process.env.NEXT_PUBLIC_BASE_URL ?? 'https://lenote.dev').replace(/\/+$/, '');
 export const SITE_NAME = 'Lenote';
 export const SITE_DESCRIPTION =
   'Lenote — Nền tảng học tập công nghệ tinh tế. Chia sẻ tri thức chuyên sâu về System Design, AI/ML, DevOps và phát triển sự nghiệp IT dành cho cộng đồng kỹ sư phần mềm Việt Nam.';

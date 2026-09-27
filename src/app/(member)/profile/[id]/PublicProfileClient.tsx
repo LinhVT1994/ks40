@@ -117,7 +117,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
 
           {/* Identity Info */}
           <div className="w-full flex flex-col items-center lg:items-start text-center lg:text-left py-1">
-            <h1 className="text-xl sm:text-2xl font-black text-zinc-800 dark:text-white tracking-tight leading-tight">
+            <h1 className="text-xl sm:text-2xl font-semibold text-zinc-800 dark:text-white tracking-tight leading-tight">
               {user.name}
             </h1>
             <div className="flex items-center gap-2 mt-1">
@@ -135,7 +135,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
                   { label: 'Followers', value: fmtViews(followerCount) },
                 ].map(s => (
                   <div key={s.label} className="flex flex-col items-center lg:items-start min-w-[40px]">
-                    <span className="text-sm font-black text-zinc-800 dark:text-white leading-none tracking-tight">{s.value}</span>
+                    <span className="text-sm font-semibold text-zinc-800 dark:text-white leading-none tracking-tight">{s.value}</span>
                     <span className="text-[7px] font-bold text-zinc-500 uppercase tracking-tighter mt-1">{s.label}</span>
                   </div>
                 ))}
@@ -157,10 +157,10 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
                 <button
                   onClick={handleFollow}
                   disabled={isPending}
-                  className={`inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
+                  className={`inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider transition-all ${
                     isFollowing
                       ? 'bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-slate-300 border border-zinc-300 dark:border-white/10 hover:bg-rose-50 hover:text-rose-500 hover:border-rose-200 dark:hover:bg-rose-500/10 dark:hover:text-rose-400'
-                      : 'bg-primary text-white shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5'
+                      : 'bg-brand text-white shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5'
                   } disabled:opacity-50`}
                 >
                   {isFollowing ? (
@@ -172,7 +172,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
               ) : (
                 <Link
                    href="/login"
-                   className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-wider bg-primary text-white shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+                   className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-[10px] font-semibold uppercase tracking-wider bg-brand text-white shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 transition-all"
                 >
                   <UserPlus className="w-3.5 h-3.5" />
                   Theo dõi
@@ -188,14 +188,14 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
         <main className="w-full animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150">
           <section>
             <div className="flex items-center gap-4 mb-8">
-              <h2 className="text-lg font-black text-zinc-800 dark:text-white tracking-tight uppercase">
+              <h2 className="text-lg font-semibold text-zinc-800 dark:text-white tracking-tight uppercase">
                 Bài viết <span className="text-zinc-300 dark:text-slate-600 font-bold ml-1">({articles.length})</span>
               </h2>
               <div className="h-[1px] flex-1 bg-gradient-to-r from-zinc-200 via-zinc-100 to-transparent dark:from-white/10 dark:via-white/5" />
             </div>
 
             {articles.length === 0 ? (
-              <div className="py-20 text-center rounded-[2.5rem] border-2 border-dashed border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
+              <div className="py-20 text-center rounded-3xl border-2 border-dashed border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">
                 <FileText className="w-10 h-10 text-zinc-200 dark:text-white/10 mx-auto mb-4" />
                 <p className="text-zinc-500 font-medium tracking-wide">Tác giả chưa công khai bài viết nào.</p>
               </div>

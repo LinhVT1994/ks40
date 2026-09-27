@@ -7,7 +7,7 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex bg-zinc-50 dark:bg-slate-900 font-display text-zinc-800 dark:text-slate-100 h-screen overflow-hidden">
+    <div className="ui-admin flex bg-canvas font-sans text-ink h-screen overflow-hidden">
       <React.Suspense fallback={<div className="w-64 shrink-0 bg-white dark:bg-slate-950 border-r border-zinc-300 dark:border-white/5" />}>
         <AdminSidebar />
       </React.Suspense>

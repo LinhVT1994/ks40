@@ -407,7 +407,7 @@ export default function GlobalScratchpad() {
                     </button>
                     <button 
                       onClick={confirmLink}
-                      className="px-3 py-1 bg-primary text-white text-[11px] font-bold rounded-lg shadow-sm shadow-primary/20 transition-all active:scale-95"
+                      className="px-3 py-1 bg-brand text-white text-[11px] font-bold rounded-lg shadow-sm shadow-primary/20 transition-all active:scale-95"
                     >
                       Áp dụng
                     </button>

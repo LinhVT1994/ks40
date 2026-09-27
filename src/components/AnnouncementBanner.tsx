@@ -19,7 +19,7 @@ const TYPE_CFG = {
   },
   info: {
     icon: Info,
-    bg: 'bg-primary',
+    bg: 'bg-brand',
     text: 'text-white',
     label: 'Thông báo',
   },

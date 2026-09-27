@@ -77,7 +77,7 @@ export default function HeaderSearch() {
           width: isExpanded ? '400px' : '250px',
         }}
         transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-        className={`relative flex items-center bg-zinc-100/50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-full overflow-visible transition-shadow duration-300 ${
+        className={`relative flex max-w-[28vw] items-center bg-zinc-100/50 dark:bg-white/5 border border-zinc-200 dark:border-white/10 rounded-xl overflow-visible transition-shadow duration-300 ${
           isExpanded ? 'shadow-lg shadow-primary/5 ring-2 ring-primary/20 border-primary/30 bg-white dark:bg-zinc-900/40' : 'hover:bg-zinc-200/50 dark:hover:bg-white/10'
         }`}
       >
@@ -87,6 +87,7 @@ export default function HeaderSearch() {
 
         <input
           ref={inputRef}
+          aria-label="Tìm kiếm bài viết"
           type="text"
           value={query}
           onChange={handleChange}
@@ -101,7 +102,7 @@ export default function HeaderSearch() {
         />
 
         {query && (
-          <button onClick={handleClear} className="absolute right-3 p-1 rounded-full hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-500 hover:text-zinc-600 dark:hover:text-white transition-colors">
+          <button onClick={handleClear} aria-label="Xóa tìm kiếm" className="absolute right-3 p-1 rounded-full hover:bg-zinc-200 dark:hover:bg-white/10 text-zinc-500 hover:text-zinc-600 dark:hover:text-white transition-colors">
             <X className="w-3.5 h-3.5" />
           </button>
         )}

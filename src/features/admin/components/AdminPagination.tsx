@@ -40,7 +40,7 @@ export default function AdminPagination({ currentPage, totalPages, total, label,
               <button key={p} onClick={() => onPageChange(p)}
                 className={`w-8 h-8 rounded-lg text-sm font-semibold transition-colors ${
                   p === currentPage
-                    ? 'bg-primary text-white'
+                    ? 'bg-brand text-white'
                     : 'text-zinc-600 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-white/5'
                 }`}>
                 {p}

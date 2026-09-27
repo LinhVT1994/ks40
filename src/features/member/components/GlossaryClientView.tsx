@@ -86,7 +86,7 @@ export default function GlossaryClientView({ initialTerms }: GlossaryClientViewP
                 {letters.map(l => (
                   <div key={l} className="relative group/section">
                     <div className="flex items-center gap-6 mb-10 py-4 bg-white/95 dark:bg-slate-950/95 backdrop-blur-sm transition-colors">
-                      <h2 className="text-5xl font-display font-heavy text-primary/10 dark:text-primary/5 group-hover/section:text-primary/30 transition-colors duration-500">
+                      <h2 className="text-5xl font-display font-medium text-primary">
                         {l}
                       </h2>
                     </div>

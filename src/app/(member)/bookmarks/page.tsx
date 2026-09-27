@@ -18,9 +18,9 @@ export default async function BookmarksPage() {
   const articles = Array.isArray(data) ? data : data.articles;
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 border-b border-line pb-6">
         <div className="p-2.5 rounded-2xl bg-primary/10">
           <Bookmark className="w-5 h-5 text-primary" />
         </div>
@@ -35,7 +35,7 @@ export default async function BookmarksPage() {
           <Bookmark className="w-10 h-10 text-zinc-300 dark:text-white/20 mx-auto mb-4" />
           <p className="text-zinc-500 font-medium">Chưa có bài viết nào được lưu</p>
           <p className="text-sm text-zinc-500 mt-1">Bấm vào biểu tượng bookmark trên bài viết để lưu lại</p>
-          <Link href="/" className="inline-block mt-4 px-5 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:opacity-90 transition-opacity">
+          <Link href="/" className="inline-block mt-4 px-5 py-2 rounded-xl bg-brand text-white text-sm font-semibold hover:opacity-90 transition-opacity">
             Khám phá bài viết
           </Link>
         </div>

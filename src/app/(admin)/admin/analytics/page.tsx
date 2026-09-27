@@ -36,7 +36,7 @@ export default async function AdminAnalyticsPage() {
         <div className="max-w-7xl mx-auto space-y-10">
           {/* Page Intro */}
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-black text-zinc-800 dark:text-white tracking-tighter font-display">
+            <h1 className="text-3xl font-semibold text-zinc-800 dark:text-white tracking-tighter font-display">
               Phân tích Tăng trưởng
             </h1>
             <p className="text-sm font-medium text-zinc-500 dark:text-slate-400 opacity-80">

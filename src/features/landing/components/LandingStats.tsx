@@ -22,15 +22,11 @@ export default function LandingStats() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              whileHover={{ 
-                scale: 1.05, 
-                backgroundColor: "rgba(59, 130, 246, 0.05)",
-              }}
-              className="p-8 rounded-[2rem] border border-zinc-200 dark:border-white/5 bg-white dark:bg-white/[0.02] flex flex-col items-center justify-center text-center transition-all duration-300 cursor-default"
+              className="ui-panel p-5 sm:p-8 flex flex-col items-center justify-center text-center"
             >
               <motion.div 
                 whileHover={{ scale: 1.1 }}
-                className="text-4xl sm:text-5xl font-black text-zinc-800 dark:text-white mb-3 font-display"
+                className="text-4xl sm:text-5xl font-semibold text-zinc-800 dark:text-white mb-3 font-display"
               >
                 {stat.value}
               </motion.div>

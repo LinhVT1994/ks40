@@ -50,7 +50,7 @@ export default function BookClient({ books }: { books: BookSummary[] }) {
         </div>
         <Link
           href="/admin/books/create"
-          className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-2xl text-sm font-bold hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 w-full sm:w-auto justify-center"
+          className="flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-2xl text-sm font-bold hover:bg-brand/90 transition-all shadow-lg shadow-primary/20 w-full sm:w-auto justify-center"
         >
           <Plus className="w-4 h-4" /> Tạo Book mới
         </Link>

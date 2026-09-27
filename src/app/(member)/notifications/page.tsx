@@ -21,11 +21,11 @@ export default async function NotificationsPage() {
   });
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10">
+    <div className="w-full max-w-3xl mx-auto px-4 md:px-8 py-8">
       <div className="mb-6 flex justify-center sm:justify-start">
         <BackButton fallbackUrl="/" />
       </div>
-      <div className="mb-8">
+      <div className="mb-8 border-b border-line pb-6">
         <h1 className="text-2xl font-bold text-zinc-800 dark:text-white tracking-tight text-center sm:text-left">Thông báo</h1>
         <p className="text-sm text-zinc-500 mt-1 text-center sm:text-left">
           {unreadCount > 0 ? `${unreadCount} thông báo chưa đọc` : 'Bạn đã đọc hết thông báo'}

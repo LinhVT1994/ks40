@@ -16,6 +16,7 @@ import ProfileClient from './ProfileClient';
 import PublicProfileClient from './PublicProfileClient';
 import JsonLd from '@/components/shared/JsonLd';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
+import { profileMetadata } from '@/lib/profile-og';
 
 function formatViews(n: number) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n);
@@ -28,10 +29,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const data = await getPublicProfileAction(id);
   if (!data) return {};
 
-  const { user } = data;
-  return {
-    alternates: { canonical: `/@${user.username || user.id}` },
-  };
+  return profileMetadata(data.user);
 }
 
 export default async function PublicProfilePage({ params }: { params: Promise<{ id: string }> }) {

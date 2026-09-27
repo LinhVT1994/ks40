@@ -112,7 +112,7 @@ export async function getArticlesAction(options: GetArticlesOptions = {}) {
   const activeTag    = options.tag?.trim();
 
   // timeframe filtering
-  let dateFilter: Prisma.ArticleWhereInput | undefined;
+  let dateFilter: { publishedAt: { gte: Date } } | undefined;
   if (timeframe !== 'all') {
     const now = new Date();
     let gteDate = new Date();
@@ -210,9 +210,8 @@ export async function getArticlesAction(options: GetArticlesOptions = {}) {
   }
 
   // Browse thuần → decay score với cached ranking
-  const poolDate = new Date();
-  poolDate.setDate(poolDate.getDate() - 30);
-  const effectiveDate = timeframe !== 'all' ? (where.publishedAt as any)?.gte : poolDate;
+  // "Tất cả thời gian" không giới hạn tuổi bài viết; chỉ lọc ngày khi được chọn.
+  const effectiveDate = dateFilter?.publishedAt.gte;
 
   // Cache key theo audience + timeframe + topic filter
   const cacheKey = `${audienceFilter.join(',')}_${effectiveDate?.toISOString() ?? 'all'}_${topicId ?? ''}_${(options.topicIds ?? []).join(',')}`;
@@ -422,13 +421,24 @@ const _getArticleContentCached = unstable_cache(
   { revalidate: 3600, tags: ['article-content', 'articles'] },
 );
 
-// Dùng cho page render — role từ session của page, không gọi auth() thêm
-export async function getArticleBySlugStaticAction(slug: string, role?: string) {
+// Public Server Action: authenticate before accessing the per-role content cache.
+export async function getArticleBySlugStaticAction(slug: string) {
+  const session = await auth();
+  const role = session?.user?.role;
+  // A cached PUBLIC copy must stop being accessible immediately after reclassification.
+  const accessible = await db.article.findFirst({
+    where: { slug, status: ArticleStatus.PUBLISHED, audience: { in: getAudienceFilter(role) } },
+    select: { id: true },
+  });
+  if (!accessible) return null;
   return _getArticleContentCached(slug, role ?? 'GUEST');
 }
 
 // Trạng thái tương tác của user (isLiked/isBookmarked) — chỉ gọi khi đã có userId
-export async function getArticleUserInteractionAction(articleId: string, userId: string) {
+export async function getArticleUserInteractionAction(articleId: string) {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return { isLiked: false, isBookmarked: false };
   const article = await db.article.findUnique({
     where:  { id: articleId },
     select: {

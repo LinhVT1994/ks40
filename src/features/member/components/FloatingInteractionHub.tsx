@@ -102,7 +102,7 @@ export default function FloatingInteractionHub({
           <button
             onClick={handleFollow}
             disabled={followPending}
-            className={`group/follow flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-[13px] font-black transition-all duration-300 border shadow-sm ${
+            className={`group/follow flex items-center justify-center gap-1.5 px-4 py-1.5 rounded-xl text-[13px] font-semibold transition-all duration-300 border shadow-sm ${
               isFollowing
                 ? 'bg-zinc-100 dark:bg-white/10 text-zinc-500 border-zinc-200 dark:border-white/5 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-500 hover:border-red-200 dark:hover:border-red-500/20'
                 : 'bg-zinc-950 dark:bg-white text-white dark:text-zinc-950 border-transparent hover:translate-y-[-1px] active:scale-95'

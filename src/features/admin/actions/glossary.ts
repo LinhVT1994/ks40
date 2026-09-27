@@ -5,7 +5,7 @@ import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { slugify } from '@/lib/slugify';
 import { ArticleStatus, NotificationType, Role } from '@prisma/client';
-import { createNotificationAction } from '@/features/notifications/actions/notification';
+import { createNotificationAction } from '@/lib/notifications';
 
 export type GlossaryTermSummary = {
   id: string;
@@ -55,8 +55,10 @@ export async function getGlossaryTermsAction(opts?: {
   limit?: number;
   isAdmin?: boolean;
 }) {
-  const page = opts?.page ?? 1;
-  const limit = opts?.limit ?? 30;
+  const session = await auth();
+  const isAdmin = session?.user?.role === 'ADMIN';
+  const page = Math.max(1, Math.floor(opts?.page || 1));
+  const limit = Math.min(100, Math.max(1, Math.floor(opts?.limit || 30)));
   const skip = (page - 1) * limit;
 
   const orderBy: any = opts?.sort === 'date'
@@ -76,8 +78,7 @@ export async function getGlossaryTermsAction(opts?: {
         ? { not: { startsWith: 'A', mode: 'insensitive' as const } }
         : { startsWith: opts.letter, mode: 'insensitive' as const }
     }),
-    ...(opts?.status && { status: opts.status }),
-    ...(!opts?.isAdmin && !opts?.status && { status: ArticleStatus.PUBLISHED }),
+    ...(!isAdmin ? { status: ArticleStatus.PUBLISHED } : opts?.status ? { status: opts.status } : {}),
   };
 
   const [terms, total, statusCountsRaw] = await Promise.all([
@@ -94,6 +95,7 @@ export async function getGlossaryTermsAction(opts?: {
     db.glossaryTerm.count({ where }),
     db.glossaryTerm.groupBy({
       by: ['status'],
+      where: isAdmin ? {} : { status: ArticleStatus.PUBLISHED },
       _count: true,
     }),
   ]);
@@ -166,6 +168,7 @@ export async function getGlossaryTermBySlugAction(slug: string) {
 }
 
 export async function getGlossaryTermByIdAction(id: string) {
+  await requireAdmin();
   return db.glossaryTerm.findUnique({
     where: { id },
     include: { topic: { select: { id: true, label: true } } },
@@ -291,4 +294,3 @@ export async function deleteGlossaryTermAction(id: string): Promise<ActionResult
     return { success: false, error: e.message ?? 'Lỗi không xác định' };
   }
 }
-

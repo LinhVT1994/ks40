@@ -64,18 +64,18 @@ function StatCard({ icon, label, value, subValue, description }: {
     description: React.ReactNode; 
 }) {
   return (
-    <div className="group relative p-5 rounded-[2rem] bg-white dark:bg-white/[0.03] border border-zinc-200 dark:border-white/5 transition-all duration-500 hover:border-primary/20 hover:scale-[1.02] hover:bg-zinc-50/50 dark:hover:bg-white/[0.05]">
+    <div className="group relative p-5 rounded-3xl bg-white dark:bg-white/[0.03] border border-zinc-200 dark:border-white/5 transition-all duration-500 hover:border-primary/20 hover:scale-[1.02] hover:bg-zinc-50/50 dark:hover:bg-white/[0.05]">
       <div className="flex items-start justify-between mb-3">
         <div className="p-2.5 rounded-2xl bg-zinc-50 dark:bg-white/5 border border-zinc-100 dark:border-white/5 group-hover:scale-110 group-hover:bg-primary/5 transition-all">
           {icon}
         </div>
       </div>
       <div>
-        <p className="text-[10px] font-black text-zinc-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">
+        <p className="text-[10px] font-semibold text-zinc-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">
           {label}
         </p>
         <div className="flex items-baseline gap-1.5">
-          <h3 className="text-2xl font-black text-zinc-800 dark:text-white tracking-tight">
+          <h3 className="text-2xl font-semibold text-zinc-800 dark:text-white tracking-tight">
             {value}
           </h3>
           {subValue && (

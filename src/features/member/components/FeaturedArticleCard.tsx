@@ -19,7 +19,7 @@ export default function FeaturedArticleCard({ article }: FeaturedArticleCardProp
     <GlanceTrigger article={article as any}>
       <Link
         href={`/article/${article.slug}`}
-        className="group relative block w-full bg-white/40 dark:bg-white/[0.02] backdrop-blur-xl border border-zinc-200 dark:border-white/5 rounded-[2.5rem] overflow-hidden hover:shadow-2xl hover:shadow-primary/20 transition-all duration-700"
+        className="ui-panel group relative block w-full overflow-hidden hover:shadow-lg transition-shadow duration-200"
       >
         <div className="flex flex-col lg:flex-row h-full">
           {/* Large Image Showcase */}
@@ -34,7 +34,7 @@ export default function FeaturedArticleCard({ article }: FeaturedArticleCardProp
             />
             {/* Featured Badge */}
             <div className="absolute top-6 left-6">
-               <div className="bg-primary/90 backdrop-blur-md text-white text-[10px] sm:text-xs font-black px-4 py-1.5 rounded-full tracking-[0.2em] uppercase shadow-lg">
+               <div className="bg-brand/90 backdrop-blur-md text-white text-[10px] sm:text-xs font-semibold px-4 py-1.5 rounded-full tracking-[0.2em] uppercase shadow-lg">
                   Nổi bật
                </div>
             </div>
@@ -46,13 +46,13 @@ export default function FeaturedArticleCard({ article }: FeaturedArticleCardProp
           {/* Content Details */}
           <div className="flex-1 p-6 sm:p-10 flex flex-col justify-center">
             <div className="flex items-center gap-3 mb-4">
-                <span className="w-8 h-[2px] bg-primary rounded-full" />
+                <span className="w-8 h-[2px] bg-brand rounded-full" />
                 <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">
                    {article.topic.label}
                 </span>
             </div>
 
-            <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-zinc-800 dark:text-white leading-[1.2] mb-4 group-hover:text-primary transition-colors duration-500">
+            <h3 className="text-xl sm:text-2xl lg:text-3xl font-semibold text-zinc-800 dark:text-white leading-[1.2] mb-4 group-hover:text-primary transition-colors duration-500">
                {article.title}
             </h3>
 

@@ -125,7 +125,7 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
             {/* Header */}
             <div className="p-6 border-b border-zinc-300 dark:border-white/10 flex items-center justify-between bg-white dark:bg-slate-900/50">
               <div>
-                <h2 className="text-xl font-black text-zinc-800 dark:text-white">Ghi chú & Highlight</h2>
+                <h2 className="text-xl font-semibold text-zinc-800 dark:text-white">Ghi chú & Highlight</h2>
                 <p className="text-xs font-bold text-zinc-500 mt-1 truncate w-64 uppercase tracking-widest">{chapterTitle}</p>
               </div>
               <button
@@ -177,7 +177,7 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
                     <button 
                       key={type}
                       onClick={() => setFilterType(type)}
-                      className={`relative pb-3 text-[10px] font-black uppercase tracking-[0.2em] transition-colors whitespace-nowrap ${
+                      className={`relative pb-3 text-[10px] font-semibold uppercase tracking-[0.2em] transition-colors whitespace-nowrap ${
                         isActive 
                           ? 'text-primary' 
                           : 'text-zinc-500 hover:text-zinc-700 dark:hover:text-slate-200'
@@ -187,7 +187,7 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
                       {isActive && (
                         <motion.div 
                           layoutId="activeTabFilter"
-                          className="absolute bottom-[-1px] left-0 w-full h-[2px] bg-primary rounded-t-full z-10"
+                          className="absolute bottom-[-1px] left-0 w-full h-[2px] bg-brand rounded-t-full z-10"
                           transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                         />
                       )}
@@ -235,7 +235,7 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
                           <div className="flex items-center gap-2 opacity-80">
                             <div className={`w-1 h-3 rounded-full bg-primary/70`} />
                             <div className="flex items-center gap-1.5 shrink-0">
-                              <span className={`text-[8.5px] px-1.5 py-0.5 rounded uppercase tracking-widest font-black bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-300`}>
+                              <span className={`text-[8.5px] px-1.5 py-0.5 rounded uppercase tracking-widest font-semibold bg-primary/10 text-primary dark:bg-primary/20 dark:text-blue-300`}>
                                 Ghi chú chương
                               </span>
                               <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">{note.time}</span>
@@ -255,7 +255,7 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
                               "{note.highlightText}"
                             </p>
                             <div className="flex items-center gap-1.5 shrink-0">
-                              <span className={`text-[8.5px] px-1.5 py-0.5 rounded uppercase tracking-widest font-black ${getBadgeClass(note.color, !!note.content)}`}>
+                              <span className={`text-[8.5px] px-1.5 py-0.5 rounded uppercase tracking-widest font-semibold ${getBadgeClass(note.color, !!note.content)}`}>
                                 {note.content ? 'Ghi chú' : 'Highlight'}
                               </span>
                               <span className="text-[9px] font-bold uppercase tracking-widest text-zinc-500">{note.time}</span>
@@ -298,7 +298,7 @@ export default function ChapterNotesPanel({ isOpen, onClose, chapterTitle }: Cha
             
             {/* Footer */}
             <div className="p-6 border-t border-zinc-300 dark:border-white/10 bg-white dark:bg-slate-900 flex justify-center">
-               <span className="text-[10px] font-black uppercase tracking-widest text-zinc-500">KS4.0 Personal Notes</span>
+               <span className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500">KS4.0 Personal Notes</span>
             </div>
           </motion.div>
         </>

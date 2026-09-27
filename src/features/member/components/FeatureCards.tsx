@@ -11,6 +11,7 @@ import { getArticlesAction, getForYouArticlesAction } from '@/features/articles/
 import { toggleBookmarkAction, getBookmarksAction } from '@/features/articles/actions/bookmark';
 import type { TopicItem } from '@/features/admin/actions/topic';
 import ArticleListItem from '@/features/articles/components/ArticleListItem';
+import BookBuddy from '@/components/shared/BookBuddy';
 
 function formatViews(n: number) {
   if (n >= 1000) return `${(n / 1000).toFixed(1)}k`;
@@ -327,7 +328,7 @@ export default function FeatureCards({
                   >
                     {tab.label}
                     {activeFeed === tab.id && (
-                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary animate-in fade-in slide-in-from-bottom-1" />
+                      <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand animate-in fade-in slide-in-from-bottom-1" />
                     )}
                   </button>
                 ));
@@ -356,7 +357,7 @@ export default function FeatureCards({
                {isTimeframeOpen && (
                  <div className="absolute right-0 top-full mt-3 w-56 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-zinc-200 dark:border-white/10 rounded-2xl shadow-2xl z-50 py-2.5 animate-in fade-in zoom-in-95 duration-200 ring-1 ring-black/5 dark:ring-white/5">
                     <div className="px-4 py-2 mb-1 border-b border-zinc-100 dark:border-white/5">
-                      <span className="text-[10px] font-black uppercase tracking-[0.2em] text-zinc-400">Lọc theo thời gian</span>
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-zinc-400">Lọc theo thời gian</span>
                     </div>
                     {timeframeOptions.map(o => (
                       <button
@@ -367,7 +368,7 @@ export default function FeatureCards({
                         }`}
                       >
                         {o.label}
-                        {activeTimeframe === o.id && <div className="w-1 h-1 rounded-full bg-primary" />}
+                        {activeTimeframe === o.id && <div className="w-1 h-1 rounded-full bg-brand" />}
                       </button>
                     ))}
                  </div>
@@ -389,7 +390,7 @@ export default function FeatureCards({
               ))
             ) : (
               <div className="py-24 flex flex-col items-center justify-center text-center px-6 animate-in fade-in duration-700">
-                <Filter className="w-8 h-8 text-zinc-200 dark:text-white/10 mb-6" />
+                <BookBuddy mood={activeFeed === 'followed' ? 'grow' : 'search'} className="mb-6 w-32" />
                 <h3 className="text-base font-bold text-zinc-500 dark:text-slate-500 mb-2">
                   {activeTimeframe !== 'all' 
                     ? `Không có bài viết nào trong ${activeTimeframeLabel.toLowerCase()}` 
@@ -421,7 +422,7 @@ export default function FeatureCards({
                 <button
                   disabled={isPending}
                   onClick={handleLoadMore}
-                  className="group relative flex items-center justify-center gap-2.5 px-6 py-2.5 bg-primary/5 dark:bg-white/5 text-primary dark:text-white rounded-full font-bold text-[13px] border border-primary/20 dark:border-white/10 hover:bg-primary hover:text-white hover:border-primary transition-all duration-500 active:scale-95 disabled:opacity-50 overflow-hidden shadow-sm hover:shadow-primary/30"
+                  className="group relative flex items-center justify-center gap-2.5 px-6 py-2.5 bg-primary/5 dark:bg-white/5 text-primary dark:text-white rounded-full font-bold text-[13px] border border-primary/20 dark:border-white/10 hover:bg-brand hover:text-white hover:border-primary transition-all duration-500 active:scale-95 disabled:opacity-50 overflow-hidden shadow-sm hover:shadow-primary/30"
                 >
                   {isPending ? (
                     <Loader2 className="w-4 h-4 animate-spin" />
@@ -502,7 +503,7 @@ function TrendingHorizontal({ articles, discoveryArticles, topicIds }: { article
                 aria-label={article.title}
               />
               <div className="py-3 hover:bg-zinc-100/80 dark:hover:bg-white/[0.02] transition-all duration-500 ease-[cubic-bezier(0.34,1,0.64,1)] flex flex-row items-stretch min-h-[120px] px-3 -mx-3 rounded-xl relative cursor-pointer group-hover:translate-x-1 group-hover:shadow-2xl group-hover:shadow-primary/5">
-                <div className="absolute -left-1 top-2 text-4xl font-black text-zinc-100 dark:text-white/[0.02] italic select-none z-0 group-hover:text-primary/20 transition-colors duration-500">
+                <div className="absolute -left-1 top-2 text-4xl font-semibold text-zinc-100 dark:text-white/[0.02] italic select-none z-0 group-hover:text-primary/20 transition-colors duration-500">
                   {String(idx + 1).padStart(2, '0')}
                 </div>
                 <div className="w-24 sm:w-28 h-auto rounded-lg bg-cover bg-center shrink-0 border border-zinc-200 dark:border-white/5 relative z-10 overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 flex items-center justify-center text-zinc-300 dark:text-white/20 font-bold text-2xl"
@@ -579,7 +580,7 @@ function TrendingSidebar({ articles, discoveryArticles, topicIds }: { articles: 
               aria-label={article.title}
             />
             <div className="flex gap-4 p-2.5 hover:bg-zinc-100/80 dark:hover:bg-white/[0.02] transition-all duration-300 rounded-xl relative cursor-pointer group-hover:translate-x-1 group-hover:shadow-lg group-hover:shadow-primary/5">
-               <div className="absolute -left-1 -top-1 w-6 h-6 flex items-center justify-center text-[10px] font-black italic text-primary/40 dark:text-white/10 select-none group-hover:text-primary transition-colors duration-300">
+               <div className="absolute -left-1 -top-1 w-6 h-6 flex items-center justify-center text-[10px] font-semibold italic text-primary/40 dark:text-white/10 select-none group-hover:text-primary transition-colors duration-300">
                   {String(trending.indexOf(article) + 1).padStart(2, '0')}
                </div>
               <div
@@ -661,7 +662,7 @@ function RecentHistory({ history, currentUserId }: { history: any[]; currentUser
                 </h4>
                 <div className="flex flex-col gap-1.5 mt-1.5">
                   <div className="w-full h-0.5 bg-zinc-100 dark:bg-white/5 rounded-full overflow-hidden">
-                    <div className="h-full bg-primary rounded-full group-hover:bg-indigo-500 transition-colors duration-300" style={{ width: `${Math.round(item.progress * 100)}%` }} />
+                    <div className="h-full bg-brand rounded-full group-hover:bg-indigo-500 transition-colors duration-300" style={{ width: `${Math.round(item.progress * 100)}%` }} />
                   </div>
                   <span className="text-[9px] font-bold text-zinc-500 dark:text-slate-500 uppercase tracking-tighter group-hover:text-primary/70 transition-colors">
                     Đã đọc {Math.round(item.progress * 100)}%

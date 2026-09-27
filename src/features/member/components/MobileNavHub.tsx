@@ -25,7 +25,7 @@ export default function MobileNavHub({
         {/* Top Progress Line */}
         <div className="absolute top-0 left-0 w-full h-[2px] bg-zinc-100 dark:bg-white/5">
           <div 
-            className="h-full bg-primary transition-all duration-300" 
+            className="h-full bg-brand transition-all duration-300"
             style={{ width: `${progress}%` }} 
           />
         </div>
@@ -37,7 +37,7 @@ export default function MobileNavHub({
             className="flex flex-col items-center gap-1 p-2 text-zinc-500 hover:text-primary transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
-            <span className="text-[9px] font-black uppercase tracking-widest">Back</span>
+            <span className="text-[9px] font-semibold uppercase tracking-widest">Back</span>
           </Link>
 
           <div className="w-px h-8 bg-zinc-200/60 dark:bg-white/10" />
@@ -48,7 +48,7 @@ export default function MobileNavHub({
             className="flex flex-col items-center gap-1 p-2 text-zinc-500 dark:text-slate-400 hover:text-primary transition-colors"
           >
             <List className="w-5 h-5" />
-            <span className="text-[9px] font-black uppercase tracking-widest">TOC</span>
+            <span className="text-[9px] font-semibold uppercase tracking-widest">TOC</span>
           </button>
 
           {/* Syllabus Toggle */}
@@ -57,7 +57,7 @@ export default function MobileNavHub({
             className="flex flex-col items-center gap-1 p-2 text-zinc-500 dark:text-slate-400 hover:text-primary transition-colors"
           >
             <BookOpen className="w-5 h-5" />
-            <span className="text-[9px] font-black uppercase tracking-widest">Syllabus</span>
+            <span className="text-[9px] font-semibold uppercase tracking-widest">Syllabus</span>
           </button>
         </div>
       </div>

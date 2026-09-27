@@ -57,7 +57,7 @@ export default function ProfileArticleCard({
           
           <div className="absolute top-3 left-3">
             <span
-              className="backdrop-blur-md max-md:backdrop-blur-sm bg-white/80 dark:bg-slate-900/80 text-[10px] font-black uppercase px-3 py-1 rounded-md tracking-widest shadow-sm border border-white/20 dark:border-white/5"
+              className="backdrop-blur-md max-md:backdrop-blur-sm bg-white/80 dark:bg-slate-900/80 text-[10px] font-semibold uppercase px-3 py-1 rounded-md tracking-widest shadow-sm border border-white/20 dark:border-white/5"
               style={{ color: article.topic.color ?? '#3B82F6' }}
             >
               {article.topic.label}
@@ -94,7 +94,7 @@ export default function ProfileArticleCard({
             </div>
             
             {showReadTime && (
-              <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest opacity-70 bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded-md">
+              <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-widest opacity-70 bg-zinc-100 dark:bg-white/5 px-2 py-0.5 rounded-md">
                 <Clock className="w-3 h-3" />
                 {article.readTime}m
               </span>

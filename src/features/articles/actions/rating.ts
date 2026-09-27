@@ -3,7 +3,7 @@
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { eventBus, EVENTS } from '@/lib/events/bus';
-import { createNotificationAction } from '@/features/notifications/actions/notification';
+import { createNotificationAction } from '@/lib/notifications';
 import { revalidatePath } from 'next/cache';
 
 // ─── Types ──────────────────────────────────────────────────

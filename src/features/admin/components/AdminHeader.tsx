@@ -23,6 +23,7 @@ function MobileMenuButton() {
   return (
     <button
       onClick={openMobileMenu}
+      aria-label="Mở menu quản trị"
       className="lg:hidden p-2 -ml-2 rounded-xl text-zinc-500 hover:bg-zinc-100 dark:hover:bg-white/5 transition-colors"
     >
       <Menu className="w-5 h-5" />
@@ -58,7 +59,7 @@ export default function AdminHeader({ breadcrumb, draftingTitle }: AdminHeaderPr
   };
 
   return (
-    <header className="flex items-center justify-between w-full px-6 md:px-8 py-3 md:py-4 border-b border-zinc-300 dark:border-white/5 bg-white dark:bg-black/5 backdrop-blur-md sticky top-0 z-30 shrink-0 relative">
+    <header className="ui-admin-header flex items-center justify-between w-full px-4 md:px-8 py-3 md:py-4 sticky top-0 z-30 shrink-0">
       <div className="flex items-center gap-2 lg:gap-3">
         {/* Mobile Hamburger */}
         <Suspense fallback={<div className="lg:hidden w-9 h-9" />}>

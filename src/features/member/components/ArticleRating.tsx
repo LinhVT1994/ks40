@@ -94,7 +94,7 @@ function AverageDisplay({
   return (
     <div className="shrink-0 w-full lg:w-[260px]">
       <div className="text-center lg:text-left mb-4">
-        <div className="text-4xl font-black text-zinc-800 dark:text-white tracking-tighter">
+        <div className="text-4xl font-semibold text-zinc-800 dark:text-white tracking-tighter">
           {totalCount > 0 ? averageScore.toFixed(1) : '—'}
         </div>
         <div className="flex items-center justify-center lg:justify-start gap-0.5 mt-1">
@@ -162,7 +162,7 @@ function RatingGate({ reason, progress }: { reason: string; progress?: number })
             </p>
             <div className="mt-2 h-1.5 bg-zinc-200 dark:bg-white/10 rounded-full overflow-hidden">
               <div
-                className="h-full bg-primary rounded-full transition-all"
+                className="h-full bg-brand rounded-full transition-all"
                 style={{ width: `${Math.min(progress ?? 0, 100)}%` }}
               />
             </div>
@@ -258,7 +258,7 @@ function RatingForm({
         <button
           onClick={handleSubmit}
           disabled={score === 0 || isPending}
-          className="px-5 py-2 text-sm font-bold rounded-xl bg-primary text-white hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="px-5 py-2 text-sm font-bold rounded-xl bg-brand text-white hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
         >
           {isPending ? 'Đang gửi...' : initialScore > 0 ? 'Cập nhật' : 'Gửi đánh giá'}
         </button>

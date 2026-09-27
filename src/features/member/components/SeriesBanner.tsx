@@ -28,7 +28,7 @@ export default function SeriesBanner({ ctx }: { ctx: SeriesContext }) {
             <BookOpen className="w-4 h-4" />
           </div>
           <div className="min-w-0">
-            <p className="text-[10px] font-black text-primary uppercase tracking-widest mb-0.5">Series</p>
+            <p className="text-[10px] font-semibold text-primary uppercase tracking-widest mb-0.5">Series</p>
             <p className="text-sm font-bold text-zinc-800 dark:text-white truncate">{series.title}</p>
           </div>
         </div>
@@ -50,7 +50,7 @@ export default function SeriesBanner({ ctx }: { ctx: SeriesContext }) {
       <div className="px-5 pb-3">
         <div className="h-1 rounded-full bg-primary/10 dark:bg-primary/20 overflow-hidden">
           <div
-            className="h-full rounded-full bg-primary transition-all duration-500"
+            className="h-full rounded-full bg-brand transition-all duration-500"
             style={{ width: `${((currentIndex + 1) / total) * 100}%` }}
           />
         </div>
@@ -71,7 +71,7 @@ export default function SeriesBanner({ ctx }: { ctx: SeriesContext }) {
                     : 'text-zinc-600 dark:text-slate-300 hover:bg-primary/5 font-medium'
                 }`}
               >
-                <span className="shrink-0 w-5 h-5 rounded-full border border-current/30 flex items-center justify-center text-[10px] font-black">
+                <span className="shrink-0 w-5 h-5 rounded-full border border-current/30 flex items-center justify-center text-[10px] font-semibold">
                   {isCurrent ? <Check className="w-3 h-3" /> : a.seriesOrder}
                 </span>
                 <span className="truncate">{a.title}</span>

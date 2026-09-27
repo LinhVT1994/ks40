@@ -53,9 +53,9 @@ export default async function HistoryPage() {
   const groups = groupByDate(history as HistoryRecord[]);
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
+    <div className="w-full max-w-4xl mx-auto px-4 md:px-8 py-8 space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 border-b border-line pb-6">
         <div className="p-2.5 rounded-2xl bg-violet-500/10">
           <History className="w-5 h-5 text-violet-500" />
         </div>
@@ -70,7 +70,7 @@ export default async function HistoryPage() {
           <History className="w-10 h-10 text-zinc-300 dark:text-white/20 mx-auto mb-4" />
           <p className="text-zinc-500 font-medium">Chưa đọc bài viết nào</p>
           <p className="text-sm text-zinc-500 mt-1">Lịch sử đọc sẽ được lưu tại đây</p>
-          <Link href="/" className="inline-block mt-4 px-5 py-2 rounded-xl bg-primary text-white text-sm font-semibold hover:opacity-90 transition-opacity">
+          <Link href="/" className="inline-block mt-4 px-5 py-2 rounded-xl bg-brand text-white text-sm font-semibold hover:opacity-90 transition-opacity">
             Khám phá bài viết
           </Link>
         </div>
@@ -105,7 +105,7 @@ export default async function HistoryPage() {
                       <div className="mt-2 flex items-center gap-2">
                         <div className="flex-1 h-1 bg-zinc-100 dark:bg-white/10 rounded-full overflow-hidden">
                           <div
-                            className="h-full bg-primary rounded-full transition-all"
+                            className="h-full bg-brand rounded-full transition-all"
                             style={{ width: `${Math.round(progress * 100)}%` }}
                           />
                         </div>

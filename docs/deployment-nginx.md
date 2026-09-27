@@ -1,5 +1,7 @@
 # Hướng dẫn Deploy Next.js với Nginx & PM2
 
+> **Đã có database/website đang chạy?** Dùng [hướng dẫn cập nhật giữ nguyên DB](deployment-existing-db.md). Không thực hiện phần tạo `.env`/khởi tạo từ đầu dưới đây trên production hiện có. Standalone phải có static assets và persistent uploads; xem checklist trong tài liệu cập nhật trước khi restart.
+
 Tài liệu này hướng dẫn cách triển khai ứng dụng **KS40** lên server Linux (Ubuntu/Debian) sử dụng Nginx làm Reverse Proxy và PM2 để quản lý process.
 
 ## 1. Chuẩn bị Server
@@ -60,6 +62,10 @@ server {
     listen 80;
     server_name yourdomain.com;
 
+    # Tài liệu chỉ được phục vụ qua API kiểm tra quyền, không qua static alias/CDN.
+    location ^~ /uploads/files/ { return 404; }
+    location ^~ /uploads/shared/ { return 404; }
+
     # Tối ưu cho Next.js static files
     location /_next/static {
         alias /path/to/your/project/.next/static;
@@ -79,8 +85,8 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # Giới hạn dung lượng upload (phù hợp với cấu hình API 50MB)
-    client_max_body_size 50M;
+    # Trần request body; API còn giới hạn riêng mỗi file và tổng số file.
+    client_max_body_size 200M;
 }
 ```
 

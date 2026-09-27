@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
 import { ArticleStatus, ArticleAudience, ArticleBadge, NotificationType } from '@prisma/client';
-import { createNotificationAction } from '@/features/notifications/actions/notification';
+import { createNotificationAction } from '@/lib/notifications';
 import { eventBus, EVENTS } from '@/lib/events/bus';
 
 type ActionResult = { success: true; id: string } | { success: false; error: string };

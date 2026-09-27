@@ -3,8 +3,7 @@
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { revalidatePath } from 'next/cache';
-import { unlink } from 'fs/promises';
-import path from 'path';
+import { canAccessAudience } from '@/lib/access';
 
 async function requireAdmin() {
   const session = await auth();
@@ -32,11 +31,8 @@ export async function deleteSharedPackageAction(id: string) {
   });
   if (!pkg) return { success: false };
 
-  for (const file of pkg.files) {
-    try {
-      await unlink(path.join(process.cwd(), 'public', file.url));
-    } catch { /* đã bị xóa */ }
-  }
+  // Keep stored files for recoverable retention; never unlink a path taken from a DB URL.
+  // Removing the package revokes access through the authorized download endpoint.
 
   await db.sharedPackage.delete({ where: { id } });
   revalidatePath('/admin/shares');
@@ -44,6 +40,9 @@ export async function deleteSharedPackageAction(id: string) {
 }
 
 export async function incrementPackageDownloadAction(slug: string) {
+  const session = await auth();
+  const pkg = await db.sharedPackage.findUnique({ where: { slug } });
+  if (!pkg || (pkg.expiresAt && pkg.expiresAt <= new Date()) || !canAccessAudience(pkg.audience, session?.user?.role)) return;
   await db.sharedPackage.update({
     where: { slug },
     data: { downloadCount: { increment: 1 } },

@@ -6,6 +6,7 @@ import { signIn } from '@/auth';
 import { isRedirectError } from 'next/dist/client/components/redirect-error';
 import { eventBus, EVENTS } from '@/lib/events/bus';
 import { logger } from '@/lib/logger';
+import { allowAuthAttempt } from '@/lib/rate-limit';
 
 const log = logger.child({ module: 'auth/register' });
 
@@ -28,13 +29,17 @@ export async function registerAction(formData: FormData): Promise<RegisterResult
   if (!/^[a-z0-9_.]+$/.test(username)) {
     return { success: false, error: 'Username chỉ được chứa chữ cái, số, dấu gạch dưới và dấu chấm.' };
   }
-  if (password.length < 6) {
-    return { success: false, error: 'Mật khẩu phải có ít nhất 6 ký tự.' };
+  if (password.length < 8 || Buffer.byteLength(password) > 72) {
+    return { success: false, error: 'Mật khẩu cần ít nhất 8 ký tự và tối đa 72 byte.' };
   }
   if (password !== confirm) {
     return { success: false, error: 'Mật khẩu xác nhận không khớp.' };
   }
 
+  if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || username.length > 40 || name.length > 100) {
+    return { success: false, error: 'Thông tin đăng ký không hợp lệ.' };
+  }
+  if (!await allowAuthAttempt('register', email)) return { success: false, error: 'Vui lòng thử lại sau 15 phút.' };
   const existingEmail = await db.user.findUnique({ where: { email } });
   if (existingEmail) {
     log.warn({ email }, 'Đăng ký thất bại: email đã tồn tại');

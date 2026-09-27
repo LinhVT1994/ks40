@@ -2,16 +2,17 @@ import React from 'react';
 import type { Metadata } from 'next';
 import { getGlossaryTermsAction, GlossaryTermSummary } from '@/features/admin/actions/glossary';
 import { getTopicTreeAction } from '@/features/admin/actions/topic';
-import { SITE_NAME } from '@/lib/seo';
+import { SITE_URL } from '@/lib/seo';
 import GlossaryExplorer from '@/features/member/components/GlossaryExplorer';
 import GlossaryTermCard from '@/features/member/components/GlossaryTermCard';
 import GlossaryPagination from '@/features/member/components/GlossaryPagination';
 import MemberContainer from '@/components/layout/MemberContainer';
 
 export const metadata: Metadata = {
-  title: `Thuật ngữ | ${SITE_NAME}`,
+  title: 'Thuật ngữ',
   description: 'Tra cứu các thuật ngữ và định nghĩa chuyên ngành được sử dụng trong các bài viết.',
   alternates: { canonical: '/glossary' },
+  openGraph: { title: 'Thuật ngữ', description: 'Tra cứu thuật ngữ và định nghĩa chuyên ngành.', url: `${SITE_URL}/glossary`, images: [`${SITE_URL}/og?title=Thu%E1%BA%ADt%20ng%E1%BB%AF`] },
 };
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
@@ -69,7 +70,7 @@ export default async function GlossaryPage({
               {letters.map(letterKey => (
                 <div key={letterKey} className="relative group/section">
                   <div className="flex items-center gap-6 mb-10 py-4 transition-colors">
-                    <h2 className="text-5xl font-display font-heavy text-primary/10 dark:text-primary/5 group-hover/section:text-primary/30 transition-colors duration-500">
+                    <h2 className="text-5xl font-display font-medium text-primary">
                       {letterKey}
                     </h2>
                   </div>
@@ -99,8 +100,6 @@ export default async function GlossaryPage({
     </div>
   );
 }
-
-
 
 
 

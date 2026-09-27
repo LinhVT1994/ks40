@@ -1,6 +1,7 @@
 'use server';
 
 import { db } from '@/lib/db';
+import { requireAdmin } from '@/lib/authorization';
 import { updateTag } from 'next/cache';
 
 export type OccupationOptionAdmin = {
@@ -14,6 +15,7 @@ export type OccupationOptionAdmin = {
 };
 
 export async function getAllOccupationOptionsAction(): Promise<OccupationOptionAdmin[]> {
+  await requireAdmin();
   return db.occupationOption.findMany({ orderBy: { order: 'asc' } });
 }
 
@@ -23,6 +25,7 @@ export async function createOccupationOptionAction(data: {
   emoji?: string;
   description?: string;
 }): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
   const raw = data.value.trim().toUpperCase().replace(/\s+/g, '_');
   if (!raw || !data.label.trim()) return { success: false, error: 'Thiếu value hoặc label' };
 
@@ -49,6 +52,7 @@ export async function updateOccupationOptionAction(
   id: string,
   data: Partial<{ label: string; emoji: string; description: string; enabled: boolean; order: number }>,
 ): Promise<{ success: boolean; error?: string }> {
+  await requireAdmin();
   await db.occupationOption.update({
     where: { id },
     data: {
@@ -64,12 +68,14 @@ export async function updateOccupationOptionAction(
 }
 
 export async function deleteOccupationOptionAction(id: string): Promise<{ success: boolean }> {
+  await requireAdmin();
   await db.occupationOption.delete({ where: { id } });
   updateTag('occupation-options');
   return { success: true };
 }
 
 export async function reorderOccupationOptionsAction(ids: string[]): Promise<void> {
+  await requireAdmin();
   await db.$transaction(
     ids.map((id, index) => db.occupationOption.update({ where: { id }, data: { order: index } })),
   );

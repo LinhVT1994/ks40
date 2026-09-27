@@ -42,9 +42,9 @@ export default function LandingProcess() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-3xl sm:text-5xl font-black text-zinc-800 dark:text-white mb-6 font-display"
+            className="text-3xl sm:text-5xl font-semibold text-zinc-800 dark:text-white mb-6 font-display"
           >
-            QUY TRÌNH <span className="text-primary italic">TỐI GIẢN</span>
+            Những bước nhỏ, <span className="text-primary italic">giá trị dài lâu.</span>
           </motion.h2>
         </div>
 
@@ -59,19 +59,14 @@ export default function LandingProcess() {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              whileHover={{ 
-                scale: 1.02, 
-                backgroundColor: "rgba(255, 255, 255, 0.05)",
-                boxShadow: "0 20px 40px rgba(0,0,0,0.1)"
-              }}
-              className="relative p-10 rounded-[3rem] bg-zinc-50 dark:bg-white/[0.03] border border-white/5 transition-all duration-500 group cursor-default"
+              className="ui-panel relative p-7 pt-12 transition-shadow duration-200 group hover:shadow-md"
             >
-              <div className="absolute -top-6 -left-6 w-16 h-16 rounded-full bg-primary text-white flex items-center justify-center text-2xl font-black shadow-xl shadow-primary/20 z-10 group-hover:scale-110 transition-transform">
-                {idx + 1}
+              <div className="absolute top-5 right-6 text-sm font-medium text-muted z-10">
+                {step.step}
               </div>
 
               {/* Icon Container */}
-              <div className="relative w-20 h-20 rounded-3xl bg-white dark:bg-slate-900 border border-zinc-200 dark:border-white/10 shadow-2xl flex items-center justify-center mb-10 z-10 group-hover:border-primary/50 transition-all duration-500 group-hover:shadow-primary/20">
+              <div className="relative w-12 h-12 rounded-xl bg-panel-soft flex items-center justify-center mb-6 z-10">
                 <step.icon className="w-8 h-8 text-primary group-hover:scale-110 transition-transform duration-500" />
                 
                 {/* Luminous indicator */}

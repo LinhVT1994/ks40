@@ -83,7 +83,7 @@ export default function MemberStep3({ data, onBack, onPublish, isPending }: Step
   };
 
   return (
-    <div className="h-full overflow-y-auto bg-white dark:bg-[#0c0c0c] scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-white/5">
+    <div className="h-full overflow-y-auto bg-white dark:bg-canvas scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-white/5">
       <div className="max-w-[1400px] mx-auto px-6 py-12 md:py-20">
         <div className="xl:grid xl:grid-cols-12 gap-16 items-start">
           {/* Main content - Matches ArticleDetailPage structure */}
@@ -108,7 +108,7 @@ export default function MemberStep3({ data, onBack, onPublish, isPending }: Step
             {/* Simulated Footer Notice */}
             <div className="mt-20 pt-10 border-t border-zinc-200 dark:border-white/5">
                <div className="bg-zinc-50 dark:bg-white/[0.02] rounded-3xl p-8 border border-zinc-200 dark:border-white/5 text-center">
-                  <h4 className="text-sm font-black text-zinc-800 dark:text-white uppercase tracking-wider mb-2">Thông tin kiểm duyệt</h4>
+                  <h4 className="text-sm font-semibold text-zinc-800 dark:text-white uppercase tracking-wider mb-2">Thông tin kiểm duyệt</h4>
                   <p className="text-xs text-zinc-500 dark:text-slate-400 max-w-lg mx-auto leading-relaxed">
                     Bài viết của bạn sẽ được đội ngũ biên tập kiểm tra nội dung, chính tả và định dạng trước khi xuất bản. 
                     Quá trình này thường hoàn tất trong vòng 24 giờ làm việc.
@@ -120,7 +120,7 @@ export default function MemberStep3({ data, onBack, onPublish, isPending }: Step
           {/* Sidebar Mockup */}
           <aside className="hidden xl:block xl:col-span-3 sticky top-[100px] border-l border-zinc-200 dark:border-white/5 pl-8 space-y-10 group/sidebar">
             <div className="space-y-4">
-              <h4 className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Tác giả</h4>
+              <h4 className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest">Tác giả</h4>
               <div className="flex items-center gap-3">
                 <div className="w-12 h-12 rounded-full bg-zinc-200 dark:bg-white/10 overflow-hidden relative border-2 border-primary/20">
                    {data.author?.image && (
@@ -136,14 +136,14 @@ export default function MemberStep3({ data, onBack, onPublish, isPending }: Step
                 <div>
                    <Link href={`/profile/preview-author`} className="hover:text-primary transition-colors">
                      <div className="text-sm font-bold text-zinc-800 dark:text-white transition-colors">{data.author?.name || 'Tác giả'}</div>
-                     <div className="text-[10px] text-zinc-500 uppercase font-black tracking-tight">Thành viên cộng đồng</div>
+                     <div className="text-[10px] text-zinc-500 uppercase font-semibold tracking-tight">Thành viên cộng đồng</div>
                    </Link>
                 </div>
               </div>
             </div>
 
             <div className="p-6 bg-zinc-50 dark:bg-white/[0.02] rounded-2xl border border-dashed border-zinc-300 dark:border-white/10">
-               <div className="text-[10px] font-black text-zinc-500 uppercase tracking-widest mb-2">Ghi chú xem trước</div>
+               <div className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest mb-2">Ghi chú xem trước</div>
                <p className="text-[10px] text-zinc-500 leading-relaxed italic">
                  Đây là bản mô phỏng giao diện khi bài viết đã được xuất bản. Một số tính năng tương tác như Thả tim, Bình luận sẽ được kích hoạt sau khi bài viết Online.
                </p>

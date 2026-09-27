@@ -290,7 +290,7 @@ export default function GlossaryClient({ terms, total, totalPages, currentPage, 
               <button
                 key={p}
                 onClick={() => { const params = new URLSearchParams(searchParams.toString()); params.set('page', String(p)); router.push(`${pathname}?${params.toString()}`); }}
-                className={`w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${p === currentPage ? 'bg-primary text-white' : 'hover:bg-zinc-100 dark:hover:bg-white/10'}`}
+                className={`w-8 h-8 rounded-lg text-xs font-semibold transition-colors ${p === currentPage ? 'bg-brand text-white' : 'hover:bg-zinc-100 dark:hover:bg-white/10'}`}
               >
                 {p}
               </button>

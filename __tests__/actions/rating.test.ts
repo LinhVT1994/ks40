@@ -44,7 +44,7 @@ vi.mock('@/lib/events/bus', () => ({
   EVENTS:   { RATING_POSTED: 'RATING_POSTED' },
 }));
 
-vi.mock('@/features/notifications/actions/notification', () => ({
+vi.mock('@/lib/notifications', () => ({
   createNotificationAction: vi.fn(),
 }));
 
@@ -54,7 +54,7 @@ import { auth }           from '@/auth';
 import { db }             from '@/lib/db';
 import { eventBus }       from '@/lib/events/bus';
 import { revalidatePath } from 'next/cache';
-import { createNotificationAction } from '@/features/notifications/actions/notification';
+import { createNotificationAction } from '@/lib/notifications';
 import {
   upsertRatingAction,
   deleteRatingAction,

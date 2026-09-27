@@ -1,8 +1,39 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
+  outputFileTracingIncludes: { '/og/profile/*': ['./src/assets/fonts/*.ttf'] },
+  async headers() {
+    const csp = [
+      "default-src 'self'",
+      // Next hydration and the existing analytics snippet currently use inline scripts.
+      `script-src 'self' 'unsafe-inline' ${process.env.NODE_ENV === 'development' ? "'unsafe-eval'" : ''} https://www.googletagmanager.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com`,
+      "script-src-attr 'none'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "img-src 'self' data: blob: https:",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      `connect-src 'self' https: ${process.env.NODE_ENV === 'development' ? 'ws: wss:' : ''}`,
+      "frame-src 'self' https://*.google.com https://*.googlesyndication.com https://*.doubleclick.net https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com",
+      "media-src 'self' blob: https:",
+      "object-src 'none'", "base-uri 'self'", "form-action 'self'", "frame-ancestors 'none'",
+    ].join('; ');
+    return [{ source: '/:path*', headers: [
+      { key: 'Content-Security-Policy', value: csp },
+      { key: 'X-Content-Type-Options', value: 'nosniff' },
+      { key: 'X-Frame-Options', value: 'DENY' },
+      { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+      { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+      ...(process.env.NODE_ENV === 'production' ? [{ key: 'Strict-Transport-Security', value: 'max-age=31536000' }] : []),
+    ] }];
+  },
   output: 'standalone',
   images: {
+    localPatterns: [
+      { pathname: '/*' },
+      { pathname: '/uploads/images/**' },
+      { pathname: '/uploads/avatars/**' },
+      { pathname: '/uploads/comments/**' },
+    ],
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'unsplash.com' },

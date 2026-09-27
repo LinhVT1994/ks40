@@ -8,16 +8,16 @@ export default function LandingComparison() {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <section className="py-24 relative bg-white dark:bg-[#020617] overflow-hidden">
+    <section className="py-24 relative bg-white dark:bg-canvas overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-3xl sm:text-5xl font-black text-zinc-800 dark:text-white mb-6 font-display"
+            className="text-3xl sm:text-5xl font-semibold text-zinc-800 dark:text-white mb-6 font-display"
           >
-            TỪ <span className="text-zinc-500">HỖN LOẠN</span> ĐẾN <span className="text-primary italic">TĨNH LẶNG</span>
+            Từ <span className="text-zinc-500">xao nhãng</span> đến <span className="text-primary italic">tập trung.</span>
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -31,7 +31,7 @@ export default function LandingComparison() {
         </div>
 
         <div 
-          className="relative h-[600px] rounded-[3rem] overflow-hidden border border-zinc-300 dark:border-white/10 shadow-2xl cursor-ew-resize group"
+          className="relative h-[600px] rounded-3xl overflow-hidden border border-zinc-300 dark:border-white/10 shadow-2xl cursor-ew-resize group"
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
@@ -73,8 +73,8 @@ export default function LandingComparison() {
                   <Coffee className="w-8 h-8 text-primary" />
                 </motion.div>
                 
-                <h3 className="text-4xl font-black text-zinc-800 dark:text-white mb-6 font-display leading-[1.1]">
-                  TỰ DO TRÌNH BÀY <br /> <span className="text-primary italic">TRI THỨC</span>
+                <h3 className="text-4xl font-semibold text-zinc-800 dark:text-white mb-6 font-display leading-[1.1]">
+                  Không gian cho <br /> <span className="text-primary italic">ý tưởng của bạn.</span>
                 </h3>
                 
                 <p className="text-zinc-500 dark:text-slate-400 text-lg mb-10 italic leading-relaxed">

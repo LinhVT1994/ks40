@@ -160,7 +160,7 @@ export default function AuthorCard({ author: initialAuthor }: { author: AuthorIn
                 className={`group/btn relative flex items-center justify-start gap-2 px-4 py-1.5 rounded-full text-[11px] font-bold transition-all overflow-hidden w-[130px] ${
                   isFollowing
                     ? 'bg-zinc-100 dark:bg-white/5 text-zinc-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-500 dark:hover:text-rose-400 border border-zinc-300 dark:border-white/10 hover:border-rose-200 dark:hover:border-rose-500/30'
-                    : 'bg-primary text-white shadow-[0_2px_10px_-4px_rgba(var(--primary-rgb),0.6)] hover:shadow-[0_4px_12px_-4px_rgba(var(--primary-rgb),0.8)] hover:-translate-y-0.5 border border-transparent'
+                    : 'bg-brand text-white shadow-[0_2px_10px_-4px_rgba(var(--primary-rgb),0.6)] hover:shadow-[0_4px_12px_-4px_rgba(var(--primary-rgb),0.8)] hover:-translate-y-0.5 border border-transparent'
                 } disabled:opacity-50`}
               >
                 {!isFollowing && <div className="absolute inset-0 bg-white/20 translate-y-[-100%] group-hover/btn:translate-y-[100%] transition-transform duration-500 ease-in-out" />}
@@ -179,7 +179,7 @@ export default function AuthorCard({ author: initialAuthor }: { author: AuthorIn
             ) : (
               <Link
                 href="/login"
-                className="group/btn relative flex items-center justify-start gap-2 px-4 py-1.5 rounded-full text-[11px] font-bold bg-primary text-white shadow-[0_2px_10px_-4px_rgba(var(--primary-rgb),0.6)] hover:shadow-[0_4px_12px_-4px_rgba(var(--primary-rgb),0.8)] hover:-translate-y-0.5 transition-all overflow-hidden w-[130px]"
+                className="group/btn relative flex items-center justify-start gap-2 px-4 py-1.5 rounded-full text-[11px] font-bold bg-brand text-white shadow-[0_2px_10px_-4px_rgba(var(--primary-rgb),0.6)] hover:shadow-[0_4px_12px_-4px_rgba(var(--primary-rgb),0.8)] hover:-translate-y-0.5 transition-all overflow-hidden w-[130px]"
               >
                 <div className="absolute inset-0 bg-white/20 translate-y-[-100%] group-hover/btn:translate-y-[100%] transition-transform duration-500 ease-in-out" />
                 <UserPlus className="w-3.5 h-3.5 relative z-10" />

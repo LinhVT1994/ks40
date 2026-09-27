@@ -7,6 +7,7 @@ import { getAuthorInfoAction } from '@/features/member/actions/follow';
 import PublicProfileClient from '../profile/[id]/PublicProfileClient';
 import JsonLd from '@/components/shared/JsonLd';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
+import { profileMetadata } from '@/lib/profile-og';
 
 type Props = { params: Promise<{ username: string }> };
 
@@ -22,28 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const data = await getPublicProfileAction(actualUsername);
   if (!data) return {};
 
-  const { user } = data;
-  const title       = user.name;
-  const description = user.bio ?? `Hồ sơ chuyên gia của ${user.name} trên ${SITE_NAME}. Khám phá các bài viết kiến thức về công nghệ, kiến trúc hệ thống và AI.`;
-  const image       = user.image ?? null;
-
-  return {
-    title,
-    description,
-    openGraph: {
-      title: `${user.name} | ${SITE_NAME}`,
-      description,
-      type: 'profile',
-      ...(image && { images: [{ url: image, alt: user.name ?? '' }] }),
-    },
-    twitter: {
-      card:  image ? 'summary_large_image' : 'summary',
-      title: `${user.name} | ${SITE_NAME}`,
-      description,
-      ...(image && { images: [image] }),
-    },
-    alternates: { canonical: `/@${user.username || user.id}` },
-  };
+  return profileMetadata(data.user);
 }
 
 export default async function PublicProfilePage({ params }: { params: Promise<{ username: string }> }) {

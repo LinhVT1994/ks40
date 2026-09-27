@@ -150,7 +150,7 @@ export default function ShareDownloadClient({ pkg, isLoggedIn }: { pkg: SharedPk
           {/* Action */}
           {ready ? (
             <button onClick={downloadAll}
-              className="w-full flex items-center justify-center gap-2 py-3.5 bg-primary text-white font-bold rounded-2xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 text-sm">
+              className="w-full flex items-center justify-center gap-2 py-3.5 bg-brand text-white font-bold rounded-2xl hover:bg-brand/90 transition-all shadow-lg shadow-primary/20 text-sm">
               <Download className="w-4 h-4" /> Tải tất cả ({pkg.files.length} file)
             </button>
           ) : (

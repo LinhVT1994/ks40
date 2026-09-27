@@ -124,7 +124,7 @@ export default function GlossaryInteractionBar({
               className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
                 localIsFollowing 
                   ? 'bg-zinc-100 dark:bg-white/5 text-zinc-400' 
-                  : 'bg-primary text-white shadow-lg shadow-primary/20 hover:scale-110 active:scale-95'
+                  : 'bg-brand text-white shadow-lg shadow-primary/20 hover:scale-110 active:scale-95'
               }`}
               title={localIsFollowing ? 'Đang theo dõi' : 'Theo dõi'}
             >

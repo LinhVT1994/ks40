@@ -85,7 +85,7 @@ export default function ArticleEditor() {
               ref={textareaRef}
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              className="flex-1 w-full resize-none p-6 font-mono text-sm leading-relaxed outline-none bg-white dark:bg-slate-950 text-zinc-800 dark:text-slate-200 placeholder:text-zinc-300"
+              className="flex-1 w-full resize-none p-6 md:p-8 font-mono text-sm leading-7 outline-none bg-panel text-ink placeholder:text-muted"
               spellCheck={false}
               placeholder="Bắt đầu viết Markdown ở đây..."
             />

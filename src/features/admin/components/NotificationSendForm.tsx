@@ -115,7 +115,7 @@ export default function NotificationSendForm({
   if (!open && !alwaysOpen) {
     return (
       <button onClick={() => setOpen(true)}
-        className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-primary text-white text-sm font-bold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20">
+        className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-brand text-white text-sm font-bold hover:opacity-90 transition-opacity shadow-sm shadow-primary/20">
         <Plus className="w-4 h-4" /> Gửi thông báo
       </button>
     );
@@ -265,7 +265,7 @@ export default function NotificationSendForm({
         <button onClick={handleSend}
           disabled={!form.title.trim() || (form.target === 'users' && !form.userIds.length) || isPending}
           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-40 disabled:cursor-not-allowed ${
-            done ? 'bg-emerald-500 text-white' : 'bg-primary text-white hover:opacity-90'
+            done ? 'bg-emerald-500 text-white' : 'bg-brand text-white hover:opacity-90'
           }`}>
           {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : done ? <CheckCheck className="w-4 h-4" /> : <Send className="w-4 h-4" />}
           {isPending ? 'Đang gửi...' : done ? 'Đã gửi!' : 'Gửi ngay'}

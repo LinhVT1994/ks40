@@ -117,7 +117,7 @@ export default function MemberStep1({
         
         {/* Section: Media */}
         <section className="space-y-4">
-          <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Hình ảnh hiển thị</label>
+          <label className="text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.2em]">Hình ảnh hiển thị</label>
           <div className="flex flex-col md:flex-row gap-8 items-start">
             {/* Cover 16:9 */}
             <div className="flex-1 space-y-3 w-full">
@@ -137,7 +137,7 @@ export default function MemberStep1({
                    className="aspect-video rounded-3xl border-2 border-dashed border-zinc-300 dark:border-white/5 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all group"
                  >
                    {uploadingCover ? <Loader2 className="w-8 h-8 text-primary animate-spin" /> : <ImagePlus className="w-8 h-8 text-zinc-300 group-hover:text-primary transition-colors" />}
-                   <span className="mt-3 text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-primary">Tải ảnh bìa</span>
+                   <span className="mt-3 text-[10px] font-semibold uppercase tracking-widest text-zinc-500 group-hover:text-primary">Tải ảnh bìa</span>
                  </div>
                )}
                <input ref={coverRef} type="file" className="hidden" onChange={handleCoverFile} accept="image/*" />
@@ -161,7 +161,7 @@ export default function MemberStep1({
                     className="aspect-[4/3] rounded-3xl border-2 border-dashed border-zinc-300 dark:border-white/5 flex flex-col items-center justify-center cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-all group"
                   >
                     {uploadingThumb ? <Loader2 className="w-6 h-6 text-primary animate-spin" /> : <ImagePlus className="w-6 h-6 text-zinc-300 group-hover:text-primary transition-colors" />}
-                    <span className="mt-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 group-hover:text-primary">Ảnh nhỏ</span>
+                    <span className="mt-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-500 group-hover:text-primary">Ảnh nhỏ</span>
                   </div>
                )}
                <input ref={thumbRef} type="file" className="hidden" onChange={handleThumbFile} accept="image/*" />
@@ -174,7 +174,7 @@ export default function MemberStep1({
           <div className="space-y-4">
             {/* Immersive Title */}
             <div className="space-y-1">
-              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2">
+              <label className="text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2">
                  <Type className="w-3.5 h-3.5" /> Tiêu đề bài viết
               </label>
               <textarea 
@@ -182,7 +182,7 @@ export default function MemberStep1({
                 onChange={e => handleTitleChange(e.target.value)}
                 placeholder="Nhập tiêu đề hấp dẫn..."
                 rows={1}
-                className="w-full bg-transparent border-none p-0 text-3xl md:text-5xl font-black outline-none placeholder:text-zinc-200 dark:placeholder:text-white/10 resize-none leading-tight py-2"
+                className="w-full bg-transparent border-none p-0 text-3xl md:text-5xl font-semibold outline-none placeholder:text-zinc-200 dark:placeholder:text-white/10 resize-none leading-tight py-2"
                 onInput={(e) => {
                   const target = e.target as HTMLTextAreaElement;
                   target.style.height = 'auto';
@@ -209,14 +209,14 @@ export default function MemberStep1({
           </div>
 
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2">
+            <label className="text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2">
                <Tag className="w-3.5 h-3.5" /> Chủ đề chính
             </label>
             <TopicSelector topics={topics} selectedId={topicId} onSelect={setTopicId} />
           </div>
 
           <div className="space-y-3">
-            <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2">
+            <label className="text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2">
                <Hash className="w-3.5 h-3.5" /> Từ khóa (Tags)
             </label>
             <div className="relative">
@@ -225,7 +225,7 @@ export default function MemberStep1({
                 onClick={() => tagInputRef.current?.focus()}
               >
                 {tags.map(tag => (
-                  <span key={tag} className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-slate-300 rounded-xl text-[10px] font-black uppercase tracking-tight shadow-sm">
+                  <span key={tag} className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-100 dark:bg-white/5 text-zinc-600 dark:text-slate-300 rounded-xl text-[10px] font-semibold uppercase tracking-tight shadow-sm">
                     {tag}
                     <button onClick={(e) => { e.stopPropagation(); setTags(tags.filter(t => t !== tag)); }} className="hover:text-rose-500 transition-colors">
                       <X className="w-3.5 h-3.5" />
@@ -259,7 +259,7 @@ export default function MemberStep1({
                           onMouseDown={() => addTag(t)}
                           className={`w-full text-left px-4 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-3 ${
                             i === activeIndex 
-                              ? 'bg-zinc-800 dark:bg-primary text-white' 
+                              ? 'bg-zinc-800 dark:bg-brand text-white'
                               : 'text-zinc-600 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-white/5'
                           }`}
                         >
@@ -276,7 +276,7 @@ export default function MemberStep1({
                       <button
                         type="button"
                         onMouseDown={() => addTag(tagInput)}
-                        className="w-full text-left px-4 py-2.5 text-xs font-black uppercase tracking-wider text-primary hover:bg-primary/5 rounded-xl transition-all flex items-center gap-3"
+                        className="w-full text-left px-4 py-2.5 text-xs font-semibold uppercase tracking-wider text-primary hover:bg-primary/5 rounded-xl transition-all flex items-center gap-3"
                       >
                         <Plus className="w-3.5 h-3.5 shrink-0" />
                         Tạo tag mới: "{tagInput.trim()}"
@@ -297,7 +297,7 @@ export default function MemberStep1({
 
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2">
+              <label className="text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.2em] flex items-center gap-2">
                  <AlignLeft className="w-3.5 h-3.5" /> Tóm tắt bài viết
               </label>
               <span className={`text-[10px] font-bold uppercase tracking-widest ${summary.length >= 280 ? 'text-rose-500 animate-pulse' : 'text-zinc-500'}`}>
@@ -322,7 +322,7 @@ export default function MemberStep1({
                console.log('Step 1 Next clicked', { title, topicId });
                onNext();
              }}
-             className="flex items-center gap-2 px-10 py-4 text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl active:scale-95 bg-zinc-800 dark:bg-primary hover:opacity-90 shadow-zinc-800/10 dark:shadow-primary/20 cursor-pointer"
+             className="flex items-center gap-2 px-10 py-4 text-white text-xs font-semibold uppercase tracking-[0.2em] rounded-2xl transition-all shadow-xl active:scale-95 bg-zinc-800 dark:bg-brand hover:opacity-90 shadow-zinc-800/10 dark:shadow-primary/20 cursor-pointer"
            >
              Tiếp theo: Viết nội dung <ArrowRight className="w-4 h-4" />
            </button>

@@ -9,7 +9,7 @@ import type { SiteAnnouncement } from '@/features/admin/actions/config';
 const ANN_TYPES: { key: SiteAnnouncement['type']; label: string; icon: React.ElementType; bg: string; text: string; border: string }[] = [
   { key: 'maintenance', label: 'Bảo trì',    icon: Wrench,        bg: 'bg-amber-500',   text: 'text-white', border: 'border-amber-500'   },
   { key: 'warning',     label: 'Cảnh báo',   icon: AlertTriangle, bg: 'bg-orange-500',  text: 'text-white', border: 'border-orange-500'  },
-  { key: 'info',        label: 'Thông báo',  icon: Info,          bg: 'bg-primary',     text: 'text-white', border: 'border-primary'     },
+  { key: 'info',        label: 'Thông báo',  icon: Info,          bg: 'bg-brand',     text: 'text-white', border: 'border-primary'     },
   { key: 'success',     label: 'Thành công', icon: CheckCircle,   bg: 'bg-emerald-500', text: 'text-white', border: 'border-emerald-500' },
 ];
 
@@ -111,7 +111,7 @@ export default function AnnouncementEditor({ initial }: { initial: SiteAnnouncem
         <div className="flex items-center justify-between pt-2 border-t border-zinc-200 dark:border-white/5">
           <label className="flex items-center gap-3 cursor-pointer select-none">
             <button type="button" onClick={() => set('active', !form.active)}
-              className={`relative w-11 h-6 rounded-full transition-colors ${form.active ? 'bg-primary' : 'bg-zinc-200 dark:bg-white/10'}`}>
+              className={`relative w-11 h-6 rounded-full transition-colors ${form.active ? 'bg-brand' : 'bg-zinc-200 dark:bg-white/10'}`}>
               <span className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow transition-transform ${form.active ? 'translate-x-5' : ''}`} />
             </button>
             <span className="text-sm font-medium text-zinc-700 dark:text-slate-300">
@@ -128,7 +128,7 @@ export default function AnnouncementEditor({ initial }: { initial: SiteAnnouncem
             )}
             <button onClick={save} disabled={!form.message.trim() || isPending}
               className={`flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-40 ${
-                saved ? 'bg-emerald-500 text-white' : 'bg-primary text-white hover:opacity-90 shadow-sm shadow-primary/20'
+                saved ? 'bg-emerald-500 text-white' : 'bg-brand text-white hover:opacity-90 shadow-sm shadow-primary/20'
               }`}>
               {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : saved ? <CheckCheck className="w-4 h-4" /> : <Pin className="w-4 h-4" />}
               {saved ? 'Đã lưu' : 'Lưu & áp dụng'}

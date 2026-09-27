@@ -16,7 +16,7 @@ function HighlightText({ text, query }: { text: string, query: string }) {
     <>
       {parts.map((part, i) => 
         part.toLowerCase() === query.toLowerCase() ? (
-          <span key={i} className="text-primary dark:text-primary-light font-black">{part}</span>
+          <span key={i} className="text-primary dark:text-primary-light font-semibold">{part}</span>
         ) : (
           <span key={i}>{part}</span>
         )
@@ -75,14 +75,15 @@ export default function TopicsExplorerPage() {
 
   return (
     <MemberContainer>
-      <div className="mt-24 sm:mt-32 mb-40 px-4 md:px-8 max-w-[1600px] mx-auto">
+      <div className="mt-8 sm:mt-10 mb-20 max-w-[1320px] mx-auto">
         
         {/* Page Header */}
-        <div className="mb-16 flex flex-col items-center text-center">
+        <div className="mb-8 flex flex-col items-start border-b border-line pb-8">
+          <p className="ui-eyebrow mb-4">Khám phá theo lĩnh vực</p>
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl sm:text-6xl font-display font-black text-zinc-800 dark:text-white leading-[1.1] tracking-tight"
+            className="text-3xl sm:text-5xl font-display font-medium text-ink leading-[1.15] tracking-tight"
           >
             Chủ đề
           </motion.h1>
@@ -90,7 +91,7 @@ export default function TopicsExplorerPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-zinc-500 dark:text-slate-400 mt-6 text-lg max-w-xl mx-auto leading-relaxed font-medium"
+            className="text-muted mt-4 text-base max-w-2xl leading-relaxed"
           >
             Hệ thống hóa tri thức theo từng khối lĩnh vực để bạn dễ dàng bao quát toàn bộ nội dung.
           </motion.p>
@@ -104,7 +105,7 @@ export default function TopicsExplorerPage() {
             opacity: 1
           }}
           transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-          className="mx-auto mb-32 relative group w-full"
+          className="mb-16 relative group w-full"
         >
           <div className="absolute inset-0 bg-primary/20 blur-3xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-700 -z-10" />
           <div className="relative">
@@ -184,7 +185,7 @@ export default function TopicsExplorerPage() {
                   >
                     {/* Background Glow */}
                     <div 
-                        className="absolute -inset-6 bg-gradient-to-br from-white/50 to-white/30 dark:from-white/[0.03] dark:to-transparent rounded-[2rem] opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 blur-xl"
+                        className="absolute -inset-6 bg-gradient-to-br from-white/50 to-white/30 dark:from-white/[0.03] dark:to-transparent rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 blur-xl"
                         style={{ background: `radial-gradient(circle at 0% 0%, ${color}10, transparent 70%)` }}
                     />
                     {/* Clickable Header */}

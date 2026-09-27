@@ -107,7 +107,7 @@ export default function Loading() {
           transition={{ delay: 1, duration: 1 }}
           className="absolute bottom-[-60px] whitespace-nowrap"
         >
-          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-zinc-500 dark:text-slate-400">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.4em] text-zinc-500 dark:text-slate-400">
             Nâng tầm tri thức công nghệ
           </span>
         </motion.div>

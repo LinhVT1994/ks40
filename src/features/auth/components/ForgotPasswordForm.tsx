@@ -33,14 +33,14 @@ export default function ForgotPasswordForm() {
           <span className="material-icons text-4xl">mark_email_read</span>
         </div>
         <div className="space-y-2">
-          <h3 className="text-2xl font-black text-zinc-900 dark:text-white font-display">Kiểm tra hộp thư</h3>
+          <h3 className="text-2xl font-semibold text-zinc-900 dark:text-white font-display">Kiểm tra hộp thư</h3>
           <p className="text-sm text-zinc-500 dark:text-slate-500 font-medium">
             Chúng tôi đã gửi một liên kết khôi phục mật khẩu đến <br />
-            <span className="font-black text-zinc-900 dark:text-white">{submittedEmail}</span>
+            <span className="font-semibold text-zinc-900 dark:text-white">{submittedEmail}</span>
           </p>
         </div>
         <div className="pt-6">
-          <button onClick={() => setSubmittedEmail('')} className="text-[11px] font-black uppercase tracking-widest text-primary hover:text-primary/80 transition-colors">
+          <button onClick={() => setSubmittedEmail('')} className="text-[11px] font-semibold uppercase tracking-widest text-primary hover:text-primary/80 transition-colors">
             Thử lại với email khác
           </button>
         </div>
@@ -57,7 +57,7 @@ export default function ForgotPasswordForm() {
       )}
 
       <div>
-        <label className="block text-xs font-black uppercase tracking-widest mb-2 text-zinc-500 dark:text-slate-500 px-1" htmlFor="email">Địa chỉ Email</label>
+        <label className="block text-xs font-semibold uppercase tracking-widest mb-2 text-zinc-500 dark:text-slate-500 px-1" htmlFor="email">Địa chỉ Email</label>
         <p className="text-[11px] font-medium text-zinc-400 dark:text-slate-500 mb-4 px-1 leading-relaxed">
           Nhập địa chỉ email liên kết với tài khoản của bạn, chúng tôi sẽ gửi liên kết để đặt lại mật khẩu.
         </p>
@@ -75,7 +75,7 @@ export default function ForgotPasswordForm() {
       </div>
 
       <button
-        className="w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-black rounded-xl px-4 py-4 text-sm hover:opacity-90 active:scale-[0.98] transition-all mt-6 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shadow-xl shadow-zinc-200 dark:shadow-none"
+        className="w-full bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-semibold rounded-xl px-4 py-4 text-sm hover:opacity-90 active:scale-[0.98] transition-all mt-6 flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed shadow-xl shadow-zinc-200 dark:shadow-none"
         type="submit"
         disabled={isPending}
       >
@@ -84,7 +84,7 @@ export default function ForgotPasswordForm() {
       </button>
 
       <div className="mt-8 text-center">
-        <Link href="/login" className="inline-flex items-center justify-center gap-2 text-[11px] font-black uppercase tracking-widest text-zinc-400 hover:text-primary transition-colors">
+        <Link href="/login" className="inline-flex items-center justify-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-zinc-400 hover:text-primary transition-colors">
           <ArrowLeft className="w-4 h-4" /> Quay lại đăng nhập
         </Link>
       </div>

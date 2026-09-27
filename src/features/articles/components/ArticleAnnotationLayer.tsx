@@ -925,7 +925,7 @@ export default function ArticleAnnotationLayer({
             }}
           >
             <div className="relative group">
-              <div className={`relative bg-white dark:bg-[#0f172a] px-4 py-3 rounded-xl shadow-lg border max-w-[260px] ${hoveredNote.isAuthorNote
+              <div className={`relative bg-white dark:bg-canvas px-4 py-3 rounded-xl shadow-lg border max-w-[260px] ${hoveredNote.isAuthorNote
                 ? 'border-violet-300 dark:border-violet-500/50'
                 : 'border-zinc-200 dark:border-white/10'
                 }`}>
@@ -933,14 +933,14 @@ export default function ArticleAnnotationLayer({
                   {hoveredNote.content}
                 </p>
 
-                <div className={`mt-2 flex items-center gap-2 text-[8px] font-black uppercase tracking-[0.15em] ${hoveredNote.isAuthorNote ? 'text-violet-500' : 'text-blue-500/80'
+                <div className={`mt-2 flex items-center gap-2 text-[8px] font-semibold uppercase tracking-[0.15em] ${hoveredNote.isAuthorNote ? 'text-violet-500' : 'text-blue-500/80'
                   }`}>
                   <div className="w-1 h-1 rounded-full bg-current" />
                   <span>{hoveredNote.isAuthorNote ? 'Ghi chú của tác giả' : 'Ghi chú'}</span>
                 </div>
               </div>
 
-              <div className={`absolute left-1/2 -bottom-1 -translate-x-1/2 w-2 h-2 bg-white dark:bg-[#0f172a] rotate-45 border-r border-b ${hoveredNote.isAuthorNote
+              <div className={`absolute left-1/2 -bottom-1 -translate-x-1/2 w-2 h-2 bg-white dark:bg-canvas rotate-45 border-r border-b ${hoveredNote.isAuthorNote
                 ? 'border-violet-300 dark:border-violet-500/50'
                 : 'border-zinc-200 dark:border-white/10'
                 }`} />

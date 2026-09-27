@@ -107,7 +107,7 @@ export default function GlobalTimer() {
               <div className="absolute inset-0 bg-primary/20 blur-md rounded-full animate-pulse" />
             )}
           </div>
-          <span className="text-[11px] md:text-sm font-black text-white tabular-nums tracking-wide">
+          <span className="text-[11px] md:text-sm font-semibold text-white tabular-nums tracking-wide">
             {formatTime(elapsed)}
           </span>
           <Maximize2 className="w-2.5 h-2.5 md:w-3.5 md:h-3.5 text-zinc-400 group-hover:text-primary transition-colors" />
@@ -127,7 +127,7 @@ export default function GlobalTimer() {
       <div className="flex items-center justify-between px-3 md:px-5 py-2 md:py-3.5 border-b border-white/5 bg-white/5 relative z-10">
         <div className="flex items-center gap-1.5 md:gap-2">
           <Timer className={`w-3 h-3 md:w-3.5 md:h-3.5 ${isRunning ? 'text-primary animate-pulse' : 'text-zinc-400'}`} />
-          <span className="text-[7px] md:text-[9px] font-black text-zinc-400 uppercase tracking-[0.2em] opacity-90 hidden sm:inline">Timer</span>
+          <span className="text-[7px] md:text-[9px] font-semibold text-zinc-400 uppercase tracking-[0.2em] opacity-90 hidden sm:inline">Timer</span>
         </div>
         <div className="flex items-center gap-0.5 md:gap-1">
           <button 
@@ -184,7 +184,7 @@ export default function GlobalTimer() {
           </svg>
           
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className={`text-xl md:text-3xl font-black tabular-nums tracking-tighter transition-all duration-500 ${
+            <div className={`text-xl md:text-3xl font-semibold tabular-nums tracking-tighter transition-all duration-500 ${
               isRunning ? 'text-white scale-105' : 'text-zinc-400'
             }`}>
               {formatTime(elapsed)}
@@ -196,10 +196,10 @@ export default function GlobalTimer() {
         <div className="flex items-center gap-2 w-full">
           <button 
             onClick={() => setIsRunning(!isRunning)}
-            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 md:py-3.5 rounded-xl font-black text-[8px] md:text-[10px] uppercase tracking-widest transition-all active:scale-95 ${
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 md:py-3.5 rounded-xl font-semibold text-[8px] md:text-[10px] uppercase tracking-widest transition-all active:scale-95 ${
               isRunning 
                 ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20' 
-                : 'bg-primary text-zinc-900'
+                : 'bg-brand text-zinc-900'
             }`}
           >
             {isRunning ? <Pause className="w-2.5 h-2.5 fill-current" /> : <Play className="w-2.5 h-2.5 fill-current" />}

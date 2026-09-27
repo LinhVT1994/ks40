@@ -99,7 +99,7 @@ export default function SettingsPreferences({
               onClick={() => handleOccupationChange(value)}
               className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 text-sm font-semibold transition-all duration-200 ${
                 occupation === value
-                  ? 'border-primary bg-primary text-white shadow-lg shadow-primary/25 scale-105'
+                  ? 'border-primary bg-brand text-white shadow-lg shadow-primary/25 scale-105'
                   : 'border-zinc-300 dark:border-white/10 bg-white dark:bg-white/5 text-zinc-700 dark:text-slate-300 hover:border-primary/40'
               }`}
             >
@@ -137,11 +137,11 @@ export default function SettingsPreferences({
                   ))}
                 </div>
                 <div className="min-w-0">
-                  <div className={`text-xs font-black truncate ${isActive ? 'text-primary' : 'text-zinc-700 dark:text-slate-300'}`}>
+                  <div className={`text-xs font-semibold truncate ${isActive ? 'text-primary' : 'text-zinc-700 dark:text-slate-300'}`}>
                     {t.name}
                   </div>
                 </div>
-                {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />}
+                {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-brand" />}
               </button>
             );
           })}
@@ -161,7 +161,7 @@ export default function SettingsPreferences({
             href="/topics"
             className="group flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-zinc-200 dark:border-white/5 bg-zinc-50 dark:bg-white/[0.02] hover:border-primary/40 hover:bg-white dark:hover:bg-white/[0.05] transition-all duration-300"
           >
-            <span className="text-[10px] font-black text-zinc-500 group-hover:text-primary uppercase tracking-widest transition-colors">Khám phá thêm</span>
+            <span className="text-[10px] font-semibold text-zinc-500 group-hover:text-primary uppercase tracking-widest transition-colors">Khám phá thêm</span>
             <ArrowUpRight className="w-3 h-3 text-zinc-400 group-hover:text-primary transition-all group-hover:rotate-12" />
           </Link>
         </div>

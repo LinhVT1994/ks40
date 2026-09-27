@@ -25,9 +25,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const term = await getGlossaryTermBySlugAction(slug);
   if (!term) return {};
 
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://lenote.vn';
+  const baseUrl = SITE_URL;
   const url = `${baseUrl}/glossary/${slug}`;
-  const title = `${term.term} là gì? Định nghĩa và ý nghĩa | ${SITE_NAME}`;
+  const title = `${term.term} là gì? Định nghĩa và ý nghĩa`;
   const description = term.shortDef || `Tìm hiểu định nghĩa chi tiết về ${term.term}. Giải thích ý nghĩa và ứng dụng của ${term.term} trong ${term.topic?.label || 'công nghệ'}.`;
 
   return {
@@ -49,7 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       authors: [term.author?.name || SITE_NAME],
       images: [
         {
-          url: `${baseUrl}/api/og?title=${encodeURIComponent(term.term)}&description=${encodeURIComponent(term.shortDef || '')}&type=glossary`,
+          url: `${baseUrl}/og?title=${encodeURIComponent(term.term)}&topic=${encodeURIComponent(term.topic?.label || 'Thuật ngữ')}`,
           width: 1200,
           height: 630,
           alt: term.term,
@@ -60,7 +60,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       card: 'summary_large_image',
       title,
       description,
-      images: [`${baseUrl}/api/og?title=${encodeURIComponent(term.term)}&description=${encodeURIComponent(term.shortDef || '')}&type=glossary`],
+      images: [`${baseUrl}/og?title=${encodeURIComponent(term.term)}&topic=${encodeURIComponent(term.topic?.label || 'Thuật ngữ')}`],
     },
   };
 }
@@ -161,7 +161,7 @@ export default async function GlossaryTermPage({ params, searchParams }: Props) 
                     <div className="flex flex-wrap items-center gap-3">
                       {term.topic && (
                         <span
-                          className="inline-flex px-3 py-1 rounded-xl text-[8px] md:text-[8px] font-black tracking-widest border"
+                          className="inline-flex px-3 py-1 rounded-xl text-[8px] md:text-[8px] font-semibold tracking-widest border"
                           style={{
                             backgroundColor: `${topicColor}10`,
                             borderColor: `${topicColor}20`,
@@ -241,8 +241,8 @@ export default async function GlossaryTermPage({ params, searchParams }: Props) 
               {otherTerms.length > 0 && (
                 <div className="pt-8 md:pt-10 px-4 md:px-12 pb-24 md:pb-12 space-y-6 md:space-y-8">
                   <div className="flex items-center gap-3">
-                    <div className="w-1.5 h-1.5 rounded-full bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
-                    <h2 className="text-sm font-black uppercase tracking-[0.2em] text-zinc-800 dark:text-white">
+                    <div className="w-1.5 h-1.5 rounded-full bg-brand shadow-[0_0_8px_rgba(var(--primary),0.5)]" />
+                    <h2 className="text-sm font-semibold uppercase tracking-[0.2em] text-zinc-800 dark:text-white">
                       Thuật ngữ liên quan
                     </h2>
                   </div>

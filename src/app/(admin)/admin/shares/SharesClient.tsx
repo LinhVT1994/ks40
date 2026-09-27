@@ -82,7 +82,7 @@ export default function SharesClient({ initialPackages }: { initialPackages: Sha
           />
         </div>
         <Link href="/admin/shares/new"
-          className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold bg-zinc-800 dark:bg-primary text-white rounded-2xl hover:opacity-90 transition-all shrink-0">
+          className="flex items-center gap-2 px-4 py-2.5 text-sm font-bold bg-zinc-800 dark:bg-brand text-white rounded-2xl hover:opacity-90 transition-all shrink-0">
           <Plus className="w-4 h-4" /> Tạo gói mới
         </Link>
       </div>

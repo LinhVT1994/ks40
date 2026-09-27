@@ -1,290 +1,205 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect, useRef } from 'react';
-import { useSession } from 'next-auth/react';
-import { Search, X, Menu, Compass, Hash, BookMarked, ArrowRight, PenLine } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { usePathname, useRouter } from 'next/navigation';
+import type { Session } from 'next-auth';
+import {
+  ArrowUpRight, Bell, BookOpen, Bookmark, Compass, FolderOpen, History,
+  Menu, PanelLeftClose, PanelLeftOpen, PenLine, Search, Settings, ShieldCheck, X,
+  type LucideIcon,
+} from 'lucide-react';
 import AnnouncementBanner from '@/components/AnnouncementBanner';
 import type { SiteAnnouncement } from '@/features/admin/actions/config';
-import UserMenu from './UserMenu';
-import HeaderSearch from './HeaderSearch';
-import NotificationBell from '@/features/notifications/components/NotificationBell';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import BrandLogo from '@/components/shared/BrandLogo';
-import EyeTracker from '@/components/shared/EyeTracker';
+import NotificationBell from '@/features/notifications/components/NotificationBell';
+import HeaderSearch from './HeaderSearch';
+import UserMenu from './UserMenu';
 
-import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
-import { AnimatePresence, motion } from 'framer-motion';
+type NavItem = { href: string; label: string; icon: LucideIcon };
 
-export default function MemberHeader({ 
-  announcement, 
-  session 
-}: { 
-  announcement?: SiteAnnouncement | null,
-  session?: any
+export default function MemberHeader({
+  announcement,
+  session,
+}: {
+  announcement?: SiteAnnouncement | null;
+  session?: Session | null;
 }) {
-  const isLoggedIn = !!session?.user;
   const pathname = usePathname();
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const router = useRouter();
+  const user = session?.user as (NonNullable<Session['user']> & { canWrite?: boolean; role?: string }) | undefined;
+  const isLoggedIn = !!user;
+  const isWriting = pathname.startsWith('/write');
+  const isReader = pathname.startsWith('/article/') || /^\/books\/[^/]+\/[^/]+/.test(pathname);
+  const [collapsed, setCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
-  const lastScrollYRef = useRef(0);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const sidebarRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      const isMobile = window.innerWidth < 768;
-      
-      // Background change threshold
-      setIsScrolled(currentScrollY > 20);
-
-      // Hide/Show logic (Mobile only)
-      if (isMobile) {
-        if (currentScrollY > lastScrollYRef.current && currentScrollY > 50) {
-          setIsVisible(false);
-        } else if (currentScrollY < lastScrollYRef.current) {
-          setIsVisible(true);
-        }
-      } else {
-        setIsVisible(true);
-      }
-      
-      lastScrollYRef.current = currentScrollY;
-    };
-    
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Close menu on navigation
   useEffect(() => {
     setMobileMenuOpen(false);
     setMobileSearchOpen(false);
   }, [pathname]);
 
-  if (pathname.startsWith('/write')) return null;
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    const previousFocus = document.activeElement as HTMLElement | null;
+    document.body.style.overflow = 'hidden';
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMobileMenuOpen(false);
+      if (event.key !== 'Tab') return;
+      const focusable = Array.from(sidebarRef.current?.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), input:not([disabled]), [tabindex="0"]',
+      ) ?? []).filter(element => element.getClientRects().length > 0);
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (!sidebarRef.current?.contains(document.activeElement)) {
+        event.preventDefault();
+        (event.shiftKey ? last : first)?.focus();
+      } else if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    const onResize = () => { if (desktop.matches && !isReader) setMobileMenuOpen(false); };
+    document.addEventListener('keydown', onKeyDown);
+    desktop.addEventListener('change', onResize);
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+      desktop.removeEventListener('change', onResize);
+      previousFocus?.focus();
+    };
+  }, [mobileMenuOpen, isReader]);
+
+  if (isWriting) return null;
+
+  const mainNav: NavItem[] = [
+    { href: isLoggedIn ? '/' : '/explore', label: 'Khám phá', icon: Compass },
+    { href: '/topics', label: 'Chủ đề', icon: FolderOpen },
+    { href: '/glossary', label: 'Thuật ngữ', icon: BookOpen },
+  ];
+  const personalNav: NavItem[] = [
+    { href: '/bookmarks', label: 'Bài viết đã lưu', icon: Bookmark },
+    { href: '/history', label: 'Lịch sử đọc', icon: History },
+    { href: '/notifications', label: 'Thông báo', icon: Bell },
+  ];
+  const active = (href: string) => pathname === href || (href !== '/' && pathname.startsWith(href + '/'));
+  const pageLabel = [...mainNav, ...personalNav].find(item => active(item.href))?.label
+    ?? (pathname === '/' ? 'Không gian tri thức' : isReader ? 'Không gian đọc' : 'Lenote');
+
+  const renderNav = (item: NavItem) => (
+    <Link key={item.href} href={item.href} title={item.label}
+      aria-current={active(item.href) ? 'page' : undefined}
+      onClick={() => setMobileMenuOpen(false)}
+      className={`ui-sidebar-link ${active(item.href) ? 'is-active' : ''}`}>
+      <item.icon size={17} strokeWidth={1.7} />
+      <span className="ui-sidebar-label">{item.label}</span>
+    </Link>
+  );
 
   return (
     <>
-      <div 
-        style={{ zIndex: 100000 }}
-        className={`fixed top-0 left-0 right-0 w-full transition-transform duration-300 bg-white md:bg-transparent dark:bg-background-dark md:dark:bg-transparent ${
-          isVisible ? 'translate-y-0' : '-translate-y-full'
-        }`}
-      >
+      {mobileMenuOpen && <button type="button" className="ui-sidebar-backdrop" aria-label="Đóng menu điều hướng" onClick={() => setMobileMenuOpen(false)} />}
+      <aside id="member-sidebar" ref={sidebarRef} data-focus-hide
+        data-collapsed={collapsed && !isReader} data-open={mobileMenuOpen} data-reader={isReader}
+        onTransitionEnd={event => {
+          if (event.target === event.currentTarget && event.propertyName === 'transform' && mobileMenuOpen) closeButtonRef.current?.focus();
+        }}
+        className="ui-sidebar" aria-label="Điều hướng Lenote" role={mobileMenuOpen ? 'dialog' : undefined} aria-modal={mobileMenuOpen ? true : undefined}>
+        <div className="ui-sidebar-brand">
+          <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex min-w-0 items-center gap-2.5" aria-label="Lenote — Trang chủ">
+            <BrandLogo size={30} /><span className="ui-sidebar-label ui-wordmark">lenote<span>.</span></span>
+          </Link>
+          <button ref={closeButtonRef} type="button" onClick={() => setMobileMenuOpen(false)}
+            className={`ui-icon-button ${isReader ? '' : 'lg:hidden'}`} aria-label="Đóng thanh điều hướng"><X size={18} /></button>
+        </div>
+
+        <div className="px-3 pb-5">
+          <Link href={user?.canWrite ? '/write' : '/explore'} onClick={() => setMobileMenuOpen(false)}
+            title={user?.canWrite ? 'Viết bài mới' : 'Khám phá bài viết'} className="ui-sidebar-create">
+            {user?.canWrite ? <PenLine size={17} /> : <Compass size={17} />}
+            <span className="ui-sidebar-label">{user?.canWrite ? 'Viết bài mới' : 'Khám phá bài viết'}</span>
+          </Link>
+        </div>
+
+        <div className="min-h-0 flex-1 overflow-y-auto px-3">
+          <nav aria-label="Thư viện" className="space-y-1">
+            <p className="ui-sidebar-label ui-sidebar-heading">Thư viện</p>
+            {mainNav.map(renderNav)}
+            <button type="button" disabled className="ui-sidebar-link w-full text-left opacity-60" title="Sách & lộ trình — Sắp có">
+              <BookOpen size={17} strokeWidth={1.7} />
+              <span className="ui-sidebar-label flex flex-1 items-center justify-between gap-2">Sách & lộ trình <span className="text-[10px] text-muted">Sắp có</span></span>
+            </button>
+          </nav>
+          {isLoggedIn && <nav aria-label="Không gian cá nhân" className="mt-7 space-y-1">
+            <p className="ui-sidebar-label ui-sidebar-heading">Không gian của bạn</p>
+            {personalNav.map(renderNav)}
+          </nav>}
+          {!isLoggedIn && <div className="ui-sidebar-label mt-9 px-3 text-xs leading-6 text-muted">
+            <p className="mb-2 font-medium text-ink">Một chút mỗi ngày.</p>
+            <p>Đọc, ghi chú và lưu giữ những điều có ý nghĩa với bạn.</p>
+          </div>}
+        </div>
+
+        <div className="border-t border-line p-3">
+          {user?.role === 'ADMIN' && renderNav({href:'/admin/overview',label:'Quản trị nội dung',icon:ShieldCheck})}
+          {isLoggedIn && renderNav({href:'/settings',label:'Cài đặt',icon:Settings})}
+          <Link href={isLoggedIn ? '/me' : '/login'} onClick={() => setMobileMenuOpen(false)}
+            className="ui-sidebar-link mt-1" title={isLoggedIn ? 'Hồ sơ của bạn' : 'Đăng nhập'}>
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">{user?.name?.charAt(0).toUpperCase() || 'L'}</span>
+            <span className="ui-sidebar-label min-w-0 flex-1 truncate text-xs">{user?.name || 'Đăng nhập để lưu tri thức'}</span>
+            <ArrowUpRight className="ui-sidebar-label h-3.5 w-3.5 text-muted" />
+          </Link>
+        </div>
+      </aside>
+
+      <header className="ui-member-topbar" data-focus-hide>
         {announcement && <AnnouncementBanner announcement={announcement} />}
-        <header className={`w-full transition-[background-color,border-color] duration-500 ${
-          isScrolled
-            ? 'bg-white md:bg-white/80 dark:bg-background-dark md:dark:bg-background-dark/60 md:backdrop-blur-md border-b border-zinc-200 dark:border-white/5 shadow-lg md:shadow-sm'
-            : 'bg-white md:bg-transparent dark:bg-background-dark md:dark:bg-transparent border-b border-transparent'
-        }`}>
-          <div className="max-w-[1600px] mx-auto w-full flex items-center justify-between py-3 px-4 md:px-8 gap-3">
-            {/* Logo */}
-            <div className="flex items-center gap-3 shrink-0">
-              {/* Mobile Menu Toggle */}
-              <button
-                className="lg:hidden p-2 -ml-2 rounded-xl text-zinc-500 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
-                onClick={() => setMobileMenuOpen(true)}
-              >
-                <Menu className="w-6 h-6" />
-              </button>
-
-              <Link href="/" className="flex items-center gap-2 group cursor-pointer">
-                <div className="hidden md:block transition-transform group-hover:scale-110">
-                <BrandLogo size={32} />
-              </div>
-                <span className="text-lg md:text-xl tracking-[0.08em] flex items-center uppercase drop-shadow-[0_4px_8px_rgba(0,0,0,0.05)] dark:drop-shadow-[0_0_8px_rgba(59,130,246,0.3)]">
-                  <span className="font-medium text-zinc-500 dark:text-slate-400">Le</span>
-                  <span className="font-black bg-gradient-to-r from-primary via-accent-purple to-primary bg-[length:200%_auto] bg-clip-text text-transparent animate-text-shimmer">
-                    note
-                  </span>
-                  <div className="hidden md:block ml-1 scale-75 origin-left">
-                    <EyeTracker />
-                  </div>
-                </span>
-              </Link>
-              
-              {/* Desktop Navigation */}
-              <nav className="hidden lg:flex items-center gap-2 ml-6">
-                <NavLink href={isLoggedIn ? "/" : "/explore"} label="Khám phá" active={pathname === (isLoggedIn ? "/" : "/explore")} />
-                <NavLink href="/topics" label="Chủ đề" active={pathname === "/topics"} />
-                <NavLink href="/glossary" label="Thuật ngữ" active={pathname === "/glossary"} />
-              </nav>
-            </div>
-
-            <div className="flex items-center gap-4 shrink-0">
-              {/* Desktop Search */}
-              <div className="hidden lg:flex items-center gap-3">
-                <HeaderSearch />
-                {isLoggedIn && (session?.user as any)?.canWrite && (
-                  <Link 
-                    href="/write"
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary text-white hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 active:scale-95"
-                  >
-                    <PenLine className="w-3.5 h-3.5" />
-                    <span className="text-[11px] font-bold uppercase tracking-wider">Viết bài</span>
-                  </Link>
-                )}
-              </div>
-
-              <div className="hidden md:flex lg:hidden">
-                <HeaderSearch />
-              </div>
-
-              {/* Icons */}
-              <div className="flex items-center gap-2">
-                {/* Search icon — chỉ hiện trên mobile */}
-                <button
-                  className="md:hidden p-2 rounded-full text-zinc-500 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/10 transition-colors"
-                  onClick={() => setMobileSearchOpen(v => !v)}
-                >
-                  {mobileSearchOpen ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
-                </button>
-                <NotificationBell />
-                <UserMenu />
-              </div>
-            </div>
+        <div className="flex min-h-16 items-center justify-between gap-3 px-4 lg:px-6">
+          <div className="flex min-w-0 items-center gap-3">
+            <button type="button" className={`ui-icon-button ${isReader ? '' : 'lg:hidden'}`}
+              aria-label="Mở menu điều hướng" aria-controls="member-sidebar" aria-expanded={mobileMenuOpen}
+              onClick={() => setMobileMenuOpen(true)}><Menu size={19} /></button>
+            {!isReader && <button type="button" className="ui-icon-button hidden lg:inline-flex"
+              aria-label={collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng'} aria-controls="member-sidebar" aria-expanded={!collapsed}
+              onClick={() => setCollapsed(value => !value)}>{collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}</button>}
+            <span className="truncate text-sm text-muted hidden sm:block">{pageLabel}</span>
+            <Link href="/" className="ui-wordmark sm:hidden">lenote<span>.</span></Link>
           </div>
-
-          {/* Mobile search bar — dropdown dưới header */}
-          {mobileSearchOpen && (
-            <div className="md:hidden px-4 pb-3 border-t border-zinc-200 dark:border-white/5 pt-3">
-              <MobileSearchBar onClose={() => setMobileSearchOpen(false)} />
-            </div>
-          )}
-        </header>
-      </div>
-
-      {/* Mobile Menu Overlay — Outside of translating wrapper for persistence */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <MobileMenuOverlay 
-            onClose={() => setMobileMenuOpen(false)} 
-            pathname={pathname}
-            isLoggedIn={isLoggedIn}
-          />
-        )}
-      </AnimatePresence>
+          <div className="flex shrink-0 items-center gap-2 md:gap-3">
+            <div className="hidden md:block"><HeaderSearch /></div>
+            <button type="button" className="ui-icon-button md:hidden" aria-label={mobileSearchOpen ? 'Đóng tìm kiếm' : 'Mở tìm kiếm'}
+              aria-expanded={mobileSearchOpen} onClick={() => setMobileSearchOpen(value => !value)}>
+              {mobileSearchOpen ? <X size={18} /> : <Search size={18} />}
+            </button>
+            <ThemeToggle />
+            <NotificationBell />
+            <UserMenu />
+          </div>
+        </div>
+        {mobileSearchOpen && <form role="search" className="border-t border-line px-4 py-3 md:hidden"
+          onSubmit={event => { event.preventDefault(); if (query.trim()) { router.push(`/search?q=${encodeURIComponent(query.trim())}`); setMobileSearchOpen(false); } }}>
+          <label htmlFor="mobile-search" className="sr-only">Tìm kiếm bài viết</label>
+          <div className="flex items-center gap-2 rounded-xl border border-line bg-panel p-2">
+            <Search size={16} className="ml-2 text-muted" />
+            <input id="mobile-search" autoFocus value={query} onChange={event => setQuery(event.target.value)}
+              onKeyDown={event => { if (event.key === 'Escape') setMobileSearchOpen(false); }}
+              className="min-w-0 flex-1 bg-transparent p-1 text-base text-ink outline-none" placeholder="Bạn muốn tìm điều gì?" />
+            <button type="submit" className="rounded-lg bg-brand p-2 text-white" aria-label="Tìm kiếm"><ArrowUpRight size={16} /></button>
+          </div>
+        </form>}
+      </header>
     </>
-  );
-}
-
-function NavLink({ href, label, active }: { href: string; label: string; active?: boolean }) {
-  return (
-    <Link
-      href={href}
-      className={cn(
-        "px-4 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 group/nav",
-        active 
-          ? "bg-primary/10 text-primary" 
-          : "text-zinc-600 dark:text-slate-400 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/5"
-      )}
-    >
-      <div className={cn(
-        "w-1 h-1 rounded-full bg-primary transition-all duration-300",
-        active ? "scale-100" : "scale-0 group-hover/nav:scale-100"
-      )} />
-      {label}
-    </Link>
-  );
-}
-
-function MobileSearchBar({ onClose }: { onClose: () => void }) {
-  const [query, setQuery] = useState('');
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && query.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(query.trim())}`;
-      onClose();
-    }
-    if (e.key === 'Escape') onClose();
-  };
-
-  return (
-    <div className="relative">
-      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-zinc-500 pointer-events-none" />
-      <input
-        autoFocus
-        type="text"
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder="Tìm kiếm bài viết..."
-        className="w-full pl-8 pr-3 py-2 text-base md:text-xs bg-zinc-100 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-lg outline-none focus:ring-2 focus:ring-primary/20 text-zinc-800 dark:text-white placeholder:text-zinc-500"
-      />
-    </div>
-  );
-}
-
-function MobileMenuOverlay({ onClose, pathname, isLoggedIn }: { onClose: () => void; pathname: string; isLoggedIn: boolean }) {
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = 'auto'; };
-  }, []);
-
-  const navItems = [
-    { href: isLoggedIn ? "/" : "/explore", label: "Khám phá", icon: Compass },
-    { href: "/topics", label: "Chủ đề", icon: Hash },
-    { href: "/glossary", label: "Thuật ngữ", icon: BookMarked },
-  ];
-
-  return (
-    <motion.div 
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[200000] bg-white/80 dark:bg-background-dark/80 backdrop-blur-2xl lg:hidden"
-    >
-      <div className="flex flex-col h-full p-6">
-        <div className="flex items-center justify-between mb-12">
-          <BrandLogo size={40} />
-          <button 
-            onClick={onClose}
-            className="p-2 text-zinc-500 dark:text-slate-400 hover:text-primary transition-colors"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
-
-        <nav className="flex flex-col gap-4">
-          <p className="text-[10px] font-black text-zinc-400 uppercase tracking-[0.3em] mb-2 ml-4">Điều hướng</p>
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const active = pathname === item.href;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center justify-between p-3 rounded-xl transition-all",
-                  active 
-                    ? "bg-primary/10 text-primary" 
-                    : "bg-zinc-50 dark:bg-white/5 text-zinc-600 dark:text-slate-400"
-                )}
-              >
-                <div className="flex items-center gap-3">
-                  <div className={cn(
-                    "p-1.5 rounded-lg",
-                    active ? "bg-primary/20" : "bg-white dark:bg-white/5 shadow-sm"
-                  )}>
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <span className="text-[13px] font-bold">{item.label}</span>
-                </div>
-                <ArrowRight className={cn("w-3.5 h-3.5 opacity-40", active ? "opacity-100" : "")} />
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="mt-auto pb-6 text-center px-8 relative">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-px bg-gradient-to-r from-transparent via-zinc-200 dark:via-white/10 to-transparent" />
-          <p className="text-[13px] font-serif text-zinc-400/80 dark:text-slate-500/80 italic leading-relaxed tracking-wide pt-8">
-            Lưu giữ tri thức, lan tỏa giá trị mỗi ngày cùng Lenote.
-          </p>
-        </div>
-      </div>
-    </motion.div>
   );
 }

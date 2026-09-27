@@ -37,9 +37,9 @@ export default function LandingFeatures() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-3xl sm:text-5xl font-black text-zinc-800 dark:text-white mb-6 font-display"
+            className="text-3xl sm:text-5xl font-semibold text-zinc-800 dark:text-white mb-6 font-display"
           >
-            TẠI SAO CHỌN <span className="text-primary">LENOTE?</span>
+            Một nơi để <span className="text-primary">hiểu sâu hơn.</span>
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -60,17 +60,11 @@ export default function LandingFeatures() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              whileHover={{ 
-                y: -10, 
-                backgroundColor: "rgba(255, 255, 255, 0.05)",
-                borderColor: "rgba(59, 130, 246, 0.4)",
-                boxShadow: "0 20px 40px rgba(0,0,0,0.1), 0 0 20px rgba(59, 130, 246, 0.1)" 
-              }}
-              className="group p-8 rounded-[2.5rem] bg-white/[0.03] border border-white/5 backdrop-blur-sm transition-all duration-500 cursor-pointer"
+              className="ui-panel group p-7 md:p-8 transition-shadow duration-200 hover:shadow-md"
             >
               <motion.div 
                 whileHover={{ scale: 1.1, rotate: 5 }}
-                className={`w-14 h-14 rounded-2xl ${f.bg} flex items-center justify-center mb-8 group-hover:bg-primary group-hover:text-white transition-all duration-500`}
+                className={`w-14 h-14 rounded-2xl ${f.bg} flex items-center justify-center mb-8 group-hover:bg-brand group-hover:text-white transition-all duration-500`}
               >
                 <f.icon className={`w-7 h-7 ${f.color} group-hover:text-white`} />
               </motion.div>

@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+import rehypeSanitize, { defaultSchema } from 'rehype-sanitize';
 import Link from 'next/link';
 import { 
   ChevronLeft, 
@@ -95,7 +96,7 @@ const CodeBlock = React.memo(({ inline, className, children, ...props }: any) =>
         <div className="absolute top-3 right-3 flex items-center gap-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           <button
             onClick={handleCopy}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all scale-95 hover:scale-100 active:scale-90 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-xl"
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[10px] font-semibold uppercase tracking-widest transition-all scale-95 hover:scale-100 active:scale-90 bg-zinc-900 text-white dark:bg-white dark:text-zinc-900 shadow-xl"
           >
             {copied ? <Check className="w-3 h-3 text-emerald-400 dark:text-emerald-600" /> : <Copy className="w-3 h-3" />}
             <span>{copied ? 'Đã chép' : 'Sao chép'}</span>
@@ -360,6 +361,10 @@ export default function MarkdownViewer({ content, className, compact = false, le
   const PROSE_WIDTH = cn(PROSE_WIDTH_BASE, leftAlign ? 'ml-0' : 'mx-auto');
 
   const memoizedComponents = useMemo(() => ({
+    iframe: ({ src }: { src?: string }) => {
+      if (!src || !/^https:\/\/(?:www\.youtube(?:-nocookie)?\.com\/embed\/[\w-]{11}|player\.vimeo\.com\/video\/\d+)(?:\?[^\s]*)?$/.test(src)) return null;
+      return <iframe src={src} title="Video" loading="lazy" allowFullScreen sandbox="allow-scripts allow-same-origin allow-presentation" referrerPolicy="strict-origin-when-cross-origin" className="w-full aspect-video rounded-xl border-0" />;
+    },
     h1: ({ children }: any) => <h1 id={slugify(flatten(children))} data-annotation-target className={cn("text-3xl sm:text-4xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-8 mt-16", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h1>,
     h2: ({ children }: any) => <h2 id={slugify(flatten(children))} data-annotation-target className={cn("text-2xl sm:text-3xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-6 mt-12", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h2>,
     h3: ({ children }: any) => <h3 id={slugify(flatten(children))} data-annotation-target className={cn("text-xl sm:text-2xl font-medium tracking-tight text-zinc-900 dark:text-slate-200 mb-4 mt-8", PROSE_WIDTH)}><AutoGlossaryHighlight>{children}</AutoGlossaryHighlight></h3>,
@@ -560,7 +565,7 @@ export default function MarkdownViewer({ content, className, compact = false, le
             {isGif && (
               <div className="absolute top-4 left-4 z-10">
                 <div className="bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-4 py-1.5 flex items-center gap-2 shadow-xl">
-                  <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
                   <span className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">GIF</span>
                 </div>
               </div>
@@ -599,7 +604,11 @@ export default function MarkdownViewer({ content, className, compact = false, le
       <div className={cn("markdown-viewer-root relative", className)}>
         <div className="max-w-[960px] mx-auto">
           <div className="markdown-content prose dark:prose-invert max-w-none !text-justify prose-pre:bg-zinc-950 prose-pre:border prose-pre:border-zinc-800 prose-pre:rounded-xl">
-            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]} components={memoizedComponents}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, [rehypeSanitize, {
+              ...defaultSchema,
+              tagNames: [...(defaultSchema.tagNames ?? []), 'iframe'],
+              attributes: { ...defaultSchema.attributes, iframe: ['src'] },
+            }]]} components={memoizedComponents}>
               {content}
             </ReactMarkdown>
           </div>

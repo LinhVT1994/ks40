@@ -384,7 +384,7 @@ export default function ArticleStep1({
                             onMouseDown={() => addTag(t)}
                             className={`w-full text-left px-3 py-2 text-sm rounded-lg transition-colors flex items-center gap-2 ${
                               i === activeIndex
-                                ? 'bg-primary text-white'
+                                ? 'bg-brand text-white'
                                 : 'text-zinc-700 dark:text-slate-200 hover:bg-zinc-100 dark:hover:bg-white/5'
                             }`}
                           >
@@ -444,7 +444,7 @@ export default function ArticleStep1({
                 <button
                   onClick={onNext}
                   disabled={!title.trim() || !category}
-                  className="flex items-center gap-2 px-8 py-3 rounded-xl bg-zinc-800 dark:bg-primary text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                  className="flex items-center gap-2 px-8 py-3 rounded-xl bg-zinc-800 dark:bg-brand text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
                 >
                   Tiếp thao: Viết nội dung
                   <ArrowRight className="w-4 h-4" />

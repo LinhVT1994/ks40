@@ -18,11 +18,10 @@ export const authConfig: NextAuthConfig = {
       return session;
     },
     authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
+      const isLoggedIn = !!auth?.user?.id && auth.user.status !== 'LOCKED';
       const path = nextUrl.pathname;
 
       const isAdminRoute      = path.startsWith('/admin');
-      const isProfileRoute    = path.startsWith('/profile');
       const isOnboardingRoute = path.startsWith('/onboarding');
       const isAuthRoute       = ['/login', '/register', '/forgot-password'].includes(path);
       const isResetRoute      = path === '/reset-password';

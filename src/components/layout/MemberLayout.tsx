@@ -24,12 +24,12 @@ export default async function MemberLayout({
   }
 
   return (
-    <div className="flex flex-col bg-background-light dark:bg-background-dark font-display text-zinc-800 dark:text-slate-100 min-h-screen relative">
+    <div className="ui-member-shell flex flex-col bg-background-light dark:bg-background-dark font-sans text-zinc-800 dark:text-slate-100 min-h-screen relative">
       <CodeThemeSync codeTheme={codeTheme} />
 
       <MemberHeader announcement={announcement} session={session} />
 
-      <main className="flex-1 flex flex-col relative z-10 w-full pt-16">
+      <main id="main-content" className="ui-member-main flex-1 flex flex-col relative z-10 min-w-0">
         {/* Main Content Dashboard */}
         <div data-focus-container className="w-full flex-1 flex flex-col">
           {children}

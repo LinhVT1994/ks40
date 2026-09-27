@@ -78,7 +78,7 @@ export default async function ArticleDetailPage({ params }: Props) {
   const role    = (session?.user as { role?: string })?.role;
   const userId  = session?.user?.id;
 
-  const article = await getArticleBySlugStaticAction(slug, role);
+  const article = await getArticleBySlugStaticAction(slug);
 
   const preview = !article ? await getArticlePreviewAction(slug) : null;
   if (!article && !preview) notFound();
@@ -95,7 +95,7 @@ export default async function ArticleDetailPage({ params }: Props) {
     authorId ? getAuthorInfoStaticAction(authorId, userId) : Promise.resolve(null),
     !isGated ? getArticleNavigationAction(data.publishedAt) : Promise.resolve({ prev: null, next: null }),
     !isGated && seriesId ? getSeriesContextAction(seriesId, data.id) : Promise.resolve(null),
-    !isGated && userId && article ? getArticleUserInteractionAction(article.id, userId) : Promise.resolve({ isLiked: false, isBookmarked: false }),
+    !isGated && userId && article ? getArticleUserInteractionAction(article.id) : Promise.resolve({ isLiked: false, isBookmarked: false }),
     !isGated ? getArticleRatingSummaryAction(data.id) : Promise.resolve(null),
     !isGated && userId ? getArticleAnnotationsAction(data.id) : Promise.resolve([]),
     !isGated ? getArticleAuthorAnnotationsAction(data.id) : Promise.resolve([]),

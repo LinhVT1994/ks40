@@ -2,7 +2,7 @@
 
 import { auth } from '@/auth';
 import { db } from '@/lib/db';
-import { createNotificationAction } from '@/features/notifications/actions/notification';
+import { createNotificationAction } from '@/lib/notifications';
 
 export async function toggleLikeAction(articleId: string): Promise<{ liked: boolean; count: number }> {
   if (typeof articleId !== 'string' || !/^[a-z0-9]{10,32}$/i.test(articleId)) {

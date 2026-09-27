@@ -71,7 +71,7 @@ export default async function AdminDocumentsPage({
           {isArticleTab && (
             <Link
               href="/admin/articles/new"
-              className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-2xl text-sm font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+              className="flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-2xl text-sm font-bold hover:bg-brand/90 transition-colors shadow-lg shadow-primary/20"
             >
               <Plus className="w-4 h-4" /> Tạo bài viết mới
             </Link>

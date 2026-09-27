@@ -3,7 +3,7 @@ import MemberContainer from '@/components/layout/MemberContainer';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Chính sách Bảo mật | Lenote',
+  title: 'Chính sách Bảo mật',
   description: 'Cách chúng tôi bảo vệ quyền riêng tư và dữ liệu của bạn tại Lenote.',
 };
 

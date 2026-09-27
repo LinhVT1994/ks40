@@ -86,7 +86,7 @@ export default function ArticleStep3({ title, articleId, onBack, onPublish, exis
                         <Icon className="w-5 h-5 relative z-10" />
                       </div>
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                        isSelected ? 'border-primary bg-primary' : 'border-zinc-300 dark:border-slate-600'
+                        isSelected ? 'border-primary bg-brand' : 'border-zinc-300 dark:border-slate-600'
                       }`}>
                         {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                       </div>
@@ -265,7 +265,7 @@ export default function ArticleStep3({ title, articleId, onBack, onPublish, exis
                   <p className="text-sm text-zinc-500 mt-1">Người dùng sẽ nhận được email ngay khi bài viết của bạn được công khai.</p>
                 </div>
               </div>
-              <div className={`w-12 h-6 rounded-full transition-colors relative shrink-0 ${sendNotif ? 'bg-primary' : 'bg-zinc-300 dark:bg-slate-700'}`}>
+              <div className={`w-12 h-6 rounded-full transition-colors relative shrink-0 ${sendNotif ? 'bg-brand' : 'bg-zinc-300 dark:bg-slate-700'}`}>
                 <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all ${sendNotif ? 'left-7' : 'left-1'}`} />
               </div>
             </button>
@@ -282,7 +282,7 @@ export default function ArticleStep3({ title, articleId, onBack, onPublish, exis
             <button className="flex items-center gap-2 px-6 py-3 rounded-xl border border-zinc-300 dark:border-white/10 bg-white dark:bg-slate-900 text-sm font-bold text-zinc-700 dark:text-white hover:bg-zinc-50 dark:hover:bg-slate-800 transition-all shadow-sm">
               <Eye className="w-4 h-4" /> Xem trước
             </button>
-            <button onClick={() => onPublish(selectedAudience, scheduleType, scheduleDate, resources, selectedSeriesId, seriesOrder ? parseInt(seriesOrder, 10) : null, nextArticleId)} className="flex items-center gap-2 px-8 py-3 rounded-xl bg-zinc-800 dark:bg-primary text-white text-sm font-bold hover:opacity-90 transition-all shadow-lg shadow-black/10 dark:shadow-primary/20">
+            <button onClick={() => onPublish(selectedAudience, scheduleType, scheduleDate, resources, selectedSeriesId, seriesOrder ? parseInt(seriesOrder, 10) : null, nextArticleId)} className="flex items-center gap-2 px-8 py-3 rounded-xl bg-zinc-800 dark:bg-brand text-white text-sm font-bold hover:opacity-90 transition-all shadow-lg shadow-black/10 dark:shadow-primary/20">
               <Send className="w-4 h-4" /> {scheduleType === 'now' ? 'Xuất bản ngay' : 'Lên lịch'}
             </button>
           </div>

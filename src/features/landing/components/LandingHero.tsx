@@ -1,91 +1,67 @@
-'use client';
-
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Zap, ArrowRight, Star, ShieldCheck, Sparkles } from 'lucide-react';
 import Link from 'next/link';
-import LandingSpotlight from './LandingSpotlight';
+import { ArrowRight, BookOpen, Bookmark, Highlighter, NotebookPen } from 'lucide-react';
+import BookBuddy from '@/components/shared/BookBuddy';
 
 export default function LandingHero() {
   return (
-    <section className="relative min-h-[90vh] flex flex-col items-center justify-center pt-20 pb-16 overflow-hidden">
-      <LandingSpotlight />
+    <>
+      <section className="ui-hero">
+        <div>
+          <p className="ui-eyebrow mb-7">Một không gian cho tri thức</p>
+          <h1 className="ui-hero-title text-ink mb-6">
+            Đọc sâu hơn.<br />
+            Hiểu nhiều hơn.<br />
+            <em>Lớn lên mỗi ngày.</em>
+          </h1>
+          <p className="ui-hero-copy mb-8">
+            Những bài viết đáng đọc, những ý tưởng đáng giữ.
+            Lenote kết nối kiến thức và trải nghiệm, để mỗi lần ghé lại
+            là một lần bạn khám phá thêm điều mới.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/explore" className="ui-button">Khám phá bài viết <ArrowRight className="h-4 w-4" /></Link>
+            <Link href="/register" className="ui-button ui-button-secondary">Tạo không gian của bạn</Link>
+          </div>
+          <div className="mt-6 flex items-center gap-3 text-xs text-muted">
+            <BookBuddy mood="grow" className="w-16" />
+            <p className="leading-6"><span className="block font-medium text-ink">Một người bạn nhỏ, cùng bạn học mỗi ngày.</span>Chậm lại một chút. Học thêm một điều.</p>
+          </div>
+        </div>
 
-      {/* Background Ornaments — hidden on mobile for performance */}
-      <div className="absolute inset-0 z-0 hidden md:block">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px]" />
+        <div className="ui-hero-art" aria-label="Minh họa không gian đọc và ghi chú của Lenote">
+          <div className="ui-notebook">
+            <div className="mb-7 flex items-center justify-between border-b border-line pb-4">
+              <span className="ui-wordmark">lenote<span>.</span></span>
+              <span className="text-[10px] uppercase tracking-widest text-muted">Không gian đọc</span>
+              <Bookmark className="h-4 w-4 text-primary" />
+            </div>
+            <p className="ui-eyebrow mb-4">Học tập & phát triển</p>
+            <h2 className="ui-notebook-title text-ink mb-5">Tri thức bắt đầu từ<br />một câu hỏi hay.</h2>
+            <div className="space-y-4 text-sm leading-7 text-muted">
+              <p>Đọc không chỉ là tiếp nhận thông tin. Đó còn là cách ta kết nối những điều đã biết với những góc nhìn mới.</p>
+              <p>Hãy giữ lại <span className="ui-notebook-mark">một ý tưởng khiến bạn dừng lại</span>, viết xuống suy nghĩ của mình và trở lại khi cần.</p>
+            </div>
+            <div className="ui-notebook-note">
+              <NotebookPen className="mt-0.5 h-4 w-4 shrink-0 text-accent-purple" />
+              <div><span className="mb-1 block font-semibold text-ink">Ghi chú của bạn</span>Điều gì mình có thể áp dụng từ ý tưởng này?</div>
+            </div>
+            <div className="mt-6 flex items-center justify-between text-[11px] text-muted">
+              <span className="flex items-center gap-2"><BookOpen className="h-3.5 w-3.5" /> Đọc · Suy ngẫm · Ghi nhớ</span>
+              <span className="h-1 w-16 overflow-hidden rounded-full bg-panel-soft"><span className="block h-full w-2/3 bg-brand" /></span>
+            </div>
+          </div>
+          <div className="ui-hero-caption"><span>Xem trước trải nghiệm</span><span>Ít xao nhãng, nhiều ý tưởng</span></div>
+        </div>
+      </section>
+      <div className="ui-feature-strip">
+        {[
+          { icon: BookOpen, title: 'Đọc theo cách của bạn', detail: 'Bài viết, sách và những góc nhìn mới' },
+          { icon: Highlighter, title: 'Giữ lại điều có giá trị', detail: 'Đánh dấu, ghi chú và đọc lại' },
+          { icon: NotebookPen, title: 'Chia sẻ để cùng phát triển', detail: 'Kết nối qua trải nghiệm và tri thức' },
+        ].map(({ icon: Icon, title, detail }) => (
+          <div key={title}><Icon className="h-5 w-5 shrink-0 text-primary" /><div><h2 className="text-ink">{title}</h2><p>{detail}</p></div></div>
+        ))}
       </div>
-      
-      {/* Top Badge */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="inline-flex items-center px-4 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md mb-8 shadow-xl shadow-primary/5"
-      >
-        <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-zinc-500">Kiến tạo tri thức</span>
-      </motion.div>
-
-      {/* Main Headline */}
-      <div className="relative z-10 max-w-5xl mx-auto text-center px-6">
-        <motion.h1 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tighter text-zinc-800 dark:text-white leading-[1.1] mb-8 font-display"
-        >
-          <span className="sr-only">Lenote — Nâng tầm tri thức.</span>
-          <motion.span 
-            className="inline-block"
-            whileHover={{ scale: 1.02, textShadow: "0 0 20px rgba(59,130,246,0.3)" }}
-            transition={{ type: "spring", stiffness: 300 }}
-          >
-            NÂNG TẦM
-          </motion.span> <br />
-          <motion.span
-            whileHover={{ scale: 1.05, filter: "brightness(1.2)" }}
-            transition={{ type: "spring", stiffness: 300 }}
-            className="inline-block bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 via-primary to-emerald-500 animate-text-shimmer bg-[length:200%_auto] cursor-pointer"
-          >
-            TRI THỨC
-          </motion.span>
-        </motion.h1>
-
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.5 }}
-          className="text-lg sm:text-xl text-zinc-500 dark:text-slate-400 max-w-2xl mx-auto mb-12 font-medium leading-relaxed"
-        >
-          Nền tảng chia sẻ tri thức và kinh nghiệm đa góc nhìn. <br className="hidden sm:block" />
-          Từ những bài học chuyên sâu đến những câu chuyện đời sống đầy giá trị.
-        </motion.p>
-
-        {/* Action Buttons */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="flex flex-col sm:flex-row items-center justify-center gap-6"
-        >
-          <Link 
-            href="/register"
-            className="group relative px-8 py-4 bg-primary text-white rounded-2xl font-bold text-lg shadow-2xl shadow-primary/30 hover:scale-105 active:scale-95 transition-all overflow-hidden flex items-center gap-3"
-          >
-            <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 skew-x-[20deg]" />
-            Bắt đầu ngay
-            <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-          </Link>
-
-          <Link 
-            href="/explore"
-            className="px-8 py-4 bg-white/5 dark:bg-white/5 border border-zinc-300 dark:border-white/10 text-zinc-800 dark:text-white rounded-2xl font-bold text-lg hover:bg-zinc-50 dark:hover:bg-white/10 transition-all flex items-center justify-center"
-          >
-            Khám phá bài viết
-          </Link>
-        </motion.div>
-      </div>
-
-    </section>
+    </>
   );
 }

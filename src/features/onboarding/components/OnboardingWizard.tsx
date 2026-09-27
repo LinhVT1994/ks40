@@ -134,7 +134,7 @@ export default function OnboardingWizard({ userName }: { userName?: string }) {
                 <motion.p 
                   animate={{ opacity: [0.4, 1, 0.4] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="text-[12px] font-black uppercase tracking-[0.4em] text-primary"
+                  className="text-[12px] font-semibold uppercase tracking-[0.4em] text-primary"
                 >
                   Vui lòng đợi
                 </motion.p>

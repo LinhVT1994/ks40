@@ -40,7 +40,7 @@ export default function DocumentsTabs({ activeTab, pendingCount }: { activeTab: 
             <Icon className="w-4 h-4" />
             {t.label}
             {t.id === 'pending' && pendingCount !== undefined && pendingCount > 0 && (
-              <span className="min-w-[20px] h-5 px-1.5 flex items-center justify-center text-[10px] font-black bg-rose-500 text-white rounded-full leading-none">
+              <span className="min-w-[20px] h-5 px-1.5 flex items-center justify-center text-[10px] font-semibold bg-rose-500 text-white rounded-full leading-none">
                 {pendingCount}
               </span>
             )}

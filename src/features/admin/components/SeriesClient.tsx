@@ -123,7 +123,7 @@ function SeriesModal({
           <button
             onClick={() => onSubmit(form)}
             disabled={isPending || !form.title || !form.slug}
-            className="flex items-center gap-2 px-6 py-2 rounded-xl bg-primary text-white text-sm font-bold hover:bg-primary/90 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-6 py-2 rounded-xl bg-brand text-white text-sm font-bold hover:bg-brand/90 disabled:opacity-50 transition-colors"
           >
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
             {mode === 'create' ? 'Tạo series' : 'Lưu thay đổi'}
@@ -213,7 +213,7 @@ export default function SeriesClient({ series: initial }: { series: SeriesSummar
         {/* Create button */}
         <button
           onClick={() => { setShowCreate(true); setError(null); }}
-          className="flex items-center gap-2 bg-primary text-white px-5 py-2.5 rounded-2xl text-sm font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+          className="flex items-center gap-2 bg-brand text-white px-5 py-2.5 rounded-2xl text-sm font-bold hover:bg-brand/90 transition-colors shadow-lg shadow-primary/20"
         >
           <Plus className="w-4 h-4" /> Tạo series mới
         </button>

@@ -246,7 +246,7 @@ export default function TopicPageClient({
                       <div className="py-4 sm:py-5 relative hover:bg-white dark:hover:bg-white/[0.03] hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col rounded-2xl px-3 sm:px-4 -mx-2 border border-transparent hover:border-zinc-200/50 dark:hover:border-white/5 cursor-pointer">
                         
                         {/* Focus Indicator */}
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-14 bg-primary rounded-full scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-center" style={{ backgroundColor: color }} />
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-14 bg-brand rounded-full scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-center" style={{ backgroundColor: color }} />
 
                         <div className="flex flex-row gap-3 sm:gap-5 items-start w-full">
 
@@ -273,7 +273,7 @@ export default function TopicPageClient({
                           {/* Badges */}
                           <div className="absolute top-1 right-1 flex flex-col gap-1 z-20">
                             {article.badges.slice(0, 1).map(b => (
-                              <span key={b} className="bg-primary/90 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase shadow-sm" style={{ backgroundColor: color }}>
+                              <span key={b} className="bg-brand/90 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase shadow-sm" style={{ backgroundColor: color }}>
                                 {BADGE_LABELS[b] ?? b}
                               </span>
                             ))}

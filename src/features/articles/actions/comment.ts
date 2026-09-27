@@ -4,7 +4,7 @@ import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { CommentStatus } from '@prisma/client';
 import { eventBus, EVENTS } from '@/lib/events/bus';
-import { createNotificationAction } from '@/features/notifications/actions/notification';
+import { createNotificationAction } from '@/lib/notifications';
 
 const MAX_COMMENT_IMAGES = 4;
 

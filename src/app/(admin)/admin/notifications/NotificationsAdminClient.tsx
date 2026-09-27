@@ -116,7 +116,7 @@ export default function NotificationsAdminClient({
                   {stats.unread}
                 </span>
               )}
-              {tab === key && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-full" />}
+              {tab === key && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand rounded-full" />}
             </button>
           ))}
         </div>
@@ -203,7 +203,7 @@ export default function NotificationsAdminClient({
                           <div className="min-w-0">
                             <p className={`text-sm truncate ${!n.read ? 'font-semibold text-zinc-800 dark:text-white' : 'text-zinc-700 dark:text-slate-300'}`}>
                               {n.title}
-                              {!n.read && <span className="ml-2 inline-block w-1.5 h-1.5 rounded-full bg-primary align-middle" />}
+                              {!n.read && <span className="ml-2 inline-block w-1.5 h-1.5 rounded-full bg-brand align-middle" />}
                             </p>
                             {n.message && <p className="text-xs text-zinc-500 truncate mt-0.5">{n.message}</p>}
                           </div>

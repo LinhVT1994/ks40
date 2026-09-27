@@ -49,7 +49,7 @@ export default function ArticleListItem({
   return (
     <div className="block group relative">
       <GlanceTrigger article={article}>
-        <div className="py-3 sm:py-4 relative hover:bg-white dark:hover:bg-white/[0.03] hover:translate-y-[-4px] hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] flex flex-col rounded-2xl px-2 sm:px-3 -mx-1 border border-transparent hover:border-zinc-200/50 dark:hover:border-white/5 cursor-pointer">
+        <div className="ui-article-row py-4 sm:py-5 relative transition-colors duration-200 flex flex-col rounded-2xl px-3 sm:px-5 cursor-pointer">
           
           {/* Main Link Overlay - Covers entire area */}
           <Link 
@@ -61,7 +61,7 @@ export default function ArticleListItem({
           {/* Focus Indicator Bar */}
           <div className={cn(
             "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-12 rounded-full scale-y-0 group-hover:scale-y-100 transition-transform duration-500 origin-center z-10",
-            article.audience === 'PREMIUM' ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'bg-primary'
+            article.audience === 'PREMIUM' ? 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'bg-brand'
           )} />
 
           <div className="flex flex-row gap-3 sm:gap-4 items-start w-full relative z-10 pointer-events-none">
@@ -100,7 +100,7 @@ export default function ArticleListItem({
               {/* Badges */}
               <div className="absolute top-1 right-1 flex flex-col gap-1 z-20">
                 {article.badges.slice(0, 1).map(b => (
-                  <span key={b} className="bg-primary/90 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase shadow-sm">
+                  <span key={b} className="bg-brand/90 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full uppercase shadow-sm">
                     {BADGE_LABELS[b] ?? b}
                   </span>
                 ))}

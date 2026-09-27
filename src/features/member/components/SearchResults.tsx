@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Search } from 'lucide-react';
+import BookBuddy from '@/components/shared/BookBuddy';
 import type { ArticleCard } from '@/features/articles/actions/article';
 import ArticleListItem from '@/features/articles/components/ArticleListItem';
 
@@ -35,7 +35,7 @@ export default function SearchResults({ articles, query, tag }: { articles: Arti
   if (!query && !tag) {
     return (
       <div className="py-24 text-center">
-        <Search className="w-12 h-12 mx-auto mb-4 text-zinc-200 dark:text-white/10" />
+        <BookBuddy mood="search" className="mx-auto mb-5 w-36" />
         <p className="text-zinc-500">Nhập từ khóa vào ô tìm kiếm phía trên để bắt đầu.</p>
       </div>
     );
@@ -44,7 +44,7 @@ export default function SearchResults({ articles, query, tag }: { articles: Arti
   if (articles.length === 0) {
     return (
       <div className="py-24 text-center">
-        <Search className="w-12 h-12 mx-auto mb-4 text-zinc-200 dark:text-white/10" />
+        <BookBuddy mood="search" className="mx-auto mb-5 w-36" />
         <p className="font-semibold text-zinc-700 dark:text-slate-200 mb-2">Không tìm thấy kết quả</p>
         <p className="text-sm text-zinc-500">Thử tìm với từ khóa khác hoặc kiểm tra lại chính tả.</p>
       </div>

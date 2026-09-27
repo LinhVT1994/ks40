@@ -19,18 +19,26 @@ export const htmlToMarkdown = (html: string) => {
     .replace(/<div><br><\/div>/g, '\n').replace(/<div>/g, '\n').replace(/<\/div>/g, '')
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<[^>]*>?/gm, '') // Final strip of any remaining HTML tags
-    .replace(/&nbsp;/g, ' ').replace(/\n\n+/g, '\n\n').trim();
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&(lt|gt|quot|#39|amp);/g, (_match, entity: string) => ({ lt: '<', gt: '>', quot: '"', '#39': "'", amp: '&' }[entity] ?? _match))
+    .replace(/\n\n+/g, '\n\n').trim();
 };
 
 export const markdownToHtml = (md: string) => {
   if (!md) return '';
   
-  let html = md
-    .replace(/!\[\]\((.*?)\)/g, '<img src="$1" style="max-width:100%; border-radius:12px; margin: 12px 0; border: 1px solid rgba(0,0,0,0.05);" />')
+  // Escape raw HTML before adding our own small set of formatting tags.
+  const escape = (value: string) => value.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  let html = escape(md)
+    .replace(/!\[\]\((.*?)\)/g, (_match, url: string) => {
+      // No data:, javascript:, protocol-relative URLs, or attribute injection.
+      if (!/^(https?:\/\/|\/(?!\/))[^\s]+$/i.test(url)) return '';
+      return `<img src="${url}" style="max-width:100%; border-radius:12px; margin:12px 0" />`;
+    })
     .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
     .replace(/\*(.*?)\*/g, '<i>$1</i>')
     .replace(/### (.*?)\n/g, '<h3>$1</h3>')
-    .replace(/> (.*?)\n/g, '<blockquote>$1</blockquote>')
+    .replace(/&gt; (.*?)\n/g, '<blockquote>$1</blockquote>')
     .replace(/^---\s*$/gm, '<hr>');
 
   // Handle unordered lists (- or *)

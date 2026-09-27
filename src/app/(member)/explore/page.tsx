@@ -8,11 +8,13 @@ import { getReadHistoryAction } from '@/features/articles/actions/read-history';
 import MemberContainer from '@/components/layout/MemberContainer';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
 import JsonLd from '@/components/shared/JsonLd';
+import BookBuddy from '@/components/shared/BookBuddy';
 
 export const metadata: Metadata = {
-  title: `Khám phá tri thức | ${SITE_NAME}`,
+  title: 'Khám phá tri thức',
   description: 'Khám phá những bài viết mới nhất, các chủ đề công nghệ thịnh hành và tri thức từ cộng đồng kỹ sư phần mềm tại Lenote.',
   alternates: { canonical: '/explore' },
+  openGraph: { title: 'Khám phá tri thức', description: 'Khám phá bài viết và chủ đề công nghệ từ cộng đồng Lenote.', url: `${SITE_URL}/explore`, images: [`${SITE_URL}/og?title=Kh%C3%A1m%20ph%C3%A1%20tri%20th%E1%BB%A9c`] },
 };
 
 export default async function ExplorePage() {
@@ -59,13 +61,17 @@ export default async function ExplorePage() {
   return (
     <MemberContainer>
       <JsonLd data={exploreJsonLd} />
-      <div className="mt-12 sm:mt-16 mb-8">
-        <h1 className="text-3xl md:text-4xl font-black text-zinc-800 dark:text-white uppercase tracking-tight font-display mb-2">
-          Khám phá <span className="text-primary text-xl md:text-2xl align-top">★</span>
+      <div className="mt-6 sm:mt-10 mb-8 flex items-center justify-between gap-4 border-b border-line pb-8">
+        <div className="min-w-0">
+        <p className="ui-eyebrow mb-4">Dành cho người ham học hỏi</p>
+        <h1 className="text-3xl md:text-5xl font-medium text-ink tracking-tight font-display mb-4">
+          Khám phá<span className="text-primary">.</span>
         </h1>
         <p className="text-zinc-500 dark:text-slate-400 font-medium">
           Tìm kiếm cảm hứng và tri thức mới từ cộng đồng Lenote.
         </p>
+        </div>
+        <BookBuddy className="hidden w-28 sm:block lg:w-36" />
       </div>
 
       <FeatureCards

@@ -18,7 +18,7 @@ export default function LandingEarlyAccess() {
            initial={{ opacity: 0, scale: 0.95 }}
            whileInView={{ opacity: 1, scale: 1 }}
            viewport={{ once: true }}
-           className="bg-white dark:bg-slate-950 border border-zinc-200 dark:border-white/10 rounded-[3rem] p-12 md:p-20 text-center shadow-xl shadow-zinc-200/50 dark:shadow-2xl dark:shadow-black relative overflow-hidden"
+           className="ui-panel p-6 sm:p-10 md:p-14 text-center relative overflow-hidden"
         >
            {/* Decorative elements — hidden on mobile */}
            <div className="hidden md:block absolute -top-24 -right-24 w-64 h-64 bg-primary/10 dark:bg-primary/20 rounded-full blur-[60px]" />
@@ -35,8 +35,8 @@ export default function LandingEarlyAccess() {
                 Đặc quyền dành riêng cho bạn
               </motion.div>
 
-              <h2 className="text-4xl sm:text-6xl font-black text-zinc-900 dark:text-white mb-8 font-display leading-tight">
-                TRỞ THÀNH <br /> <span className="bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">EARLY ADOPTER</span>
+              <h2 className="text-4xl sm:text-6xl font-semibold text-zinc-900 dark:text-white mb-8 font-display leading-tight">
+                Đồng hành từ <br /> <span className="text-primary">những ngày đầu.</span>
               </h2>
 
               <p className="text-zinc-600 dark:text-slate-500 text-lg md:text-xl max-w-2xl mx-auto mb-16 leading-relaxed">
@@ -73,16 +73,12 @@ export default function LandingEarlyAccess() {
               </div>
 
               <motion.div
-                whileHover={{ 
-                  scale: 1.05, 
-                  boxShadow: "0 20px 40px rgba(59, 130, 246, 0.4), 0 0 20px rgba(59, 130, 246, 0.2)" 
-                }}
                 whileTap={{ scale: 0.98 }}
                 className="relative group/btn w-fit mx-auto rounded-2xl"
               >
                 <Link 
                   href="/register"
-                  className="inline-flex items-center gap-3 px-12 py-5 bg-primary text-white rounded-2xl font-black text-xl shadow-xl shadow-primary/20 transition-all relative overflow-hidden"
+                  className="ui-button relative overflow-hidden"
                 >
                   {/* Internal Shimmer Sweep */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_1.5s_infinite] transition-transform pointer-events-none" />

@@ -152,24 +152,24 @@ export default function WritePageClient({ topics, editArticle }: Props) {
   const readTimeEst = Math.max(1, Math.ceil(wordCount / 200));
 
   return (
-    <div className={`flex flex-col bg-white dark:bg-slate-950 transition-all duration-500 ${
+    <div className={`flex flex-col bg-panel transition-all duration-500 ${
       isFullscreen ? 'fixed inset-0 z-[100] h-screen' : 'min-h-[calc(100vh-64px)]'
     }`}>
       {/* HEADER BAR - Zen Style */}
-      <div className="flex items-center justify-between px-4 md:px-6 py-3 shrink-0 border-b border-zinc-300 dark:border-white/5 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl z-[40]">
+      <div className="flex items-center justify-between px-4 md:px-6 py-3 shrink-0 border-b border-line bg-panel z-[40]">
         <div className="flex items-center gap-4">
           <button onClick={() => router.back()} className="p-2 rounded-xl text-zinc-500 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/5 transition-all">
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div className="h-4 w-px bg-zinc-200 dark:bg-white/10 hidden sm:block" />
-          <span className="text-xs font-black text-zinc-500 dark:text-slate-500 tracking-widest hidden sm:inline uppercase">
+          <span className="text-xs font-semibold text-zinc-500 dark:text-slate-500 tracking-widest hidden sm:inline uppercase">
             {isEdit ? 'Chỉnh sửa' : 'Viết bài mới'}
           </span>
         </div>
 
         <div className="flex items-center gap-3">
-          {error && <span className="hidden lg:inline text-[10px] font-black text-rose-500 bg-rose-50 dark:bg-rose-500/10 px-3 py-1.5 rounded-lg border border-rose-100 dark:border-rose-500/20">{error}</span>}
-          {saved && <span className="text-[10px] font-black text-emerald-500 uppercase tracking-widest">Đã lưu nháp</span>}
+          {error && <span className="hidden lg:inline text-[10px] font-semibold text-rose-500 bg-rose-50 dark:bg-rose-500/10 px-3 py-1.5 rounded-lg border border-rose-100 dark:border-rose-500/20">{error}</span>}
+          {saved && <span className="text-[10px] font-semibold text-emerald-500 uppercase tracking-widest">Đã lưu nháp</span>}
           
           <button 
             onClick={() => setIsFullscreen(!isFullscreen)}
@@ -180,7 +180,7 @@ export default function WritePageClient({ topics, editArticle }: Props) {
 
           <button 
             onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-            className={`p-2.5 rounded-xl transition-all ${isSettingsOpen ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/5'}`}
+            className={`p-2.5 rounded-xl transition-all ${isSettingsOpen ? 'bg-brand text-white shadow-lg shadow-primary/20' : 'text-zinc-500 hover:text-primary hover:bg-zinc-100 dark:hover:bg-white/5'}`}
           >
             <Settings className="w-4 h-4" />
           </button>
@@ -188,7 +188,7 @@ export default function WritePageClient({ topics, editArticle }: Props) {
           <button
             onClick={handleSave}
             disabled={isPending}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-800 dark:bg-primary text-white text-xs font-black tracking-widest hover:opacity-90 disabled:opacity-50 transition-all shadow-xl shadow-zinc-800/10 dark:shadow-primary/20 active:scale-95"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-800 dark:bg-brand text-white text-xs font-semibold tracking-widest hover:opacity-90 disabled:opacity-50 transition-all shadow-xl shadow-zinc-800/10 dark:shadow-primary/20 active:scale-95"
           >
             {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
             {isEdit ? 'CẬP NHẬT' : 'LƯU NHÁP'}
@@ -213,7 +213,7 @@ export default function WritePageClient({ topics, editArticle }: Props) {
                     value={title}
                     onChange={e => handleTitleChange(e.target.value)}
                     placeholder="Tiêu đề bài viết..."
-                    className="w-full text-3xl font-black bg-transparent border-none outline-none placeholder:text-zinc-200 dark:placeholder:text-slate-800 text-zinc-800 dark:text-white leading-tight"
+                    className="w-full text-3xl font-semibold bg-transparent border-none outline-none placeholder:text-zinc-200 dark:placeholder:text-slate-800 text-zinc-800 dark:text-white leading-tight"
                   />
                   <div className="flex items-center gap-2 mt-3 text-[10px] font-bold text-zinc-300 dark:text-slate-700">
                     <Hash className="w-3 h-3" />
@@ -227,7 +227,7 @@ export default function WritePageClient({ topics, editArticle }: Props) {
                 </div>
 
                 <div className="px-6 py-2 flex items-center gap-4 border-b border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01] shrink-0">
-                  <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Markdown Editor</span>
+                  <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest">Markdown Editor</span>
                   <div className="ml-auto flex items-center gap-4 text-[10px] font-bold text-zinc-300 dark:text-slate-600 uppercase tracking-tighter">
                     <span>{wordCount} từ</span>
                     <span>~{readTimeEst} phút đọc</span>
@@ -249,7 +249,7 @@ export default function WritePageClient({ topics, editArticle }: Props) {
             {(viewMode === 'preview' || viewMode === 'split') && (
               <div className={`${viewMode === 'split' ? 'w-1/2' : 'w-full'} overflow-hidden`}>
                 <div className="px-6 py-2 flex items-center justify-between border-b border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.01]">
-                   <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest">Xem trước hiện tại</span>
+                   <span className="text-[10px] font-semibold text-zinc-500 uppercase tracking-widest">Xem trước hiện tại</span>
                    <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                 </div>
                 <MarkdownPreview content={content} />
@@ -264,7 +264,7 @@ export default function WritePageClient({ topics, editArticle }: Props) {
         }`}>
           <div className="w-80 h-full flex flex-col p-6 overflow-y-auto">
             <div className="flex items-center justify-between mb-8">
-              <h5 className="text-[10px] font-black text-zinc-500 uppercase tracking-[0.2em]">Cấu hình bài viết</h5>
+              <h5 className="text-[10px] font-semibold text-zinc-500 uppercase tracking-[0.2em]">Cấu hình bài viết</h5>
               <button onClick={() => setIsSettingsOpen(false)} className="text-zinc-300 hover:text-rose-500 transition-colors">
                 <X className="w-5 h-5" />
               </button>
@@ -273,7 +273,7 @@ export default function WritePageClient({ topics, editArticle }: Props) {
             <div className="space-y-8">
               {/* Topic */}
               <div className="space-y-3">
-                <label className="flex items-center gap-2 text-[10px] font-black text-zinc-500 dark:text-slate-400 uppercase tracking-wider">
+                <label className="flex items-center gap-2 text-[10px] font-semibold text-zinc-500 dark:text-slate-400 uppercase tracking-wider">
                   <Hash className="w-3 h-3" /> Chủ đề
                 </label>
                 <select
@@ -292,7 +292,7 @@ export default function WritePageClient({ topics, editArticle }: Props) {
 
               {/* Cover */}
               <div className="space-y-3">
-                <label className="flex items-center gap-2 text-[10px] font-black text-zinc-500 dark:text-slate-400 uppercase tracking-wider">
+                <label className="flex items-center gap-2 text-[10px] font-semibold text-zinc-500 dark:text-slate-400 uppercase tracking-wider">
                   <ImageIcon className="w-3 h-3" /> Ảnh bìa (URL)
                 </label>
                 <input
@@ -319,12 +319,12 @@ export default function WritePageClient({ topics, editArticle }: Props) {
 
               {/* Tags */}
               <div className="space-y-3">
-                <label className="flex items-center gap-2 text-[10px] font-black text-zinc-500 dark:text-slate-400 uppercase tracking-wider">
+                <label className="flex items-center gap-2 text-[10px] font-semibold text-zinc-500 dark:text-slate-400 uppercase tracking-wider">
                   <Info className="w-3 h-3" /> Từ khóa (Tags)
                 </label>
                 <div className="flex flex-wrap gap-2 p-3 bg-zinc-50 dark:bg-white/5 border border-zinc-300 dark:border-white/10 rounded-xl min-h-[50px]">
                   {tags.map(tag => (
-                    <span key={tag} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-slate-300 rounded-lg text-[10px] font-black uppercase tracking-tighter">
+                    <span key={tag} className="flex items-center gap-1.5 px-2.5 py-1.5 bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10 text-zinc-600 dark:text-slate-300 rounded-lg text-[10px] font-semibold uppercase tracking-tighter">
                       {tag}
                       <button onClick={() => setTags(prev => prev.filter(t => t !== tag))} className="text-zinc-300 hover:text-rose-500 transition-colors">
                         <X className="w-3 h-3" />
@@ -343,7 +343,7 @@ export default function WritePageClient({ topics, editArticle }: Props) {
 
               {/* Summary */}
               <div className="space-y-3">
-                <label className="flex items-center gap-2 text-[10px] font-black text-zinc-500 dark:text-slate-400 uppercase tracking-wider">
+                <label className="flex items-center gap-2 text-[10px] font-semibold text-zinc-500 dark:text-slate-400 uppercase tracking-wider">
                   <Edit3 className="w-3 h-3" /> Tóm tắt bài viết
                 </label>
                 <textarea

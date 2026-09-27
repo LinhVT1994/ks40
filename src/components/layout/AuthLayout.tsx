@@ -4,19 +4,20 @@ import AuthFooter from "./AuthFooter";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      {/* Background glow effects — hidden on mobile for performance */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full max-w-[1200px] pointer-events-none z-0 hidden md:block">
-        <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px]"></div>
-      </div>
-      
+    <div className="ui-auth">
       <AuthHeader />
       
-      <main className="flex-grow flex items-start sm:items-center justify-center p-6 pt-10 sm:pt-6 relative z-10 w-full">
-        {children}
+      <main className="ui-auth-main relative z-10">
+        <aside className="ui-auth-story">
+          <p className="ui-eyebrow">Không gian tri thức của bạn</p>
+          <h2 className="text-ink">Những điều hay,<br />xứng đáng được<br /><span className="text-primary">lưu giữ.</span></h2>
+          <p>Đọc những góc nhìn mới, ghi lại điều tâm đắc và xây dựng kho tri thức của riêng bạn cùng Lenote.</p>
+          <blockquote>“Mỗi ngày, thêm một điều đáng nhớ.”</blockquote>
+        </aside>
+        <div className="flex w-full justify-center">{children}</div>
       </main>
       
       <AuthFooter />
-    </>
+    </div>
   );
 }

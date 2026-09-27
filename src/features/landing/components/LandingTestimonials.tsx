@@ -35,9 +35,9 @@ export default function LandingTestimonials() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-3xl sm:text-5xl font-black text-zinc-800 dark:text-white mb-6 font-display"
+            className="text-3xl sm:text-5xl font-semibold text-zinc-800 dark:text-white mb-6 font-display"
           >
-            TRẢI NGHIỆM <span className="text-primary italic">THỰC TẾ</span>
+            Cùng nhau <span className="text-primary italic">học hỏi mỗi ngày.</span>
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -58,13 +58,7 @@ export default function LandingTestimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
-              whileHover={{ 
-                y: -8, 
-                backgroundColor: "rgba(255, 255, 255, 0.05)",
-                borderColor: "rgba(59, 130, 246, 0.3)",
-                boxShadow: "0 20px 40px rgba(0,0,0,0.1)"
-              }}
-              className="p-8 rounded-[2.5rem] bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 transition-all duration-500 cursor-default"
+              className="ui-panel relative p-7 transition-shadow duration-200 hover:shadow-md"
             >
               <Quote className="absolute top-8 right-8 w-10 h-10 text-primary opacity-10 group-hover:opacity-20 transition-opacity" />
               

@@ -217,7 +217,7 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
       {/* Immersive Header / Local Nav */}
       <div className="flex items-center justify-between px-6 py-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-b border-zinc-300 dark:border-white/5 shrink-0 z-50">
         <div className="flex items-center gap-4">
-          <h1 className="text-sm font-black text-zinc-800 dark:text-white uppercase tracking-widest">
+          <h1 className="text-sm font-semibold text-zinc-800 dark:text-white uppercase tracking-widest">
             {currentId ? 'Chỉnh sửa bài viết' : 'Viết bài mới'}
           </h1>
         </div>
@@ -228,10 +228,10 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
             {[1, 2, 3].map(s => (
               <div key={s} className="flex items-center gap-2">
                 <div className={`w-2 h-2 rounded-full transition-all ${
-                  step === s ? 'bg-primary ring-4 ring-primary/20 scale-125' : 
+                  step === s ? 'bg-brand ring-4 ring-primary/20 scale-125' :
                   step > s ? 'bg-emerald-500' : 'bg-zinc-200 dark:bg-white/10'
                 }`} />
-                <span className={`text-[10px] font-black uppercase tracking-widest ${
+                <span className={`text-[10px] font-semibold uppercase tracking-widest ${
                   step === s ? 'text-zinc-800 dark:text-white' : 'text-zinc-500'
                 }`}>
                   {s === 1 ? 'Thông tin' : s === 2 ? 'Nội dung' : 'Gửi duyệt'}
@@ -246,7 +246,7 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
            <div className="flex items-center gap-2">
              <button 
                onClick={() => router.back()}
-               className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-400 hover:text-rose-500 transition-colors mr-2"
+               className="px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-400 hover:text-rose-500 transition-colors mr-2"
              >
                Hủy bỏ
              </button>
@@ -254,7 +254,7 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
              {step > 1 && (
                <button 
                  onClick={() => setStep(prev => prev - 1)}
-                 className="px-4 py-2 text-[10px] font-black uppercase tracking-widest text-zinc-500 hover:text-zinc-800 dark:hover:text-white transition-colors"
+                 className="px-4 py-2 text-[10px] font-semibold uppercase tracking-widest text-zinc-500 hover:text-zinc-800 dark:hover:text-white transition-colors"
                >
                  Quay lại
                </button>
@@ -263,7 +263,7 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
              {step < 3 ? (
                <button 
                  onClick={() => setStep(prev => prev + 1)}
-                 className="px-6 py-2 bg-zinc-800 dark:bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/10 cursor-pointer"
+                 className="px-6 py-2 bg-zinc-800 dark:bg-brand text-white text-[10px] font-semibold uppercase tracking-widest rounded-xl hover:opacity-90 transition-all shadow-lg shadow-primary/10 cursor-pointer"
                >
                  Tiếp theo
                </button>
@@ -272,14 +272,14 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
                  <button 
                     onClick={handleSaveOnly}
                     disabled={isPending}
-                    className="px-6 py-2 bg-zinc-100 dark:bg-white/5 text-zinc-800 dark:text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 transition-all border border-zinc-300 dark:border-white/5 cursor-pointer"
+                    className="px-6 py-2 bg-zinc-100 dark:bg-white/5 text-zinc-800 dark:text-white text-[10px] font-semibold uppercase tracking-widest rounded-xl hover:opacity-90 transition-all border border-zinc-300 dark:border-white/5 cursor-pointer"
                  >
                     Lưu nháp
                  </button>
                  <button 
                     onClick={handlePublish}
                     disabled={isPending}
-                    className="px-6 py-2 bg-emerald-600 text-white text-[10px] font-black uppercase tracking-widest rounded-xl hover:opacity-90 transition-all shadow-lg shadow-emerald-500/10 flex items-center gap-2 cursor-pointer"
+                    className="px-6 py-2 bg-emerald-600 text-white text-[10px] font-semibold uppercase tracking-widest rounded-xl hover:opacity-90 transition-all shadow-lg shadow-emerald-500/10 flex items-center gap-2 cursor-pointer"
                  >
                     {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : 'Gửi bài viết'}
                  </button>
@@ -306,7 +306,7 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
                   <AlertCircle className="w-5 h-5 text-rose-500" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-black text-rose-600 dark:text-rose-400 uppercase tracking-widest">Phản hồi từ Admin</h3>
+                  <h3 className="text-sm font-semibold text-rose-600 dark:text-rose-400 uppercase tracking-widest">Phản hồi từ Admin</h3>
                   <p className="text-[11px] text-rose-500/60 font-medium uppercase tracking-wider">Cần điều chỉnh nội dung</p>
                 </div>
               </div>
@@ -389,7 +389,7 @@ export default function MemberArticleStepper({ topics, editArticle }: Props) {
           'bg-rose-500/90 text-white border-rose-400/20'
         }`}>
           {savingStatus === 'saving' && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-          <span className="text-[10px] font-black uppercase tracking-widest">
+          <span className="text-[10px] font-semibold uppercase tracking-widest">
             {savingStatus === 'saving' ? 'Đang lưu bản nháp...' : 
              savingStatus === 'saved' ? 'Đã tự động lưu bản nháp' : 
              'Lỗi lưu bản nháp'}

@@ -5,12 +5,10 @@ import { SITE_URL } from '@/lib/seo';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static routes
   const staticRoutes: MetadataRoute.Sitemap = [
-    { url: SITE_URL,               lastModified: new Date(), changeFrequency: 'daily',   priority: 1 },
-    { url: `${SITE_URL}/explore`,  lastModified: new Date(), changeFrequency: 'daily',   priority: 0.9 },
-    { url: `${SITE_URL}/topics`,   lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
-    { url: `${SITE_URL}/glossary`, lastModified: new Date(), changeFrequency: 'weekly',  priority: 0.8 },
-    { url: `${SITE_URL}/login`,    changeFrequency: 'monthly', priority: 0.3 },
-    { url: `${SITE_URL}/register`, changeFrequency: 'monthly', priority: 0.3 },
+    { url: SITE_URL,              changeFrequency: 'daily',   priority: 1 },
+    { url: `${SITE_URL}/explore`,  changeFrequency: 'daily',   priority: 0.9 },
+    { url: `${SITE_URL}/topics`,   changeFrequency: 'weekly',  priority: 0.8 },
+    { url: `${SITE_URL}/glossary`,  changeFrequency: 'weekly',  priority: 0.8 },
     { url: `${SITE_URL}/privacy`,  changeFrequency: 'monthly', priority: 0.2 },
     { url: `${SITE_URL}/terms`,    changeFrequency: 'monthly', priority: 0.2 },
   ];
@@ -46,6 +44,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Glossary Term routes
   const glossaryTerms = await db.glossaryTerm.findMany({
+    where: { status: 'PUBLISHED' },
     select: { slug: true, updatedAt: true },
   });
 

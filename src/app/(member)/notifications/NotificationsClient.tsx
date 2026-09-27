@@ -191,7 +191,7 @@ export default function NotificationsClient({
           {groups.map(({ label, items }) => (
             <div key={label}>
               <div className="flex items-center gap-3 mb-3">
-                <span className="text-[10px] font-black text-zinc-500 dark:text-slate-500 uppercase tracking-[0.2em] whitespace-nowrap">
+                <span className="text-[10px] font-semibold text-zinc-500 dark:text-slate-500 uppercase tracking-[0.2em] whitespace-nowrap">
                   {label}
                 </span>
                 <div className="flex-1 h-px bg-zinc-100 dark:bg-white/5" />
@@ -220,7 +220,7 @@ export default function NotificationsClient({
                           <p className={`text-sm leading-snug tracking-tight ${!n.read ? 'font-bold text-zinc-800 dark:text-white' : 'font-medium text-zinc-500 dark:text-slate-400'}`}>
                             {n.title}
                           </p>
-                          <span className={`text-[9px] font-black px-2 py-0.5 rounded-lg shrink-0 uppercase tracking-widest ${cfg.bg} ${cfg.color} border border-white/20`}>
+                          <span className={`text-[9px] font-semibold px-2 py-0.5 rounded-lg shrink-0 uppercase tracking-widest ${cfg.bg} ${cfg.color} border border-white/20`}>
                             {cfg.label}
                           </span>
                         </div>
@@ -236,7 +236,7 @@ export default function NotificationsClient({
                       </div>
 
                       {!n.read && (
-                        <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-2 shadow-[0_0_8px_rgba(39,39,42,0.3)] dark:shadow-[0_0_10px_rgba(59,130,246,0.5)] animate-pulse" />
+                        <div className="w-2 h-2 rounded-full bg-brand shrink-0 mt-2 shadow-[0_0_8px_rgba(39,39,42,0.3)] dark:shadow-[0_0_10px_rgba(59,130,246,0.5)] animate-pulse" />
                       )}
                     </div>
                   );
@@ -260,7 +260,7 @@ export default function NotificationsClient({
               <button
                 onClick={handleLoadMore}
                 disabled={loadingMore}
-                className="group flex items-center gap-2 px-8 py-3 rounded-2xl bg-zinc-800 dark:bg-white text-white dark:text-slate-900 text-sm font-black uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition-all shadow-xl shadow-zinc-800/10 dark:shadow-white/5"
+                className="group flex items-center gap-2 px-8 py-3 rounded-2xl bg-zinc-800 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold uppercase tracking-widest hover:opacity-90 disabled:opacity-50 transition-all shadow-xl shadow-zinc-800/10 dark:shadow-white/5"
               >
                 {loadingMore ? (
                   <>

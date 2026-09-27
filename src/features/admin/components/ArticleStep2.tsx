@@ -191,7 +191,7 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
           <button
             onClick={handleInsertVideo}
             disabled={!videoUrl.trim()}
-            className="px-3 py-1.5 text-xs font-bold bg-zinc-800 dark:bg-primary text-white rounded-lg hover:opacity-90 transition-all disabled:opacity-40"
+            className="px-3 py-1.5 text-xs font-bold bg-zinc-800 dark:bg-brand text-white rounded-lg hover:opacity-90 transition-all disabled:opacity-40"
           >
             Chèn
           </button>
@@ -290,7 +290,7 @@ export default function ArticleStep2({ title, content, overview, objectives, onC
         <button onClick={onBack} className="flex items-center gap-2 px-6 py-2.5 rounded-xl border border-zinc-300 dark:border-white/10 text-sm font-bold text-zinc-500 hover:text-zinc-800 dark:hover:text-white hover:border-zinc-300 dark:hover:border-white/20 transition-all">
           <ArrowLeft className="w-4 h-4" /> Quay lại
         </button>
-        <button onClick={onNext} className="flex items-center gap-2 px-8 py-2.5 rounded-xl bg-zinc-800 dark:bg-primary text-white text-sm font-bold hover:opacity-90 transition-all">
+        <button onClick={onNext} className="flex items-center gap-2 px-8 py-2.5 rounded-xl bg-zinc-800 dark:bg-brand text-white text-sm font-bold hover:opacity-90 transition-all">
           Tiếp theo <ArrowRight className="w-4 h-4" />
         </button>
       </div>

@@ -11,7 +11,7 @@ import "./globals.css";
 
 const inter = Inter({
   subsets: ["latin", "vietnamese"],
-  variable: "--font-sans",
+  variable: "--font-inter",
 });
 
 const dancingScript = Dancing_Script({
@@ -66,14 +66,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor:   '#6366f1',
+  themeColor:   '#faf9f5',
   width:        'device-width',
   initialScale: 1,
 };
 
 import GlobalTimer from "@/components/shared/GlobalTimer";
 import ProductivityHub from "@/components/shared/ProductivityHub";
-import InteractiveGlow from "@/components/shared/InteractiveGlow";
 import { NotesProvider } from "@/context/NotesContext";
 import GlobalNotesSidebar from "@/components/shared/GlobalNotesSidebar";
 import GlobalScratchpad from "@/components/shared/GlobalScratchpad";
@@ -133,10 +132,9 @@ export default async function RootLayout({
         <SessionProvider session={session}>
           <ThemeProvider
             attribute="class"
-            defaultTheme="dark"
+            defaultTheme="light"
             enableSystem={true}
           >
-            <InteractiveGlow />
             <NotesProvider>
               {children}
               <Suspense fallback={null}>

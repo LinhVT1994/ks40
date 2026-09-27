@@ -20,24 +20,25 @@ export default function GlossaryHero({
   const [isSearching, setIsSearching] = React.useState(!!defaultValue);
 
   return (
-    <section className="relative pt-16 pb-12 overflow-hidden">
-      <div className="max-w-4xl mx-auto px-4 text-center space-y-12">
+    <section className="relative pt-10 pb-10 overflow-hidden border-b border-line mb-8">
+      <div className="max-w-5xl mx-auto px-4 text-left space-y-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="space-y-6"
+          className="space-y-4"
         >
-          <h1 className="text-4xl md:text-6xl font-display font-heavy text-zinc-800 dark:text-white leading-[1.1] tracking-tight">
+          <p className="ui-eyebrow">Từ điển tri thức</p>
+          <h1 className="text-3xl md:text-5xl font-display font-medium text-ink leading-[1.15] tracking-tight">
             Thuật ngữ
           </h1>
-          <p className="text-zinc-500 dark:text-slate-300 text-lg max-w-xl mx-auto leading-relaxed font-medium">
+          <p className="text-muted text-base max-w-2xl leading-relaxed">
             Hệ thống hóa các định nghĩa chuyên ngành giúp bạn nắm bắt nhanh chóng nội dung bài viết và tài liệu.
           </p>
         </motion.div>
 
-        <div className="flex flex-col items-center">
-          <div className="flex flex-wrap items-center justify-center gap-3">
+        <div className="flex flex-col items-start">
+          <div className="flex flex-wrap items-center gap-3">
             {/* Search Trigger */}
             <button
               onClick={() => {
@@ -69,7 +70,7 @@ export default function GlossaryHero({
               }`}
             >
               <div className="w-4 h-4 flex items-center justify-center">
-                 <span className="text-[10px] font-black">A-Z</span>
+                 <span className="text-[10px] font-semibold">A-Z</span>
               </div>
               <span className="text-[11px] font-bold uppercase tracking-widest">
                 {currentLetter ? `Chữ cái: ${currentLetter}` : 'Bảng chữ cái'}
@@ -102,7 +103,7 @@ export default function GlossaryHero({
                     <div className="pr-2 shrink-0">
                       <button
                         type="submit"
-                        className="px-5 py-1.5 bg-zinc-800 dark:bg-white/10 text-white text-xs font-bold rounded-full hover:bg-primary transition-all whitespace-nowrap"
+                        className="px-5 py-1.5 bg-zinc-800 dark:bg-white/10 text-white text-xs font-bold rounded-full hover:bg-brand transition-all whitespace-nowrap"
                       >
                         Tìm kiếm
                       </button>
@@ -117,4 +118,3 @@ export default function GlossaryHero({
     </section>
   );
 }
-

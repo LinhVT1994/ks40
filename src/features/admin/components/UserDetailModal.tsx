@@ -221,7 +221,7 @@ export default function UserDetailModal({ user, mode, isPending, onClose, onSave
               <button
                 onClick={handleSave}
                 disabled={!hasChanges || isPending}
-                className="ml-auto flex items-center gap-2 px-5 py-2 text-sm font-bold rounded-xl bg-primary text-white hover:bg-primary/90 disabled:opacity-40 transition-all shadow-sm"
+                className="ml-auto flex items-center gap-2 px-5 py-2 text-sm font-bold rounded-xl bg-brand text-white hover:bg-brand/90 disabled:opacity-40 transition-all shadow-sm"
               >
                 {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                 Lưu thay đổi

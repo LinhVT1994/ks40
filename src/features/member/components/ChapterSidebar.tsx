@@ -89,7 +89,7 @@ export default function ChapterSidebar({
         title="Curriculum"
       >
         <div className={`select-none ${isLeft ? '-rotate-90' : 'rotate-90'} origin-center whitespace-nowrap opacity-20 group-hover:opacity-100 transition-opacity duration-300`}>
-           <span className="text-[10px] font-black text-zinc-500 dark:text-slate-400 uppercase tracking-[0.6em] flex items-center gap-4">
+           <span className="text-[10px] font-semibold text-zinc-500 dark:text-slate-400 uppercase tracking-[0.6em] flex items-center gap-4">
               <ChevronLeft className={`w-3 h-3 ${isLeft ? 'rotate-90' : '-rotate-90'}`} /> Curriculum
            </span>
         </div>
@@ -120,8 +120,8 @@ export default function ChapterSidebar({
           </button>
 
           <nav className="flex flex-col overflow-y-auto max-h-[80vh] px-5">
-            <div className="mb-6 flex items-center gap-3 text-[10px] font-black text-primary uppercase tracking-[0.4em]">
-               <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+            <div className="mb-6 flex items-center gap-3 text-[10px] font-semibold text-primary uppercase tracking-[0.4em]">
+               <div className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
                Curriculum
             </div>
             
@@ -143,7 +143,7 @@ export default function ChapterSidebar({
                       
                       {/* Text */}
                       <div className="flex-1 min-w-0">
-                        <div className={`text-[9px] font-black uppercase tracking-widest mb-0.5 flex items-center gap-2 ${isActive ? 'text-primary' : 'text-zinc-500'}`}>
+                        <div className={`text-[9px] font-semibold uppercase tracking-widest mb-0.5 flex items-center gap-2 ${isActive ? 'text-primary' : 'text-zinc-500'}`}>
                           Phase {String(chapter.order).padStart(2, '0')}
                           {chapter.isCompleted && (
                              <CheckCircle2 className="w-3 h-3 text-emerald-500" />

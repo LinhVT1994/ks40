@@ -58,7 +58,7 @@ function NotifItem({
       </div>
 
       {!notif.read && (
-        <div className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1.5" />
+        <div className="w-2 h-2 rounded-full bg-brand shrink-0 mt-1.5" />
       )}
     </div>
   );
@@ -93,7 +93,7 @@ function BellIcon({ count }: { count: number }) {
         className={`w-5 h-5 transition-transform ${shake ? 'animate-[wiggle_0.5s_ease-in-out]' : ''}`}
       />
       {count > 0 && (
-        <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center px-1 rounded-full bg-primary text-white text-[10px] font-bold leading-none shadow-sm shadow-primary/40 animate-in zoom-in duration-200">
+        <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center px-1 rounded-full bg-brand text-white text-[10px] font-bold leading-none shadow-sm shadow-primary/40 animate-in zoom-in duration-200">
           {count > 99 ? '99+' : count}
         </span>
       )}

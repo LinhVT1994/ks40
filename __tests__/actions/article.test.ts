@@ -110,7 +110,7 @@ describe('createArticleAction', () => {
 
     // Cache bị invalidate
     expect(revalidatePath).toHaveBeenCalledWith('/admin/documents');
-    expect(revalidatePath).toHaveBeenCalledWith('/dashboard');
+    expect(revalidatePath).toHaveBeenCalledWith('/');
   });
 
   // ─────────────────────────────────────────────────────────────────────────

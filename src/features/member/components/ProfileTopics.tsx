@@ -173,7 +173,7 @@ export default function ProfileTopics({ initialTopics, availableTopics }: Props)
                   filteredGroupsForDialog.map(group => (
                     <div key={group.id} className="space-y-3">
                       <div className="sticky top-[-2px] bg-white dark:bg-slate-900 z-10 flex items-center justify-between border-b border-zinc-100 dark:border-white/5 py-2.5 -mx-2 px-2">
-                        <h3 className="text-[10px] font-black uppercase tracking-widest text-zinc-500 dark:text-white/40">{group.label}</h3>
+                        <h3 className="text-[10px] font-semibold uppercase tracking-widest text-zinc-500 dark:text-white/40">{group.label}</h3>
                         <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-zinc-100 dark:bg-white/5 text-zinc-400">{group.children.length} topics</span>
                       </div>
                       
@@ -202,7 +202,7 @@ export default function ProfileTopics({ initialTopics, availableTopics }: Props)
                 ) : (
                   <div className="h-full flex flex-col items-center justify-center text-center py-20 opacity-60">
                     <p className="text-sm text-zinc-500 font-medium">Không tìm thấy chủ đề nào khớp với "{searchQuery}"</p>
-                    <button onClick={() => setSearchQuery('')} className="mt-4 text-[10px] font-black text-primary uppercase tracking-widest hover:underline">Xoá tìm kiếm</button>
+                    <button onClick={() => setSearchQuery('')} className="mt-4 text-[10px] font-semibold text-primary uppercase tracking-widest hover:underline">Xoá tìm kiếm</button>
                   </div>
                 )}
               </div>
@@ -216,14 +216,14 @@ export default function ProfileTopics({ initialTopics, availableTopics }: Props)
                       </div>
                     ))}
                     {followedTopicsList.length > 4 && (
-                      <div className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-900 bg-primary text-white flex items-center justify-center text-[9px] font-black shadow-sm">
+                      <div className="w-6 h-6 rounded-full border-2 border-white dark:border-slate-900 bg-brand text-white flex items-center justify-center text-[9px] font-semibold shadow-sm">
                         +{followedTopicsList.length - 4}
                       </div>
                     )}
                   </div>
                   <p className="text-[10px] text-zinc-400 font-bold uppercase tracking-wider">Đang theo dõi {followedTopicsList.length}</p>
                 </div>
-                <button onClick={() => setIsManagingTopics(false)} className="px-6 py-2.5 rounded-xl bg-primary text-white text-[11px] font-black hover:opacity-90 active:scale-95 transition-all shadow-md shadow-primary/20">
+                <button onClick={() => setIsManagingTopics(false)} className="px-6 py-2.5 rounded-xl bg-brand text-white text-[11px] font-semibold hover:opacity-90 active:scale-95 transition-all shadow-md shadow-primary/20">
                   Hoàn thành
                 </button>
               </div>
