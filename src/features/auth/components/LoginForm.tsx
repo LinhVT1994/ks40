@@ -6,11 +6,6 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
-// Tài khoản seed (prisma/seed.ts) — chỉ điền sẵn khi chạy development
-const DEV_ACCOUNT = process.env.NODE_ENV === 'development'
-  ? { email: 'admin@lenote.dev', password: 'admin123456a@' }
-  : null;
-
 export default function LoginForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl');
@@ -19,7 +14,7 @@ export default function LoginForm() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [initialEmail, setInitialEmail] = useState(DEV_ACCOUNT?.email ?? '');
+  const [initialEmail, setInitialEmail] = useState('');
 
   React.useEffect(() => {
     const saved = localStorage.getItem('remembered_email');
@@ -101,7 +96,6 @@ export default function LoginForm() {
             className="w-full bg-zinc-50 dark:bg-black/30 border border-zinc-200 dark:border-white/10 rounded-xl px-4 py-2.5 sm:py-3 pr-10 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all outline-none placeholder:text-zinc-300 dark:placeholder:text-zinc-700"
             id="password"
             name="password"
-            defaultValue={DEV_ACCOUNT?.password}
             placeholder="••••••••"
             type={showPassword ? 'text' : 'password'}
             required
