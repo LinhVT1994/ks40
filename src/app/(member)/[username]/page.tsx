@@ -97,9 +97,10 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   return (
     <div className="relative min-h-[calc(100vh-64px)] -mt-[64px] pb-20">
       <JsonLd data={personJsonLd} />
+
       <ProfileCover cover={user.coverImage} />
 
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-44 sm:pt-56">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-[220px] sm:pt-[260px] lg:pt-[300px]">
         <PublicProfileClient
           user={{
             ...user,

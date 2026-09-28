@@ -130,6 +130,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
               {/* Stats Row */}
               <div className="flex flex-wrap justify-center lg:justify-start items-center gap-6 text-zinc-500">
                 {[
+                  { label: 'Bài viết', value: fmtViews(user._count.articles) },
                   { label: 'Lượt xem', value: fmtViews(user.totalViews) },
                   { label: 'Lượt thích', value: fmtViews(user.totalLikes) },
                   { label: 'Followers', value: fmtViews(followerCount) },
@@ -187,12 +188,8 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
       <div className="flex-1 flex flex-col lg:flex-row items-start relative order-3 lg:order-2 h-full min-h-[600px]">
         <main className="w-full animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150">
           <section>
-            <div className="flex items-center gap-4 mb-8">
-              <h2 className="text-lg font-semibold text-zinc-800 dark:text-white tracking-tight uppercase">
-                Bài viết <span className="text-zinc-300 dark:text-slate-600 font-bold ml-1">({articles.length})</span>
-              </h2>
-              <div className="h-[1px] flex-1 bg-gradient-to-r from-zinc-200 via-zinc-100 to-transparent dark:from-white/10 dark:via-white/5" />
-            </div>
+            {/* Visually hidden: the cards speak for themselves; the count lives in the stats row. */}
+            <h2 className="sr-only">Bài viết ({articles.length})</h2>
 
             {articles.length === 0 ? (
               <div className="py-20 text-center rounded-3xl border-2 border-dashed border-zinc-200 dark:border-white/5 bg-zinc-50/50 dark:bg-white/[0.02]">

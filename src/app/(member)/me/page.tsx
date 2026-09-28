@@ -72,9 +72,10 @@ export default async function PersonalDashboardPage() {
   return (
     <div className="relative min-h-[calc(100vh-64px)] -mt-[64px] pb-20">
       <JsonLd data={personJsonLd} />
+
       <ProfileCover cover={user.coverImage} editable />
 
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-10 pt-44 sm:pt-56">
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-10 pt-[220px] sm:pt-[260px] lg:pt-[300px]">
         <ProfileClient
           user={{
             ...user,
