@@ -54,11 +54,12 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
   icons: {
     icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
       { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
       { url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
     ],
     shortcut: '/favicon.ico',
-    apple:    '/icon-512.png',
+    apple:    { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' },
   },
   other: {
     "google-adsense-account": "ca-pub-9196783506195067",
