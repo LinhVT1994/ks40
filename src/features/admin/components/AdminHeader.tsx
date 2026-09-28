@@ -114,7 +114,7 @@ export default function AdminHeader({ breadcrumb, draftingTitle }: AdminHeaderPr
             onClick={() => setMenuOpen(v => !v)}
             className="flex items-center gap-2 group outline-none"
           >
-            <Avatar src={user?.image} name={user?.name} size={36} className="border-2 border-primary/30 hover:scale-105 transition-transform" />
+            <Avatar src={user?.image} name={user?.name} size={36} className="border-[1.5px]! border-primary! ring-2 ring-background-light dark:ring-background-dark hover:scale-105 transition-transform" />
             <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
           </button>
 

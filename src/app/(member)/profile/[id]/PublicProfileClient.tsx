@@ -101,8 +101,8 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
         {/* User Identity Section */}
         <div className="relative px-2 flex flex-col items-center lg:items-start gap-4">
           {/* Avatar Area */}
-          <div className="relative shrink-0">
-            <div className="relative w-20 h-20 lg:w-24 lg:h-24 shadow-xl rounded-full overflow-hidden border-2 border-white dark:border-slate-800 bg-surface group">
+          <div className="relative shrink-0 -mt-[68px] lg:-mt-[76px]">
+            <div className="relative w-20 h-20 lg:w-24 lg:h-24 shadow-xl rounded-full overflow-hidden border-[1.5px] border-primary ring-[3px] ring-background-light dark:ring-background-dark bg-surface group">
                <Image
                  src={user.avatarUrl}
                  alt={user.name ?? ''}

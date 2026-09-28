@@ -23,7 +23,7 @@ export function CoverBackground({ cover }: { cover: string | null }) {
   );
 }
 
-/** Profile "wall": a full-width background behind the header that fades into the page under the profile. */
+/** Profile "wall": a full-width background behind the header, with the profile content starting just below it. */
 export default function ProfileCover({ cover: initialCover, editable = false }: Props) {
   const [cover, setCover] = useState(initialCover);
   const [open, setOpen] = useState(false);
@@ -46,11 +46,11 @@ export default function ProfileCover({ cover: initialCover, editable = false }: 
 
   return (
     <>
-      {/* The wall: a full-width background behind the header and the top of the profile */}
+      {/* The wall: a full-width background behind the header; the profile starts below it */}
       <div className="absolute top-0 left-0 right-0 h-[300px] sm:h-[360px] lg:h-[420px] -z-10 overflow-hidden" aria-hidden="true">
         <CoverBackground cover={cover} />
-        {/* Fade into the page so the profile reads cleanly on top of the wall */}
-        <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-b from-transparent via-background-light/70 to-background-light dark:via-background-dark/70 dark:to-background-dark" />
+        {/* Short fade so the wall's bottom edge melts into the page */}
+        <div className="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-b from-transparent to-background-light dark:to-background-dark" />
       </div>
 
       {editable && (

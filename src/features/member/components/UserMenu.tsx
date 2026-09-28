@@ -82,7 +82,7 @@ export default function UserMenu() {
           <p className="text-xs font-bold text-primary transition-colors group-hover:text-primary/80">{user?.name ?? '...'}</p>
           <p className="text-[10px] text-zinc-500">{roleLabel}</p>
         </div>
-        <Avatar src={user?.image} name={user?.name} size={40} className="border-2 border-primary/30 shadow-sm transition-transform group-hover:scale-105" />
+        <Avatar src={user?.image} name={user?.name} size={40} className="border-[1.5px]! border-primary! ring-2 ring-background-light dark:ring-background-dark shadow-sm transition-transform group-hover:scale-105" />
       </button>
 
       {isOpen && mounted && (

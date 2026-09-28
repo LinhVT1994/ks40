@@ -100,7 +100,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
 
       <ProfileCover cover={user.coverImage} />
 
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-[220px] sm:pt-[260px] lg:pt-[300px]">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-[328px] sm:pt-[388px] lg:pt-[448px]">
         <PublicProfileClient
           user={{
             ...user,

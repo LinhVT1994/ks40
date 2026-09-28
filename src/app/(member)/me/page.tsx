@@ -75,7 +75,7 @@ export default async function PersonalDashboardPage() {
 
       <ProfileCover cover={user.coverImage} editable />
 
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-10 pt-[220px] sm:pt-[260px] lg:pt-[300px]">
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-10 pt-[328px] sm:pt-[388px] lg:pt-[448px]">
         <ProfileClient
           user={{
             ...user,

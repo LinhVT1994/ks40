@@ -670,8 +670,8 @@ export default function ProfileClient({
       {/* 1. Sidebar */}
       <aside className="w-full lg:w-[280px] flex-shrink-0 lg:sticky lg:top-24 space-y-4 lg:space-y-12 order-1">
         <div className="relative px-2 flex flex-col items-center lg:items-start gap-4">
-          <div className="relative shrink-0">
-            <div className="relative w-20 h-20 sm:w-24 sm:h-24 shadow-xl rounded-full overflow-hidden border-2 border-white dark:border-slate-800 bg-surface group">
+          <div className="relative shrink-0 -mt-[68px] sm:-mt-[76px]">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 shadow-xl rounded-full overflow-hidden border-[1.5px] border-primary ring-[3px] ring-background-light dark:ring-background-dark bg-surface group">
               <Image src={user.avatarUrl} alt={user.name ?? ''} fill unoptimized priority sizes="96px" className="object-cover rounded-full transition-transform duration-500 group-hover:scale-110" />
             </div>
           </div>
