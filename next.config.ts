@@ -2,6 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  // Next 16 blocks dev assets/HMR for non-localhost origins; allow loopback IP, LAN IP and our domain.
+  allowedDevOrigins: ['127.0.0.1', '192.168.1.60', 'lenote.dev', '*.lenote.dev'],
   outputFileTracingIncludes: { '/og/profile/*': ['./src/assets/fonts/*.ttf'] },
   async headers() {
     const csp = [
