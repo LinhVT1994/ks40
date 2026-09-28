@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import type { Metadata } from 'next';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
 
-export type ProfileCardData = { id: string; name: string | null; username: string | null; bio: string | null; image: string | null };
+export type ProfileCardData = { id: string; name: string | null; username: string | null; bio: string | null; image: string | null; coverImage?: string | null };
 
 export function cardText(value: string | null, fallback: string, limit: number) {
   const text = (value || fallback).normalize('NFC').replace(/[\u0000-\u001f\u007f]/g, ' ').replace(/\s+/g, ' ').trim() || fallback;
@@ -20,7 +20,7 @@ export function profileMetadata(user: ProfileCardData): Metadata {
   const description = cardText(user.bio, `Khám phá góc tri thức và những chia sẻ của ${name} trên ${SITE_NAME}.`, 180);
   const url = `${SITE_URL}/@${encodeURIComponent(user.username || user.id)}`;
   // Changes to public profile fields give social crawlers a fresh image URL.
-  const version = createHash('sha256').update(JSON.stringify([user.name, user.username, user.bio, user.image])).digest('hex').slice(0, 12);
+  const version = createHash('sha256').update(JSON.stringify([user.name, user.username, user.bio, user.image, user.coverImage ?? null])).digest('hex').slice(0, 12);
   const image = { url: `${SITE_URL}/og/profile/${encodeURIComponent(user.id)}?v=${version}`, width: 1200, height: 630, type: 'image/png', alt: `${name} — Góc tri thức trên Lenote` };
   return {
     title: name, description, alternates: { canonical: url },

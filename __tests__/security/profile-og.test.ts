@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 vi.mock('server-only', () => ({}));
 import { cardText, profileInitials, profileMetadata } from '@/lib/profile-og';
-import { allowedAvatarUrl, loadProfileAvatar } from '@/lib/profile-og-avatar';
+import { allowedAvatarUrl, allowedCoverUrl, loadProfileAvatar, loadProfileCover } from '@/lib/profile-og-avatar';
 import { SITE_URL } from '@/lib/seo';
 
 const user = { id: 'user-1', name: 'Nguyễn Minh Anh', username: 'minhanh', bio: 'Ghi chép và chia sẻ.', image: null };
@@ -15,6 +15,9 @@ describe('profile share metadata', () => {
   });
   it('changes the card URL when profile text changes', () => {
     expect(profileMetadata(user).openGraph?.images).not.toEqual(profileMetadata({ ...user, bio: 'Updated' }).openGraph?.images);
+  });
+  it('changes the card URL when the cover changes', () => {
+    expect(profileMetadata(user).openGraph?.images).not.toEqual(profileMetadata({ ...user, coverImage: 'preset:sage' }).openGraph?.images);
   });
   it('falls back for absent username, name, bio and avatar', () => {
     expect(profileMetadata({ ...user, name: null, username: null, bio: null }).alternates).toEqual({ canonical: `${SITE_URL}/@user-1` });
@@ -51,5 +54,23 @@ describe('avatar fetch boundary', () => {
   it('rejects oversized streamed responses', async () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(new Uint8Array(2 * 1024 * 1024 + 1), { headers: { 'content-type': 'image/png' } })));
     expect(await loadProfileAvatar('https://lh3.googleusercontent.com/avatar')).toBeNull();
+  });
+});
+
+describe('cover fetch boundary', () => {
+  it('allows only the configured Azure account and covers prefix', () => {
+    vi.stubEnv('AZURE_STORAGE_ACCOUNT_NAME', 'testaccount');
+    vi.stubEnv('AZURE_STORAGE_CONTAINER_NAME', 'uploads');
+    expect(allowedCoverUrl('https://testaccount.blob.core.windows.net/uploads/covers/a.png')).not.toBeNull();
+    expect(allowedCoverUrl('https://testaccount.blob.core.windows.net/uploads/avatars/a.png')).toBeNull();
+    expect(allowedCoverUrl('https://testaccount.blob.core.windows.net/uploads/files/secret.png')).toBeNull();
+    expect(allowedCoverUrl('https://other.blob.core.windows.net/uploads/covers/a.png')).toBeNull();
+  });
+  it.each(['https://lh3.googleusercontent.com/cover', 'http://127.0.0.1/cover', 'preset:sage', '/uploads/covers/../../.env', '/uploads/avatars/a.png'])('rejects untrusted cover %s', async value => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal('fetch', fetchMock);
+    expect(allowedCoverUrl(value)).toBeNull();
+    expect(await loadProfileCover(value)).toBeNull();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 });
