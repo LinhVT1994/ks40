@@ -6,6 +6,8 @@ import { useSession } from 'next-auth/react';
 import { Camera, Loader2, CheckCircle2, Globe, Facebook, Instagram, Twitter, Linkedin, Github, Youtube, Music } from 'lucide-react';
 import { updateProfileAction } from '@/features/member/actions/profile';
 import { compressImage } from '@/lib/compress-image';
+import CoverPicker from './CoverPicker';
+import { CoverBackground } from './ProfileCover';
 
 type SocialUser = User & {
   bio?: string | null;
@@ -18,6 +20,7 @@ type SocialUser = User & {
   githubUrl?: string | null;
   youtubeUrl?: string | null;
   tiktokUrl?: string | null;
+  coverImage?: string | null;
 };
 
 const SOCIAL_FIELDS = [
@@ -44,6 +47,8 @@ export default function SettingsProfile({ user }: { user: SocialUser }) {
   const [isUploading, setIsUploading] = useState(false);
   const [saved, setSaved] = useState(false);
   const { update } = useSession();
+
+  const [cover, setCover] = useState<string | null>(user.coverImage ?? null);
 
   // Local state for avatar preview
   const [avatarPreview, setAvatarPreview] = useState<string>(user.image || '');
@@ -133,6 +138,21 @@ export default function SettingsProfile({ user }: { user: SocialUser }) {
         <div>
           <h3 className="text-sm font-bold text-zinc-800 dark:text-white">Ảnh đại diện</h3>
           <p className="text-xs text-zinc-500 mt-1 max-w-xs leading-relaxed">Định dạng JPG, GIF hoặc PNG.<br/>Dung lượng tối đa 2MB.</p>
+        </div>
+      </div>
+
+      <div className="space-y-3">
+        <div>
+          <h3 className="text-sm font-bold text-zinc-800 dark:text-white">Ảnh bìa</h3>
+          <p className="text-xs text-zinc-500 mt-1 leading-relaxed">Hiển thị ở đầu trang cá nhân của bạn. Thay đổi được lưu ngay.</p>
+        </div>
+        <div className="flex flex-col md:flex-row gap-5">
+          <div className="relative h-28 md:h-auto md:min-h-[160px] md:flex-1 rounded-2xl overflow-hidden border border-zinc-300 dark:border-white/10">
+            <CoverBackground cover={cover} />
+          </div>
+          <div className="md:w-[300px] shrink-0">
+            <CoverPicker cover={cover} onChange={setCover} />
+          </div>
         </div>
       </div>
 

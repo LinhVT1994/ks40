@@ -4,6 +4,7 @@ import { auth } from '@/auth';
 import { db } from '@/lib/db';
 import { ArticleStatus } from '@prisma/client';
 import { updateTag, revalidatePath } from 'next/cache';
+import { isCoverPresetValue } from '@/lib/profile-covers';
 
 export async function getPublicProfileAction(identifier: string) {
   // 1. Try finding by ID first (most stable)
@@ -14,6 +15,7 @@ export async function getPublicProfileAction(identifier: string) {
       name: true,
       username: true,
       image: true,
+      coverImage: true,
       bio: true,
       websiteUrl: true,
       facebookUrl: true,
@@ -41,6 +43,7 @@ export async function getPublicProfileAction(identifier: string) {
         name: true,
         username: true,
         image: true,
+        coverImage: true,
         bio: true,
         websiteUrl: true,
         facebookUrl: true,
@@ -163,5 +166,29 @@ export async function updateProfileAction(data: {
     return { success: true, user };
   } catch {
     return { success: false, error: 'Lỗi cập nhật hồ sơ' };
+  }
+}
+
+/** Set the profile cover to a preset, or pass null to reset to the default. Uploads go through /api/upload/cover. */
+export async function setProfileCoverAction(value: string | null) {
+  const session = await auth();
+  const userId = session?.user?.id;
+  if (!userId) return { success: false, error: 'Unauthorized' };
+
+  if (value !== null && !isCoverPresetValue(value)) {
+    return { success: false, error: 'Ảnh bìa không hợp lệ' };
+  }
+
+  try {
+    const user = await db.user.update({
+      where: { id: userId },
+      data: { coverImage: value },
+      select: { id: true, username: true },
+    });
+    revalidatePath('/me');
+    revalidatePath(`/@${user.username || user.id}`);
+    return { success: true };
+  } catch {
+    return { success: false, error: 'Lỗi cập nhật ảnh bìa' };
   }
 }

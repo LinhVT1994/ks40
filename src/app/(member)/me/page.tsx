@@ -7,6 +7,7 @@ import { getFollowersAction, getFollowingAction } from '@/features/member/action
 import { getProfileArticlesAction, getPublicProfileAction } from '@/features/member/actions/profile';
 import { getArticleRatingsAction } from '@/features/articles/actions/rating';
 import ProfileClient from '../profile/[id]/ProfileClient';
+import ProfileCover from '@/features/member/components/ProfileCover';
 import JsonLd from '@/components/shared/JsonLd';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
 
@@ -71,10 +72,9 @@ export default async function PersonalDashboardPage() {
   return (
     <div className="relative min-h-[calc(100vh-64px)] -mt-[64px] pb-20">
       <JsonLd data={personJsonLd} />
-      <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-b from-primary/10 via-accent-purple/5 to-transparent -z-10" />
-      <div className="absolute top-0 left-0 right-0 h-[400px] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] -z-10" />
+      <ProfileCover cover={user.coverImage} editable />
 
-      <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-10 pt-32 sm:pt-40">
+      <div className="max-w-[1600px] mx-auto px-6 sm:px-8 lg:px-10 pt-44 sm:pt-56">
         <ProfileClient
           user={{
             ...user,

@@ -5,6 +5,7 @@ import { getPublicProfileAction, getProfileArticlesAction } from '@/features/mem
 import { getFollowersAction } from '@/features/member/actions/profile-follow';
 import { getAuthorInfoAction } from '@/features/member/actions/follow';
 import PublicProfileClient from '../profile/[id]/PublicProfileClient';
+import ProfileCover from '@/features/member/components/ProfileCover';
 import JsonLd from '@/components/shared/JsonLd';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
 import { profileMetadata } from '@/lib/profile-og';
@@ -96,10 +97,9 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   return (
     <div className="relative min-h-[calc(100vh-64px)] -mt-[64px] pb-20">
       <JsonLd data={personJsonLd} />
-      <div className="absolute top-0 left-0 right-0 h-[400px] bg-gradient-to-b from-primary/10 via-accent-purple/5 to-transparent -z-10" />
-      <div className="absolute top-0 left-0 right-0 h-[400px] bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] -z-10" />
+      <ProfileCover cover={user.coverImage} />
 
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-32 sm:pt-40">
+      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pt-44 sm:pt-56">
         <PublicProfileClient
           user={{
             ...user,

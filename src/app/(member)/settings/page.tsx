@@ -17,7 +17,7 @@ export default async function SettingsPage() {
 
   const [prefs, dbUser, availableTopics, followedTopics] = await Promise.all([
     getPreferencesAction(),
-    db.user.findUnique({ where: { id: session.user.id }, select: { name: true, bio: true, username: true, websiteUrl: true, facebookUrl: true, instagramUrl: true, twitterUrl: true, linkedinUrl: true, githubUrl: true, youtubeUrl: true } }),
+    db.user.findUnique({ where: { id: session.user.id }, select: { name: true, bio: true, username: true, coverImage: true, websiteUrl: true, facebookUrl: true, instagramUrl: true, twitterUrl: true, linkedinUrl: true, githubUrl: true, youtubeUrl: true } }),
     getEnabledTopicsAction(),
     db.topicFollow.findMany({ where: { userId: session.user.id }, select: { topicId: true } }),
   ]);
@@ -34,6 +34,7 @@ export default async function SettingsPage() {
     linkedinUrl: dbUser?.linkedinUrl ?? null,
     githubUrl: dbUser?.githubUrl ?? null,
     youtubeUrl: dbUser?.youtubeUrl ?? null,
+    coverImage: dbUser?.coverImage ?? null,
   };
 
   const initialTopics = followedTopics.map(f => f.topicId);
