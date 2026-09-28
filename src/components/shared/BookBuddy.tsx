@@ -3,82 +3,100 @@ type BookBuddyProps = {
   className?: string;
 };
 
-/** Excalidraw-inspired sketch. Decorative; nearby text carries the meaning. */
+/**
+ * "Nốt" — Lenote's mascot: a little walking note with a folded corner and a
+ * springy hair strand. Flat, filled shapes. Decorative; nearby text carries the meaning.
+ */
 export default function BookBuddy({ mood = 'wave', className = '' }: BookBuddyProps) {
-  const ink = 'var(--color-primary)';
-  const paper = 'var(--ui-canvas)';
-  const cover = 'color-mix(in srgb, var(--color-primary) 12%, var(--ui-canvas))';
-  const accent = 'var(--color-primary)';
+  const body = 'var(--color-primary)';
+  const bodyShade = 'color-mix(in srgb, var(--color-primary) 78%, #1a1410)';
+  const fold = 'color-mix(in srgb, var(--color-primary) 45%, #fff7ee)';
+  const face = '#fff8f0';
+  const ink = '#2a211c';
+  const blush = '#f0a58f';
+  const leaf = '#7aa06a';
+  const waving = mood === 'wave' || mood === 'grow';
 
   return (
     <svg viewBox="0 0 180 160" fill="none" aria-hidden="true" focusable="false"
       className={`ui-book-buddy ${className}`}
       strokeLinecap="round" strokeLinejoin="round">
-      {/* Loose double strokes give the sketch its hand-drawn character. */}
-      <g stroke={ink} strokeWidth="1.6">
-        <path d="M46 145q40-3 87-1" opacity="0.22" />
-        <path d="m71 125-4 15-10 1m48-17 6 15 10 1" />
-        <path d="M48 82q-19 0-18 18m1-7-5 4m5-2 4 4" />
-        {mood === 'wave' || mood === 'grow' ? (
-          <g className="ui-book-buddy-wave">
-            <path d="M129 81q24-2 20-25m0 0-6-3m6 3 3-6m-3 7 7-2" />
-            <path d="M130 83q23-4 21-24" strokeWidth="0.65" opacity="0.4" />
-            <path d="m156 42 4-5m-11 3 1-5" strokeWidth="1.3" />
-          </g>
-        ) : <path d="M129 86q19 1 17 19" />}
-      </g>
+      {/* Ground shadow */}
+      <ellipse cx="90" cy="148" rx="34" ry="4.5" fill={body} opacity="0.14" />
+
+      {/* Feet */}
+      <ellipse cx="77" cy="141" rx="9" ry="5" fill={bodyShade} />
+      <ellipse cx="103" cy="141" rx="9" ry="5" fill={bodyShade} />
+
+      {/* Resting arm (left) */}
+      <path d="M58 96q-14 4-14 17" stroke={bodyShade} strokeWidth="7" />
+
+      {/* Free arm (right) */}
+      {waving ? (
+        <g className="ui-book-buddy-wave">
+          <path d="M122 94q16-6 18-24" stroke={bodyShade} strokeWidth="7" />
+          <path d="M149 58l5-5m-2 15 7-1" stroke={body} strokeWidth="2.2" opacity="0.55" />
+        </g>
+      ) : mood === 'search' ? (
+        <g>
+          <path d="M122 98q12 1 14 12" stroke={bodyShade} strokeWidth="7" />
+          <path d="m147 111 11 12" stroke={bodyShade} strokeWidth="5" />
+          <circle cx="140" cy="103" r="12" fill={face} fillOpacity="0.9" stroke={bodyShade} strokeWidth="3.2" />
+          <path d="M133 99q3-4 8-4" stroke={blush} strokeWidth="2" />
+        </g>
+      ) : (
+        <path d="M122 96q14 4 14 17" stroke={bodyShade} strokeWidth="7" />
+      )}
 
       <g className="ui-book-buddy-cover">
-        {/* Whiteboard-like paper, offset edges, no gradients or textures. */}
-        <path d="m52 39 65-9 15 9 8 84-74 11-13-8Z" fill={paper} stroke={ink} strokeWidth="1.8" />
-        <path d="m118 33 10 7 9 79-12 6Z" fill={paper} stroke={ink} strokeWidth="1.4" />
-        <path d="m123 43 8 70m-4-69 8 69" stroke={ink} strokeWidth="0.85" opacity="0.5" />
-        <path d="m62 121 65-9 10 9-69 10q-14 0-6-10Z" fill={paper} stroke={ink} strokeWidth="1.6" />
-        <path d="m68 125 61-9m-55 12 56-9" stroke={ink} strokeWidth="0.7" opacity="0.45" />
+        {/* Body: a soft note with the top-right corner folded down */}
+        <path d="M68 38h38l20 20v58q0 18-18 18H70q-18 0-18-18V56q0-18 16-18Z" fill={body} />
+        <path d="M106 38v12q0 8 8 8h12Z" fill={fold} />
 
-        <path d="M52 39q33-3 65-10l8 42 6 43-66 12q-12 2-13-8l-9-64q-1-12 9-15Z"
-          fill={cover} stroke={ink} strokeWidth="1.9" />
-        <path d="M52 41q32-6 64-10m3 2 10 80m-1 3-64 12q-11-1-11-11l-8-62q-2-10 8-13"
-          stroke={ink} strokeWidth="0.7" opacity="0.45" />
-        <path d="m56 40 10 78m-8-77 9 74" stroke={ink} strokeWidth="1" opacity="0.7" />
+        {/* Single springy hair strand */}
+        {mood !== 'grow' && <path d="M84 39q-3-9 3-15 5-4 9-1" stroke={bodyShade} strokeWidth="3.4" />}
 
-        {/* A single muted accent, drawn as rough diagonal hatching. */}
-        <g stroke={accent} strokeWidth="1.3" opacity="0.38">
-          <path d="m69 105 8-8m-6 14 14-15m-6 16 10-10m-1 9 10-10m-1 9 11-11m-2 10 10-10m-1 9 8-8" />
+        {/* Face panel */}
+        <ellipse cx="88" cy="82" rx="27" ry="23" fill={face} />
+        <ellipse cx="79" cy="80" rx="4.2" ry={mood === 'lost' ? 4.2 : 5.2} fill={ink} />
+        <ellipse cx="97" cy="80" rx="4.2" ry={mood === 'lost' ? 4.2 : 5.2} fill={ink} />
+        <circle cx="80.6" cy="77.8" r="1.5" fill={face} />
+        <circle cx="98.6" cy="77.8" r="1.5" fill={face} />
+        {/* Worried brows */}
+        {mood === 'lost' && <path d="M73 71l8-3m22 3-8-3" stroke={ink} strokeWidth="2.4" />}
+        <ellipse cx="70" cy="90" rx="4.5" ry="2.8" fill={blush} opacity="0.7" />
+        <ellipse cx="106" cy="90" rx="4.5" ry="2.8" fill={blush} opacity="0.7" />
+        {mood === 'lost'
+          ? <path d="M84 94q4-3 8 0" stroke={ink} strokeWidth="2.6" />
+          : mood === 'search'
+            ? <ellipse cx="88" cy="93" rx="2.6" ry="3" fill={ink} />
+            : <path d="M82 89q6 7 12 0" fill={ink} />}
+
+        {/* Ruled lines on the belly */}
+        <path d="M66 113h44m-40 9h34" stroke={face} strokeWidth="2.4" opacity="0.45" />
+      </g>
+
+      {/* Sparkles */}
+      <g fill={body} opacity="0.5">
+        <path d="M34 46q1.2 5.5 6 6.5-4.8 1-6 6.5-1.2-5.5-6-6.5 4.8-1 6-6.5Z" />
+        {mood !== 'grow' && <path d="M150 126q.9 3.6 4 4.3-3.1.7-4 4.3-.9-3.6-4-4.3 3.1-.7 4-4.3Z" />}
+      </g>
+
+      {mood === 'lost' && (
+        <g>
+          <path d="M140 30q0-9 8-9t8 8q0 5-6 8-2 1-2 6" stroke={body} strokeWidth="3.6" />
+          <circle cx="148" cy="51" r="2.2" fill={body} />
+          <path d="M121 60q-4 6 0 8 4-2 0-8Z" fill="#8cc4e0" />
         </g>
-        <path d="m100 32 3 23 5-5 6 3-3-22" fill={paper} stroke={accent} strokeWidth="1.5" />
-        <path d="m104 35 2 11m2-12 1 10" stroke={accent} strokeWidth="1" opacity="0.5" />
+      )}
 
-        <path d="m70 52 16-2m-14 8 11-2" stroke={ink} strokeWidth="1.3" opacity="0.5" />
-        <ellipse cx="79" cy="77" rx="2.2" ry="3" fill={ink} transform="rotate(-8 79 77)" />
-        <ellipse cx="104" cy="74" rx="2" ry="2.8" fill={ink} />
-        <path d={mood === 'lost' ? 'M87 92q5-4 10-1' : 'M86 87q7 9 14-3'} stroke={ink} strokeWidth="1.7" />
-        <path d="m72 86 5-1m29-3 5-1" stroke={accent} strokeWidth="2" opacity="0.5" />
-      </g>
-
-      <g stroke={accent} strokeWidth="1.3">
-        <path d="m27 40 8 1m-4-6-1 11m-5-10 10 10" />
-        {mood !== 'grow' && <path d="m148 119 3-7 3 7 7 3-7 2-3 7-3-7-6-2Z" />}
-      </g>
-      {mood === 'search' && <g stroke={ink} strokeLinecap="round">
-        <path d="M119 75c9-5 20 1 22 10 3 10-5 19-15 18-10 0-17-8-15-17 1-5 3-9 8-11Z"
-          fill={paper} fillOpacity="0.9" strokeWidth="1.8" />
-        <path d="M119 77c8-5 19 1 20 10 1 10-6 15-14 14-10-1-15-10-10-18"
-          strokeWidth="0.7" opacity="0.5" />
-        <path d="m138 100 16 17-4 4-15-18" fill={paper} strokeWidth="1.7" />
-        <path d="m119 88 7-7m-3 12 9-10" stroke={accent} strokeWidth="1" opacity="0.5" />
-      </g>}
-      {mood === 'lost' && <g stroke={ink} strokeLinecap="round">
-        <path d="M140 29c-2-10 13-12 15-4 2 7-8 7-7 16" strokeWidth="1.8" />
-        <path d="M142 28c-1-7 11-9 12-2" strokeWidth="0.65" opacity="0.5" />
-        <path d="m149 48 .1 1" strokeWidth="2.5" />
-      </g>}
-      {mood === 'grow' && <g stroke={ink} strokeWidth="1.4">
-        <path d="M30 139q10-20 8-41" />
-        <path d="M35 125q-18-1-17-17 16 3 17 17Zm3-12q1-18 17-18-2 16-17 18Z" fill={paper} />
-        <path d="m22 113 12 11m7-15 9-10" stroke={accent} />
-        <path d="M24 141h15" opacity="0.35" />
-      </g>}
+      {mood === 'grow' && (
+        <g>
+          <path d="M89 39q0-16 8-25" stroke={leaf} strokeWidth="3" />
+          <path d="M97 16q-11-3-12-12 11 0 12 12Z" fill={leaf} />
+          <path d="M98 14q8-7 16-3-7 8-16 3Z" fill={leaf} opacity="0.8" />
+        </g>
+      )}
     </svg>
   );
 }

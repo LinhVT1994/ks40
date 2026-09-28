@@ -80,9 +80,9 @@
 
 @layer components {
   .ui-book-buddy { display: block; flex-shrink: 0; overflow: visible; }
-  .ui-book-buddy-wave { transform-origin: 130px 83px; transition: transform 250ms ease; }
+  .ui-book-buddy-wave { transform-origin: 125px 90px; transition: transform 250ms ease; }
   .ui-book-buddy:hover .ui-book-buddy-wave { transform: rotate(-12deg); }
-  .ui-book-buddy-cover { transform-origin: 90px 130px; transition: transform 250ms ease; }
+  .ui-book-buddy-cover { transform-origin: 88px 125px; transition: transform 250ms ease; }
   .ui-book-buddy:hover .ui-book-buddy-cover { transform: rotate(-3deg); }
   .ui-eyebrow {
     display: flex;
