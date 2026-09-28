@@ -31,16 +31,16 @@ export default function LandingProcess() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-20">
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={{ scale: 0.9 }}
+            whileInView={{ scale: 1 }}
             viewport={{ once: true }}
             className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-widest mb-4"
           >
             Hành trình trải nghiệm
           </motion.div>
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ y: 20 }}
+            whileInView={{ y: 0 }}
             viewport={{ once: true }}
             className="text-3xl sm:text-5xl font-semibold text-zinc-800 dark:text-white mb-6 font-display"
           >
@@ -55,8 +55,8 @@ export default function LandingProcess() {
           {STEPS.map((step, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              initial={{ scale: 0.9 }}
+              whileInView={{ scale: 1 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
               className="ui-panel relative p-7 pt-12 transition-shadow duration-200 group hover:shadow-md"

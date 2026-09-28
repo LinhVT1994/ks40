@@ -15,8 +15,8 @@ export default function LandingEarlyAccess() {
 
       <div className="max-w-5xl mx-auto px-6 relative z-10">
         <motion.div 
-           initial={{ opacity: 0, scale: 0.95 }}
-           whileInView={{ opacity: 1, scale: 1 }}
+           initial={{ scale: 0.95 }}
+           whileInView={{ scale: 1 }}
            viewport={{ once: true }}
            className="ui-panel p-6 sm:p-10 md:p-14 text-center relative overflow-hidden"
         >
@@ -26,8 +26,8 @@ export default function LandingEarlyAccess() {
 
            <div className="relative z-10">
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                initial={{ y: 10 }}
+                whileInView={{ y: 0 }}
                 viewport={{ once: true }}
                 className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest mb-8 border border-primary/20"
               >
@@ -51,8 +51,8 @@ export default function LandingEarlyAccess() {
                  ].map((item, idx) => (
                      <motion.div 
                        key={idx}
-                       initial={{ opacity: 0, y: 20 }}
-                       whileInView={{ opacity: 1, y: 0 }}
+                       initial={{ y: 20 }}
+                       whileInView={{ y: 0 }}
                        viewport={{ once: true }}
                        transition={{ delay: 0.1 * idx }}
                        whileHover={{ scale: 1.05 }}

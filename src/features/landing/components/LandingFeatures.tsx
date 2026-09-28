@@ -34,16 +34,16 @@ export default function LandingFeatures() {
       <div className="max-w-7xl mx-auto px-6 relative z-10">
         <div className="text-center mb-20">
           <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ y: 20 }}
+            whileInView={{ y: 0 }}
             viewport={{ once: true }}
             className="text-3xl sm:text-5xl font-semibold text-zinc-800 dark:text-white mb-6 font-display"
           >
             Một nơi để <span className="text-primary">hiểu sâu hơn.</span>
           </motion.h2>
           <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ y: 20 }}
+            whileInView={{ y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
             className="text-zinc-500 dark:text-slate-400 max-w-2xl mx-auto text-lg"
@@ -56,8 +56,8 @@ export default function LandingFeatures() {
           {FEATURES.map((f, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ y: 20 }}
+              whileInView={{ y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
               className="ui-panel group p-7 md:p-8 transition-shadow duration-200 hover:shadow-md"

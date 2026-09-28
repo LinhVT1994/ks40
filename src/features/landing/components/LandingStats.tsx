@@ -18,8 +18,8 @@ export default function LandingStats() {
           {STATS.map((stat, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ y: 20 }}
+              whileInView={{ y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
               className="ui-panel p-5 sm:p-8 flex flex-col items-center justify-center text-center"

@@ -12,16 +12,16 @@ export default function LandingComparison() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16">
           <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ y: 20 }}
+            whileInView={{ y: 0 }}
             viewport={{ once: true }}
             className="text-3xl sm:text-5xl font-semibold text-zinc-800 dark:text-white mb-6 font-display"
           >
             Từ <span className="text-zinc-500">xao nhãng</span> đến <span className="text-primary italic">tập trung.</span>
           </motion.h2>
           <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ y: 20 }}
+            whileInView={{ y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
             className="text-zinc-500 dark:text-slate-400 text-lg max-w-2xl mx-auto"
@@ -89,8 +89,8 @@ export default function LandingComparison() {
                   ].map((text, idx) => (
                     <motion.div 
                         key={idx} 
-                        initial={{ opacity: 0, x: 20 }}
-                        whileInView={{ opacity: 1, x: 0 }}
+                        initial={{ x: 20 }}
+                        whileInView={{ x: 0 }}
                         transition={{ delay: 0.5 + idx * 0.1 }}
                         className="flex items-center gap-3"
                     >

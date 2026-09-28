@@ -24,8 +24,8 @@ export default function LandingZenPreview() {
         <div className="flex flex-col lg:flex-row gap-16 items-center">
           <div className="flex-1 max-w-xl">
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ x: -20 }}
+              whileInView={{ x: 0 }}
               viewport={{ once: true }}
               className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-[0.2em] mb-6"
             >
@@ -34,8 +34,8 @@ export default function LandingZenPreview() {
             </motion.div>
             
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ y: 20 }}
+              whileInView={{ y: 0 }}
               viewport={{ once: true }}
               className="text-4xl sm:text-6xl font-semibold text-zinc-800 dark:text-white mb-8 font-display leading-[1.1]"
             >
@@ -43,8 +43,8 @@ export default function LandingZenPreview() {
             </motion.h2>
             
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ y: 20 }}
+              whileInView={{ y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
               className="text-zinc-500 dark:text-slate-400 text-lg mb-10 leading-relaxed"
@@ -59,8 +59,8 @@ export default function LandingZenPreview() {
                ].map((item, idx) => (
                  <motion.div 
                     key={idx}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
+                    initial={{ scale: 0.9 }}
+                    whileInView={{ scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ delay: 0.2 + idx * 0.1 }}
                     className="p-4 rounded-2xl bg-white dark:bg-white/5 border border-zinc-200 dark:border-white/10"
@@ -75,8 +75,8 @@ export default function LandingZenPreview() {
           <div className="flex-1 w-full lg:w-auto relative">
              {/* The Editor Mockup */}
              <motion.div 
-                initial={{ opacity: 0, scale: 0.95, rotateY: -10 }}
-                whileInView={{ opacity: 1, scale: 1, rotateY: 0 }}
+                initial={{ scale: 0.95, rotateY: -10 }}
+                whileInView={{ scale: 1, rotateY: 0 }}
                 viewport={{ once: true }}
                 whileHover={{ 
                   scale: 1.02, 

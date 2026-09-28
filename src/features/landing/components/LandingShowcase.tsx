@@ -36,16 +36,16 @@ export default function LandingShowcase() {
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
           <div className="max-w-2xl">
             <motion.h2 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ x: -20 }}
+              whileInView={{ x: 0 }}
               viewport={{ once: true }}
               className="text-3xl sm:text-5xl font-semibold text-zinc-800 dark:text-white mb-6 font-display"
             >
               Những góc nhìn <span className="text-primary italic">đáng khám phá.</span>
             </motion.h2>
             <motion.p 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
+              initial={{ x: -20 }}
+              whileInView={{ x: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
               className="text-zinc-500 dark:text-slate-400 text-lg"
@@ -55,8 +55,8 @@ export default function LandingShowcase() {
           </div>
           
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            initial={{ scale: 0.9 }}
+            whileInView={{ scale: 1 }}
             viewport={{ once: true }}
           >
             <Link 
@@ -73,8 +73,8 @@ export default function LandingShowcase() {
           {SHOWCASE_ITEMS.map((item, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ y: 20 }}
+              whileInView={{ y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
               className="ui-panel relative p-5 transition-shadow duration-200 group hover:shadow-md"

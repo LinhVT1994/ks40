@@ -32,16 +32,16 @@ export default function LandingTestimonials() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-20">
           <motion.h2 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ y: 20 }}
+            whileInView={{ y: 0 }}
             viewport={{ once: true }}
             className="text-3xl sm:text-5xl font-semibold text-zinc-800 dark:text-white mb-6 font-display"
           >
             Cùng nhau <span className="text-primary italic">học hỏi mỗi ngày.</span>
           </motion.h2>
           <motion.p 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ y: 20 }}
+            whileInView={{ y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
             className="text-zinc-500 dark:text-slate-400 text-lg"
@@ -54,8 +54,8 @@ export default function LandingTestimonials() {
           {TESTIMONIALS.map((t, idx) => (
             <motion.div
               key={idx}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
+              initial={{ y: 20 }}
+              whileInView={{ y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: idx * 0.1 }}
               className="ui-panel relative p-7 transition-shadow duration-200 hover:shadow-md"
