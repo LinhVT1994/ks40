@@ -40,7 +40,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           if (existing?.status === 'LOCKED') return false;
           await db.user.upsert({
             where: { email: user.email },
-            update: { name: user.name ?? '', image: user.image },
+            // Only backfill from Google — never overwrite a name/avatar the user set on Lenote.
+            update: {
+              ...(!existing?.name && { name: user.name ?? '' }),
+              ...(!existing?.image && { image: user.image }),
+            },
             create: { email: user.email, name: user.name ?? '', image: user.image },
           });
         } catch {

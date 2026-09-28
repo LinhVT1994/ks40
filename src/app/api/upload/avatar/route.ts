@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import path from 'path';
+import { revalidatePath, revalidateTag } from 'next/cache';
 import { auth } from '@/auth';
 import { uploadToAzure, isAzureConfigured } from '@/lib/azure-storage';
 import { db } from '@/lib/db';
@@ -47,10 +48,18 @@ export async function POST(req: NextRequest) {
     }
 
     // Update avatar immediately in DB
-    await db.user.update({
+    const user = await db.user.update({
       where: { id: userId },
-      data: { image: url }
+      data: { image: url },
+      select: { id: true, username: true },
     });
+
+    // Author avatars are baked into cached author cards and article pages (1h TTL);
+    // expire them now so production shows the new avatar immediately.
+    revalidateTag('author-info', { expire: 0 });
+    revalidateTag('article-content', { expire: 0 });
+    revalidatePath('/me');
+    revalidatePath(`/@${user.username || user.id}`);
 
     return NextResponse.json({ url });
   } catch (err) {
