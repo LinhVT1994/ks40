@@ -15,5 +15,5 @@ it('queries only public fields of active profiles and returns 404 for unavailabl
   vi.mocked(db.user.findFirst).mockResolvedValue(null);
   const result = await GET(new Request('https://example.test'), { params: Promise.resolve({ id: 'user-1' }) });
   expect(result.status).toBe(404);
-  expect(db.user.findFirst).toHaveBeenCalledWith({ where: { id: 'user-1', status: 'ACTIVE' }, select: { id: true, name: true, username: true, bio: true, image: true } });
+  expect(db.user.findFirst).toHaveBeenCalledWith({ where: { id: 'user-1', status: 'ACTIVE' }, select: { id: true, name: true, username: true, bio: true, image: true, coverImage: true } });
 });
