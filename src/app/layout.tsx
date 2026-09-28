@@ -133,7 +133,7 @@ export default async function RootLayout({
           <ThemeProvider
             attribute="class"
             defaultTheme="light"
-            enableSystem={true}
+            enableSystem={false}
           >
             <NotesProvider>
               {children}
