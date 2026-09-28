@@ -48,7 +48,7 @@ export default function Loading() {
       />
 
       {/* Global Grain/Noise Overlay for high-end look */}
-      <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-[1] bg-[url('https://grainy-gradients.vercel.app/noise.svg')]" />
+      <div className="absolute inset-0 opacity-[0.03] pointer-events-none z-[1] bg-[url('/noise.svg')]" />
 
       {/* Background Ambient Glow — Breathing */}
       <motion.div 
