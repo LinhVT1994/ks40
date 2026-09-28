@@ -1,6 +1,8 @@
 # Cập nhật Lenote khi đã có database
 
-Tài liệu này dành cho **cập nhật ứng dụng**, không phải khởi tạo hệ thống. Bản thay đổi UI/SEO/security/profile OG này không sửa `prisma/schema.prisma`, không thêm migration và không sửa `docker-compose.yml`.
+Tài liệu này dành cho **cập nhật ứng dụng**, không phải khởi tạo hệ thống.
+
+> **Bản cập nhật ảnh bìa trang cá nhân (09/2026) có migration mới:** `20260928000000_add_user_cover_image` thêm cột `User.coverImage` (TEXT, cho phép NULL). Migration chỉ **thêm** cột, không xóa/sửa dữ liệu, nhưng **bắt buộc chạy trước khi restart app** — code mới truy vấn cột này, thiếu cột thì trang hồ sơ, `/me`, cài đặt và ảnh OG profile sẽ lỗi. Xem [mục 3](#3-migration-database-bắt-buộc-cho-bản-ảnh-bìa). Bản này không sửa `docker-compose.yml`.
 
 ## Những gì phải giữ nguyên
 
@@ -9,7 +11,7 @@ Tài liệu này dành cho **cập nhật ứng dụng**, không phải khởi t
 - Dữ liệu PostgreSQL/volume Docker; thư mục ảnh/tài liệu đang sử dụng.
 - `.env` production. Không chép `.env` từ máy dev và không chạy `cp .env.example .env` đè lên file đang có.
 
-**Không chạy** `prisma migrate reset`, `prisma db push --force-reset`, `prisma db push --accept-data-loss`, `prisma db seed`, `prisma migrate dev`, `docker compose down -v`, hay script seed trong lần cập nhật này. Không cần `prisma db push` hoặc `prisma migrate deploy` cho chính bản vá này. Nếu database production thiếu bảng/cột của phiên bản trước, dừng lại để kiểm tra schema/history, không tự reset để chữa lỗi.
+**Không chạy** `prisma migrate reset`, `prisma db push --force-reset`, `prisma db push --accept-data-loss`, `prisma db seed`, `prisma migrate dev`, `docker compose down -v`, hay script seed trong lần cập nhật này. Không dùng `prisma db push`. Bản ảnh bìa cần đúng một lệnh ghi DB là `prisma migrate deploy`, chỉ chạy sau khi đã kiểm tra `prisma migrate status` theo [mục 3](#3-migration-database-bắt-buộc-cho-bản-ảnh-bìa). Nếu database production thiếu bảng/cột của phiên bản trước, dừng lại để kiểm tra schema/history, không tự reset để chữa lỗi.
 
 `npm ci` chạy postinstall `prisma generate`; `npm run build` cũng chạy `prisma generate`. Các lệnh đó tạo Prisma Client trong ứng dụng, **không tạo/xóa bảng hoặc chạy seed**. Build có đọc DB để tạo sitemap.
 
@@ -39,9 +41,45 @@ npm test
 npm run build -- --webpack
 ```
 
-Chỉ pull vào đúng nhánh/thư mục ứng dụng đã xác nhận. Nếu server có thay đổi local hoặc pull không fast-forward được: dừng lại, không `reset --hard`/`git clean` để ép deploy. `--webpack` là phương án build đã kiểm chứng cho bản này; không tác động DB. Build thất bại thì giữ nguyên bản đang phục vụ.
+Chỉ pull vào đúng nhánh/thư mục ứng dụng đã xác nhận. Nếu server có thay đổi local hoặc pull không fast-forward được: dừng lại, không `reset --hard`/`git clean` để ép deploy. `--webpack` là phương án build đã kiểm chứng cho bản này; không tác động DB. Build thất bại thì giữ nguyên bản đang phục vụ — **chưa chạy migration khi build chưa thành công**.
 
-## 3. VPS/PM2/Nginx: chạy standalone đúng cách
+## 3. Migration database (bắt buộc cho bản ảnh bìa)
+
+Thứ tự: **build thành công → backup → `migrate status` → `migrate deploy` → restart app**. Cột mới cho phép NULL nên app cũ đang chạy không bị ảnh hưởng trong lúc chờ restart.
+
+Chạy trong thư mục release mới, với environment production (đúng `DATABASE_URL`):
+
+```bash
+npx prisma migrate status
+```
+
+Đọc kết quả và xử lý **đúng một** trong các trường hợp:
+
+| `migrate status` báo chưa áp dụng | Việc cần làm |
+| --- | --- |
+| Chỉ `20260928000000_add_user_cover_image` | Chạy `npx prisma migrate deploy`. |
+| Cả `20260429000000_add_glossary_term` | Kiểm tra DB trước (bên dưới). Migration glossary **không chạy lại được** (`CREATE TABLE` sẽ lỗi nếu bảng đã có). |
+| Migration khác, hoặc báo drift/failed | Dừng lại, không deploy. Không `migrate reset`/`db push` để chữa. |
+
+Nếu glossary đang pending, kiểm tra **chỉ đọc** xem các bảng đã tồn tại chưa (thường do trước đây dùng `db push`). Script không in secret và không đổi DB:
+
+```bash
+npx tsx scripts/check-migration-state.ts
+```
+
+- **`state: "all"` — cả 3 bảng đã có:** đánh dấu migration glossary là đã áp dụng (chỉ ghi vào bảng lịch sử `_prisma_migrations`, không đổi schema), rồi deploy phần còn lại:
+  ```bash
+  npx prisma migrate resolve --applied 20260429000000_add_glossary_term
+  npx prisma migrate deploy
+  ```
+- **`state: "none"` — chưa có bảng nào:** chạy `npx prisma migrate deploy` bình thường, lệnh sẽ tạo cả glossary lẫn cột ảnh bìa.
+- **`state: "partial"` — chỉ có một phần:** dừng lại, kiểm tra thủ công. Không tự tạo/xóa bảng.
+
+Sau khi deploy, `npx prisma migrate status` phải báo `Database schema is up to date!` và chạy lại script phải thấy `"userCoverImageColumn": true`. Chỉ khi đó mới restart app ở bước tiếp theo.
+
+Ảnh bìa tải lên dùng cùng nơi lưu với avatar: Azure container ảnh hiện có (thư mục `covers/`), hoặc `public/uploads/covers` nếu không cấu hình Azure — thư mục này nằm trong `public/uploads` đã mount persistent ở mục 4, không cần thêm mount mới.
+
+## 4. VPS/PM2/Nginx: chạy standalone đúng cách
 
 Nếu deploy trên VPS, dùng một **release mới chưa chạy và không chứa dữ liệu upload duy nhất**. Không thay cấu hình PM2 bằng tên giả định: kiểm tra `pm2 list` và `pm2 describe TEN_APP` trước.
 
@@ -82,16 +120,18 @@ location ^~ /uploads/shared/ { return 404; }
 
 Chỉ reload Nginx sau `nginx -t` thành công. Giữ các cấu hình TLS/domain đang hoạt động; không thay cả virtual host bằng mẫu.
 
-## 4. Docker hoặc nền tảng khác
+## 5. Docker hoặc nền tảng khác
 
 `docker-compose.yml` trong repo hiện **chỉ khai báo PostgreSQL**, không có service web. Không chạy lại compose như một cách deploy giao diện. Dùng pipeline/container ứng dụng hiện có, giữ nguyên DB connection và volumes; nếu muốn dựng service web mới, cần cấu hình riêng trước. Với Vercel, dùng environment production và external DB hiện có, không dùng local filesystem làm persistent storage.
 
-## 5. Kiểm tra và rollback
+## 6. Kiểm tra và rollback
 
 - `/explore`, `/robots.txt`, `/sitemap.xml` trả 200; profile có `og:image` và ảnh PNG 1200×630.
+- Ảnh bìa: mở `/@username` của một tài khoản có sẵn (hiện nền mặc định, không lỗi). Đăng nhập, vào **Cài đặt → Hồ sơ → Ảnh bìa**: chọn một nền có sẵn, tải thử một ảnh, rồi "Về nền mặc định"; mỗi lần đổi, trang `/me` và ảnh OG `/og/profile/<id>` cập nhật theo.
+- Avatar: đổi avatar rồi mở một bài viết của chính tài khoản đó — avatar tác giả phải đổi ngay (không chờ cache 1 giờ). Với tài khoản Google: đăng xuất, đăng nhập lại bằng Google, avatar/tên đã đặt trên Lenote phải được giữ nguyên. Nếu avatar đã bị ảnh Google ghi đè từ bản cũ, tải lại avatar một lần.
 - Đăng nhập bằng tài khoản đang có, kiểm tra số lượng bài/người dùng và tải một file có sẵn. Bản vá yêu cầu phiên cũ đăng nhập lại; link reset mật khẩu phát hành trước bản vá phải yêu cầu lại.
 - Chạy `npx tsx scripts/audit-document-storage.ts` bằng environment production để kiểm kê **chỉ đọc**, không in URL/secret và không đổi DB. Nếu còn tài liệu Azure public cũ, xem [security-rollout.md](security-rollout.md) trước khi kết luận đã khóa hoàn toàn quyền tải.
-- Nếu bản mới lỗi: trỏ process/reverse proxy về release cũ và restart **ứng dụng**. Giữ nguyên DB, env và persistent storage; không restore DB cũ đè lên dữ liệu mới chỉ để rollback code.
+- Nếu bản mới lỗi: trỏ process/reverse proxy về release cũ và restart **ứng dụng**. Giữ nguyên DB, env và persistent storage; không restore DB cũ đè lên dữ liệu mới chỉ để rollback code. Code cũ bỏ qua cột `coverImage`, nên **không cần và không được** xóa cột hay migration khi rollback.
 
 ## Tham khảo chính thức
 
