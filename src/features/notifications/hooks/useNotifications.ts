@@ -6,6 +6,7 @@ import {
   markAsReadAction,
   markAllAsReadAction,
 } from '../actions/notification';
+import { subscribeNotifications } from '../lib/notification-stream';
 import type { Notification } from '@prisma/client';
 
 export function useNotifications(userId?: string) {
@@ -39,24 +40,20 @@ export function useNotifications(userId?: string) {
   useEffect(() => {
     if (!userId) return;
 
-    const es = new EventSource('/api/notifications/stream');
-
-    es.addEventListener('init', (e) => {
-      const { unreadCount } = JSON.parse(e.data) as { unreadCount: number };
-      sseInitReceived.current = true;
-      setUnreadCount(unreadCount);
-    });
-
-    es.addEventListener('notification', (e) => {
-      const notif = JSON.parse(e.data) as Notification;
+    // Shared across tabs — see notification-stream.ts.
+    return subscribeNotifications((event) => {
+      if (event.type === 'init') {
+        sseInitReceived.current = true;
+        setUnreadCount(event.unreadCount);
+        return;
+      }
+      const notif = event.notification;
       setNotifications((prev) => {
         if (prev.some((n) => n.id === notif.id)) return prev;
         return [notif, ...prev];
       });
       setUnreadCount((c) => c + 1);
     });
-
-    return () => es.close();
   }, []);
 
   // ── Actions (optimistic) ──────────────────────────────────────

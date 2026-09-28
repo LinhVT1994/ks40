@@ -8,11 +8,12 @@ import {
   Send as SendIcon, CheckCircle2, AlertCircle, Loader2, ChevronDown
 } from 'lucide-react';
 import type { Notification } from '@prisma/client';
-import { 
-  markAsReadAction, 
-  markAllAsReadAction, 
-  getNotificationsAction 
+import {
+  markAsReadAction,
+  markAllAsReadAction,
+  getNotificationsAction
 } from '@/features/notifications/actions/notification';
+import { subscribeNotifications } from '@/features/notifications/lib/notification-stream';
 
 const TYPE_CFG: Record<string, { icon: React.ElementType; color: string; bg: string; label: string }> = {
   SYSTEM:             { icon: Zap,           color: 'text-rose-500',   bg: 'bg-rose-500/10',   label: 'Hệ thống'  },
@@ -67,18 +68,16 @@ export default function NotificationsClient({
 
   // SSE: Only handle new notifications if we are on 'all' or 'unread' filter
   useEffect(() => {
-    const es = new EventSource('/api/notifications/stream');
-    es.addEventListener('notification', (e) => {
-      const notif = JSON.parse(e.data) as Notification;
-      if (filter === 'read') return;
-
+    // Reuses the header bell's shared connection instead of opening a second EventSource.
+    return subscribeNotifications((event) => {
+      if (event.type !== 'notification' || filter === 'read') return;
+      const notif = event.notification;
       setNotifications((prev) => {
         if (prev.some(n => n.id === notif.id)) return prev;
         return [notif, ...prev];
       });
       setUnreadCount(prev => prev + 1);
     });
-    return () => es.close();
   }, [filter]);
 
   // Handle Filter Change (Server-Side)
