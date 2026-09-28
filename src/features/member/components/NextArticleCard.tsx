@@ -34,7 +34,7 @@ export default function NextArticleCard({ article }: { article: NextArticle }) {
         <span className="h-px flex-1 bg-zinc-200 dark:bg-white/5" />
       </p>
 
-      <div className="relative group flex flex-col sm:flex-row gap-0 rounded-3xl overflow-hidden border border-zinc-300 dark:border-white/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 bg-white dark:bg-slate-900">
+      <div className="relative group flex flex-col sm:flex-row gap-0 rounded-3xl overflow-hidden border border-card-line hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 bg-white dark:bg-slate-900">
         {/* Absolute Cover Link for the article */}
         <Link 
           href={`/article/${article.slug}`} 

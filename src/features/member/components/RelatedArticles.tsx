@@ -24,7 +24,7 @@ function ArticleGridCard({ article, isLarge }: { article: ArticleCard; isLarge?:
           aria-label={article.title}
         />
         
-        <div className="relative z-10 h-full flex flex-col overflow-hidden bg-white dark:bg-white/[0.02] border border-zinc-200 dark:border-white/5 rounded-2xl group-hover:border-primary/30 dark:group-hover:border-primary/20 transition-all duration-500 group-hover:shadow-xl group-hover:shadow-primary/5">
+        <div className="relative z-10 h-full flex flex-col overflow-hidden bg-white dark:bg-white/[0.02] border border-card-line rounded-2xl group-hover:border-primary/30 dark:group-hover:border-primary/20 transition-all duration-500 group-hover:shadow-xl group-hover:shadow-primary/5">
           <div className={`w-full relative overflow-hidden ${isLarge ? "aspect-[22/10]" : "aspect-[16/10]"}`}>
             {article.thumbnail ? (
               <Image

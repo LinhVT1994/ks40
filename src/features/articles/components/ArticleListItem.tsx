@@ -71,7 +71,7 @@ export default function ArticleListItem({
                 "w-24 sm:w-36 2xl:w-48 h-20 sm:h-28 2xl:h-32 shrink-0 relative rounded-xl overflow-hidden shadow-sm bg-zinc-100 dark:bg-white/5 border transition-colors duration-500",
                 article.audience === 'PREMIUM' 
                   ? 'border-amber-200/50 dark:border-amber-500/20 group-hover:border-amber-500/50 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.1)]' 
-                  : 'border-zinc-200 dark:border-white/5 group-hover:border-primary/30'
+                  : 'border-card-line group-hover:border-primary/30'
               )}
             >
               {article.thumbnail ? (

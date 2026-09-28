@@ -42,7 +42,7 @@ export default function ProfileArticleCard({
         href={`/article/${article.slug}`}
         style={{ animationDelay: `${index * 100}ms` }}
         className={cn(
-          "group relative flex flex-col h-[350px] bg-white/40 dark:bg-white/[0.02] backdrop-blur-md max-md:backdrop-blur-sm border border-zinc-200 dark:border-white/5 rounded-2xl overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.15)] dark:hover:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.3)] animate-in fade-in slide-in-from-bottom-4 fill-mode-both cursor-pointer",
+          "group relative flex flex-col h-[350px] bg-white/40 dark:bg-white/[0.02] backdrop-blur-md max-md:backdrop-blur-sm border border-card-line rounded-2xl overflow-hidden transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.15)] dark:hover:shadow-[0_20px_50px_-10px_rgba(59,130,246,0.3)] animate-in fade-in slide-in-from-bottom-4 fill-mode-both cursor-pointer",
           className
         )}
       >
@@ -57,8 +57,7 @@ export default function ProfileArticleCard({
           
           <div className="absolute top-3 left-3">
             <span
-              className="backdrop-blur-md max-md:backdrop-blur-sm bg-white/80 dark:bg-slate-900/80 text-[10px] font-semibold uppercase px-3 py-1 rounded-md tracking-widest shadow-sm border border-white/20 dark:border-white/5"
-              style={{ color: article.topic.color ?? '#3B82F6' }}
+              className="bg-surface/95 dark:bg-[#2b2924]/95 text-primary text-[10px] font-bold uppercase px-2.5 py-1 rounded-md tracking-wider shadow-sm border border-primary/25"
             >
               {article.topic.label}
             </span>

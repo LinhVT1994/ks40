@@ -42,6 +42,7 @@
   --color-ink: var(--ui-ink);
   --color-muted: var(--ui-muted);
   --color-line: var(--ui-line);
+  --color-card-line: var(--ui-card-line);
 }
 
 @layer base {
@@ -53,6 +54,8 @@
     --ui-ink: #26251f;
     --ui-muted: #77736a;
     --ui-line: #e6e3da;
+    /* Article card borders: warm, terracotta-tinted instead of neutral grey. */
+    --ui-card-line: #e8cfc1;
   }
 
   .dark {
@@ -63,6 +66,7 @@
     --ui-ink: #efeee8;
     --ui-muted: #b4afa3;
     --ui-line: #48453d;
+    --ui-card-line: #5c4536;
     --color-zinc-400: #b4afa3;
     --color-zinc-500: #a59f92;
   }
@@ -170,7 +174,7 @@
   .ui-welcome h1 { font-size: clamp(2rem, 3.5vw, 3.25rem); font-weight: 400; letter-spacing: -0.025em; line-height: 1.25; }
   .ui-welcome-search { display: flex; align-items: center; gap: 0.75rem; padding: 1.3rem 1.25rem; background: var(--ui-panel); border: 1px solid var(--ui-line); border-radius: 1.25rem; box-shadow: var(--shadow-md); }
   .ui-welcome-search:focus-within { border-color: var(--color-primary); box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 10%, transparent); }
-  .ui-article-row { margin-bottom: 0.75rem; background: var(--ui-panel); border: 1px solid var(--ui-line); }
+  .ui-article-row { margin-bottom: 0.75rem; background: var(--ui-panel); border: 1px solid var(--ui-card-line); }
   .ui-article-row:hover { border-color: var(--color-primary); box-shadow: var(--shadow-md); }
   .ui-article-row:focus-within { border-color: var(--color-primary); }
   .ui-reader-heading { border-bottom: 1px solid var(--ui-line); padding-bottom: 2rem; }
