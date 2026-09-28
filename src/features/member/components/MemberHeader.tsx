@@ -119,7 +119,7 @@ export default function MemberHeader({
         className="ui-sidebar" aria-label="Điều hướng Lenote" role={mobileMenuOpen ? 'dialog' : undefined} aria-modal={mobileMenuOpen ? true : undefined}>
         <div className="ui-sidebar-brand">
           <Link href="/" onClick={() => setMobileMenuOpen(false)} className="flex min-w-0 items-center gap-2.5" aria-label="Lenote — Trang chủ">
-            <BrandLogo size={30} /><span className="ui-sidebar-label ui-wordmark">lenote<span>.</span></span>
+            <BrandLogo size={30} /><span className="ui-sidebar-label ui-wordmark">lenote<span>.dev</span></span>
           </Link>
           <button ref={closeButtonRef} type="button" onClick={() => setMobileMenuOpen(false)}
             className={`ui-icon-button ${isReader ? '' : 'lg:hidden'}`} aria-label="Đóng thanh điều hướng"><X size={18} /></button>
@@ -175,7 +175,7 @@ export default function MemberHeader({
               aria-label={collapsed ? 'Mở rộng thanh điều hướng' : 'Thu gọn thanh điều hướng'} aria-controls="member-sidebar" aria-expanded={!collapsed}
               onClick={() => setCollapsed(value => !value)}>{collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}</button>}
             <span className="truncate text-sm text-muted hidden sm:block">{pageLabel}</span>
-            <Link href="/" className="ui-wordmark sm:hidden">lenote<span>.</span></Link>
+            <Link href="/" className="ui-wordmark sm:hidden">lenote<span>.dev</span></Link>
           </div>
           <div className="flex shrink-0 items-center gap-2 md:gap-3">
             <div className="hidden md:block"><HeaderSearch /></div>

@@ -59,7 +59,7 @@ export default function AdminSidebar() {
         </div>
         {!collapsed && (
           <span className="ui-wordmark whitespace-nowrap">
-            lenote<span>.</span> <span className="text-[10px] font-medium tracking-widest uppercase">Studio</span>
+            lenote<span>.dev</span> <span className="text-[10px] font-medium tracking-widest uppercase">Studio</span>
           </span>
         )}
       </div>

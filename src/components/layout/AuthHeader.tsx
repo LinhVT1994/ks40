@@ -15,7 +15,7 @@ export default function AuthHeader() {
           Quay lại Trang chủ
         </span>
       </Link>
-      <Link href="/" className="ui-wordmark" aria-label="Lenote — Trang chủ">lenote<span>.</span></Link>
+      <Link href="/" className="ui-wordmark" aria-label="Lenote — Trang chủ">lenote<span>.dev</span></Link>
     </header>
   );
 }

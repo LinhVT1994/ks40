@@ -36,7 +36,7 @@ export default function MemberFooter() {
               <div className="transition-transform group-hover:scale-110">
                 <BrandLogo size={40} />
               </div>
-              <span className="ui-wordmark">lenote<span>.</span></span>
+              <span className="ui-wordmark">lenote<span>.dev</span></span>
             </Link>
             <p className="text-zinc-500 dark:text-slate-400 text-sm leading-relaxed max-w-sm">
               Nền tảng chia sẻ tri thức và kinh nghiệm đa góc nhìn. Từ những bài học chuyên môn sâu sắc đến những câu chuyện đời sống, cùng nhau lưu giữ và lan tỏa giá trị mỗi ngày.

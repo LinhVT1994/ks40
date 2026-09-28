@@ -31,7 +31,7 @@ export default function LandingHero() {
         <div className="ui-hero-art" aria-label="Minh họa không gian đọc và ghi chú của Lenote">
           <div className="ui-notebook">
             <div className="mb-7 flex items-center justify-between border-b border-line pb-4">
-              <span className="ui-wordmark">lenote<span>.</span></span>
+              <span className="ui-wordmark">lenote<span>.dev</span></span>
               <span className="text-[10px] uppercase tracking-widest text-muted">Không gian đọc</span>
               <Bookmark className="h-4 w-4 text-primary" />
             </div>
