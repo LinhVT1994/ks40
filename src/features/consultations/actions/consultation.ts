@@ -8,7 +8,7 @@ import { createNotificationAction } from '@/lib/notifications';
 import { sendConsultationEmail } from '@/lib/email';
 import { SITE_URL } from '@/lib/seo';
 import {
-  DURATION_OPTIONS, generateSlotStates, isBookableSlot, isValidTimeZone, parseWeeklySlots, type WeeklySlot,
+  DURATION_OPTIONS, dateKeyInZone, generateSlotStates, isBookableSlot, isValidTimeZone, parseBlockedDates, parseWeeklySlots, type WeeklySlot,
 } from '../lib/slots';
 
 const MAX_PENDING_PER_GUEST = 2;
@@ -37,9 +37,15 @@ function formatInZone(date: Date, tz: string) {
   return `${text} (${tz})`;
 }
 
-function readSettings(raw: { weeklySlots: Prisma.JsonValue; timezone: string; durationMin: number }) {
+function readSettings(raw: { weeklySlots: Prisma.JsonValue; timezone: string; durationMin: number; blockedDates: string[] }) {
   const parsed = parseWeeklySlots(raw.weeklySlots);
-  return { weeklySlots: parsed.ok ? parsed.slots : [], timezone: raw.timezone, durationMin: raw.durationMin };
+  return { weeklySlots: parsed.ok ? parsed.slots : [], timezone: raw.timezone, durationMin: raw.durationMin, blockedDates: raw.blockedDates };
+}
+
+/** Stored blocked dates minus those already in the past (host zone). */
+function upcomingBlockedDates(dates: string[], tz: string) {
+  const parsed = parseBlockedDates(dates, dateKeyInZone(new Date(), tz));
+  return parsed.ok ? parsed.dates : [];
 }
 
 async function hostBusyRanges(hostId: string, from: Date) {
@@ -58,14 +64,21 @@ export type ConsultationSettingsInput = {
   meetingUrl: string;
   timezone: string;
   weeklySlots: WeeklySlot[];
+  blockedDates: string[];
 };
 
 export async function getMyConsultationSettingsAction() {
   const user = await currentUser();
   if (!user) return null;
   const settings = await db.consultationSettings.findUnique({ where: { userId: user.id } });
+  // Upcoming active bookings, as host-zone dates, so the form can warn about blocking a booked day.
+  const upcoming = settings ? await db.consultation.findMany({
+    where: { hostId: user.id, status: { in: ACTIVE }, startAt: { gt: new Date() } },
+    select: { startAt: true },
+  }) : [];
   return {
     canHost: canHost(user),
+    bookedDates: [...new Set(upcoming.map(c => dateKeyInZone(c.startAt, settings!.timezone)))],
     settings: settings && {
       enabled: settings.enabled,
       intro: settings.intro ?? '',
@@ -73,6 +86,7 @@ export async function getMyConsultationSettingsAction() {
       meetingUrl: settings.meetingUrl ?? '',
       timezone: settings.timezone,
       weeklySlots: readSettings(settings).weeklySlots,
+      blockedDates: upcomingBlockedDates(settings.blockedDates, settings.timezone),
     },
   };
 }
@@ -89,6 +103,8 @@ export async function saveConsultationSettingsAction(input: ConsultationSettings
 
   const slots = parseWeeklySlots(input.weeklySlots);
   if (!slots.ok) return { success: false, error: slots.error };
+  const blocked = parseBlockedDates(input.blockedDates ?? [], dateKeyInZone(new Date(), input.timezone));
+  if (!blocked.ok) return { success: false, error: blocked.error };
 
   const meetingUrl = (input.meetingUrl ?? '').trim();
   if (meetingUrl) {
@@ -109,6 +125,7 @@ export async function saveConsultationSettingsAction(input: ConsultationSettings
     meetingUrl: meetingUrl || null,
     timezone: input.timezone,
     weeklySlots: slots.slots as unknown as Prisma.InputJsonValue,
+    blockedDates: blocked.dates,
   };
   await db.consultationSettings.upsert({ where: { userId: user.id }, update: data, create: { userId: user.id, ...data } });
   revalidatePath('/consultations');

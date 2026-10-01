@@ -6,9 +6,10 @@ import { useRouter } from 'next/navigation';
 import { AlertCircle, CheckCircle2, ExternalLink, Eraser, Link2, Loader2, Sparkles, Video } from 'lucide-react';
 import { toast } from 'sonner';
 import { saveConsultationSettingsAction, type ConsultationSettingsInput } from '../actions/consultation';
-import { DURATION_OPTIONS, WEEKDAY_LABELS, generateSlots } from '../lib/slots';
+import { DURATION_OPTIONS, WEEKDAY_LABELS, dateKeyInZone, generateSlots } from '../lib/slots';
 import { PRESETS, cellsToWindows, windowsToCells } from '../lib/availability-grid';
 import AvailabilityGrid from './AvailabilityGrid';
+import BlockedDatesPicker from './BlockedDatesPicker';
 import { cn } from '@/lib/utils';
 
 const inputClass = 'w-full bg-zinc-50 dark:bg-black/20 border border-zinc-300 dark:border-white/10 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-primary/40 text-zinc-800 dark:text-white';
@@ -47,11 +48,11 @@ function Section({ step, title, hint, children }: { step: number; title: string;
   );
 }
 
-export default function ConsultationSettingsForm({ initial, profileHref }: { initial: ConsultationSettingsInput | null; profileHref: string }) {
+export default function ConsultationSettingsForm({ initial, profileHref, bookedDates }: { initial: ConsultationSettingsInput | null; profileHref: string; bookedDates: string[] }) {
   const router = useRouter();
   const browserZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, []);
   const start = useMemo<ConsultationSettingsInput>(() => initial ?? {
-    enabled: false, intro: '', durationMin: 30, meetingUrl: '', timezone: browserZone, weeklySlots: [],
+    enabled: false, intro: '', durationMin: 30, meetingUrl: '', timezone: browserZone, weeklySlots: [], blockedDates: [],
   }, [initial, browserZone]);
   const [form, setForm] = useState(start);
   const [cells, setCells] = useState(() => windowsToCells(start.weeklySlots));
@@ -64,7 +65,8 @@ export default function ConsultationSettingsForm({ initial, profileHref }: { ini
   const dirty = JSON.stringify(current) !== saved;
   const provider = meetingProvider(form.meetingUrl);
   const hoursPerWeek = (cells.size * 30) / 60;
-  const upcoming = useMemo(() => generateSlots({ weeklySlots: windows, timezone: form.timezone, durationMin: form.durationMin }).length, [windows, form.timezone, form.durationMin]);
+  const upcoming = useMemo(() => generateSlots({ weeklySlots: windows, timezone: form.timezone, durationMin: form.durationMin, blockedDates: form.blockedDates }).length, [windows, form.timezone, form.durationMin, form.blockedDates]);
+  const zoneToday = useMemo(() => dateKeyInZone(new Date(), form.timezone), [form.timezone]);
   const zoneNow = useMemo(() => new Date().toLocaleTimeString('vi-VN', { timeZone: form.timezone, hour: '2-digit', minute: '2-digit', hour12: false }), [form.timezone]);
 
   // Problems that block turning bookings on.
@@ -201,6 +203,10 @@ export default function ConsultationSettingsForm({ initial, profileHref }: { ini
                 })}
           </ul>
         </div>
+      </Section>
+
+      <Section step={4} title="Ngày không nhận lịch" hint="Chặn những ngày cụ thể (đi công tác, nghỉ lễ…) mà không cần sửa lịch rảnh hằng tuần.">
+        <BlockedDatesPicker value={form.blockedDates} onChange={d => set('blockedDates', d)} today={zoneToday} bookedDates={bookedDates} />
       </Section>
 
       {/* Save bar */}

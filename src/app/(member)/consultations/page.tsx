@@ -54,7 +54,7 @@ export default async function ConsultationsPage({ searchParams }: { searchParams
       </nav>
 
       {activeTab === 'settings' ? (
-        <ConsultationSettingsForm initial={mine?.settings ?? null} profileHref={`/@${session.user.username || session.user.id}`} />
+        <ConsultationSettingsForm initial={mine?.settings ?? null} bookedDates={mine?.bookedDates ?? []} profileHref={`/@${session.user.username || session.user.id}`} />
       ) : (
         <ConsultationList items={items} />
       )}

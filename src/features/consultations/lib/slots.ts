@@ -12,6 +12,7 @@ export const DURATION_OPTIONS = [15, 30, 45, 60] as const;
 export const BOOKING_HORIZON_DAYS = 14;
 export const MIN_LEAD_MINUTES = 120;
 export const MAX_WEEKLY_WINDOWS = 28;
+export const MAX_BLOCKED_DATES = 90;
 export const WEEKDAY_LABELS = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'] as const;
 
 const HHMM = /^([01]\d|2[0-3]):([0-5]\d)$/;
@@ -75,6 +76,29 @@ function zonedDate(date: Date, tz: string) {
   return { year: get('year'), month: get('month'), day: get('day') };
 }
 
+const pad2 = (n: number) => String(n).padStart(2, '0');
+
+/** "YYYY-MM-DD" of `date` as seen in `tz`. */
+export function dateKeyInZone(date: Date, tz: string) {
+  const { year, month, day } = zonedDate(date, tz);
+  return `${year}-${pad2(month)}-${pad2(day)}`;
+}
+
+/** Validate untrusted blocked dates; drops dates before `today` (host zone) and duplicates, sorts the rest. */
+export function parseBlockedDates(input: unknown, today: string): { ok: true; dates: string[] } | { ok: false; error: string } {
+  if (!Array.isArray(input)) return { ok: false, error: 'Danh sách ngày nghỉ không hợp lệ' };
+  const dates = new Set<string>();
+  for (const raw of input) {
+    if (typeof raw !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(raw)) return { ok: false, error: 'Ngày nghỉ không hợp lệ' };
+    const [y, m, d] = raw.split('-').map(Number);
+    const check = new Date(Date.UTC(y, m - 1, d));
+    if (check.getUTCFullYear() !== y || check.getUTCMonth() !== m - 1 || check.getUTCDate() !== d) return { ok: false, error: 'Ngày nghỉ không hợp lệ' };
+    if (raw >= today) dates.add(raw);
+  }
+  if (dates.size > MAX_BLOCKED_DATES) return { ok: false, error: `Tối đa ${MAX_BLOCKED_DATES} ngày nghỉ` };
+  return { ok: true, dates: [...dates].sort() };
+}
+
 function overlaps(start: number, end: number, busy: BusyRange[]) {
   return busy.some(b => start < b.endAt.getTime() && end > b.startAt.getTime());
 }
@@ -88,8 +112,11 @@ export function generateSlots(opts: {
   days?: number;
   leadMinutes?: number;
   busy?: BusyRange[];
+  /** "YYYY-MM-DD" dates (host zone) with no availability. */
+  blockedDates?: string[];
 }): Date[] {
-  const { weeklySlots, timezone, durationMin, now = new Date(), days = BOOKING_HORIZON_DAYS, leadMinutes = MIN_LEAD_MINUTES, busy = [] } = opts;
+  const { weeklySlots, timezone, durationMin, now = new Date(), days = BOOKING_HORIZON_DAYS, leadMinutes = MIN_LEAD_MINUTES, busy = [], blockedDates = [] } = opts;
+  const blocked = new Set(blockedDates);
   if (!weeklySlots.length || durationMin <= 0 || !isValidTimeZone(timezone)) return [];
 
   const earliest = now.getTime() + leadMinutes * 60_000;
@@ -100,6 +127,7 @@ export function generateSlots(opts: {
     // Calendar arithmetic in UTC is safe for dates (no wall-clock involved).
     const cal = new Date(Date.UTC(today.year, today.month - 1, today.day + offset));
     const weekday = cal.getUTCDay();
+    if (blocked.has(`${cal.getUTCFullYear()}-${pad2(cal.getUTCMonth() + 1)}-${pad2(cal.getUTCDate())}`)) continue;
     for (const window of weeklySlots) {
       if (window.day !== weekday) continue;
       for (let m = toMinutes(window.start); m + durationMin <= toMinutes(window.end); m += durationMin) {

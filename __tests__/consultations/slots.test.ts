@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { generateSlotStates, generateSlots, isBookableSlot, parseWeeklySlots, zonedTimeToUtc } from '@/features/consultations/lib/slots';
+import { dateKeyInZone, generateSlotStates, generateSlots, isBookableSlot, parseBlockedDates, parseWeeklySlots, zonedTimeToUtc } from '@/features/consultations/lib/slots';
 
 // Wed 2026-10-07 00:00 UTC
 const NOW = new Date('2026-10-07T00:00:00Z');
@@ -76,6 +76,29 @@ describe('generateSlotStates', () => {
     const states = generateSlotStates({ ...base, busy });
     expect(states).toHaveLength(4);
     expect(states.filter(s => s.taken).map(s => s.start.toISOString())).toEqual(['2026-10-08T13:00:00.000Z']);
+  });
+});
+
+describe('blocked dates', () => {
+  const base = { weeklySlots: [{ day: 4, start: '20:00', end: '21:00' }], timezone: 'Asia/Ho_Chi_Minh', durationMin: 30, now: NOW };
+  it('skips every slot on a blocked date (host zone)', () => {
+    const slots = generateSlots({ ...base, blockedDates: ['2026-10-08'] }).map(d => d.toISOString());
+    expect(slots).toEqual(['2026-10-15T13:00:00.000Z', '2026-10-15T13:30:00.000Z']);
+  });
+  it('blocks by the host calendar date, not UTC', () => {
+    // 07:00 Thu in Tokyo is still Wed 22:00 UTC; blocking Thursday must remove it.
+    const tokyo = { weeklySlots: [{ day: 4, start: '07:00', end: '07:30' }], timezone: 'Asia/Tokyo', durationMin: 30, now: NOW };
+    expect(generateSlots({ ...tokyo, blockedDates: ['2026-10-08'] })[0].toISOString()).toBe('2026-10-14T22:00:00.000Z');
+  });
+  it('validates, dedupes, sorts and drops past dates', () => {
+    expect(parseBlockedDates(['2026-10-20', '2026-10-09', '2026-10-09', '2026-10-01'], '2026-10-07')).toEqual({ ok: true, dates: ['2026-10-09', '2026-10-20'] });
+    expect(parseBlockedDates(['2026-02-30'], '2026-01-01').ok).toBe(false);
+    expect(parseBlockedDates(['10/09/2026'], '2026-01-01').ok).toBe(false);
+    expect(parseBlockedDates('2026-10-09', '2026-01-01').ok).toBe(false);
+  });
+  it('computes the date key in a zone', () => {
+    expect(dateKeyInZone(new Date('2026-10-07T22:00:00Z'), 'Asia/Tokyo')).toBe('2026-10-08');
+    expect(dateKeyInZone(new Date('2026-10-07T22:00:00Z'), 'UTC')).toBe('2026-10-07');
   });
 });
 
