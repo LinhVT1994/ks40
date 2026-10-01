@@ -50,6 +50,9 @@ model User {
   glossaryTerms      GlossaryTerm[]
   glossaryLikes      GlossaryLike[]
   glossaryBookmarks  GlossaryBookmark[]
+  consultationSettings ConsultationSettings?
+  hostedConsultations  Consultation[]       @relation("ConsultationHost")
+  bookedConsultations  Consultation[]       @relation("ConsultationGuest")
 }
 
 model Note {
@@ -553,6 +556,10 @@ enum NotificationType {
   RATING
   GLOSSARY_SUBMITTED
   GLOSSARY_APPROVED
+  CONSULTATION_REQUESTED
+  CONSULTATION_CONFIRMED
+  CONSULTATION_DECLINED
+  CONSULTATION_CANCELLED
 }
 
 enum ActivityType {
@@ -578,4 +585,48 @@ enum Occupation {
   EDUCATOR
   ENGINEER
   OTHER
+}
+
+// ── 1:1 consultations ───────────────────────────────────────────
+// A writer (canWrite) opts in and publishes weekly availability; readers book a slot.
+
+model ConsultationSettings {
+  userId      String   @id
+  enabled     Boolean  @default(false)
+  intro       String?
+  durationMin Int      @default(30)
+  meetingUrl  String?
+  /// IANA zone the weekly slots are expressed in, e.g. "Asia/Ho_Chi_Minh".
+  timezone    String   @default("Asia/Ho_Chi_Minh")
+  /// [{ day: 0-6 (Sun-Sat), start: "HH:MM", end: "HH:MM" }] in `timezone`.
+  weeklySlots Json     @default("[]")
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Active bookings (PENDING/CONFIRMED) are unique per host+startAt via a partial index in the migration.
+model Consultation {
+  id            String             @id @default(cuid())
+  hostId        String
+  guestId       String
+  startAt       DateTime
+  endAt         DateTime
+  topic         String
+  status        ConsultationStatus @default(PENDING)
+  declineReason String?
+  cancelledById String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  host          User               @relation("ConsultationHost", fields: [hostId], references: [id], onDelete: Cascade)
+  guest         User               @relation("ConsultationGuest", fields: [guestId], references: [id], onDelete: Cascade)
+
+  @@index([hostId, startAt])
+  @@index([guestId, startAt])
+}
+
+enum ConsultationStatus {
+  PENDING
+  CONFIRMED
+  DECLINED
+  CANCELLED
 }

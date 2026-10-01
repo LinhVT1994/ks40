@@ -4,6 +4,7 @@ import type { Metadata } from 'next';
 import { getPublicProfileAction, getProfileArticlesAction } from '@/features/member/actions/profile';
 import { getFollowersAction } from '@/features/member/actions/profile-follow';
 import { getAuthorInfoAction } from '@/features/member/actions/follow';
+import { getPublicConsultationInfoAction } from '@/features/consultations/actions/consultation';
 import PublicProfileClient from '../profile/[id]/PublicProfileClient';
 import ProfileCover from '@/features/member/components/ProfileCover';
 import JsonLd from '@/components/shared/JsonLd';
@@ -57,11 +58,12 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
   }
 
   const [
-    followersData, authorInfo, articlesData
+    followersData, authorInfo, articlesData, consultation
   ] = await Promise.all([
     getFollowersAction(user.id),
     getAuthorInfoAction(user.id),
     getProfileArticlesAction(user.id),
+    getPublicConsultationInfoAction(user.id),
   ]);
 
   const sameAs = [
@@ -113,6 +115,7 @@ export default async function PublicProfilePage({ params }: { params: Promise<{ 
           followers={followersArr}
           isFollowing={authorInfo?.isFollowing ?? false}
           followerCount={authorInfo?.followerCount ?? followersArr.length}
+          consultation={consultation}
         />
       </div>
     </div>
