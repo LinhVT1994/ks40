@@ -75,7 +75,7 @@ type Props = {
   isFollowing: boolean;
   followerCount: number;
   /** Present when the author accepts 1:1 consultations. */
-  consultation?: { intro: string | null; durationMin: number } | null;
+  consultation?: { intro: string | null; durationMin: number; price: number } | null;
 };
 
 /* ── Main Component ────────────────────────────────────── */
@@ -183,7 +183,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
                 </Link>
               )}
               {consultation && session?.user?.id !== user.id && (
-                <BookConsultationButton hostId={user.id} hostName={user.name ?? 'tác giả'} intro={consultation.intro} durationMin={consultation.durationMin} />
+                <BookConsultationButton hostId={user.id} hostName={user.name ?? 'tác giả'} intro={consultation.intro} durationMin={consultation.durationMin} price={consultation.price} />
               )}
             </div>
           </div>

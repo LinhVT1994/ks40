@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { CalendarDays, CalendarPlus, Check, Link2, Loader2, Pencil, Video, X } from 'lucide-react';
+import { CalendarDays, CalendarPlus, Check, Link2, Loader2, Pencil, QrCode, Video, Wallet, X } from 'lucide-react';
 import { toast } from 'sonner';
 import Avatar from '@/components/shared/Avatar';
-import { cancelConsultationAction, respondConsultationAction, updateConsultationLinkAction, type ConsultationListItem } from '../actions/consultation';
+import { cancelConsultationAction, getPaymentInstructionsAction, respondConsultationAction, updateConsultationLinkAction, type ConsultationListItem, type PaymentInstructions } from '../actions/consultation';
+import { formatVnd } from '../lib/payment';
+import { Dialog } from './dialog-ui';
+import PaymentPanel from './PaymentPanel';
 import { cn } from '@/lib/utils';
 
 const fmtWhen = (iso: string, endIso: string) => {
@@ -21,26 +24,58 @@ type Bucket = 'action' | 'upcoming' | 'past';
 function bucketOf(c: ConsultationListItem, now: number): Bucket {
   const upcoming = new Date(c.endAt).getTime() > now;
   if (upcoming && c.status === 'PENDING' && c.role === 'host') return 'action';
-  if (upcoming && (c.status === 'PENDING' || c.status === 'CONFIRMED')) return 'upcoming';
+  if (upcoming && c.status === 'AWAITING_PAYMENT' && !c.paymentReported) return 'action';
+  if (upcoming && (c.status === 'AWAITING_PAYMENT' || c.status === 'PENDING' || c.status === 'CONFIRMED')) return 'upcoming';
   return 'past';
 }
 
 function StatusBadge({ c, now }: { c: ConsultationListItem; now: number }) {
   const ended = new Date(c.endAt).getTime() <= now;
   const map: Record<string, [string, string]> = {
+    AWAITING_PAYMENT: c.paymentReported ? ['Đang đối chiếu', 'bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-300'] : ['Chờ thanh toán', 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'],
     PENDING: ended ? ['Hết hạn', 'bg-zinc-100 text-zinc-500 dark:bg-white/5'] : ['Chờ xác nhận', 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400'],
     CONFIRMED: ended ? ['Đã diễn ra', 'bg-zinc-100 text-zinc-600 dark:bg-white/5'] : ['Đã xác nhận', 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400'],
     DECLINED: ['Đã từ chối', 'bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400'],
-    CANCELLED: [c.cancelledByMe ? 'Bạn đã hủy' : 'Đã bị hủy', 'bg-zinc-100 text-zinc-500 dark:bg-white/5'],
+    CANCELLED: [c.cancelledByMe ? 'Bạn đã hủy' : c.declineReason === 'Quá hạn thanh toán' ? 'Hết giờ giữ chỗ' : 'Đã bị hủy', 'bg-zinc-100 text-zinc-500 dark:bg-white/5'],
   };
   const [label, cls] = map[c.status];
   return <span className={cn('text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md', cls)}>{label}</span>;
+}
+
+/** Refund state for a paid booking that won't happen. */
+function RefundNote({ c }: { c: ConsultationListItem }) {
+  if (!c.paid || (c.status !== 'DECLINED' && c.status !== 'CANCELLED')) return null;
+  return (
+    <p className={cn('mt-2 inline-flex items-center gap-1.5 text-xs', c.refunded ? 'text-emerald-700 dark:text-emerald-400' : 'text-amber-700 dark:text-amber-400')}>
+      <Wallet className="w-3.5 h-3.5" /> {c.role === 'guest'
+        ? (c.refunded ? `Đã hoàn ${formatVnd(c.price)}` : `${formatVnd(c.price)} sẽ được hoàn lại cho bạn`)
+        : (c.refunded ? 'Người đặt đã được hoàn tiền' : 'Người đặt sẽ được hoàn tiền')}
+    </p>
+  );
+}
+
+function PaymentDialog({ c, onClose }: { c: ConsultationListItem; onClose: () => void }) {
+  const router = useRouter();
+  const [payment, setPayment] = useState<PaymentInstructions | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    getPaymentInstructionsAction(c.id).then(res => (res.success ? setPayment(res.payment) : setError(res.error))).catch(() => setError('Không tải được thông tin thanh toán'));
+  }, [c.id]);
+  return (
+    <Dialog titleId={`pay-${c.id}`} title={`Thanh toán ${formatVnd(c.price)}`} icon={<QrCode />} onClose={onClose} size="lg"
+      footer={<><span className="text-[11px] text-zinc-500">Buổi tư vấn với {c.other.name}</span><button type="button" onClick={onClose} className="h-9 px-3 rounded-lg text-sm font-medium text-zinc-600 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-white/5">Đóng</button></>}>
+      {payment ? <PaymentPanel consultationId={c.id} payment={payment} onReported={() => router.refresh()} />
+        : error ? <p className="py-8 text-center text-sm text-rose-600">{error}</p>
+        : <div className="flex items-center justify-center gap-2 py-12 text-sm text-zinc-500"><Loader2 className="w-4 h-4 animate-spin" /> Đang tải…</div>}
+    </Dialog>
+  );
 }
 
 function Row({ c, now, defaultMeetingUrl }: { c: ConsultationListItem; now: number; defaultMeetingUrl: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [mode, setMode] = useState<'idle' | 'accept' | 'decline' | 'edit-link'>('idle');
+  const [paying, setPaying] = useState(false);
   const [reason, setReason] = useState('');
   const [link, setLink] = useState('');
   const upcoming = new Date(c.startAt).getTime() > now;
@@ -64,12 +99,24 @@ function Row({ c, now, defaultMeetingUrl }: { c: ConsultationListItem; now: numb
             <span className="text-[11px] text-zinc-500">{c.role === 'host' ? 'đặt lịch với bạn' : 'là người tư vấn'}</span>
             <StatusBadge c={c} now={now} />
           </div>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-slate-300 flex items-center gap-1.5"><CalendarDays className="w-3.5 h-3.5 text-primary shrink-0" /> {fmtWhen(c.startAt, c.endAt)}</p>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-slate-300 flex items-center gap-1.5"><CalendarDays className="w-3.5 h-3.5 text-primary shrink-0" /> {fmtWhen(c.startAt, c.endAt)}{c.price > 0 && <span className="text-zinc-500">· {formatVnd(c.price)}</span>}</p>
           <p className="mt-2 text-sm text-zinc-600 dark:text-slate-400 leading-relaxed whitespace-pre-line line-clamp-4">{c.topic}</p>
           {c.status === 'DECLINED' && c.declineReason && <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">Lời nhắn: {c.declineReason}</p>}
+          {c.status === 'CANCELLED' && !c.cancelledByMe && c.declineReason && <p className="mt-2 text-xs text-zinc-500">Lý do: {c.declineReason}</p>}
+          {c.status === 'AWAITING_PAYMENT' && (
+            <p className="mt-2 text-xs text-zinc-500">{c.paymentReported
+              ? 'Bạn đã báo chuyển khoản, quản trị viên đang đối chiếu. Yêu cầu sẽ tới tác giả ngay sau đó.'
+              : <>Chuyển khoản với nội dung <strong className="text-primary tracking-wider">{c.paymentCode}</strong> trước {c.holdUntil && new Date(c.holdUntil).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })} để giữ chỗ.</>}</p>
+          )}
+          <RefundNote c={c} />
 
           {upcoming && (
             <div className="mt-4 flex flex-wrap items-center gap-2">
+              {c.status === 'AWAITING_PAYMENT' && (
+                <button type="button" onClick={() => setPaying(true)} className={cn('ui-button !py-2 !px-3.5 !text-xs', c.paymentReported && 'ui-button-secondary')}>
+                  <QrCode className="w-3.5 h-3.5" /> {c.paymentReported ? 'Xem thông tin chuyển khoản' : 'Thanh toán'}
+                </button>
+              )}
               {c.status === 'CONFIRMED' && c.meetingUrl && (
                 <a href={c.meetingUrl} target="_blank" rel="noopener noreferrer" className="ui-button !py-2 !px-3.5 !text-xs"><Video className="w-3.5 h-3.5" /> Vào phòng họp</a>
               )}
@@ -88,9 +135,14 @@ function Row({ c, now, defaultMeetingUrl }: { c: ConsultationListItem; now: numb
                   <button type="button" disabled={isPending} onClick={() => setMode('decline')} className="ui-button ui-button-secondary !py-2 !px-3.5 !text-xs"><X className="w-3.5 h-3.5" /> Từ chối</button>
                 </>
               )}
-              {(c.status === 'CONFIRMED' || (c.status === 'PENDING' && c.role === 'guest')) && (
+              {(c.status === 'CONFIRMED' || (c.role === 'guest' && (c.status === 'PENDING' || (c.status === 'AWAITING_PAYMENT' && !c.paymentReported)))) && (
                 <button type="button" disabled={isPending}
-                  onClick={() => { if (confirm('Hủy lịch hẹn này? Người kia sẽ nhận được thông báo.')) run(() => cancelConsultationAction(c.id), 'Đã hủy lịch hẹn'); }}
+                  onClick={() => {
+                    const msg = c.status === 'AWAITING_PAYMENT'
+                      ? 'Hủy giữ chỗ này? Nếu bạn đã chuyển tiền, đừng hủy — hãy bấm “Thanh toán” → “Tôi đã chuyển khoản”.'
+                      : `Hủy lịch hẹn này? Người kia sẽ nhận được thông báo.${c.paid ? ' Người đặt sẽ được hoàn tiền.' : ''}`;
+                    if (confirm(msg)) run(() => cancelConsultationAction(c.id), 'Đã hủy lịch hẹn');
+                  }}
                   className="px-3 py-2 rounded-xl text-xs font-medium text-zinc-500 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10">Hủy lịch</button>
               )}
             </div>
@@ -132,6 +184,7 @@ function Row({ c, now, defaultMeetingUrl }: { c: ConsultationListItem; now: numb
           )}
         </div>
       </div>
+      {paying && <PaymentDialog c={c} onClose={() => { setPaying(false); router.refresh(); }} />}
     </li>
   );
 }
@@ -152,7 +205,7 @@ export default function ConsultationList({ items, defaultMeetingUrl = '' }: { it
     );
   }
 
-  const sections: [Bucket, string][] = [['action', 'Cần bạn phản hồi'], ['upcoming', 'Sắp tới'], ['past', 'Đã qua & đã hủy']];
+  const sections: [Bucket, string][] = [['action', 'Cần bạn xử lý'], ['upcoming', 'Sắp tới'], ['past', 'Đã qua & đã hủy']];
   return (
     <div className="space-y-10">
       {sections.map(([key, title]) => groups[key].length > 0 && (

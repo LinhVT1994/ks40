@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Bell, FileText, MessageSquare, Heart, Zap, CheckCheck, X, CheckCircle2, AlertCircle, Lightbulb, CalendarClock, CalendarCheck, CalendarX } from 'lucide-react';
+import { Bell, FileText, MessageSquare, Heart, Zap, CheckCheck, X, CheckCircle2, AlertCircle, Lightbulb, CalendarClock, CalendarCheck, CalendarX, Wallet } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { formatDistanceToNow } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -24,6 +24,8 @@ const TYPE_CFG: Record<string, { icon: React.ElementType; color: string; bg: str
   CONSULTATION_CONFIRMED: { icon: CalendarCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
   CONSULTATION_DECLINED:  { icon: CalendarX,     color: 'text-rose-500',    bg: 'bg-rose-500/10'    },
   CONSULTATION_CANCELLED: { icon: CalendarX,     color: 'text-zinc-500',    bg: 'bg-zinc-500/10'    },
+  CONSULTATION_PAID:      { icon: Wallet,        color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
+  CONSULTATION_PAYMENT_REPORTED: { icon: Wallet, color: 'text-amber-500',   bg: 'bg-amber-500/10'   },
 };
 
 function timeAgo(date: Date | string) {

@@ -5,8 +5,11 @@ import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 import { ArrowLeft, CalendarCheck, CalendarClock, Clock, Loader2, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
-import { getAvailableSlotsAction, requestConsultationAction } from '../actions/consultation';
+import { getAvailableSlotsAction, requestConsultationAction, type PaymentInstructions } from '../actions/consultation';
+import { formatVnd } from '../lib/payment';
+import PaymentPanel from './PaymentPanel';
 import SlotPicker, { type PickerSlot } from './SlotPicker';
 
 type Props = {
@@ -14,6 +17,8 @@ type Props = {
   hostName: string;
   intro: string | null;
   durationMin: number;
+  /** VND per session; 0 = free. */
+  price: number;
 };
 
 const fmtLong = (iso: string, durationMin: number) => {
@@ -23,11 +28,16 @@ const fmtLong = (iso: string, durationMin: number) => {
   return `${start.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit' })} · ${t(start)}–${t(end)}`;
 };
 
-/** "Đặt lịch tư vấn" button + two-step dialog (pick a slot on the calendar → describe the question). */
-export default function BookConsultationButton({ hostId, hostName, intro, durationMin }: Props) {
+/**
+ * "Đặt lịch tư vấn" button + dialog: pick a slot → describe the question → (paid sessions) transfer
+ * instructions with the generated payment code.
+ */
+export default function BookConsultationButton({ hostId, hostName, intro, durationMin, price }: Props) {
+  const router = useRouter();
   const { data: session } = useSession();
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [booked, setBooked] = useState<{ id: string; payment: PaymentInstructions } | null>(null);
   const [slots, setSlots] = useState<PickerSlot[] | null>(null);
   const [picked, setPicked] = useState<string | null>(null);
   const [topic, setTopic] = useState('');
@@ -53,6 +63,7 @@ export default function BookConsultationButton({ hostId, hostName, intro, durati
     setOpen(true);
     setStep(1);
     setPicked(null);
+    setBooked(null);
     loadSlots();
   };
 
@@ -65,9 +76,14 @@ export default function BookConsultationButton({ hostId, hostName, intro, durati
         if (res.error.includes('không còn trống') || res.error.includes('vừa có người đặt')) { setPicked(null); setStep(1); loadSlots(); }
         return;
       }
+      setTopic('');
+      if (res.payment) {
+        setBooked({ id: res.id, payment: res.payment });
+        setStep(3);
+        return;
+      }
       toast.success(`Đã gửi yêu cầu tới ${hostName}. Bạn sẽ nhận thông báo khi tác giả phản hồi.`);
       setOpen(false);
-      setTopic('');
     });
   };
 
@@ -100,12 +116,20 @@ export default function BookConsultationButton({ hostId, hostName, intro, durati
             <div className="flex items-start justify-between gap-4 p-5 sm:p-6 pb-4 border-b border-zinc-200 dark:border-white/10">
               <div>
                 <h2 id="book-title" className="text-lg font-display font-semibold text-zinc-800 dark:text-white">Đặt lịch tư vấn với {hostName}</h2>
-                <p className="mt-1 text-xs text-zinc-500 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {durationLabel} phút · Miễn phí · Qua Google Meet/Zoom</p>
+                <p className="mt-1 text-xs text-zinc-500 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {durationLabel} phút · {price > 0 ? <strong className="text-zinc-700 dark:text-slate-200">{formatVnd(price)}/buổi</strong> : 'Miễn phí'} · Qua Google Meet/Zoom</p>
               </div>
               <button type="button" onClick={() => setOpen(false)} aria-label="Đóng" className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 dark:hover:bg-white/5"><X className="w-4 h-4" /></button>
             </div>
 
-            {step === 1 ? (
+            {step === 3 && booked ? (
+              <div className="p-5 sm:p-6 space-y-4">
+                <div className="flex items-center gap-2 rounded-2xl bg-primary/5 border border-primary/20 px-4 py-3 text-sm font-semibold text-zinc-800 dark:text-white">
+                  <CalendarCheck className="w-4 h-4 text-primary" /> {picked && fmtLong(picked, pickedDuration)}
+                </div>
+                <p className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Bước 3 · Chuyển khoản {formatVnd(booked.payment.amount)}</p>
+                <PaymentPanel consultationId={booked.id} payment={booked.payment} onReported={() => router.refresh()} />
+              </div>
+            ) : step === 1 ? (
               <div className="p-5 sm:p-6 space-y-5">
                 {intro && <p className="text-sm text-zinc-600 dark:text-slate-300 leading-relaxed border-l-2 border-primary/40 pl-3">{intro}</p>}
                 <div className="flex items-baseline justify-between gap-3">
@@ -137,16 +161,21 @@ export default function BookConsultationButton({ hostId, hostName, intro, durati
             )}
 
             <div className="flex items-center justify-between gap-3 px-5 sm:px-6 pb-5 sm:pb-6">
-              {step === 1 ? (
+              {step === 3 ? (
                 <>
-                  <p className="text-[11px] text-zinc-500 leading-relaxed">Tác giả sẽ xác nhận lịch. Link họp hiện sau khi được xác nhận.</p>
+                  <p className="text-[11px] text-zinc-500 leading-relaxed">Bạn có thể mở lại hướng dẫn này trong <Link href="/consultations" className="text-primary hover:underline">Lịch tư vấn</Link>.</p>
+                  <button type="button" onClick={() => setOpen(false)} className="ui-button ui-button-secondary shrink-0">Đóng</button>
+                </>
+              ) : step === 1 ? (
+                <>
+                  <p className="text-[11px] text-zinc-500 leading-relaxed">{price > 0 ? `Sau khi chọn giờ, bạn chuyển khoản ${formatVnd(price)} để giữ chỗ. Tác giả xác nhận sau khi nhận được tiền.` : 'Tác giả sẽ xác nhận lịch. Link họp hiện sau khi được xác nhận.'}</p>
                   <button type="button" onClick={() => setStep(2)} disabled={!picked} className="ui-button shrink-0 disabled:opacity-50 disabled:pointer-events-none">Tiếp tục</button>
                 </>
               ) : (
                 <>
                   <button type="button" onClick={() => setStep(1)} className="inline-flex items-center gap-1.5 text-xs font-semibold text-zinc-500 hover:text-zinc-800 dark:hover:text-white"><ArrowLeft className="w-3.5 h-3.5" /> Quay lại</button>
                   <button type="button" onClick={submit} disabled={topic.trim().length < 10 || isPending} className="ui-button shrink-0 disabled:opacity-50 disabled:pointer-events-none">
-                    {isPending && <Loader2 className="w-4 h-4 animate-spin" />} Gửi yêu cầu
+                    {isPending && <Loader2 className="w-4 h-4 animate-spin" />} {price > 0 ? 'Tiếp tục thanh toán' : 'Gửi yêu cầu'}
                   </button>
                 </>
               )}

@@ -5,7 +5,8 @@ import { formatDistanceToNow, format, isToday, isYesterday } from 'date-fns';
 import { vi } from 'date-fns/locale';
 import { 
   Bell, FileText, MessageSquare, Heart, Zap, CheckCheck, Star,
-  Send as SendIcon, CheckCircle2, AlertCircle, Loader2, ChevronDown, CalendarClock, CalendarCheck, CalendarX
+  Send as SendIcon, CheckCircle2, AlertCircle, Loader2, ChevronDown, CalendarClock, CalendarCheck, CalendarX,
+  Wallet,
 } from 'lucide-react';
 import type { Notification } from '@prisma/client';
 import {
@@ -28,6 +29,8 @@ const TYPE_CFG: Record<string, { icon: React.ElementType; color: string; bg: str
   CONSULTATION_CONFIRMED: { icon: CalendarCheck, color: 'text-emerald-500', bg: 'bg-emerald-500/10', label: 'Tư vấn' },
   CONSULTATION_DECLINED:  { icon: CalendarX,     color: 'text-rose-500',    bg: 'bg-rose-500/10',    label: 'Tư vấn' },
   CONSULTATION_CANCELLED: { icon: CalendarX,     color: 'text-zinc-500',    bg: 'bg-zinc-500/10',    label: 'Tư vấn' },
+  CONSULTATION_PAID:      { icon: Wallet,        color: 'text-emerald-500', bg: 'bg-emerald-500/10', label: 'Thanh toán' },
+  CONSULTATION_PAYMENT_REPORTED: { icon: Wallet, color: 'text-amber-500',   bg: 'bg-amber-500/10',   label: 'Thanh toán' },
 };
 
 function dateLabel(date: Date | string) {

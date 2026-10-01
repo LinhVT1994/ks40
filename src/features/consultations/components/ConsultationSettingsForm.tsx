@@ -36,21 +36,21 @@ function toStore(a: Availability): { weeklySlots: WeeklySlot[]; dateOverrides: D
   };
 }
 
-type Props = { initial: ConsultationSettingsInput | null; profileHref: string; bookedCells: Record<string, number[]> };
+type Props = { initial: ConsultationSettingsInput | null; profileHref: string; bookedCells: Record<string, number[]>; paymentReady: boolean };
 
 /**
  * Host availability planner: the calendar is the page. Creating time (pick on the calendar or
  * "Tạo lịch") opens a dialog with the session length and meeting link for that block; the settings
  * dialog only holds accept on/off, time zone and intro. Every confirmed change is saved immediately.
  */
-export default function ConsultationSettingsForm({ initial, profileHref, bookedCells }: Props) {
+export default function ConsultationSettingsForm({ initial, profileHref, bookedCells, paymentReady }: Props) {
   const router = useRouter();
   const browserZone = useMemo(() => Intl.DateTimeFormat().resolvedOptions().timeZone, []);
   const start = useMemo<ConsultationSettingsInput>(() => initial ?? {
-    enabled: false, intro: '', durationMin: 30, meetingUrl: '', timezone: browserZone, weeklySlots: [], dateOverrides: {},
+    enabled: false, intro: '', durationMin: 30, meetingUrl: '', timezone: browserZone, weeklySlots: [], dateOverrides: {}, price: 0,
   }, [initial, browserZone]);
 
-  const [general, setGeneral] = useState<GeneralSettings>({ enabled: start.enabled, timezone: start.timezone, intro: start.intro });
+  const [general, setGeneral] = useState<GeneralSettings>({ enabled: start.enabled, timezone: start.timezone, intro: start.intro, price: start.price });
   const [availability, setAvailability] = useState<Availability>(() => fromStore(start.weeklySlots, start.dateOverrides, start.durationMin));
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [isSaving, startTransition] = useTransition();
@@ -100,7 +100,7 @@ export default function ConsultationSettingsForm({ initial, profileHref, bookedC
             <p className="text-sm font-semibold text-zinc-800 dark:text-white">{general.enabled ? 'Đang nhận đặt lịch' : 'Chưa nhận đặt lịch'}</p>
             <p className="text-xs text-zinc-500 truncate">
               {general.enabled
-                ? <><strong className="text-primary">{upcoming}</strong> buổi có thể đặt trong 2 tuần tới · <Link href={profileHref} className="text-primary hover:underline inline-flex items-center gap-0.5">trang cá nhân <ExternalLink className="w-3 h-3" /></Link></>
+                ? <><strong className="text-primary">{upcoming}</strong> buổi có thể đặt trong 2 tuần tới · {general.price > 0 ? `${general.price.toLocaleString('vi-VN')}đ/buổi` : 'miễn phí'} · <Link href={profileHref} className="text-primary hover:underline inline-flex items-center gap-0.5">trang cá nhân <ExternalLink className="w-3 h-3" /></Link></>
                 : hasHours ? <>Bật “Cho phép nhận đặt lịch” trong <button type="button" onClick={() => setSettingsOpen(true)} className="text-primary hover:underline">Cài đặt</button>.</> : 'Thêm giờ rảnh trên lịch bên dưới, rồi bật nhận đặt lịch trong Cài đặt.'}
             </p>
           </div>
@@ -131,6 +131,7 @@ export default function ConsultationSettingsForm({ initial, profileHref, bookedC
           value={general}
           saving={isSaving}
           canEnable={enableBlocker}
+          paymentReady={paymentReady}
           onClose={() => setSettingsOpen(false)}
           onSave={g => {
             persist(g, availability, { message: g.enabled && !general.enabled ? 'Người đọc có thể đặt lịch với bạn' : 'Đã lưu cài đặt' });

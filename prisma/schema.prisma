@@ -560,6 +560,8 @@ enum NotificationType {
   CONSULTATION_CONFIRMED
   CONSULTATION_DECLINED
   CONSULTATION_CANCELLED
+  CONSULTATION_PAID
+  CONSULTATION_PAYMENT_REPORTED
 }
 
 enum ActivityType {
@@ -602,11 +604,15 @@ model ConsultationSettings {
   weeklySlots Json     @default("[]")
   /// { "YYYY-MM-DD": [{ start, end }] } in `timezone`; replaces the weekly pattern on that date ([] = day off).
   dateOverrides Json    @default("{}")
+  /// Price per session in VND; 0 = free (no transfer step).
+  price       Int      @default(0)
   updatedAt   DateTime @updatedAt
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
-/// Active bookings (PENDING/CONFIRMED) are unique per host+startAt via a partial index in the migration.
+/// Active bookings (AWAITING_PAYMENT/PENDING/CONFIRMED) are unique per host+startAt via a partial index in the migration.
+/// Paid flow: AWAITING_PAYMENT (slot held, guest transfers to the system account with `paymentCode`)
+/// → admin confirms the transfer (`paidAt`) → PENDING (host is asked) → CONFIRMED / DECLINED.
 model Consultation {
   id            String             @id @default(cuid())
   hostId        String
@@ -619,6 +625,15 @@ model Consultation {
   meetingUrl    String?
   declineReason String?
   cancelledById String?
+  /// VND snapshot of the host's price at booking time; 0 = free.
+  price         Int                @default(0)
+  /// Code the guest puts in the transfer message, e.g. "LN7K4Q9X".
+  paymentCode   String?            @unique
+  /// Guest pressed "I've transferred" (keeps the hold from expiring).
+  paymentReportedAt DateTime?
+  paidAt        DateTime?
+  paymentConfirmedById String?
+  refundedAt    DateTime?
   createdAt     DateTime           @default(now())
   updatedAt     DateTime           @updatedAt
   host          User               @relation("ConsultationHost", fields: [hostId], references: [id], onDelete: Cascade)
@@ -629,6 +644,7 @@ model Consultation {
 }
 
 enum ConsultationStatus {
+  AWAITING_PAYMENT
   PENDING
   CONFIRMED
   DECLINED
