@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { generateSlots, isBookableSlot, parseWeeklySlots, zonedTimeToUtc } from '@/features/consultations/lib/slots';
+import { generateSlotStates, generateSlots, isBookableSlot, parseWeeklySlots, zonedTimeToUtc } from '@/features/consultations/lib/slots';
 
 // Wed 2026-10-07 00:00 UTC
 const NOW = new Date('2026-10-07T00:00:00Z');
@@ -16,6 +16,11 @@ describe('zonedTimeToUtc', () => {
 });
 
 describe('parseWeeklySlots', () => {
+  it('accepts 24:00 as an end time but not as a start time', () => {
+    expect(parseWeeklySlots([{ day: 1, start: '23:30', end: '24:00' }]).ok).toBe(true);
+    expect(parseWeeklySlots([{ day: 1, start: '24:00', end: '24:00' }]).ok).toBe(false);
+    expect(parseWeeklySlots([{ day: 1, start: '23:00', end: '24:30' }]).ok).toBe(false);
+  });
   it('accepts valid windows', () => {
     expect(parseWeeklySlots([{ day: 4, start: '20:00', end: '22:00' }])).toEqual({ ok: true, slots: [{ day: 4, start: '20:00', end: '22:00' }] });
   });
@@ -38,6 +43,10 @@ describe('generateSlots', () => {
       '2026-10-15T13:00:00.000Z', '2026-10-15T13:30:00.000Z',
     ]);
   });
+  it('offers the last half hour of the day when the window ends at 24:00', () => {
+    const late = generateSlots({ ...base, weeklySlots: [{ day: 4, start: '23:30', end: '24:00' }] });
+    expect(late[0].toISOString()).toBe('2026-10-08T16:30:00.000Z'); // 23:30 in Ho Chi Minh
+  });
   it('drops slots that do not fully fit the window', () => {
     expect(generateSlots({ ...base, durationMin: 45 })).toHaveLength(2);
   });
@@ -59,3 +68,14 @@ describe('generateSlots', () => {
     expect(isBookableSlot(new Date('2026-10-08T13:10:00Z'), base)).toBe(false);
   });
 });
+
+describe('generateSlotStates', () => {
+  const base = { weeklySlots: [{ day: 4, start: '20:00', end: '21:00' }], timezone: 'Asia/Ho_Chi_Minh', durationMin: 30, now: NOW };
+  it('keeps busy slots but flags them as taken', () => {
+    const busy = [{ startAt: new Date('2026-10-08T13:00:00Z'), endAt: new Date('2026-10-08T13:30:00Z') }];
+    const states = generateSlotStates({ ...base, busy });
+    expect(states).toHaveLength(4);
+    expect(states.filter(s => s.taken).map(s => s.start.toISOString())).toEqual(['2026-10-08T13:00:00.000Z']);
+  });
+});
+

@@ -15,6 +15,8 @@ export const MAX_WEEKLY_WINDOWS = 28;
 export const WEEKDAY_LABELS = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'] as const;
 
 const HHMM = /^([01]\d|2[0-3]):([0-5]\d)$/;
+/** End times may also be "24:00" (end of day), so the last slot of the day is bookable. */
+const END_HHMM = /^(([01]\d|2[0-3]):([0-5]\d)|24:00)$/;
 
 export function toMinutes(hhmm: string) {
   const [h, m] = hhmm.split(':').map(Number);
@@ -38,7 +40,7 @@ export function parseWeeklySlots(input: unknown): { ok: true; slots: WeeklySlot[
   for (const raw of input) {
     const { day, start, end } = (raw ?? {}) as Record<string, unknown>;
     if (!Number.isInteger(day) || (day as number) < 0 || (day as number) > 6) return { ok: false, error: 'Ngày trong tuần không hợp lệ' };
-    if (typeof start !== 'string' || typeof end !== 'string' || !HHMM.test(start) || !HHMM.test(end)) return { ok: false, error: 'Giờ phải có dạng HH:MM' };
+    if (typeof start !== 'string' || typeof end !== 'string' || !HHMM.test(start) || !END_HHMM.test(end)) return { ok: false, error: 'Giờ phải có dạng HH:MM' };
     if (toMinutes(start) >= toMinutes(end)) return { ok: false, error: 'Giờ kết thúc phải sau giờ bắt đầu' };
     slots.push({ day: day as number, start, end });
   }
@@ -114,4 +116,18 @@ export function generateSlots(opts: {
 /** True if `startAt` is exactly one of the host's currently bookable slots. */
 export function isBookableSlot(startAt: Date, opts: Parameters<typeof generateSlots>[0]) {
   return generateSlots(opts).some(s => s.getTime() === startAt.getTime());
+}
+
+export type SlotState = { start: Date; taken: boolean };
+
+/**
+ * Every slot of the pattern in the booking window, flagged `taken` when it overlaps a busy range.
+ * Used to render a calendar where booked times stay visible (greyed) instead of disappearing.
+ */
+export function generateSlotStates(opts: Parameters<typeof generateSlots>[0]): SlotState[] {
+  const { busy = [], ...rest } = opts;
+  return generateSlots(rest).map(start => {
+    const end = start.getTime() + rest.durationMin * 60_000;
+    return { start, taken: overlaps(start.getTime(), end, busy) };
+  });
 }

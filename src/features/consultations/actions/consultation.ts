@@ -8,7 +8,7 @@ import { createNotificationAction } from '@/lib/notifications';
 import { sendConsultationEmail } from '@/lib/email';
 import { SITE_URL } from '@/lib/seo';
 import {
-  DURATION_OPTIONS, generateSlots, isBookableSlot, isValidTimeZone, parseWeeklySlots, type WeeklySlot,
+  DURATION_OPTIONS, generateSlotStates, isBookableSlot, isValidTimeZone, parseWeeklySlots, type WeeklySlot,
 } from '../lib/slots';
 
 const MAX_PENDING_PER_GUEST = 2;
@@ -128,8 +128,13 @@ export async function getPublicConsultationInfoAction(hostId: string) {
   return { intro: settings.intro, durationMin: settings.durationMin, timezone: settings.timezone };
 }
 
-/** Bookable UTC start times (ISO strings) for the next two weeks. */
-export async function getAvailableSlotsAction(hostId: string): Promise<string[]> {
+export type SlotOption = { start: string; taken: boolean };
+
+/**
+ * Slots for the next two weeks as ISO start times. Taken slots are included (flagged) so the
+ * booking calendar can show them greyed out; no details about who booked them are exposed.
+ */
+export async function getAvailableSlotsAction(hostId: string): Promise<SlotOption[]> {
   if (typeof hostId !== 'string' || !hostId) return [];
   const settings = await db.consultationSettings.findUnique({
     where: { userId: hostId },
@@ -138,7 +143,7 @@ export async function getAvailableSlotsAction(hostId: string): Promise<string[]>
   if (!settings?.enabled || settings.user.status !== 'ACTIVE' || !canHost(settings.user)) return [];
   const now = new Date();
   const busy = await hostBusyRanges(hostId, now);
-  return generateSlots({ ...readSettings(settings), now, busy }).map(d => d.toISOString());
+  return generateSlotStates({ ...readSettings(settings), now, busy }).map(s => ({ start: s.start.toISOString(), taken: s.taken }));
 }
 
 export async function requestConsultationAction(input: { hostId: string; startAt: string; topic: string }): Promise<Result<{ id: string }>> {
