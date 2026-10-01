@@ -600,8 +600,8 @@ model ConsultationSettings {
   timezone    String   @default("Asia/Ho_Chi_Minh")
   /// [{ day: 0-6 (Sun-Sat), start: "HH:MM", end: "HH:MM" }] in `timezone`.
   weeklySlots Json     @default("[]")
-  /// Calendar dates ("YYYY-MM-DD", in `timezone`) on which no slots are offered.
-  blockedDates String[] @default([])
+  /// { "YYYY-MM-DD": [{ start, end }] } in `timezone`; replaces the weekly pattern on that date ([] = day off).
+  dateOverrides Json    @default("{}")
   updatedAt   DateTime @updatedAt
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
@@ -615,6 +615,8 @@ model Consultation {
   endAt         DateTime
   topic         String
   status        ConsultationStatus @default(PENDING)
+  /// Meeting link for this booking (set when the host accepts; falls back to the host's default link).
+  meetingUrl    String?
   declineReason String?
   cancelledById String?
   createdAt     DateTime           @default(now())

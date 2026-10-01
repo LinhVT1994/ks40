@@ -37,7 +37,7 @@ export default function BookConsultationButton({ hostId, hostName, intro, durati
   const loadSlots = () => {
     setSlots(null);
     getAvailableSlotsAction(hostId)
-      .then(list => setSlots(list.map(s => ({ start: new Date(s.start), taken: s.taken }))))
+      .then(list => setSlots(list.map(s => ({ start: new Date(s.start), taken: s.taken, durationMin: s.durationMin }))))
       .catch(() => setSlots([]));
   };
 
@@ -82,6 +82,11 @@ export default function BookConsultationButton({ hostId, hostName, intro, durati
   }
 
   const freeCount = slots?.filter(s => !s.taken).length ?? 0;
+  const pickedSlot = slots?.find(s => s.start.toISOString() === picked);
+  const pickedDuration = pickedSlot?.durationMin ?? durationMin;
+  // Windows can have different session lengths; summarize as "30 phút" or "30–60 phút".
+  const durations = [...new Set((slots ?? []).map(s => s.durationMin ?? durationMin))].sort((a, b) => a - b);
+  const durationLabel = durations.length > 1 ? `${durations[0]}–${durations[durations.length - 1]}` : `${durations[0] ?? durationMin}`;
 
   return (
     <>
@@ -95,7 +100,7 @@ export default function BookConsultationButton({ hostId, hostName, intro, durati
             <div className="flex items-start justify-between gap-4 p-5 sm:p-6 pb-4 border-b border-zinc-200 dark:border-white/10">
               <div>
                 <h2 id="book-title" className="text-lg font-display font-semibold text-zinc-800 dark:text-white">Đặt lịch tư vấn với {hostName}</h2>
-                <p className="mt-1 text-xs text-zinc-500 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {durationMin} phút · Miễn phí · Qua Google Meet/Zoom</p>
+                <p className="mt-1 text-xs text-zinc-500 flex items-center gap-1.5"><Clock className="w-3.5 h-3.5" /> {durationLabel} phút · Miễn phí · Qua Google Meet/Zoom</p>
               </div>
               <button type="button" onClick={() => setOpen(false)} aria-label="Đóng" className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100 dark:hover:bg-white/5"><X className="w-4 h-4" /></button>
             </div>
@@ -118,7 +123,7 @@ export default function BookConsultationButton({ hostId, hostName, intro, durati
             ) : (
               <div className="p-5 sm:p-6 space-y-5">
                 <div className="flex items-center justify-between gap-3 rounded-2xl bg-primary/5 border border-primary/20 px-4 py-3">
-                  <span className="flex items-center gap-2 text-sm font-semibold text-zinc-800 dark:text-white"><CalendarCheck className="w-4 h-4 text-primary" /> {picked && fmtLong(picked, durationMin)}</span>
+                  <span className="flex items-center gap-2 text-sm font-semibold text-zinc-800 dark:text-white"><CalendarCheck className="w-4 h-4 text-primary" /> {picked && fmtLong(picked, pickedDuration)} <span className="font-normal text-zinc-500">· {pickedDuration} phút</span></span>
                   <button type="button" onClick={() => setStep(1)} className="text-xs font-semibold text-primary hover:underline shrink-0">Đổi giờ</button>
                 </div>
                 <div>

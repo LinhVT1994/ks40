@@ -35,7 +35,7 @@ export default async function ConsultationsPage({ searchParams }: { searchParams
   ];
 
   return (
-    <div className="max-w-[960px] mx-auto px-4 md:px-8 py-10 w-full animate-in fade-in duration-500">
+    <div className={cn('mx-auto px-4 md:px-8 py-10 w-full animate-in fade-in duration-500', activeTab === 'settings' ? 'max-w-[1280px]' : 'max-w-[960px]')}>
       <p className="ui-eyebrow mb-4">Trò chuyện 1:1</p>
       <h1 className="text-3xl font-display font-bold text-zinc-800 dark:text-white tracking-tight">Lịch tư vấn</h1>
       <p className="text-zinc-500 mt-2 text-sm leading-relaxed">
@@ -54,9 +54,9 @@ export default async function ConsultationsPage({ searchParams }: { searchParams
       </nav>
 
       {activeTab === 'settings' ? (
-        <ConsultationSettingsForm initial={mine?.settings ?? null} bookedDates={mine?.bookedDates ?? []} profileHref={`/@${session.user.username || session.user.id}`} />
+        <ConsultationSettingsForm initial={mine?.settings ?? null} bookedCells={mine?.bookedCells ?? {}} profileHref={`/@${session.user.username || session.user.id}`} />
       ) : (
-        <ConsultationList items={items} />
+        <ConsultationList items={items} defaultMeetingUrl={mine?.settings?.meetingUrl ?? ''} />
       )}
     </div>
   );

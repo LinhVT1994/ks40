@@ -8,7 +8,7 @@ import { createNotificationAction } from '@/lib/notifications';
 import { sendConsultationEmail } from '@/lib/email';
 import { SITE_URL } from '@/lib/seo';
 import {
-  DURATION_OPTIONS, dateKeyInZone, generateSlotStates, isBookableSlot, isValidTimeZone, parseBlockedDates, parseWeeklySlots, type WeeklySlot,
+  DURATION_OPTIONS, dateKeyInZone, findBookableSlot, generateSlotStates, minutesInZone, isValidTimeZone, parseDateOverrides, parseWeeklySlots, type DateOverrides, type WeeklySlot,
 } from '../lib/slots';
 
 const MAX_PENDING_PER_GUEST = 2;
@@ -28,6 +28,18 @@ async function currentUser() {
   });
 }
 
+/** Trimmed https URL, '' for empty, or null when invalid. */
+function normalizeMeetingUrl(raw: string | undefined | null): string | null {
+  const value = (raw ?? '').trim();
+  if (!value) return '';
+  if (value.length > 500) return null;
+  try {
+    return new URL(value).protocol === 'https:' ? value : null;
+  } catch {
+    return null;
+  }
+}
+
 const canHost = (u: { role: string; canWrite: boolean } | null) => !!u && (u.role === 'ADMIN' || u.canWrite);
 
 function formatInZone(date: Date, tz: string) {
@@ -37,15 +49,15 @@ function formatInZone(date: Date, tz: string) {
   return `${text} (${tz})`;
 }
 
-function readSettings(raw: { weeklySlots: Prisma.JsonValue; timezone: string; durationMin: number; blockedDates: string[] }) {
+function readSettings(raw: { weeklySlots: Prisma.JsonValue; dateOverrides: Prisma.JsonValue; timezone: string; durationMin: number }) {
   const parsed = parseWeeklySlots(raw.weeklySlots);
-  return { weeklySlots: parsed.ok ? parsed.slots : [], timezone: raw.timezone, durationMin: raw.durationMin, blockedDates: raw.blockedDates };
+  return { weeklySlots: parsed.ok ? parsed.slots : [], overrides: upcomingOverrides(raw.dateOverrides, raw.timezone), timezone: raw.timezone, durationMin: raw.durationMin };
 }
 
-/** Stored blocked dates minus those already in the past (host zone). */
-function upcomingBlockedDates(dates: string[], tz: string) {
-  const parsed = parseBlockedDates(dates, dateKeyInZone(new Date(), tz));
-  return parsed.ok ? parsed.dates : [];
+/** Stored per-date overrides minus those already in the past (host zone). */
+function upcomingOverrides(raw: Prisma.JsonValue, tz: string): DateOverrides {
+  const parsed = parseDateOverrides(raw ?? {}, dateKeyInZone(new Date(), tz));
+  return parsed.ok ? parsed.overrides : {};
 }
 
 async function hostBusyRanges(hostId: string, from: Date) {
@@ -64,21 +76,32 @@ export type ConsultationSettingsInput = {
   meetingUrl: string;
   timezone: string;
   weeklySlots: WeeklySlot[];
-  blockedDates: string[];
+  dateOverrides: DateOverrides;
 };
 
 export async function getMyConsultationSettingsAction() {
   const user = await currentUser();
   if (!user) return null;
   const settings = await db.consultationSettings.findUnique({ where: { userId: user.id } });
-  // Upcoming active bookings, as host-zone dates, so the form can warn about blocking a booked day.
+  // Upcoming active bookings as host-zone { date: [30-min cells] }, so the calendar can show which slots are taken.
   const upcoming = settings ? await db.consultation.findMany({
-    where: { hostId: user.id, status: { in: ACTIVE }, startAt: { gt: new Date() } },
-    select: { startAt: true },
+    where: { hostId: user.id, status: { in: ACTIVE }, endAt: { gt: new Date() } },
+    select: { startAt: true, endAt: true },
   }) : [];
+  const bookedCells: Record<string, number[]> = {};
+  for (const c of upcoming) {
+    const tz = settings!.timezone;
+    for (let t = c.startAt.getTime(); t < c.endAt.getTime(); t += 30 * 60_000) {
+      const at = new Date(t);
+      const key = dateKeyInZone(at, tz);
+      const minute = Math.floor(minutesInZone(at, tz) / 30) * 30;
+      const cells = (bookedCells[key] ??= []);
+      if (!cells.includes(minute)) cells.push(minute);
+    }
+  }
   return {
     canHost: canHost(user),
-    bookedDates: [...new Set(upcoming.map(c => dateKeyInZone(c.startAt, settings!.timezone)))],
+    bookedCells,
     settings: settings && {
       enabled: settings.enabled,
       intro: settings.intro ?? '',
@@ -86,7 +109,7 @@ export async function getMyConsultationSettingsAction() {
       meetingUrl: settings.meetingUrl ?? '',
       timezone: settings.timezone,
       weeklySlots: readSettings(settings).weeklySlots,
-      blockedDates: upcomingBlockedDates(settings.blockedDates, settings.timezone),
+      dateOverrides: upcomingOverrides(settings.dateOverrides, settings.timezone),
     },
   };
 }
@@ -103,20 +126,17 @@ export async function saveConsultationSettingsAction(input: ConsultationSettings
 
   const slots = parseWeeklySlots(input.weeklySlots);
   if (!slots.ok) return { success: false, error: slots.error };
-  const blocked = parseBlockedDates(input.blockedDates ?? [], dateKeyInZone(new Date(), input.timezone));
-  if (!blocked.ok) return { success: false, error: blocked.error };
+  const overrides = parseDateOverrides(input.dateOverrides ?? {}, dateKeyInZone(new Date(), input.timezone));
+  if (!overrides.ok) return { success: false, error: overrides.error };
+  // Drop repeating windows whose period has already ended.
+  const today = dateKeyInZone(new Date(), input.timezone);
+  slots.slots = slots.slots.filter(w => !w.until || w.until >= today);
 
-  const meetingUrl = (input.meetingUrl ?? '').trim();
-  if (meetingUrl) {
-    try {
-      const url = new URL(meetingUrl);
-      if (url.protocol !== 'https:') throw new Error();
-    } catch {
-      return { success: false, error: 'Link họp phải là đường dẫn https:// hợp lệ' };
-    }
-  }
-  if (input.enabled && !meetingUrl) return { success: false, error: 'Cần có link Meet/Zoom để bật nhận tư vấn' };
-  if (input.enabled && slots.slots.length === 0) return { success: false, error: 'Cần ít nhất một khung giờ rảnh để bật nhận tư vấn' };
+  // Default link is optional: hosts who use a fresh link per session add it when accepting.
+  const meetingUrl = normalizeMeetingUrl(input.meetingUrl);
+  if (meetingUrl === null) return { success: false, error: 'Link họp phải là đường dẫn https:// hợp lệ' };
+  const anyDateHours = overrides.ok && Object.values(overrides.overrides).some(w => w.length > 0);
+  if (input.enabled && slots.slots.length === 0 && !anyDateHours) return { success: false, error: 'Cần ít nhất một khung giờ rảnh để bật nhận tư vấn' };
 
   const data = {
     enabled: !!input.enabled,
@@ -125,7 +145,7 @@ export async function saveConsultationSettingsAction(input: ConsultationSettings
     meetingUrl: meetingUrl || null,
     timezone: input.timezone,
     weeklySlots: slots.slots as unknown as Prisma.InputJsonValue,
-    blockedDates: blocked.dates,
+    dateOverrides: overrides.overrides as unknown as Prisma.InputJsonValue,
   };
   await db.consultationSettings.upsert({ where: { userId: user.id }, update: data, create: { userId: user.id, ...data } });
   revalidatePath('/consultations');
@@ -145,7 +165,7 @@ export async function getPublicConsultationInfoAction(hostId: string) {
   return { intro: settings.intro, durationMin: settings.durationMin, timezone: settings.timezone };
 }
 
-export type SlotOption = { start: string; taken: boolean };
+export type SlotOption = { start: string; taken: boolean; durationMin: number };
 
 /**
  * Slots for the next two weeks as ISO start times. Taken slots are included (flagged) so the
@@ -160,7 +180,7 @@ export async function getAvailableSlotsAction(hostId: string): Promise<SlotOptio
   if (!settings?.enabled || settings.user.status !== 'ACTIVE' || !canHost(settings.user)) return [];
   const now = new Date();
   const busy = await hostBusyRanges(hostId, now);
-  return generateSlotStates({ ...readSettings(settings), now, busy }).map(s => ({ start: s.start.toISOString(), taken: s.taken }));
+  return generateSlotStates({ ...readSettings(settings), now, busy }).map(s => ({ start: s.start.toISOString(), taken: s.taken, durationMin: s.durationMin }));
 }
 
 export async function requestConsultationAction(input: { hostId: string; startAt: string; topic: string }): Promise<Result<{ id: string }>> {
@@ -188,12 +208,14 @@ export async function requestConsultationAction(input: { hostId: string; startAt
   const now = new Date();
   const busy = await hostBusyRanges(host.id, now);
   const cfg = readSettings(settings);
-  if (!isBookableSlot(startAt, { ...cfg, now, busy })) return { success: false, error: 'Khung giờ này không còn trống. Hãy chọn giờ khác.' };
+  const slot = findBookableSlot(startAt, { ...cfg, now, busy });
+  if (!slot) return { success: false, error: 'Khung giờ này không còn trống. Hãy chọn giờ khác.' };
 
   let id: string;
   try {
     const created = await db.consultation.create({
-      data: { hostId: host.id, guestId: guest.id, startAt, endAt: new Date(startAt.getTime() + cfg.durationMin * 60_000), topic },
+      // The window's link is kept for the host's accept form; guests only see it once confirmed.
+      data: { hostId: host.id, guestId: guest.id, startAt, endAt: new Date(startAt.getTime() + slot.durationMin * 60_000), topic, meetingUrl: slot.meetingUrl ?? null },
       select: { id: true },
     });
     id = created.id;
@@ -227,13 +249,17 @@ async function loadForParticipant(id: string) {
   return db.consultation.findUnique({
     where: { id },
     include: {
-      host: { select: { id: true, name: true, email: true, consultationSettings: { select: { timezone: true } } } },
+      host: { select: { id: true, name: true, email: true, consultationSettings: { select: { timezone: true, meetingUrl: true } } } },
       guest: { select: { id: true, name: true, email: true } },
     },
   });
 }
 
-export async function respondConsultationAction(id: string, decision: 'accept' | 'decline', reason?: string): Promise<Result> {
+/**
+ * Accept or decline a pending request. On accept, `meetingUrl` is this session's link; when empty the
+ * host's default link is used, and one of the two is required.
+ */
+export async function respondConsultationAction(id: string, decision: 'accept' | 'decline', reason?: string, meetingUrl?: string): Promise<Result> {
   const user = await currentUser();
   if (!user) return { success: false, error: 'Bạn cần đăng nhập' };
   const c = await loadForParticipant(id);
@@ -241,11 +267,19 @@ export async function respondConsultationAction(id: string, decision: 'accept' |
   if (c.status !== 'PENDING') return { success: false, error: 'Lịch hẹn này đã được xử lý' };
   if (decision === 'accept' && c.startAt <= new Date()) return { success: false, error: 'Đã quá giờ hẹn, không thể chấp nhận' };
 
+  let link: string | null = null;
+  if (decision === 'accept') {
+    const given = normalizeMeetingUrl(meetingUrl);
+    if (given === null) return { success: false, error: 'Link họp phải là đường dẫn https:// hợp lệ' };
+    link = given || c.meetingUrl || c.host.consultationSettings?.meetingUrl || null;
+    if (!link) return { success: false, error: 'Hãy nhập link Meet/Zoom cho buổi này' };
+  }
+
   const declineReason = decision === 'decline' ? (reason ?? '').trim().slice(0, 300) || null : null;
   // Guard against double-processing with a conditional update.
   const updated = await db.consultation.updateMany({
     where: { id, status: 'PENDING' },
-    data: decision === 'accept' ? { status: 'CONFIRMED' } : { status: 'DECLINED', declineReason },
+    data: decision === 'accept' ? { status: 'CONFIRMED', meetingUrl: link } : { status: 'DECLINED', declineReason },
   });
   if (updated.count === 0) return { success: false, error: 'Lịch hẹn này đã được xử lý' };
 
@@ -254,7 +288,7 @@ export async function respondConsultationAction(id: string, decision: 'accept' |
     void createNotificationAction(c.guestId, 'CONSULTATION_CONFIRMED', `${c.host.name} đã xác nhận lịch tư vấn`, { message: when, link: '/consultations' });
     if (c.guest.email) void sendConsultationEmail({
       to: c.guest.email, subject: `Lịch tư vấn với ${c.host.name} đã được xác nhận`, heading: 'Lịch tư vấn đã được xác nhận 🎉',
-      lines: [`${c.host.name} đã xác nhận buổi trò chuyện vào ${when}.`, 'Link họp và file lịch (.ics) có trong trang Lịch hẹn của bạn.'],
+      lines: [`${c.host.name} đã xác nhận buổi trò chuyện vào ${when}.`, `Link họp: ${link}`, 'File lịch (.ics) có trong trang Lịch hẹn của bạn.'],
       ctaUrl: `${SITE_URL}/consultations`, ctaLabel: 'Xem lịch hẹn',
     });
   } else {
@@ -265,6 +299,31 @@ export async function respondConsultationAction(id: string, decision: 'accept' |
       ctaUrl: `${SITE_URL}/consultations`, ctaLabel: 'Xem lịch hẹn',
     });
   }
+  revalidatePath('/consultations');
+  return { success: true };
+}
+
+/** Host changes the meeting link of a confirmed, upcoming booking; the guest is notified. */
+export async function updateConsultationLinkAction(id: string, meetingUrl: string): Promise<Result> {
+  const user = await currentUser();
+  if (!user) return { success: false, error: 'Bạn cần đăng nhập' };
+  const link = normalizeMeetingUrl(meetingUrl);
+  if (!link) return { success: false, error: 'Link họp phải là đường dẫn https:// hợp lệ' };
+  const c = await loadForParticipant(id);
+  if (!c || c.hostId !== user.id) return { success: false, error: 'Không tìm thấy lịch hẹn' };
+  if (c.status !== 'CONFIRMED' || c.endAt <= new Date()) return { success: false, error: 'Chỉ sửa được link của lịch đã xác nhận và chưa diễn ra' };
+  if (link === c.meetingUrl) return { success: true };
+
+  const updated = await db.consultation.updateMany({ where: { id, status: 'CONFIRMED' }, data: { meetingUrl: link } });
+  if (updated.count === 0) return { success: false, error: 'Lịch hẹn này đã thay đổi, hãy tải lại trang' };
+
+  const when = formatInZone(c.startAt, c.host.consultationSettings?.timezone ?? 'Asia/Ho_Chi_Minh');
+  void createNotificationAction(c.guestId, 'CONSULTATION_CONFIRMED', `${c.host.name} đã cập nhật link họp`, { message: when, link: '/consultations' });
+  if (c.guest.email) void sendConsultationEmail({
+    to: c.guest.email, subject: `Link họp mới cho buổi tư vấn với ${c.host.name}`, heading: 'Link họp đã được cập nhật',
+    lines: [`Buổi trò chuyện vào ${when} có link họp mới:`, link],
+    ctaUrl: `${SITE_URL}/consultations`, ctaLabel: 'Xem lịch hẹn',
+  });
   revalidatePath('/consultations');
   return { success: true };
 }
@@ -305,6 +364,8 @@ export type ConsultationListItem = {
   cancelledByMe: boolean;
   /** Only revealed to both parties once confirmed. */
   meetingUrl: string | null;
+  /** Host-only: link to prefill when accepting a pending request (from the booked window or the default). */
+  suggestedMeetingUrl: string | null;
   other: { id: string; name: string; username: string | null; image: string | null };
 };
 
@@ -333,7 +394,9 @@ export async function getMyConsultationsAction(): Promise<ConsultationListItem[]
       status: r.status,
       declineReason: r.declineReason,
       cancelledByMe: r.cancelledById === user.id,
-      meetingUrl: r.status === 'CONFIRMED' ? r.host.consultationSettings?.meetingUrl ?? null : null,
+      // Per-booking link; older bookings fall back to the host's default.
+      meetingUrl: r.status === 'CONFIRMED' ? r.meetingUrl ?? r.host.consultationSettings?.meetingUrl ?? null : null,
+      suggestedMeetingUrl: role === 'host' && r.status === 'PENDING' ? r.meetingUrl ?? r.host.consultationSettings?.meetingUrl ?? null : null,
       other: { id: other.id, name: other.name, username: other.username, image: other.image },
     };
   });

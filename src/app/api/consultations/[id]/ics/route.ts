@@ -26,7 +26,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
   });
   if (!c || (c.hostId !== userId && c.guestId !== userId) || c.status !== 'CONFIRMED') return new Response(null, { status: 404 });
 
-  const meetingUrl = c.host.consultationSettings?.meetingUrl ?? '';
+  const meetingUrl = c.meetingUrl ?? c.host.consultationSettings?.meetingUrl ?? '';
   const ics = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',

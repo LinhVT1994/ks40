@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-export type PickerSlot = { start: Date; taken: boolean };
+export type PickerSlot = { start: Date; taken: boolean; durationMin?: number };
 
 type Props = {
   slots: PickerSlot[];

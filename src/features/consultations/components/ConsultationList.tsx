@@ -3,10 +3,10 @@
 import { useState, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { CalendarDays, CalendarPlus, Check, Loader2, Video, X } from 'lucide-react';
+import { CalendarDays, CalendarPlus, Check, Link2, Loader2, Pencil, Video, X } from 'lucide-react';
 import { toast } from 'sonner';
 import Avatar from '@/components/shared/Avatar';
-import { cancelConsultationAction, respondConsultationAction, type ConsultationListItem } from '../actions/consultation';
+import { cancelConsultationAction, respondConsultationAction, updateConsultationLinkAction, type ConsultationListItem } from '../actions/consultation';
 import { cn } from '@/lib/utils';
 
 const fmtWhen = (iso: string, endIso: string) => {
@@ -37,11 +37,12 @@ function StatusBadge({ c, now }: { c: ConsultationListItem; now: number }) {
   return <span className={cn('text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-md', cls)}>{label}</span>;
 }
 
-function Row({ c, now }: { c: ConsultationListItem; now: number }) {
+function Row({ c, now, defaultMeetingUrl }: { c: ConsultationListItem; now: number; defaultMeetingUrl: string }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [declining, setDeclining] = useState(false);
+  const [mode, setMode] = useState<'idle' | 'accept' | 'decline' | 'edit-link'>('idle');
   const [reason, setReason] = useState('');
+  const [link, setLink] = useState('');
   const upcoming = new Date(c.startAt).getTime() > now;
   const profileHref = `/@${c.other.username || c.other.id}`;
 
@@ -49,7 +50,7 @@ function Row({ c, now }: { c: ConsultationListItem; now: number }) {
     const res = await fn();
     if (!res.success) { toast.error(res.error ?? 'Đã có lỗi xảy ra'); return; }
     toast.success(ok);
-    setDeclining(false);
+    setMode('idle');
     router.refresh();
   });
 
@@ -75,12 +76,16 @@ function Row({ c, now }: { c: ConsultationListItem; now: number }) {
               {c.status === 'CONFIRMED' && (
                 <a href={`/api/consultations/${c.id}/ics`} className="ui-button ui-button-secondary !py-2 !px-3.5 !text-xs"><CalendarPlus className="w-3.5 h-3.5" /> Thêm vào lịch</a>
               )}
-              {c.status === 'PENDING' && c.role === 'host' && !declining && (
+              {c.status === 'CONFIRMED' && c.role === 'host' && mode === 'idle' && (
+                <button type="button" onClick={() => { setLink(c.meetingUrl ?? ''); setMode('edit-link'); }}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium text-zinc-600 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-white/5"><Pencil className="w-3.5 h-3.5" /> Sửa link</button>
+              )}
+              {c.status === 'PENDING' && c.role === 'host' && mode === 'idle' && (
                 <>
-                  <button type="button" disabled={isPending} onClick={() => run(() => respondConsultationAction(c.id, 'accept'), 'Đã xác nhận lịch hẹn')} className="ui-button !py-2 !px-3.5 !text-xs">
-                    {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} Chấp nhận
+                  <button type="button" disabled={isPending} onClick={() => { setLink(c.suggestedMeetingUrl ?? defaultMeetingUrl); setMode('accept'); }} className="ui-button !py-2 !px-3.5 !text-xs">
+                    <Check className="w-3.5 h-3.5" /> Chấp nhận
                   </button>
-                  <button type="button" disabled={isPending} onClick={() => setDeclining(true)} className="ui-button ui-button-secondary !py-2 !px-3.5 !text-xs"><X className="w-3.5 h-3.5" /> Từ chối</button>
+                  <button type="button" disabled={isPending} onClick={() => setMode('decline')} className="ui-button ui-button-secondary !py-2 !px-3.5 !text-xs"><X className="w-3.5 h-3.5" /> Từ chối</button>
                 </>
               )}
               {(c.status === 'CONFIRMED' || (c.status === 'PENDING' && c.role === 'guest')) && (
@@ -91,14 +96,37 @@ function Row({ c, now }: { c: ConsultationListItem; now: number }) {
             </div>
           )}
 
-          {declining && (
+          {(mode === 'accept' || mode === 'edit-link') && (
+            <div className="mt-4 rounded-2xl border border-primary/20 bg-primary/[0.04] p-3 space-y-2">
+              <label htmlFor={`link-${c.id}`} className="text-xs font-semibold text-zinc-700 dark:text-slate-200">Link họp cho buổi này</label>
+              <div className="relative">
+                <Link2 className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input id={`link-${c.id}`} type="url" inputMode="url" value={link} onChange={e => setLink(e.target.value)} autoFocus
+                  placeholder="https://meet.google.com/… hoặc https://zoom.us/j/…"
+                  className="w-full bg-white dark:bg-black/20 border border-zinc-300 dark:border-white/10 rounded-xl pl-9 pr-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40" />
+              </div>
+              <p className="text-[11px] text-zinc-500">{mode === 'accept' ? ((c.suggestedMeetingUrl ?? defaultMeetingUrl) ? 'Đã điền sẵn link của khung giờ này — thay bằng link mới nếu muốn.' : 'Tạo một phòng Meet/Zoom rồi dán link vào đây.') : 'Người đặt sẽ nhận thông báo về link mới.'}</p>
+              <div className="flex gap-2">
+                <button type="button" disabled={isPending || !link.trim()}
+                  onClick={() => mode === 'accept'
+                    ? run(() => respondConsultationAction(c.id, 'accept', undefined, link), 'Đã xác nhận lịch hẹn')
+                    : run(() => updateConsultationLinkAction(c.id, link), 'Đã cập nhật link họp')}
+                  className="ui-button !py-2 !px-3.5 !text-xs disabled:opacity-50">
+                  {isPending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />} {mode === 'accept' ? 'Xác nhận lịch' : 'Lưu link'}
+                </button>
+                <button type="button" onClick={() => setMode('idle')} className="px-3 py-2 text-xs text-zinc-500">Thôi</button>
+              </div>
+            </div>
+          )}
+
+          {mode === 'decline' && (
             <div className="mt-4 space-y-2">
               <input value={reason} onChange={e => setReason(e.target.value)} maxLength={300} autoFocus
                 placeholder="Lời nhắn (không bắt buộc), ví dụ: tuần này mình bận, bạn chọn tuần sau nhé"
                 className="w-full bg-zinc-50 dark:bg-black/20 border border-zinc-300 dark:border-white/10 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/40" />
               <div className="flex gap-2">
                 <button type="button" disabled={isPending} onClick={() => run(() => respondConsultationAction(c.id, 'decline', reason), 'Đã từ chối lịch hẹn')} className="ui-button !py-2 !px-3.5 !text-xs">Gửi từ chối</button>
-                <button type="button" onClick={() => setDeclining(false)} className="px-3 py-2 text-xs text-zinc-500">Thôi</button>
+                <button type="button" onClick={() => setMode('idle')} className="px-3 py-2 text-xs text-zinc-500">Thôi</button>
               </div>
             </div>
           )}
@@ -108,7 +136,7 @@ function Row({ c, now }: { c: ConsultationListItem; now: number }) {
   );
 }
 
-export default function ConsultationList({ items }: { items: ConsultationListItem[] }) {
+export default function ConsultationList({ items, defaultMeetingUrl = '' }: { items: ConsultationListItem[]; defaultMeetingUrl?: string }) {
   const [now] = useState(() => Date.now());
   const groups: Record<Bucket, ConsultationListItem[]> = { action: [], upcoming: [], past: [] };
   for (const c of items) groups[bucketOf(c, now)].push(c);
@@ -130,7 +158,7 @@ export default function ConsultationList({ items }: { items: ConsultationListIte
       {sections.map(([key, title]) => groups[key].length > 0 && (
         <section key={key}>
           <h2 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-4">{title} <span className="text-primary">({groups[key].length})</span></h2>
-          <ul className="space-y-3">{groups[key].map(c => <Row key={c.id} c={c} now={now} />)}</ul>
+          <ul className="space-y-3">{groups[key].map(c => <Row key={c.id} c={c} now={now} defaultMeetingUrl={defaultMeetingUrl} />)}</ul>
         </section>
       ))}
     </div>
