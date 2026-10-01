@@ -817,164 +817,82 @@ blockquote:hover div:last-child::after {
 .syntax-highlighter .token.important,
 .syntax-highlighter .token.variable { color: var(--sh-accent2) !important; }
 
-/* ─── Premium Zen Toast (Glass / Luminous / Minimalist) ───────────── */
-@keyframes toast-enter {
-  from { opacity: 0; transform: translateY(-16px) scale(0.95); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@keyframes toast-pulse-soft {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50%      { transform: scale(1.08); opacity: 0.8; }
-}
-
+/* ─── Toasts (sonner) ────────────────────────────────────────────────
+   Compact, warm cards. Only paint is overridden: sonner owns position,
+   stacking transforms and enter/exit animation. */
 [data-sonner-toaster] {
-  --toast-radius: 12px;
-  --toast-pad-y: 16px;
-  --toast-pad-x: 20px;
-}
-
-[data-sonner-toast] {
-  position: relative !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 14px !important;
-  min-width: min(340px, calc(100vw - 32px)) !important;
-  max-width: min(440px, calc(100vw - 32px)) !important;
-  border-radius: var(--toast-radius) !important;
-  padding: var(--toast-pad-y) var(--toast-pad-x) !important;
-  
-  /* Solid Premium Base */
-  background: var(--ui-panel) !important;
-  
-  border: 1px solid rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.05),
-    0 10px 15px -3px rgba(0, 0, 0, 0.03),
-    0 0 0 1px rgba(0, 0, 0, 0.02) !important;
-  
-  color: #1a1a1a !important;
+  --width: min(420px, calc(100vw - 32px));
+  --border-radius: 14px;
   font-family: var(--font-sans) !important;
-  animation: toast-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1) !important;
-  overflow: hidden;
 }
 
-[data-sonner-toast]:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 
-    0 12px 24px -8px rgba(0, 0, 0, 0.08),
-    0 24px 48px -12px rgba(0, 0, 0, 0.12),
-    0 0 0 1px rgba(0, 0, 0, 0.04) !important;
+[data-sonner-toaster] [data-sonner-toast][data-styled] {
+  gap: 12px;
+  padding: 15px 14px 15px 18px;
+  border-radius: 14px;
+  background: var(--ui-panel);
+  border: 1px solid var(--ui-card-line, rgba(60, 40, 20, 0.12));
+  color: #2a2622;
+  box-shadow: 0 1px 2px rgba(60, 40, 20, 0.06), 0 10px 28px -12px rgba(60, 40, 20, 0.22);
+  font-size: 13.5px;
 }
 
-/* Icon Container Refinement */
-[data-sonner-toast] [data-icon] {
-  flex-shrink: 0 !important;
-  width: 24px !important;
-  height: 24px !important;
-  display: inline-flex !important;
-  align-items: center;
-  justify-content: center;
-  border-radius: 8px;
-  background: rgba(var(--icon-rgb), 0.08);
-  color: rgb(var(--icon-rgb)) !important;
-  padding: 4px;
+[data-sonner-toaster] [data-sonner-toast] [data-icon] {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  color: rgb(var(--icon-rgb, 120, 113, 108));
 }
+[data-sonner-toaster] [data-sonner-toast] [data-icon] svg { width: 20px; height: 20px; }
 
-[data-sonner-toast] [data-content] {
-  flex: 1;
-  min-width: 0;
+[data-sonner-toaster] [data-sonner-toast] [data-title] {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #2a2622;
 }
-
-/* Typography */
-[data-sonner-toast] [data-title] {
-  font-size: 14px !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.02em;
-  line-height: 1.4;
-  color: #111827 !important;
-}
-
-[data-sonner-toast] [data-description] {
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  color: #4b5563 !important;
+[data-sonner-toaster] [data-sonner-toast] [data-description] {
+  font-size: 12.5px;
   line-height: 1.5;
+  color: #78716c;
   margin-top: 2px;
 }
 
-/* ── Success ── */
-[data-sonner-toast][data-type='success'] {
-  --icon-rgb: 16, 185, 129; /* Emerald 500 */
-  border-color: rgba(16, 185, 129, 0.25) !important;
+/* Action ("Hoàn tác") — a quiet text button, not sonner's black pill */
+[data-sonner-toaster] [data-sonner-toast] [data-button][data-action] {
+  height: 32px;
+  margin-left: auto;
+  padding: 0 12px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-brand);
+  font-size: 13px;
+  font-weight: 600;
+  transition: background-color 0.15s;
 }
-[data-sonner-toast][data-type='success']:hover {
-  box-shadow: 0 12px 30px -10px rgba(16, 185, 129, 0.15), 0 0 0 1px rgba(16, 185, 129, 0.12) !important;
-}
-
-/* ── Error ── */
-[data-sonner-toast][data-type='error'] {
-  --icon-rgb: 239, 68, 68; /* Red 500 */
-  border-color: rgba(239, 68, 68, 0.25) !important;
-}
-[data-sonner-toast][data-type='error']:hover {
-  box-shadow: 0 12px 30px -10px rgba(239, 68, 68, 0.15), 0 0 0 1px rgba(239, 68, 68, 0.12) !important;
-}
-
-/* ── Info ── */
-[data-sonner-toast][data-type='info'] {
-  --icon-rgb: 59, 130, 246; /* Blue 500 */
-  border-color: rgba(59, 130, 246, 0.25) !important;
-}
-[data-sonner-toast][data-type='info']:hover {
-  box-shadow: 0 12px 30px -10px rgba(59, 130, 246, 0.15), 0 0 0 1px rgba(59, 130, 246, 0.12) !important;
+[data-sonner-toaster] [data-sonner-toast] [data-button][data-action]:hover { background: color-mix(in srgb, var(--color-brand) 10%, transparent); }
+[data-sonner-toaster] [data-sonner-toast] [data-button][data-cancel] {
+  height: 32px; padding: 0 12px; border-radius: 8px;
+  background: transparent; color: #78716c; font-size: 12.5px; font-weight: 500;
 }
 
-/* ── Warning ── */
-[data-sonner-toast][data-type='warning'] {
-  --icon-rgb: 245, 158, 11; /* Amber 500 */
-  border-color: rgba(245, 158, 11, 0.25) !important;
-}
-[data-sonner-toast][data-type='warning']:hover {
-  box-shadow: 0 12px 30px -10px rgba(245, 158, 11, 0.15), 0 0 0 1px rgba(245, 158, 11, 0.12) !important;
-}
+[data-sonner-toaster] [data-sonner-toast][data-type='success'] { --icon-rgb: 16, 150, 105; }
+[data-sonner-toaster] [data-sonner-toast][data-type='error']   { --icon-rgb: 220, 55, 55; }
+[data-sonner-toaster] [data-sonner-toast][data-type='info']    { --icon-rgb: 59, 120, 220; }
+[data-sonner-toaster] [data-sonner-toast][data-type='warning'] { --icon-rgb: 217, 140, 6; }
+[data-sonner-toaster] [data-sonner-toast][data-type='error'] [data-title] { color: #b42318; }
 
-/* ── Dark Mode Immersive ── */
-.dark [data-sonner-toast] {
-  background: var(--ui-panel) !important;
-  border-color: rgba(255, 255, 255, 0.1) !important;
-  box-shadow: 
-    0 4px 6px -1px rgba(0, 0, 0, 0.2),
-    0 20px 25px -5px rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.05) !important;
-  color: #f3f4f6 !important;
+.dark [data-sonner-toaster] [data-sonner-toast] {
+  background: var(--ui-panel);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #f3f1ee;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -12px rgba(0, 0, 0, 0.6);
 }
-
-.dark [data-sonner-toast]:hover {
-  background: var(--ui-panel-soft) !important;
-  box-shadow: 
-    0 12px 30px -10px rgba(0, 0, 0, 0.5),
-    0 30px 60px -15px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.1) !important;
-}
-
-
-.dark [data-sonner-toast] [data-title] {
-  color: #ffffff !important;
-}
-
-.dark [data-sonner-toast] [data-description] {
-  color: #9ca3af !important;
-}
-
-.dark [data-sonner-toast] [data-icon] {
-  background: rgba(var(--icon-rgb), 0.15);
-}
-
-.dark [data-sonner-toast]::after {
-  opacity: 0.6;
-}
+.dark [data-sonner-toaster] [data-sonner-toast] [data-title] { color: #f3f1ee; }
+.dark [data-sonner-toaster] [data-sonner-toast] [data-description] { color: #a8a29e; }
+.dark [data-sonner-toaster] [data-sonner-toast][data-type='error'] [data-title] { color: #fca5a5; }
+.dark [data-sonner-toaster] [data-sonner-toast] [data-button][data-action] { color: #e3a184; }
+.dark [data-sonner-toaster] [data-sonner-toast] [data-button][data-action]:hover { background: rgba(227, 161, 132, 0.12); }
 
 
 /* Compact Prose for Notes */
