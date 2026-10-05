@@ -50,6 +50,9 @@ model User {
   glossaryTerms      GlossaryTerm[]
   glossaryLikes      GlossaryLike[]
   glossaryBookmarks  GlossaryBookmark[]
+  consultationSettings ConsultationSettings?
+  hostedConsultations  Consultation[]       @relation("ConsultationHost")
+  bookedConsultations  Consultation[]       @relation("ConsultationGuest")
 }
 
 model Note {
@@ -553,6 +556,12 @@ enum NotificationType {
   RATING
   GLOSSARY_SUBMITTED
   GLOSSARY_APPROVED
+  CONSULTATION_REQUESTED
+  CONSULTATION_CONFIRMED
+  CONSULTATION_DECLINED
+  CONSULTATION_CANCELLED
+  CONSULTATION_PAID
+  CONSULTATION_PAYMENT_REPORTED
 }
 
 enum ActivityType {
@@ -578,4 +587,66 @@ enum Occupation {
   EDUCATOR
   ENGINEER
   OTHER
+}
+
+// ── 1:1 consultations ───────────────────────────────────────────
+// A writer (canWrite) opts in and publishes weekly availability; readers book a slot.
+
+model ConsultationSettings {
+  userId      String   @id
+  enabled     Boolean  @default(false)
+  intro       String?
+  durationMin Int      @default(30)
+  meetingUrl  String?
+  /// IANA zone the weekly slots are expressed in, e.g. "Asia/Ho_Chi_Minh".
+  timezone    String   @default("Asia/Ho_Chi_Minh")
+  /// [{ day: 0-6 (Sun-Sat), start: "HH:MM", end: "HH:MM" }] in `timezone`.
+  weeklySlots Json     @default("[]")
+  /// { "YYYY-MM-DD": [{ start, end }] } in `timezone`; replaces the weekly pattern on that date ([] = day off).
+  dateOverrides Json    @default("{}")
+  /// Price per session in VND; 0 = free (no transfer step).
+  price       Int      @default(0)
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+/// Active bookings (AWAITING_PAYMENT/PENDING/CONFIRMED) are unique per host+startAt via a partial index in the migration.
+/// Paid flow: AWAITING_PAYMENT (slot held, guest transfers to the system account with `paymentCode`)
+/// → admin confirms the transfer (`paidAt`) → PENDING (host is asked) → CONFIRMED / DECLINED.
+model Consultation {
+  id            String             @id @default(cuid())
+  hostId        String
+  guestId       String
+  startAt       DateTime
+  endAt         DateTime
+  topic         String
+  status        ConsultationStatus @default(PENDING)
+  /// Meeting link for this booking (set when the host accepts; falls back to the host's default link).
+  meetingUrl    String?
+  declineReason String?
+  cancelledById String?
+  /// VND snapshot of the host's price at booking time; 0 = free.
+  price         Int                @default(0)
+  /// Code the guest puts in the transfer message, e.g. "LN7K4Q9X".
+  paymentCode   String?            @unique
+  /// Guest pressed "I've transferred" (keeps the hold from expiring).
+  paymentReportedAt DateTime?
+  paidAt        DateTime?
+  paymentConfirmedById String?
+  refundedAt    DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  host          User               @relation("ConsultationHost", fields: [hostId], references: [id], onDelete: Cascade)
+  guest         User               @relation("ConsultationGuest", fields: [guestId], references: [id], onDelete: Cascade)
+
+  @@index([hostId, startAt])
+  @@index([guestId, startAt])
+}
+
+enum ConsultationStatus {
+  AWAITING_PAYMENT
+  PENDING
+  CONFIRMED
+  DECLINED
+  CANCELLED
 }

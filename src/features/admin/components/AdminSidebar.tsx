@@ -6,7 +6,7 @@ import { usePathname, useSearchParams, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, FileText, Users, MessageSquare,
   Settings, ChevronLeft, ChevronRight,
-  GraduationCap, Activity, Bell, Share2, LayoutGrid, BarChart3, BookMarked,
+  GraduationCap, Activity, Bell, Share2, LayoutGrid, BarChart3, BookMarked, Wallet,
 } from 'lucide-react';
 
 const navItems: { href: string; icon: React.ElementType; label: string; badge?: number }[] = [
@@ -16,6 +16,7 @@ const navItems: { href: string; icon: React.ElementType; label: string; badge?: 
   { href: '/admin/glossary',       icon: BookMarked,      label: 'Thuật ngữ'    },
   { href: '/admin/users',          icon: Users,           label: 'Người dùng'  },
   { href: '/admin/comments',       icon: MessageSquare,   label: 'Bình luận'   },
+  { href: '/admin/payments',       icon: Wallet,          label: 'Thanh toán'  },
   { href: '/admin/shares',         icon: Share2,          label: 'Chia sẻ file' },
   { href: '/admin/notifications',  icon: Bell,            label: 'Thông báo'   },
   { href: '/admin/activity',       icon: Activity,        label: 'Hoạt động'   },

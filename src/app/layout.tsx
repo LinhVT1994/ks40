@@ -147,19 +147,11 @@ export default async function RootLayout({
             </NotesProvider>
             <Toaster
               position="top-center"
-              expand={false}
-              richColors={false}
               closeButton={false}
-              theme="system"
-              offset={24}
-              gap={12}
+              offset={20}
+              gap={8}
               duration={3500}
-              visibleToasts={4}
-              className="premium-toaster"
-              toastOptions={{
-                className: 'premium-toast group',
-                unstyled: false,
-              }}
+              visibleToasts={3}
             />
           </ThemeProvider>
         </SessionProvider>

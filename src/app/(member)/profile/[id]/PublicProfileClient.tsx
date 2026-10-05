@@ -12,6 +12,7 @@ import { toggleFollowAction } from '@/features/member/actions/follow';
 import { GlanceTrigger } from '@/features/member/components/GlancePreview';
 import ProfileArticleCard from '@/features/member/components/ProfileArticleCard';
 import { cn } from '@/lib/utils';
+import BookConsultationButton from '@/features/consultations/components/BookConsultationButton';
 
 /* ── Helpers ───────────────────────────────────────────── */
 function fmtViews(n: number) {
@@ -73,10 +74,12 @@ type Props = {
   followers: Follower[];
   isFollowing: boolean;
   followerCount: number;
+  /** Present when the author accepts 1:1 consultations. */
+  consultation?: { intro: string | null; durationMin: number; price: number } | null;
 };
 
 /* ── Main Component ────────────────────────────────────── */
-export default function PublicProfileClient({ user, articles, followers, isFollowing: initialFollowing, followerCount: initialCount }: Props) {
+export default function PublicProfileClient({ user, articles, followers, isFollowing: initialFollowing, followerCount: initialCount, consultation }: Props) {
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const { data: session } = useSession();
@@ -153,7 +156,7 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
             </div>
 
             {/* Follow Button */}
-            <div className="mt-10 w-full flex justify-center lg:justify-start">
+            <div className="mt-10 w-full flex flex-wrap gap-3 justify-center lg:justify-start">
               {session ? (
                 <button
                   onClick={handleFollow}
@@ -178,6 +181,9 @@ export default function PublicProfileClient({ user, articles, followers, isFollo
                   <UserPlus className="w-3.5 h-3.5" />
                   Theo dõi
                 </Link>
+              )}
+              {consultation && session?.user?.id !== user.id && (
+                <BookConsultationButton hostId={user.id} hostName={user.name ?? 'tác giả'} intro={consultation.intro} durationMin={consultation.durationMin} price={consultation.price} />
               )}
             </div>
           </div>

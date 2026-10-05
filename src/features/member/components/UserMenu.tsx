@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useSession } from "next-auth/react";
-import { Sun, Moon, User, Settings, LogOut, ShieldCheck } from "lucide-react";
+import { Sun, Moon, User, Settings, LogOut, ShieldCheck, CalendarClock } from "lucide-react";
 import { signOut } from "next-auth/react";
 import Avatar from "@/components/shared/Avatar";
 
@@ -112,6 +112,13 @@ export default function UserMenu() {
               >
                 <User className="w-4 h-4" /> Trang cá nhân
               </a>
+            <a
+              href="/consultations"
+              className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-700 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              <CalendarClock className="w-4 h-4" /> Lịch tư vấn
+            </a>
             <a
               href="/settings"
               className="w-full flex items-center gap-3 px-3 py-2 text-sm text-zinc-700 dark:text-slate-300 hover:bg-zinc-100 dark:hover:bg-white/5 rounded-xl transition-colors"

@@ -73,3 +73,33 @@ export async function sendPasswordResetEmail(email: string, resetUrl: string) {
     `,
   });
 }
+
+const escapeHtml = (s: string) => s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]!));
+
+/** Simple transactional email for consultation events. Never throws — failures are logged. */
+export async function sendConsultationEmail(opts: { to: string; subject: string; heading: string; lines: string[]; ctaUrl: string; ctaLabel: string }) {
+  if (!process.env.RESEND_API_KEY) return;
+  try {
+    const body = opts.lines.map(l => `<p style="margin:0 0 12px;font-size:15px;line-height:1.6;color:#475569;">${escapeHtml(l)}</p>`).join('');
+    await resend.emails.send({
+      from: 'Lenote <no-reply@lenote.dev>',
+      to: opts.to,
+      subject: opts.subject,
+      html: `<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+        <body style="margin:0;padding:0;background:#faf9f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+          <table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:40px 16px;">
+            <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:20px;border:1px solid #e8cfc1;">
+              <tr><td style="padding:28px 28px 8px;font-size:22px;font-weight:700;color:#ae563b;">lenote.dev</td></tr>
+              <tr><td style="padding:0 28px 28px;">
+                <h1 style="margin:0 0 16px;font-size:20px;color:#26251f;">${escapeHtml(opts.heading)}</h1>
+                ${body}
+                <a href="${encodeURI(opts.ctaUrl)}" style="display:inline-block;margin-top:8px;padding:12px 20px;border-radius:12px;background:#ae563b;color:#fff;text-decoration:none;font-weight:600;font-size:14px;">${escapeHtml(opts.ctaLabel)}</a>
+              </td></tr>
+            </table>
+          </td></tr></table>
+        </body></html>`,
+    });
+  } catch (err) {
+    console.error('[sendConsultationEmail] failed', { subject: opts.subject, err });
+  }
+}
