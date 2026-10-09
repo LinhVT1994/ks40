@@ -12,7 +12,8 @@ import {
   DURATION_OPTIONS, dateKeyInZone, findBookableSlot, generateSlotStates, minutesInZone, isValidTimeZone, parseDateOverrides, parseWeeklySlots, type DateOverrides, type WeeklySlot,
 } from '../lib/slots';
 import { PAYMENT_HOLD_MINUTES, PRICE_MAX, generatePaymentCode, type PaymentAccount } from '../lib/payment';
-import { EXPIRED_REASON, formatInZone, getPaymentAccount, notifyHostOfRequest, releaseExpiredHolds } from '../server/core';
+import { EXPIRED_REASON, getPaymentAccount, notifyHostOfRequest, releaseExpiredHolds } from '../server/core';
+import { bookingZones, cleanTimeZone, formatInZone } from '../lib/when';
 
 const MAX_PENDING_PER_GUEST = 2;
 const TOPIC_MIN = 10;
@@ -194,7 +195,7 @@ export async function getAvailableSlotsAction(hostId: string): Promise<SlotOptio
 
 export type PaymentInstructions = { code: string; amount: number; account: PaymentAccount; holdUntil: string | null; reported: boolean };
 
-export async function requestConsultationAction(input: { hostId: string; startAt: string; topic: string }): Promise<Result<{ id: string; payment: PaymentInstructions | null }>> {
+export async function requestConsultationAction(input: { hostId: string; startAt: string; topic: string; timezone?: string }): Promise<Result<{ id: string; payment: PaymentInstructions | null }>> {
   const guest = await currentUser();
   if (!guest || guest.status !== 'ACTIVE') return { success: false, error: 'Bạn cần đăng nhập để đặt lịch' };
   if (guest.id === input.hostId) return { success: false, error: 'Bạn không thể tự đặt lịch với chính mình' };
@@ -228,13 +229,14 @@ export async function requestConsultationAction(input: { hostId: string; startAt
   const account = price > 0 ? await getPaymentAccount() : null;
   if (price > 0 && !account) return { success: false, error: 'Hệ thống tạm thời chưa nhận thanh toán. Hãy thử lại sau.' };
 
+  const guestTimezone = cleanTimeZone(input.timezone);
   let created: { id: string; paymentCode: string | null; createdAt: Date } | null = null;
   for (let attempt = 0; attempt < 3 && !created; attempt++) {
     try {
       created = await db.consultation.create({
         // The window's link is kept for the host's accept form; guests only see it once confirmed.
         data: {
-          hostId: host.id, guestId: guest.id, startAt, endAt: new Date(startAt.getTime() + slot.durationMin * 60_000), topic, meetingUrl: slot.meetingUrl ?? null,
+          hostId: host.id, guestId: guest.id, guestTimezone, startAt, endAt: new Date(startAt.getTime() + slot.durationMin * 60_000), topic, meetingUrl: slot.meetingUrl ?? null,
           price, ...(price > 0 && { status: 'AWAITING_PAYMENT', paymentCode: generatePaymentCode(randomInt) }),
         },
         select: { id: true, paymentCode: true, createdAt: true },
@@ -250,7 +252,7 @@ export async function requestConsultationAction(input: { hostId: string; startAt
   }
   if (!created) return { success: false, error: 'Không tạo được mã thanh toán, hãy thử lại' };
 
-  if (price === 0) void notifyHostOfRequest({ host, guestName: guest.name, startAt, topic, timezone: cfg.timezone });
+  if (price === 0) void notifyHostOfRequest({ host, guestName: guest.name, startAt, topic, timezone: cfg.timezone, guestTimezone });
   revalidatePath('/consultations');
   return {
     success: true,
@@ -351,7 +353,8 @@ export async function respondConsultationAction(id: string, decision: 'accept' |
   });
   if (updated.count === 0) return { success: false, error: 'Lịch hẹn này đã được xử lý' };
 
-  const when = formatInZone(c.startAt, c.host.consultationSettings?.timezone ?? 'Asia/Ho_Chi_Minh');
+  const zones = bookingZones(c);
+  const when = formatInZone(c.startAt, zones.guest, zones.host);
   if (decision === 'accept') {
     void createNotificationAction(c.guestId, 'CONSULTATION_CONFIRMED', `${c.host.name} đã xác nhận lịch tư vấn`, { message: when, link: '/consultations' });
     if (c.guest.email) void sendConsultationEmail({
@@ -386,7 +389,8 @@ export async function updateConsultationLinkAction(id: string, meetingUrl: strin
   const updated = await db.consultation.updateMany({ where: { id, status: 'CONFIRMED' }, data: { meetingUrl: link } });
   if (updated.count === 0) return { success: false, error: 'Lịch hẹn này đã thay đổi, hãy tải lại trang' };
 
-  const when = formatInZone(c.startAt, c.host.consultationSettings?.timezone ?? 'Asia/Ho_Chi_Minh');
+  const zones = bookingZones(c);
+  const when = formatInZone(c.startAt, zones.guest, zones.host);
   void createNotificationAction(c.guestId, 'CONSULTATION_CONFIRMED', `${c.host.name} đã cập nhật link họp`, { message: when, link: '/consultations' });
   if (c.guest.email) void sendConsultationEmail({
     to: c.guest.email, subject: `Link họp mới cho buổi tư vấn với ${c.host.name}`, heading: 'Link họp đã được cập nhật',
@@ -418,7 +422,8 @@ export async function cancelConsultationAction(id: string): Promise<Result> {
   // An unpaid hold was never shown to the host, so there's no one to tell.
   if (c.status === 'AWAITING_PAYMENT') { revalidatePath('/consultations'); return { success: true }; }
   const other = c.hostId === user.id ? c.guest : c.host;
-  const when = formatInZone(c.startAt, c.host.consultationSettings?.timezone ?? 'Asia/Ho_Chi_Minh');
+  const zones = bookingZones(c);
+  const when = other.id === c.guestId ? formatInZone(c.startAt, zones.guest, zones.host) : formatInZone(c.startAt, zones.host, zones.guest);
   void createNotificationAction(other.id, 'CONSULTATION_CANCELLED', `${user.name} đã hủy lịch tư vấn`, { message: when, link: '/consultations' });
   if (other.email) void sendConsultationEmail({
     to: other.email, subject: `${user.name} đã hủy lịch tư vấn`, heading: 'Lịch tư vấn đã bị hủy',
@@ -445,6 +450,8 @@ export type ConsultationListItem = {
   /** Host-only: link to prefill when accepting a pending request (from the booked window or the default). */
   suggestedMeetingUrl: string | null;
   other: { id: string; name: string; username: string | null; image: string | null };
+  /** Host-only: the guest's zone at booking, to show their local time when it differs. */
+  guestTimezone: string | null;
   /** VND paid/owed; 0 = free. */
   price: number;
   /** Guest-only while awaiting payment. */
@@ -490,6 +497,7 @@ export async function getMyConsultationsAction(): Promise<ConsultationListItem[]
       meetingUrl: r.status === 'CONFIRMED' ? r.meetingUrl ?? r.host.consultationSettings?.meetingUrl ?? null : null,
       suggestedMeetingUrl: role === 'host' && r.status === 'PENDING' ? r.meetingUrl ?? r.host.consultationSettings?.meetingUrl ?? null : null,
       other: { id: other.id, name: other.name, username: other.username, image: other.image },
+      guestTimezone: role === 'host' ? r.guestTimezone : null,
       price: r.price,
       paymentCode: role === 'guest' && r.status === 'AWAITING_PAYMENT' ? r.paymentCode : null,
       paymentReported: !!r.paymentReportedAt,

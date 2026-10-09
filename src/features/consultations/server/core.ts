@@ -4,18 +4,12 @@ import { db } from '@/lib/db';
 import { createNotificationAction } from '@/lib/notifications';
 import { sendConsultationEmail } from '@/lib/email';
 import { SITE_URL } from '@/lib/seo';
+import { formatInZone } from '../lib/when';
 import { PAYMENT_CONFIG_KEY, PAYMENT_HOLD_MINUTES, parsePaymentAccount, type PaymentAccount } from '../lib/payment';
 
 /* Server-only helpers shared by the consultation and admin payment actions (not callable from the client). */
 
 export const EXPIRED_REASON = 'Quá hạn thanh toán';
-
-export function formatInZone(date: Date, tz: string) {
-  const text = new Intl.DateTimeFormat('vi-VN', {
-    timeZone: tz, weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false,
-  }).format(date);
-  return `${text} (${tz})`;
-}
 
 /** Release holds whose guest never reported a transfer in time. Cheap enough to run on every read. */
 export async function releaseExpiredHolds() {
@@ -33,10 +27,10 @@ export async function getPaymentAccount(): Promise<PaymentAccount | null> {
 }
 
 /** "New request" notification + email to the host (on booking when free, after payment when paid). */
-export async function notifyHostOfRequest({ host, guestName, startAt, topic, timezone }: {
-  host: { id: string; email: string | null }; guestName: string; startAt: Date; topic: string; timezone: string;
+export async function notifyHostOfRequest({ host, guestName, startAt, topic, timezone, guestTimezone }: {
+  host: { id: string; email: string | null }; guestName: string; startAt: Date; topic: string; timezone: string; guestTimezone: string | null;
 }) {
-  const when = formatInZone(startAt, timezone);
+  const when = formatInZone(startAt, timezone, guestTimezone);
   await createNotificationAction(host.id, 'CONSULTATION_REQUESTED', `${guestName} muốn đặt lịch tư vấn`, { message: when, link: '/consultations' });
   if (host.email) {
     await sendConsultationEmail({

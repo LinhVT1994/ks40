@@ -621,6 +621,8 @@ model Consultation {
   startAt       DateTime
   endAt         DateTime
   topic         String
+  /// Guest's IANA zone when booking, so their emails show their own clock (null on older bookings).
+  guestTimezone String?
   status        ConsultationStatus @default(PENDING)
   /// Meeting link for this booking (set when the host accepts; falls back to the host's default link).
   meetingUrl    String?
