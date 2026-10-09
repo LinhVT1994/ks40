@@ -74,6 +74,9 @@ export default function UserTable({ users, onView, onEdit, onToggleStatus }: Pro
                   {user.canWrite && (
                     <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-primary/10 text-primary">Writer</span>
                   )}
+                  {user.canConsult && (
+                    <span className="text-[10px] font-bold px-2 py-1 rounded-full bg-primary/10 text-primary">Tư vấn</span>
+                  )}
                 </div>
 
                 {/* Articles written */}

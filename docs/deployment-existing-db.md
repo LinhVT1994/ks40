@@ -2,7 +2,7 @@
 
 Tài liệu này dành cho **cập nhật ứng dụng**, không phải khởi tạo hệ thống.
 
-> **Bản đặt lịch tư vấn (10/2026) có 5 migration mới** (`20261001000000` → `20261001040000`): thêm bảng `ConsultationSettings`, `Consultation`, enum `ConsultationStatus` và 6 giá trị mới cho `NotificationType`. Tất cả chỉ **thêm** bảng/cột/giá trị enum, không đụng dữ liệu đang có (migration `…020000` chỉ chuyển dữ liệu trong cột `blockedDates` mới thêm ở `…010000` rồi bỏ cột đó). **Bắt buộc chạy trước khi restart app.** Sau khi deploy, admin cần nhập tài khoản ngân hàng nhận tiền thì tác giả mới đặt giá được. Xem [mục 3](#3-migration-database) và [mục 3b](#3b-cấu-hình-sau-deploy-đặt-lịch-tư-vấn). Bản này không sửa `docker-compose.yml`, không cần biến môi trường hay cron mới.
+> **Bản đặt lịch tư vấn (10/2026) có 6 migration mới** (`20261001000000` → `20261009000000`): thêm bảng `ConsultationSettings`, `Consultation`, enum `ConsultationStatus` và 6 giá trị mới cho `NotificationType`, cột `User.canConsult`. Tất cả chỉ **thêm** bảng/cột/giá trị enum, không đụng dữ liệu đang có (migration `…020000` chỉ chuyển dữ liệu trong cột `blockedDates` mới thêm ở `…010000` rồi bỏ cột đó; `…20261009000000` bật sẵn `canConsult` cho người đã bật nhận tư vấn). **Bắt buộc chạy trước khi restart app.** Chỉ người được admin bật **Quyền nhận tư vấn** (Admin → Người dùng → Chỉnh sửa) mới nhận đặt lịch được. Sau khi deploy, admin cần nhập tài khoản ngân hàng nhận tiền thì tác giả mới đặt giá được. Xem [mục 3](#3-migration-database) và [mục 3b](#3b-cấu-hình-sau-deploy-đặt-lịch-tư-vấn). Bản này không sửa `docker-compose.yml`, không cần biến môi trường hay cron mới.
 >
 > **Bản cập nhật ảnh bìa trang cá nhân (09/2026) có migration mới:** `20260928000000_add_user_cover_image` thêm cột `User.coverImage` (TEXT, cho phép NULL). Migration chỉ **thêm** cột, không xóa/sửa dữ liệu, nhưng **bắt buộc chạy trước khi restart app** — code mới truy vấn cột này, thiếu cột thì trang hồ sơ, `/me`, cài đặt và ảnh OG profile sẽ lỗi. Xem [mục 3](#3-migration-database). Bản này không sửa `docker-compose.yml`.
 
@@ -66,6 +66,7 @@ Các migration có thể đang pending (tùy lần deploy trước đã tới đ
 | `20261001020000_consultation_date_overrides` | Cột `dateOverrides` (giờ riêng theo ngày), chuyển dữ liệu từ `blockedDates` rồi bỏ cột đó. |
 | `20261001030000_consultation_meeting_url` | Cột `Consultation.meetingUrl` (link họp từng buổi). |
 | `20261001040000_consultation_payments` | Giá (`price`), mã thanh toán (`paymentCode`, unique), các mốc thanh toán/hoàn tiền, trạng thái `AWAITING_PAYMENT`, 2 loại thông báo thanh toán; tạo lại unique index để chỗ đang giữ (chờ thanh toán) cũng chặn đặt trùng. |
+| `20261009000000_user_can_consult` | Cột `User.canConsult` (mặc định tắt): chỉ admin cấp quyền nhận tư vấn. Người đã bật nhận tư vấn được giữ quyền. |
 
 Xử lý **đúng một** trong các trường hợp:
 
@@ -92,7 +93,7 @@ npx tsx scripts/check-migration-state.ts
 
 Sau khi deploy, `npx prisma migrate status` phải báo `Database schema is up to date!` và chạy lại script phải thấy `"userCoverImageColumn": true` và `"consultations": { …, "state": "all" }`. Chỉ khi đó mới restart app ở bước tiếp theo.
 
-> Đã thử trên bản sao schema của `release-mvp`: `migrate deploy` áp dụng đủ 5 migration tư vấn, sau đó `prisma migrate diff` giữa DB và `schema.prisma` trống (không lệch).
+> Đã thử trên bản sao schema của `release-mvp`: `migrate deploy` áp dụng đủ 5 migration tư vấn đầu, sau đó `prisma migrate diff` giữa DB và `schema.prisma` trống (không lệch). Migration `…20261009000000` thêm sau, chỉ thêm một cột.
 
 Ảnh bìa tải lên dùng cùng nơi lưu với avatar: Azure container ảnh hiện có (thư mục `covers/`), hoặc `public/uploads/covers` nếu không cấu hình Azure — thư mục này nằm trong `public/uploads` đã mount persistent ở mục 4, không cần thêm mount mới.
 
@@ -163,7 +164,8 @@ Chỉ reload Nginx sau `nginx -t` thành công. Giữ các cấu hình TLS/domai
 - Ảnh bìa: mở `/@username` của một tài khoản có sẵn (hiện nền mặc định, không lỗi). Đăng nhập, vào **Cài đặt → Hồ sơ → Ảnh bìa**: chọn một nền có sẵn, tải thử một ảnh, rồi "Về nền mặc định"; mỗi lần đổi, trang `/me` và ảnh OG `/og/profile/<id>` cập nhật theo.
 - Avatar: đổi avatar rồi mở một bài viết của chính tài khoản đó — avatar tác giả phải đổi ngay (không chờ cache 1 giờ). Với tài khoản Google: đăng xuất, đăng nhập lại bằng Google, avatar/tên đã đặt trên Lenote phải được giữ nguyên. Nếu avatar đã bị ảnh Google ghi đè từ bản cũ, tải lại avatar một lần.
 - Đặt lịch tư vấn (dùng tài khoản thử, xóa sau khi kiểm tra):
-  - Tài khoản có quyền viết: **menu tài khoản → Lịch tư vấn → Thiết lập nhận tư vấn**, kéo chọn một khung giờ trên lịch, lưu; mở **Cài đặt**, bật nhận đặt lịch và đặt giá (ví dụ 10.000đ).
+  - Admin: **Admin → Người dùng → Chỉnh sửa** tài khoản thử, bật **Quyền nhận tư vấn**. Tài khoản chưa được bật không thấy tab thiết lập.
+  - Tài khoản đó: **menu tài khoản → Lịch tư vấn → Thiết lập nhận tư vấn**, kéo chọn một khung giờ trên lịch, lưu; mở **Cài đặt**, bật nhận đặt lịch và đặt giá (ví dụ 10.000đ).
   - Tài khoản khác: mở trang cá nhân tác giả → **Đặt lịch tư vấn** → chọn giờ → nhập câu hỏi → **Tiếp tục thanh toán**: phải hiện QR, số tiền và mã `LN…`. Bấm **Tôi đã chuyển khoản**.
   - Admin: `/admin/payments` thấy mã đó ở **Chờ đối chiếu** → **Đã nhận tiền**; tác giả nhận thông báo và email, thấy yêu cầu ở tab **Lịch hẹn**.
   - Tác giả từ chối → admin thấy ở **Cần hoàn tiền** → **Đã hoàn tiền**. Sau đó đặt lại giá về giá thật hoặc 0.

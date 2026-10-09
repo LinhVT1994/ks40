@@ -29,7 +29,7 @@ async function currentUser() {
   if (!id) return null;
   return db.user.findUnique({
     where: { id },
-    select: { id: true, name: true, email: true, username: true, role: true, canWrite: true, status: true },
+    select: { id: true, name: true, email: true, username: true, role: true, canConsult: true, status: true },
   });
 }
 
@@ -45,7 +45,8 @@ function normalizeMeetingUrl(raw: string | undefined | null): string | null {
   }
 }
 
-const canHost = (u: { role: string; canWrite: boolean } | null) => !!u && (u.role === 'ADMIN' || u.canWrite);
+// Admins decide who may host (User.canConsult); existing bookings survive a revoke.
+const canHost = (u: { canConsult: boolean } | null) => !!u && u.canConsult;
 
 function readSettings(raw: { weeklySlots: Prisma.JsonValue; dateOverrides: Prisma.JsonValue; timezone: string; durationMin: number }) {
   const parsed = parseWeeklySlots(raw.weeklySlots);
@@ -120,7 +121,7 @@ export async function getMyConsultationSettingsAction() {
 export async function saveConsultationSettingsAction(input: ConsultationSettingsInput): Promise<Result> {
   const user = await currentUser();
   if (!user) return { success: false, error: 'Bạn cần đăng nhập' };
-  if (!canHost(user)) return { success: false, error: 'Chỉ tác giả mới có thể nhận tư vấn' };
+  if (!canHost(user)) return { success: false, error: 'Tài khoản của bạn chưa được admin cấp quyền nhận tư vấn' };
 
   const intro = (input.intro ?? '').trim();
   if (intro.length > 500) return { success: false, error: 'Lời giới thiệu tối đa 500 ký tự' };
@@ -167,7 +168,7 @@ export async function saveConsultationSettingsAction(input: ConsultationSettings
 export async function getPublicConsultationInfoAction(hostId: string) {
   const settings = await db.consultationSettings.findUnique({
     where: { userId: hostId },
-    select: { enabled: true, intro: true, durationMin: true, timezone: true, price: true, user: { select: { role: true, canWrite: true, status: true } } },
+    select: { enabled: true, intro: true, durationMin: true, timezone: true, price: true, user: { select: { role: true, canConsult: true, status: true } } },
   });
   if (!settings?.enabled || settings.user.status !== 'ACTIVE' || !canHost(settings.user)) return null;
   return { intro: settings.intro, durationMin: settings.durationMin, timezone: settings.timezone, price: settings.price };
@@ -183,7 +184,7 @@ export async function getAvailableSlotsAction(hostId: string): Promise<SlotOptio
   if (typeof hostId !== 'string' || !hostId) return [];
   const settings = await db.consultationSettings.findUnique({
     where: { userId: hostId },
-    include: { user: { select: { role: true, canWrite: true, status: true } } },
+    include: { user: { select: { role: true, canConsult: true, status: true } } },
   });
   if (!settings?.enabled || settings.user.status !== 'ACTIVE' || !canHost(settings.user)) return [];
   const now = new Date();
@@ -207,7 +208,7 @@ export async function requestConsultationAction(input: { hostId: string; startAt
 
   const settings = await db.consultationSettings.findUnique({
     where: { userId: input.hostId },
-    include: { user: { select: { id: true, name: true, email: true, username: true, role: true, canWrite: true, status: true } } },
+    include: { user: { select: { id: true, name: true, email: true, username: true, role: true, canConsult: true, status: true } } },
   });
   const host = settings?.user;
   if (!settings?.enabled || !host || host.status !== 'ACTIVE' || !canHost(host)) return { success: false, error: 'Tác giả hiện không nhận tư vấn' };
