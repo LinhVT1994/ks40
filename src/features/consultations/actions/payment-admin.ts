@@ -8,7 +8,8 @@ import { createNotificationAction } from '@/lib/notifications';
 import { sendConsultationEmail } from '@/lib/email';
 import { SITE_URL } from '@/lib/seo';
 import { PAYMENT_CONFIG_KEY, PAYMENT_HOLD_MINUTES, parsePaymentAccount, type PaymentAccount } from '../lib/payment';
-import { EXPIRED_REASON, formatInZone, getPaymentAccount, notifyHostOfRequest, releaseExpiredHolds } from '../server/core';
+import { EXPIRED_REASON, getPaymentAccount, notifyHostOfRequest, releaseExpiredHolds } from '../server/core';
+import { bookingZones, formatInZone } from '../lib/when';
 
 type Result = { success: true } | { success: false; error: string };
 
@@ -134,9 +135,9 @@ export async function confirmPaymentAction(id: string): Promise<Result> {
       data: { status: 'PENDING', paidAt: now, paymentConfirmedById: admin.id },
     });
     if (updated.count === 0) return { success: false, error: 'Giao dịch đã thay đổi, hãy tải lại' };
-    const tz = c.host.consultationSettings?.timezone ?? 'Asia/Ho_Chi_Minh';
-    const when = formatInZone(c.startAt, tz);
-    void notifyHostOfRequest({ host: c.host, guestName: c.guest.name, startAt: c.startAt, topic: c.topic, timezone: tz });
+    const zones = bookingZones(c);
+    const when = formatInZone(c.startAt, zones.guest, zones.host);
+    void notifyHostOfRequest({ host: c.host, guestName: c.guest.name, startAt: c.startAt, topic: c.topic, timezone: zones.host, guestTimezone: c.guestTimezone });
     void createNotificationAction(c.guestId, 'CONSULTATION_PAID', 'Đã nhận thanh toán', { message: `Yêu cầu đã được gửi tới ${c.host.name} · ${when}`, link: '/consultations' });
     if (c.guest.email) void sendConsultationEmail({
       to: c.guest.email, subject: `Đã nhận thanh toán ${c.paymentCode}`, heading: 'Đã nhận thanh toán',

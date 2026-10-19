@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { X, Lock, UserCheck, FileText, Eye, Calendar, Clock, PenLine, Save, Loader2 } from 'lucide-react';
+import { X, Lock, UserCheck, FileText, Eye, Calendar, Clock, PenLine, CalendarClock, Save, Loader2 } from 'lucide-react';
 import { User, UserRole, ROLE_CONFIG, STATUS_CONFIG, USER_ROLES } from '@/features/admin/data/users';
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
   mode: 'view' | 'edit';
   isPending?: boolean;
   onClose: () => void;
-  onSave: (id: string, changes: { role?: UserRole; canWrite?: boolean; status?: 'active' | 'locked' }) => void;
+  onSave: (id: string, changes: { role?: UserRole; canWrite?: boolean; canConsult?: boolean; status?: 'active' | 'locked' }) => void;
 }
 
 function formatDate(iso: string) {
@@ -20,12 +20,14 @@ export default function UserDetailModal({ user, mode, isPending, onClose, onSave
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const [draftRole, setDraftRole] = useState<UserRole | null>(null);
   const [draftCanWrite, setDraftCanWrite] = useState<boolean | null>(null);
+  const [draftCanConsult, setDraftCanConsult] = useState<boolean | null>(null);
   const [draftStatus, setDraftStatus] = useState<'active' | 'locked' | null>(null);
 
   // Reset draft khi user thay đổi
   useEffect(() => {
     setDraftRole(null);
     setDraftCanWrite(null);
+    setDraftCanConsult(null);
     setDraftStatus(null);
     setRoleDropdownOpen(false);
   }, [user?.id]);
@@ -42,17 +44,19 @@ export default function UserDetailModal({ user, mode, isPending, onClose, onSave
   // Giá trị hiển thị: draft nếu có, fallback về user gốc
   const currentRole = draftRole ?? user.role;
   const currentCanWrite = draftCanWrite ?? user.canWrite;
+  const currentCanConsult = draftCanConsult ?? user.canConsult;
   const currentStatus = draftStatus ?? user.status;
 
   const role = ROLE_CONFIG[currentRole];
   const status = STATUS_CONFIG[currentStatus];
 
-  const hasChanges = draftRole !== null || draftCanWrite !== null || draftStatus !== null;
+  const hasChanges = draftRole !== null || draftCanWrite !== null || draftCanConsult !== null || draftStatus !== null;
 
   const handleSave = () => {
-    const changes: { role?: UserRole; canWrite?: boolean; status?: 'active' | 'locked' } = {};
+    const changes: { role?: UserRole; canWrite?: boolean; canConsult?: boolean; status?: 'active' | 'locked' } = {};
     if (draftRole !== null && draftRole !== user.role) changes.role = draftRole;
     if (draftCanWrite !== null && draftCanWrite !== user.canWrite) changes.canWrite = draftCanWrite;
+    if (draftCanConsult !== null && draftCanConsult !== user.canConsult) changes.canConsult = draftCanConsult;
     if (draftStatus !== null && draftStatus !== user.status) changes.status = draftStatus;
     if (Object.keys(changes).length > 0) {
       onSave(user.id, changes);
@@ -93,6 +97,7 @@ export default function UserDetailModal({ user, mode, isPending, onClose, onSave
               <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${role.className}`}>{role.label}</span>
               <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${status.className}`}>{status.label}</span>
               {currentCanWrite && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">Writer</span>}
+              {currentCanConsult && <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary/10 text-primary">Tư vấn</span>}
             </div>
           </div>
         </div>
@@ -186,6 +191,32 @@ export default function UserDetailModal({ user, mode, isPending, onClose, onSave
                     {currentCanWrite ? 'Bật' : 'Tắt'}
                   </span>
                 </button>
+              </div>
+
+              {/* canConsult */}
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-widest text-zinc-500 mb-3">Quyền nhận tư vấn</p>
+                <button
+                  onClick={() => setDraftCanConsult(prev => !(prev ?? user.canConsult))}
+                  className={`w-full flex items-center justify-between px-4 py-2.5 text-sm font-semibold rounded-xl border transition-colors ${
+                    currentCanConsult
+                      ? 'border-primary/30 bg-primary/5 text-primary'
+                      : 'border-zinc-300 dark:border-white/10 bg-zinc-50 dark:bg-white/5 text-zinc-500 dark:text-slate-400'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <CalendarClock className="w-4 h-4" />
+                    {currentCanConsult ? 'Được nhận đặt lịch tư vấn' : 'Chưa được nhận tư vấn'}
+                  </span>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    currentCanConsult ? 'bg-primary/10 text-primary' : 'bg-zinc-100 dark:bg-white/10 text-zinc-500'
+                  }`}>
+                    {currentCanConsult ? 'Bật' : 'Tắt'}
+                  </span>
+                </button>
+                {user.canConsult && draftCanConsult === false && (
+                  <p className="mt-2 text-[11px] text-zinc-500">Trang cá nhân sẽ ẩn nút đặt lịch. Các lịch hẹn đã có vẫn giữ nguyên.</p>
+                )}
               </div>
 
               {/* Status */}

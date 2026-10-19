@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useState, useSyncExternalStore, useTransition } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CalendarDays, CalendarPlus, Check, Link2, Loader2, Pencil, QrCode, Video, Wallet, X } from 'lucide-react';
@@ -8,15 +8,38 @@ import { toast } from 'sonner';
 import Avatar from '@/components/shared/Avatar';
 import { cancelConsultationAction, getPaymentInstructionsAction, respondConsultationAction, updateConsultationLinkAction, type ConsultationListItem, type PaymentInstructions } from '../actions/consultation';
 import { formatVnd } from '../lib/payment';
+import { DEFAULT_TIMEZONE } from '../lib/when';
 import { Dialog } from './dialog-ui';
 import PaymentPanel from './PaymentPanel';
 import { cn } from '@/lib/utils';
 
-const fmtWhen = (iso: string, endIso: string) => {
+/** `timeZone` undefined = the browser's zone (only after hydration; see `useDisplayZone`). */
+const fmtWhen = (iso: string, endIso: string, timeZone?: string) => {
   const start = new Date(iso);
-  const date = start.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
-  const t = (d: Date) => d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false });
+  const date = start.toLocaleDateString('vi-VN', { timeZone, weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' });
+  const t = (d: Date) => d.toLocaleTimeString('vi-VN', { timeZone, hour: '2-digit', minute: '2-digit', hour12: false });
   return `${date} · ${t(start)}–${t(new Date(endIso))}`;
+};
+
+const noop = () => () => {};
+/** False during SSR/hydration, true after: the browser's zone is only known on the client. */
+const useHydrated = () => useSyncExternalStore(noop, () => true, () => false);
+/**
+ * Server and first client render use a fixed zone so the HTML matches whatever zone the server runs in;
+ * after hydration the browser's own zone takes over.
+ */
+const useDisplayZone = () => (useHydrated() ? undefined : DEFAULT_TIMEZONE);
+
+/** "21:00 13/10 giờ của khách (Asia/Tokyo)" when the guest's clock differs from this browser's. */
+const guestLocal = (iso: string, tz: string | null) => {
+  if (!tz) return null;
+  const fmt = (zone?: string) => new Date(iso).toLocaleString('vi-VN', { timeZone: zone, hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit', hour12: false });
+  try {
+    const theirs = fmt(tz);
+    return theirs === fmt() ? null : `${theirs.replace(/-/g, '/')} giờ của khách (${tz})`;
+  } catch {
+    return null;
+  }
 };
 
 type Bucket = 'action' | 'upcoming' | 'past';
@@ -76,6 +99,8 @@ function Row({ c, now, defaultMeetingUrl }: { c: ConsultationListItem; now: numb
   const [isPending, startTransition] = useTransition();
   const [mode, setMode] = useState<'idle' | 'accept' | 'decline' | 'edit-link'>('idle');
   const [paying, setPaying] = useState(false);
+  const zone = useDisplayZone();
+  const guestTime = zone ? null : guestLocal(c.startAt, c.guestTimezone);
   const [reason, setReason] = useState('');
   const [link, setLink] = useState('');
   const upcoming = new Date(c.startAt).getTime() > now;
@@ -99,14 +124,15 @@ function Row({ c, now, defaultMeetingUrl }: { c: ConsultationListItem; now: numb
             <span className="text-[11px] text-zinc-500">{c.role === 'host' ? 'đặt lịch với bạn' : 'là người tư vấn'}</span>
             <StatusBadge c={c} now={now} />
           </div>
-          <p className="mt-1 text-sm text-zinc-600 dark:text-slate-300 flex items-center gap-1.5"><CalendarDays className="w-3.5 h-3.5 text-primary shrink-0" /> {fmtWhen(c.startAt, c.endAt)}{c.price > 0 && <span className="text-zinc-500">· {formatVnd(c.price)}</span>}</p>
+          <p className="mt-1 text-sm text-zinc-600 dark:text-slate-300 flex items-center gap-1.5"><CalendarDays className="w-3.5 h-3.5 text-primary shrink-0" /> {fmtWhen(c.startAt, c.endAt, zone)}{c.price > 0 && <span className="text-zinc-500">· {formatVnd(c.price)}</span>}</p>
+          {guestTime && <p className="mt-0.5 pl-5 text-[11px] text-zinc-500">{guestTime}</p>}
           <p className="mt-2 text-sm text-zinc-600 dark:text-slate-400 leading-relaxed whitespace-pre-line line-clamp-4">{c.topic}</p>
           {c.status === 'DECLINED' && c.declineReason && <p className="mt-2 text-xs text-rose-600 dark:text-rose-400">Lời nhắn: {c.declineReason}</p>}
           {c.status === 'CANCELLED' && !c.cancelledByMe && c.declineReason && <p className="mt-2 text-xs text-zinc-500">Lý do: {c.declineReason}</p>}
           {c.status === 'AWAITING_PAYMENT' && (
             <p className="mt-2 text-xs text-zinc-500">{c.paymentReported
               ? 'Bạn đã báo chuyển khoản, quản trị viên đang đối chiếu. Yêu cầu sẽ tới tác giả ngay sau đó.'
-              : <>Chuyển khoản với nội dung <strong className="text-primary tracking-wider">{c.paymentCode}</strong> trước {c.holdUntil && new Date(c.holdUntil).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', hour12: false })} để giữ chỗ.</>}</p>
+              : <>Chuyển khoản với nội dung <strong className="text-primary tracking-wider">{c.paymentCode}</strong> trước {c.holdUntil && new Date(c.holdUntil).toLocaleTimeString('vi-VN', { timeZone: zone, hour: '2-digit', minute: '2-digit', hour12: false })} để giữ chỗ.</>}</p>
           )}
           <RefundNote c={c} />
 

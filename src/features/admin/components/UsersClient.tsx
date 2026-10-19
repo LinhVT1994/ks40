@@ -9,7 +9,7 @@ import UserDetailModal from './UserDetailModal';
 import AdminPagination from './AdminPagination';
 import type { User, UserRole, UserStatus } from '@/features/admin/data/users';
 import type { AdminUser } from '@/features/admin/actions/user';
-import { updateUserRoleAction, toggleUserStatusAction, toggleUserCanWriteAction } from '@/features/admin/actions/user';
+import { updateUserRoleAction, toggleUserStatusAction, toggleUserCanWriteAction, toggleUserCanConsultAction } from '@/features/admin/actions/user';
 import { Role } from '@prisma/client';
 
 type RoleFilter   = UserRole | 'all';
@@ -29,6 +29,7 @@ function toUser(u: AdminUser): User {
     role:            roleMap[u.role] ?? 'Member',
     status:          statusMap[u.status] ?? 'active',
     canWrite:        u.canWrite,
+    canConsult:      u.canConsult,
     joinedAt:        u.createdAt instanceof Date ? u.createdAt.toISOString().slice(0, 10) : String(u.createdAt),
     lastActive:      u.createdAt instanceof Date ? u.createdAt.toISOString().slice(0, 10) : String(u.createdAt),
     docsViewed:      u._count.readHistories,
@@ -96,7 +97,7 @@ export default function UsersClient({
     startTransition(async () => { await toggleUserStatusAction(id); });
   };
 
-  const handleSaveUser = (id: string, changes: { role?: UserRole; canWrite?: boolean; status?: 'active' | 'locked' }) => {
+  const handleSaveUser = (id: string, changes: { role?: UserRole; canWrite?: boolean; canConsult?: boolean; status?: 'active' | 'locked' }) => {
     // Optimistic update
     setLocalUsers(prev => prev.map(u => {
       if (u.id !== id) return u;
@@ -104,6 +105,7 @@ export default function UsersClient({
         ...u,
         ...(changes.role !== undefined && { role: changes.role }),
         ...(changes.canWrite !== undefined && { canWrite: changes.canWrite }),
+        ...(changes.canConsult !== undefined && { canConsult: changes.canConsult }),
         ...(changes.status !== undefined && { status: changes.status }),
       };
     }));
@@ -113,6 +115,7 @@ export default function UsersClient({
         ...prev,
         ...(changes.role !== undefined && { role: changes.role }),
         ...(changes.canWrite !== undefined && { canWrite: changes.canWrite }),
+        ...(changes.canConsult !== undefined && { canConsult: changes.canConsult }),
         ...(changes.status !== undefined && { status: changes.status }),
       };
     });
@@ -122,6 +125,7 @@ export default function UsersClient({
       const promises: Promise<void>[] = [];
       if (changes.role !== undefined) promises.push(updateUserRoleAction(id, ROLE_UP_MAP[changes.role]));
       if (changes.canWrite !== undefined) promises.push(toggleUserCanWriteAction(id));
+      if (changes.canConsult !== undefined) promises.push(toggleUserCanConsultAction(id));
       if (changes.status !== undefined) promises.push(toggleUserStatusAction(id));
       await Promise.all(promises);
     });

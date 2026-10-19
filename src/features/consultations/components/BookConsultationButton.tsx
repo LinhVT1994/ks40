@@ -70,7 +70,7 @@ export default function BookConsultationButton({ hostId, hostName, intro, durati
   const submit = () => {
     if (!picked) return;
     startTransition(async () => {
-      const res = await requestConsultationAction({ hostId, startAt: picked, topic });
+      const res = await requestConsultationAction({ hostId, startAt: picked, topic, timezone: viewerZone });
       if (!res.success) {
         toast.error(res.error);
         if (res.error.includes('không còn trống') || res.error.includes('vừa có người đặt')) { setPicked(null); setStep(1); loadSlots(); }
